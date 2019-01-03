@@ -1,6 +1,7 @@
-package com.trackaty.chat;
+package com.trackaty.chat.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 
@@ -12,11 +13,23 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.Fragments.MainFragment;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
+import com.trackaty.chat.R;
+import com.trackaty.chat.models.User;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.Menu;
@@ -32,10 +45,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final static String TAG = MainActivity.class.getSimpleName();
     private TextView mTextMessage;
     private static final int RC_SIGN_IN = 123;
+
+    public String currentUserId;
+    public String currentUserName;
+    public String currentUserEmail;
+    public Uri currentUserPhoto;
+    public Boolean currentUserVerified;
+
     private boolean isFirstloaded; // boolean to check if back button is clicked on startActivityForResult
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    // [START declare_database_ref]
+    private DatabaseReference mDatabase;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -64,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // [START initialize_database_ref]
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -79,11 +105,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+
+                    currentUserId = user.getUid();
+                    currentUserName = user.getDisplayName();
+                    currentUserEmail = user.getEmail();
+                    currentUserPhoto = user.getPhotoUrl();
+                    currentUserVerified = user.isEmailVerified();
+
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getDisplayName:" + user.getDisplayName());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
                     Log.d(TAG, "onAuthStateChanged:signed_in_emailVerified?:" + user.isEmailVerified());
+
+                    isUserExist(currentUserId); // if not start complete profile
 
                 } else {
                     // User is signed out
@@ -95,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
     }//End of onCreate
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -257,5 +293,52 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
+    private void isUserExist(String userId) {
+
+        // Read from the database just once
+        Log.d(TAG, "userId Value is: " + userId);
+// [START single_value_read]
+        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        // [START_EXCLUDE]
+                        if (dataSnapshot.exists()) {
+                            // Get user value
+                            User user = dataSnapshot.getValue(User.class);
+                            assert user != null;
+                            Log.d(TAG, "user exist: " + user.getUserName());
+                        } else {
+                            // User is null, error out
+                            Log.e(TAG, "User is null, no such user");
+                            completeProfile(currentUserId , currentUserName , currentUserEmail);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+                        // [START_EXCLUDE]
+                        //setEditingEnabled(true);
+                        // [END_EXCLUDE]
+                    }
+                });
+        // [END single_value_read]
+    }
+
+    private void completeProfile(String UserId, String UserName, String UserEmail) {
+
+        NavDirections directions = MainFragmentDirections.mainToCompleteProfile(UserId,UserName,UserEmail);
+
+        NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+        //check if we are on Main Fragment not on complete Profile already
+        if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
+            Navigation.findNavController(this, R.id.host_fragment)
+                    .navigate(directions);
+        }
+
+    }
 
 }
