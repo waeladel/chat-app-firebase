@@ -10,20 +10,20 @@
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
-            android:id="@+id/main_to_completeProfile"
+            android:id="@+id/action_main_to_complete_profile"
             app:destination="@id/completeProfileFragment"
             app:launchSingleTop="false"
             app:popUpTo="@+id/mainFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/main_to_profile"
+            android:id="@+id/action_main_to_profile"
             app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/completeProfileFragment"
         android:name="com.trackaty.chat.Fragments.CompleteProfileFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        tools:layout="@layout/fragment_complete_profile" >
         <argument
             android:name="userId"
             app:argType="string" />

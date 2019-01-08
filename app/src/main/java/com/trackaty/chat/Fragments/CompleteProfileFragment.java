@@ -36,7 +36,7 @@ public class CompleteProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View fragView = inflater.inflate(R.layout.fragment_login, container, false);
+        View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
         textView = (TextView) fragView.findViewById(R.id.wael);
 

@@ -24,8 +24,10 @@ import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.User;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private TextView mTextMessage;
     private static final int RC_SIGN_IN = 123;
 
+    NavController navController ;
+
     public String currentUserId;
     public String currentUserName;
     public String currentUserEmail;
@@ -55,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private NavController.OnDestinationChangedListener mDestinationListener ;
 
     // [START declare_database_ref]
     private DatabaseReference mDatabase;
@@ -82,10 +88,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        navController = Navigation.findNavController(this, R.id.host_fragment);
+
+
+        /*navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+
+            @Override
+            public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+                Log.d(TAG, "destination Label= "+ destination.getLabel() );
+            }
+        });*/
+
+        mDestinationListener = (new NavController.OnDestinationChangedListener() {
+
+            @Override
+            public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+                Log.d(TAG, "destination Label= "+ destination.getLabel() );
+            }
+        });
 
         // [START initialize_database_ref]
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -194,6 +220,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
         Log.d(TAG, "MainActivity onStart");
         Log.d(TAG, "mAuthListener="+ mAuthListener);
+
+        //add Listener for destination changes
+        navController.addOnDestinationChangedListener(mDestinationListener);
     }
 
     @Override
@@ -203,12 +232,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+
+        if (mDestinationListener != null) {
+            //remove the Listener for destination changes
+            navController.removeOnDestinationChangedListener(mDestinationListener);
+        }
+
     }
 
     @Override
     public void onPause () {
         super.onPause ();
         Log.d(TAG, "MainActivity onPause");
+    }
+
+    @Override
+    public void onDestroy () {
+        super.onDestroy ();
+        Log.d(TAG, "MainActivity onDestroy");
     }
 
     @Override
@@ -332,9 +373,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void completeProfile(String UserId, String UserName, String UserEmail) {
 
-        NavDirections directions = MainFragmentDirections.mainToCompleteProfile(UserId,UserName,UserEmail);
+        NavDirections directions = MainFragmentDirections.actionMainToCompleteProfile(UserId,UserName,UserEmail);
 
-        NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
         //check if we are on Main Fragment not on complete Profile already
         if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
@@ -348,14 +389,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(UserId != null && !TextUtils.isEmpty(UserId)){
             Log.i(TAG, "UserId not null");
 
-            NavDirections directions = MainFragmentDirections.mainToProfile(UserId);
+            NavDirections directions = MainFragmentDirections.actionMainToProfile(UserId);
 
-            NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+            //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
             //check if we are on Main Fragment not on complete Profile already
             if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
-                Navigation.findNavController(this, R.id.host_fragment)
-                        .navigate(directions);
+                navController.navigate(directions);
+
+                /*Navigation.findNavController(this, R.id.host_fragment)
+                        .navigate(directions);*/
             }
 
         }
