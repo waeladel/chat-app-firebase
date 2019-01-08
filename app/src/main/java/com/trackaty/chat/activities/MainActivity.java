@@ -20,7 +20,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.Fragments.MainFragment;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.User;
@@ -29,8 +28,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     // [START declare_database_ref]
     private DatabaseReference mDatabase;
+    private DatabaseReference mUser;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -147,8 +147,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int id = item.getItemId();
 
         switch (id){
-            case R.id.action_edit_profile:
+            case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
+                goToProfile(currentUserId);
 
                 break;
             case R.id.action_menu_invite:
@@ -297,33 +298,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + userId);
+        mUser = mDatabase.child("users").child(userId);
 // [START single_value_read]
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        // [START_EXCLUDE]
-                        if (dataSnapshot.exists()) {
-                            // Get user value
-                            User user = dataSnapshot.getValue(User.class);
-                            assert user != null;
-                            Log.d(TAG, "user exist: " + user.getUserName());
-                        } else {
-                            // User is null, error out
-                            Log.e(TAG, "User is null, no such user");
-                            completeProfile(currentUserId , currentUserName , currentUserEmail);
-                        }
+        //ValueEventListener postListener = new ValueEventListener() {
+        //mUser.addValueEventListener(postListener);
+        mUser.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // [START_EXCLUDE]
+                if (dataSnapshot.exists()) {
+                    // Get user value
+                    User user = dataSnapshot.getValue(User.class);
+                    assert user != null;
+                    Log.d(TAG, "user exist: " + user.getUserName());
+                } else {
+                    // User is null, error out
+                    Log.w(TAG, "User is null, no such user");
+                    //completeProfile(currentUserId, currentUserName, currentUserEmail);
+                }
 
-                    }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        // [START_EXCLUDE]
-                        //setEditingEnabled(true);
-                        // [END_EXCLUDE]
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+                // [START_EXCLUDE]
+                //setEditingEnabled(true);
+                // [END_EXCLUDE]
+            }
+        });
         // [END single_value_read]
     }
 
@@ -340,5 +343,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     }
+
+    private void goToProfile(String UserId) {
+        if(UserId != null && !TextUtils.isEmpty(UserId)){
+            Log.i(TAG, "UserId not null");
+
+            NavDirections directions = MainFragmentDirections.mainToProfile(UserId);
+
+            NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+            //check if we are on Main Fragment not on complete Profile already
+            if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
+                Navigation.findNavController(this, R.id.host_fragment)
+                        .navigate(directions);
+            }
+
+        }
+    }
+
 
 }

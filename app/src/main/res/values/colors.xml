@@ -3,4 +3,15 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <!-- New MaterialComponents attributes. -->
+
+
+    <color name="my_app_color_on_primary">#008577</color>
+    <color name="my_app_color_on_secondary">#00574B</color>
+    <color name="my_app_color_on_background">#D81B60</color>
+    <color name="my_app_color_on_error">#008577</color>
+    <color name="my_app_color_on_surface">#00574B</color>
+    <color name="mtrl_scrim_color">#D81B60</color>
+
 </resources>
