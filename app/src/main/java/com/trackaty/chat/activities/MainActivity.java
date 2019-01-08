@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private static final int RC_SIGN_IN = 123;
 
     NavController navController ;
+    BottomNavigationView bottomNavigation;
 
     public String currentUserId;
     public String currentUserName;
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         navController = Navigation.findNavController(this, R.id.host_fragment);
 
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
 
         /*navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
 
@@ -109,7 +112,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
-                Log.d(TAG, "destination Label= "+ destination.getLabel() );
+                Log.d(TAG, "destination Label= "+ destination.getLabel());
+                Log.d(TAG, "destination id= "+ destination.getId());
+
+                if("fragment_main".equals(destination.getLabel())){
+                   bottomNavigation.setVisibility(View.VISIBLE);
+
+                }else{
+                    bottomNavigation.setVisibility(View.GONE);
+                }
             }
         });
 
@@ -118,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Log.d(TAG, "MainActivity onCreate");
 
@@ -403,6 +415,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         }
     }
+
+
 
 
 }
