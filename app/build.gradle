@@ -41,6 +41,9 @@ dependencies {
 
     def nav_version = "1.0.0-alpha09"
     implementation "android.arch.navigation:navigation-fragment:$nav_version" // use -ktx for Kotlin
-    implementation "android.arch.navigation:navigation-ui:$nav_version" // use -ktx for Kotlin
+    implementation "android.arch.navigation:navigation-ui:$nav_version"
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'// use -ktx for Kotlin
+
+    implementation 'com.squareup.picasso:picasso:2.71828'//picasso for loading images
 
 }

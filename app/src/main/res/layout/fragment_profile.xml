@@ -18,26 +18,32 @@
             android:layout_height="0dp"
             android:contentDescription="@string/cover_image_description"
             android:scaleType="centerCrop"
+            android:src="@drawable/ic_picture_gallery_white"
             app:layout_constraintDimensionRatio="2:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/profile_image"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:contentDescription="@string/profile_image_description"
             android:scaleType="centerCrop"
+            android:src="@drawable/ic_user_account_grey_white"
             app:civ_border_color="@color/colorAccent"
-            app:civ_border_width="2dp"
+            app:civ_border_width="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/coverImage"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toStartOf="@+id/guideline70"
-            app:layout_constraintStart_toStartOf="@+id/guideline30"
+            app:layout_constraintDimensionRatio="w,1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/coverImage"
-            tools:src="@tools:sample/avatars" />
+            app:layout_constraintVertical_bias="0.39999998" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline30"
@@ -54,10 +60,16 @@
             app:layout_constraintGuide_percent="0.7" />
 
         <TextView
-            android:id="@+id/name_text"
-            android:layout_width="wrap_content"
+            android:id="@+id/user_name_text"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center_horizontal"
+            android:maxLines="2"
             android:textAppearance="@style/TextAppearance.AppCompat.Display2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -66,23 +78,27 @@
             tools:text="@tools:sample/full_names" />
 
         <TextView
-            android:id="@+id/bio_text"
-            android:layout_width="wrap_content"
+            android:id="@+id/user_bio_text"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
-            android:maxLines="3"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:maxLines="4"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/name_text"
+            app:layout_constraintTop_toBottomOf="@+id/user_name_text"
             tools:text="@tools:sample/last_names" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/love_Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_favorite_black_24dp"
@@ -90,33 +106,33 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bio_text" />
+            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/chat_Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_baseline_chat_24px"
             app:layout_constraintEnd_toStartOf="@+id/block_Button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/love_Button"
-            app:layout_constraintTop_toBottomOf="@+id/bio_text" />
+            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/block_Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_block_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/chat_Button"
-            app:layout_constraintTop_toBottomOf="@+id/bio_text" />
+            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
 
         <TextView
             android:id="@+id/love_text"
@@ -173,19 +189,19 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:text="@string/user_loved_by"
             app:layout_constraintBottom_toBottomOf="@+id/heart_icon"
             app:layout_constraintStart_toEndOf="@+id/heart_icon"
-            app:layout_constraintTop_toTopOf="@+id/heart_icon" />
+            app:layout_constraintTop_toTopOf="@+id/heart_icon"
+            tools:text="@tools:sample/full_names" />
 
         <TextView
             android:id="@+id/pick_up_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/user_pickup"
             app:layout_constraintBottom_toBottomOf="@+id/chat_icon"
             app:layout_constraintStart_toStartOf="@+id/user_loved_by_value"
-            app:layout_constraintTop_toTopOf="@+id/chat_icon" />
+            app:layout_constraintTop_toTopOf="@+id/chat_icon"
+            tools:text="@tools:sample/cities" />
 
         <ImageView
             android:id="@+id/heart_icon"
@@ -236,24 +252,24 @@
 
         <ImageView
             android:id="@+id/relationship_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:src="@drawable/ic_broken_heart"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/relationship_headline"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            tools:src="@tools:sample/avatars"/>
 
         <TextView
             android:id="@+id/user_relationship_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/not_specified"
             app:layout_constraintBottom_toBottomOf="@+id/relationship_icon"
             app:layout_constraintStart_toStartOf="@+id/pick_up_value"
-            app:layout_constraintTop_toTopOf="@+id/relationship_icon" />
+            app:layout_constraintTop_toTopOf="@+id/relationship_icon"
+            tools:text="@tools:sample/date/hhmm" />
 
         <View
             android:id="@+id/interested_divider"
@@ -282,648 +298,41 @@
 
         <ImageView
             android:id="@+id/interested_in_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:src="@drawable/ic_business_man"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/interested_in_headline"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            tools:src="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/user_interested_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/men"
             app:layout_constraintBottom_toBottomOf="@+id/interested_in_icon"
             app:layout_constraintStart_toStartOf="@+id/user_relationship_value"
-            app:layout_constraintTop_toTopOf="@+id/interested_in_icon" />
+            app:layout_constraintTop_toTopOf="@+id/interested_in_icon"
+            tools:text="@tools:sample/date/ddmmyy" />
 
-        <View
-            android:id="@+id/about_divider"
+        <Button
+            android:id="@+id/see_more_button"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:background="?android:attr/listDivider"
+            android:layout_marginBottom="8dp"
+            android:maxLines="1"
+            android:text="@string/see_more_button"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_interested_value" />
-
-        <TextView
-            android:id="@+id/about_user_headline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/about_user_headline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/about_divider" />
-
-        <ImageView
-            android:id="@+id/user_gender_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_transsexual"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/about_user_headline"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_gender_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/transsexual"
-            app:layout_constraintBottom_toBottomOf="@+id/user_gender_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_interested_value" />
-
-        <ImageView
-            android:id="@+id/user_age_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_hourglass"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_gender_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_age_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_age_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_age_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_gender_value"
-            app:layout_constraintTop_toTopOf="@+id/user_age_icon" />
-
-        <ImageView
-            android:id="@+id/user_horoscope_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_scorpio_vertical_animal_shape_of_zodiac_symbol"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_age_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_horoscope_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Scorpio"
-            app:layout_constraintBottom_toBottomOf="@+id/user_horoscope_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_age_value"
-            app:layout_constraintTop_toTopOf="@+id/user_horoscope_icon" />
-
-        <ImageView
-            android:id="@+id/user_nationality_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_flag_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_horoscope_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_country_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_country_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_nationality_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_horoscope_value"
-            app:layout_constraintTop_toTopOf="@+id/user_nationality_icon" />
-
-
-        <ImageView
-            android:id="@+id/user_Hometown_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_location_on_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_nationality_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_hometown_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_hometown_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_Hometown_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_country_value"
-            app:layout_constraintTop_toTopOf="@+id/user_Hometown_icon" />
-
-        <ImageView
-            android:id="@+id/user_Lives_in_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_old_house"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_Hometown_icon"
-            tools:ignore="ContentDescription" />
-
-
-        <TextView
-            android:id="@+id/user_lives_in_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_lives_in_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_Lives_in_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_hometown_value"
-            app:layout_constraintTop_toTopOf="@+id/user_Lives_in_icon" />
-
-        <ImageView
-            android:id="@+id/user_religion_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_praying_hands"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_Lives_in_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_religion_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_religion_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_religion_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_lives_in_value"
-            app:layout_constraintTop_toTopOf="@+id/user_religion_icon" />
-
-        <ImageView
-            android:id="@+id/user_politics_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_voting"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_religion_icon"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_politics_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_politics_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_politics_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_religion_value"
-            app:layout_constraintTop_toTopOf="@+id/user_politics_icon" />
-
-        <View
-            android:id="@+id/work_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_politics_value" />
-
-
-        <TextView
-            android:id="@+id/work_education_headline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/user_work_school_headline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/work_divider" />
-
-        <ImageView
-            android:id="@+id/user_work_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_work_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/work_education_headline"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_work_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_work_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_work_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_lives_in_value"
-            app:layout_constraintTop_toTopOf="@+id/user_work_icon" />
-
-        <ImageView
-            android:id="@+id/user_college_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_school_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_work_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_college_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_college_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_college_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_work_value"
-            app:layout_constraintTop_toTopOf="@+id/user_college_icon" />
-
-        <ImageView
-            android:id="@+id/user_school_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_school_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_college_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_school_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_school_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_school_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_college_value"
-            app:layout_constraintTop_toTopOf="@+id/user_school_icon" />
-
-        <View
-            android:id="@+id/Habits_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_school_value" />
-
-        <TextView
-            android:id="@+id/work_habits_headline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/user_Habits_Hobbies_headline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Habits_divider" />
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/habits_barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="end"
-            app:constraint_referenced_ids="user_smoke_value,user_water_pipe_value,user_drugs_value,user_drink_value,user_athlete_value,user_gamer_value,user_travel_value,user_cook_value,user_read_value"
-            tools:layout_editor_absoluteX="89dp"
-            tools:layout_editor_absoluteY="731dp" />
-
-        <ImageView
-            android:id="@+id/user_smoke_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_smoking_rooms_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/work_habits_headline"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_smoke_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_smoke_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_smoke_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_school_value"
-            app:layout_constraintTop_toTopOf="@+id/user_smoke_icon" />
-
-        <TextView
-            android:id="@+id/user_smoke_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_smoke_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_water_pipe_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_shisha"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_smoke_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_water_pipe_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_water_pipe_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_water_pipe_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_smoke_value"
-            app:layout_constraintTop_toTopOf="@+id/user_water_pipe_icon" />
-
-        <TextView
-            android:id="@+id/user_water_pipe_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_water_pipe_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_drugs_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_injection"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_water_pipe_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_drugs_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_drugs_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_drugs_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_water_pipe_value"
-            app:layout_constraintTop_toTopOf="@+id/user_drugs_icon" />
-
-        <TextView
-            android:id="@+id/user_drugs_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_drugs_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-
-        <ImageView
-            android:id="@+id/user_drink_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_drinking_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_drugs_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_drink_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_drink_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_drink_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_drugs_value"
-            app:layout_constraintTop_toTopOf="@+id/user_drink_icon" />
-
-        <TextView
-            android:id="@+id/user_drink_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_drink_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_athlete_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_fitness_athlete_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_drink_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_athlete_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_athlete_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_athlete_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_drink_value"
-            app:layout_constraintTop_toTopOf="@+id/user_athlete_icon" />
-
-        <TextView
-            android:id="@+id/user_athlete_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_athlete_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_gamer_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_games_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_athlete_value"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/user_gamer_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_gamer_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_gamer_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_athlete_value"
-            app:layout_constraintTop_toTopOf="@+id/user_gamer_icon" />
-
-        <TextView
-            android:id="@+id/user_gamer_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_gamer_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_travel_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_flight_24dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_gamer_value"
-            tools:ignore="ContentDescription"/>
-
-        <TextView
-            android:id="@+id/user_travel_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_travel_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_travel_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_gamer_value"
-            app:layout_constraintTop_toTopOf="@+id/user_travel_icon" />
-
-        <TextView
-            android:id="@+id/user_travel_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_travel_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_cook_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_cook_24dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_travel_value"
-            tools:ignore="ContentDescription"/>
-
-        <TextView
-            android:id="@+id/user_cook_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_cook_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_cook_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_travel_value"
-            app:layout_constraintTop_toTopOf="@+id/user_cook_icon" />
-
-        <TextView
-            android:id="@+id/user_cook_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_cook_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <ImageView
-            android:id="@+id/user_read_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_library_book_24dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_cook_value"
-            tools:ignore="ContentDescription"/>
-
-        <TextView
-            android:id="@+id/user_read_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_read_value"
-            app:layout_constraintBottom_toBottomOf="@+id/user_read_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_cook_value"
-            app:layout_constraintTop_toTopOf="@+id/user_read_icon" />
-
-        <TextView
-            android:id="@+id/user_read_yes_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/yes"
-            app:layout_constraintBaseline_toBaselineOf="@+id/user_read_value"
-            app:layout_constraintStart_toEndOf="@+id/habits_barrier" />
-
-        <View
-            android:id="@+id/body_decorations_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_read_value" />
-
-
-        <View
-            android:id="@+id/last_divider"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="2500dp" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

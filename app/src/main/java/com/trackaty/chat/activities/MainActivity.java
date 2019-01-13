@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private NavController.OnDestinationChangedListener mDestinationListener ;
 
     // [START declare_database_ref]
-    private DatabaseReference mDatabase;
-    private DatabaseReference mUser;
+    private DatabaseReference mDatabaseRef;
+    private DatabaseReference mUserRef;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
 
         // [START initialize_database_ref]
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -351,19 +351,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + userId);
-        mUser = mDatabase.child("users").child(userId);
+        mUserRef = mDatabaseRef.child("users").child(userId);
 // [START single_value_read]
         //ValueEventListener postListener = new ValueEventListener() {
-        //mUser.addValueEventListener(postListener);
-        mUser.addListenerForSingleValueEvent(new ValueEventListener() {
+        //mUserRef.addValueEventListener(postListener);
+        mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // Get user value
                     User user = dataSnapshot.getValue(User.class);
-                    assert user != null;
-                    Log.d(TAG, "user exist: " + user.getUserName());
+                    /*String userName = dataSnapshot.child("name").getValue().toString();
+                    String userId = dataSnapshot.getKey();*/
+                    if (user != null) {
+                        Log.d(TAG, "user exist: Name=" + user.getName());
+                    }
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");

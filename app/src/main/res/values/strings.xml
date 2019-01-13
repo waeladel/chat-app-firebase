@@ -12,6 +12,8 @@
     <string name="love_button">Love</string>
     <string name="message_button">Message</string>
     <string name="block_button">Block</string>
+    <string name="see_more_about_button">See more about %1$s</string>
+    <string name="see_more_button">See more</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -65,26 +67,27 @@
     <!-- gender type array -->
 
     <!--  Zodiac array -->
-    <string name="Aries">Horoscope: Aries (Mar 20 – Apr 20)</string>
-    <string name="Taurus">Horoscope: Taurus (Apr 20 – May 21)</string>
-    <string name="Gemini">Horoscope: Gemini (May 21 – Jun 21)</string>
-    <string name="Cancer">Horoscope: Cancer (Jun 21 – Jul 23)</string>
-    <string name="Leo">Horoscope: Leo (Jul 23 – Aug 23)</string>
-    <string name="Virgo">Horoscope: Virgo (Aug 23 – Sep 23)</string>
-    <string name="Libra">Horoscope: Libra (Sep 23 – Oct 23)</string>
-    <string name="Scorpio">Horoscope: Scorpio (Oct 23 – Nov 22)</string>
-    <string name="Sagittarius">Horoscope: Sagittarius (Nov 22 – Dec 22)</string>
-    <string name="Capricorn">Horoscope: Capricorn (Dec 22 – Jan 20)</string>
-    <string name="Aquarius">Horoscope: Aquarius (Jan 20 – Feb 18)</string>
-    <string name="Pisces">Horoscope: Pisces (Feb 18 – Mar 20)</string>
+    <string name="aries">Horoscope: Aries (Mar 20 – Apr 20)</string>
+    <string name="taurus">Horoscope: Taurus (Apr 20 – May 21)</string>
+    <string name="gemini">Horoscope: Gemini (May 21 – Jun 21)</string>
+    <string name="cancer">Horoscope: Cancer (Jun 21 – Jul 23)</string>
+    <string name="leo">Horoscope: Leo (Jul 23 – Aug 23)</string>
+    <string name="virgo">Horoscope: Virgo (Aug 23 – Sep 23)</string>
+    <string name="libra">Horoscope: Libra (Sep 23 – Oct 23)</string>
+    <string name="scorpio">Horoscope: Scorpio (Oct 23 – Nov 22)</string>
+    <string name="sagittarius">Horoscope: Sagittarius (Nov 22 – Dec 22)</string>
+    <string name="capricorn">Horoscope: Capricorn (Dec 22 – Jan 20)</string>
+    <string name="aquarius">Horoscope: Aquarius (Jan 20 – Feb 18)</string>
+    <string name="pisces">Horoscope: Pisces (Feb 18 – Mar 20)</string>
 
     <!-- gender type array -->
 
     <!-- values-->
     <string name="not_specified">Not Specified</string>
+    <string name="horoscope_not_specified">Horoscope: Not Specified</string>
     <string name="user_loved_by">Loved by %1$d people</string>
-    <string name="user_pickup">Received %1$d pick-up lines</string>
-    <string name="user_age_value">Age: %1$d</string>
+    <string name="user_pickedup_by">Received %1$d pick-up lines</string>
+    <string name="user_age_value">Age: %1$s</string>
     <string name="user_country_value">Nationality: %1$s</string>
     <string name="user_hometown_value">Hometown: %1$s</string>
     <string name="user_lives_in_value">Lives in: %1$s</string>
@@ -93,21 +96,17 @@
     <string name="user_school_value">School: %1$s</string>
     <string name="user_religion_value">Religion: %1$s</string>
     <string name="user_politics_value">Political Views: %1$s</string>
-    <string name="user_smoke_value">Smoke: </string>
-    <string name="user_water_pipe_value">Shisha: </string>
-    <string name="user_drugs_value">Drugs: </string>
-    <string name="user_drink_value">Drink: </string>
-    <string name="user_athlete_value">Athlete: </string>
-    <string name="user_gamer_value">Games: </string>
-    <string name="user_travel_value">Travel: </string>
-    <string name="user_cook_value">Cook: </string>
-    <string name="user_read_value">Read: </string>
+    <string name="user_smoke_value">Smoke: %1$s</string>
+    <string name="user_water_pipe_value">Shisha: %1$s</string>
+    <string name="user_drugs_value">Drugs: %1$s</string>
+    <string name="user_drink_value">Drink: %1$s</string>
+    <string name="user_athlete_value">Athlete: %1$s</string>
+    <string name="user_gamer_value">Games: %1$s</string>
+    <string name="user_travel_value">Travel: %1$s</string>
+    <string name="user_cook_value">Cook: %1$s</string>
+    <string name="user_read_value">Read: %1$s</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-
-
-
-
 
 
     <!-- countryText.setText(getString(R.string.country, country.getName()));-->
