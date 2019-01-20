@@ -10,10 +10,8 @@ import android.widget.TextView;
 
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
-import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,7 +52,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
                 break;
             case 3:
-                holder.sectionHeader.setText(R.string.user_Habits_Hobbies_headline);
+                holder.sectionHeader.setText(R.string.user_habits_hobbies_headline);
                 Log.i(TAG, "habits section="+ userDataArrayList.get(position).getKey());
                 break;
         }
@@ -80,13 +78,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
         if(userDataArrayList.get(position).getKey().equals("gender")){
 
             switch (userDataArrayList.get(position).getValue()) {
-                case "female":
-                    holder.itemValue.setText(R.string.female);
-                    holder.itemIcon.setImageResource(R.drawable.ic_female);
-                    break;
                 case "male":
                     holder.itemValue.setText(R.string.male);
                     holder.itemIcon.setImageResource(R.drawable.ic_male);
+                    break;
+                case "female":
+                    holder.itemValue.setText(R.string.female);
+                    holder.itemIcon.setImageResource(R.drawable.ic_female);
                     break;
                 case"transsexual":
                     holder.itemValue.setText(R.string.transsexual);

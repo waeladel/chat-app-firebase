@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,9 +30,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 
 /**
@@ -42,7 +38,7 @@ import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 public class MoreProfileFragment extends Fragment {
 
     private final static String TAG = MoreProfileFragment.class.getSimpleName();
-    public String userId;
+    public String currentUserId, userId;
 
     public  final static int SECTION_ABOUT = 1;
     public  final static int SECTION_WORK = 2;
@@ -74,12 +70,19 @@ public class MoreProfileFragment extends Fragment {
         View fragView = inflater.inflate(R.layout.fragment_more_profile, container, false);
 
         if (getArguments() != null) {
-            userId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId();
-            Log.d(TAG, "userId= " + userId);
+            currentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId();
+            userId =  MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
+
+            Log.d(TAG, "currentUserId= " + currentUserId);
 
             // [START initialize_database_ref]
             mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-            mUserRef = mDatabaseRef.child("users").child(userId);
+            if(null != currentUserId && currentUserId.equals(userId)) {// it's logged in user profile
+                mUserRef = mDatabaseRef.child("users").child(currentUserId);
+            }else{
+                mUserRef = mDatabaseRef.child("users").child(userId); // it's another user
+            }
+
 
             // [START single_value_read]
             //ValueEventListener postListener = new ValueEventListener() {
@@ -91,7 +94,7 @@ public class MoreProfileFragment extends Fragment {
                     if (dataSnapshot.exists()) {
                         // Get user value
                         User user = dataSnapshot.getValue(User.class);
-                        if (user != null) {
+                        if (null!= user) {
                             Field[] fields = user.getClass().getFields();
                             for (Field f : fields) {
                                 Log.d(TAG, "fields=" + f.getName());
@@ -109,7 +112,7 @@ public class MoreProfileFragment extends Fragment {
 
                             mProfileAdapter.notifyDataSetChanged();
                             /*String userName = dataSnapshot.child("name").getValue().toString();
-                            String userId = dataSnapshot.getKey();*/
+                            String currentUserId = dataSnapshot.getKey();*/
                             Log.d(TAG, "user exist: Name=" + user.getName());
                         } else {
                             // User is null, error out

@@ -40,11 +40,10 @@ public class CompleteProfileFragment extends Fragment {
 
         textView = (TextView) fragView.findViewById(R.id.wael);
 
-        assert getArguments() != null;
-        String userId = CompleteProfileFragmentArgs.fromBundle(getArguments()).getUserId();
+        String currentUserId = CompleteProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
         String userEmail = CompleteProfileFragmentArgs.fromBundle(getArguments()).getUserEmail();
         String userName = CompleteProfileFragmentArgs.fromBundle(getArguments()).getUserName();
-        textView.setText(userId+userEmail+userName);
+        textView.setText(currentUserId+userEmail+userName);
 
         // Inflate the layout for this fragment
         return fragView;

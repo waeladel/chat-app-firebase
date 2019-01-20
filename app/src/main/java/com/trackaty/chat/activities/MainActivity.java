@@ -347,11 +347,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void isUserExist(String userId) {
+    private void isUserExist(String currentUserId) {
 
         // Read from the database just once
-        Log.d(TAG, "userId Value is: " + userId);
-        mUserRef = mDatabaseRef.child("users").child(userId);
+        Log.d(TAG, "currentUserId Value is: " + currentUserId);
+        mUserRef = mDatabaseRef.child("users").child(currentUserId);
 // [START single_value_read]
         //ValueEventListener postListener = new ValueEventListener() {
         //mUserRef.addValueEventListener(postListener);
@@ -363,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     // Get user value
                     User user = dataSnapshot.getValue(User.class);
                     /*String userName = dataSnapshot.child("name").getValue().toString();
-                    String userId = dataSnapshot.getKey();*/
+                    String currentUserId = dataSnapshot.getKey();*/
                     if (user != null) {
                         Log.d(TAG, "user exist: Name=" + user.getName());
                     }
@@ -400,11 +400,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private void goToProfile(String UserId) {
-        if(UserId != null && !TextUtils.isEmpty(UserId)){
+    private void goToProfile(String currentUserId) {
+        if(currentUserId != null && !TextUtils.isEmpty(currentUserId)){
             Log.i(TAG, "UserId not null");
 
-            NavDirections directions = MainFragmentDirections.actionMainToProfile(UserId);
+            String userId = currentUserId;
+
+            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUserId, userId);
 
             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 

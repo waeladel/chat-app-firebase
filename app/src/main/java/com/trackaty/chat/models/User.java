@@ -19,12 +19,12 @@ public class User {
     public String horoscope;
     public String nationality;
     public String lives;
+    public String hometown;
     public String religion;
     public String politics;
     public String work;
     public String college;
     public String school;
-    public String hometown;
     public Boolean smoke;
     public Boolean shisha;
     public Boolean drugs;

@@ -9,9 +9,11 @@
     <string name="title_log_out">Log Out</string>
     <string name="action_profile">Profile</string>
     <string name="menu_invite">Invite Friends</string>
-    <string name="love_button">Love</string>
-    <string name="message_button">Message</string>
+    <string name="love_button_hint">Love</string>
+    <string name="message_button_hint">Message</string>
     <string name="block_button">Block</string>
+    <string name="edit_profile_button">Edit Profile</string>
+
     <string name="see_more_about_button">See more about %1$s</string>
     <string name="see_more_button">See more</string>
 
@@ -30,14 +32,57 @@
     <string name="about_user_headline">About</string>
     <string name="user_relationship_headline">Relationship</string>
     <string name="user_interested_in_headline">Interested in</string>
+    <string name="user_gender_headline">Gender</string>
+    <string name="user_horoscope_headline">Horoscope</string>
+    <string name="user_age_headline">Age</string>
+    <string name="user_birthday_headline">Birth date</string>
     <string name="user_work_school_headline">Work and education</string>
-    <string name="user_Habits_Hobbies_headline">Habits and hobbies</string>
+    <string name="user_habits_hobbies_headline">Habits and hobbies</string>
     <string name="user_body_decorations_headline">Body decorations</string>
+    <string name="user_avatar_headline">Profile Picture</string>
+    <string name="user_cover_headline">Cover Picture</string>
+    <string name="user_name_hint">Name</string>
+    <string name="user_name_helper">What is your name?</string>
+    <string name="user_biography_hint">Biography</string>
+    <string name="user_biography_helper">Describe yourself</string>
+
+    <string name="user_smoke_headline">Smoke</string>
+    <string name="user_water_pipe_headline">Shisha</string>
+    <string name="user_drugs_headline">Drugs</string>
+    <string name="user_drink_headline">Drink</string>
+    <string name="user_athlete_headline">Athlete</string>
+    <string name="user_gamer_headline">Gamer</string>
+    <string name="user_travel_headline">Travel</string>
+    <string name="user_cook_headline">Cook</string>
+    <string name="user_read_headline">Read</string>
+
+    <string name="user_lives_headline">lives in</string>
+    <string name="user_nationality_headline">Nationality</string>
+    <string name="user_hometown_headline">Hometown</string>
+    <string name="user_religion_headline">Religion views</string>
+    <string name="user_politics_headline">Political views</string>
+    <string name="user_work_headline">Occupation</string>
+    <string name="user_college_headline">College</string>
+    <string name="user_school_headline">School</string>
+
+    <string name="required_helper">*Required</string>
+    <string name="user_nationality_helper">E.g., France or Germany</string>
+    <string name="user_lives_helper">E.g., Paris, France</string>
+    <string name="user_hometown_helper">E.g., Berlin, Germany</string>
+    <string name="user_religion_helper">E.g., Christian but i do not believe in &#8230;</string>
+    <string name="user_politics_helper">E.g., Liberal or Republican but hates Trump</string>
+    <string name="user_work_helper">E.g., A Doctor in El Camino Hospital</string>
+    <string name="user_college_helper">E.g., Studied at Harvard University</string>
+    <string name="user_school_helper">E.g., Studied at Santa Monica High School</string>
+
 
 
     <!--Images content Description-->
     <string name="cover_image_description">Your cover image</string>
     <string name="profile_image_description">Your Profile picture</string>
+    <string name="add_image_button_description">Add Profile picture</string>
+    <string name="expand_button_description">Expand button</string>
+
 
 
     <!-- Relationship array -->
@@ -55,32 +100,32 @@
     <!-- Relationship  array -->
 
     <!-- Interested in array -->
-    <string name="women">Women</string>
     <string name="men">Men</string>
-    <string name="both_men_women">Both</string>
+    <string name="women">Women</string>
+    <string name="both_men_women">Both men and women</string>
     <!-- Interested in type array -->
 
     <!-- gender array -->
-    <string name="female">Gender: Female</string>
-    <string name="male">Gender: Male</string>
-    <string name="transsexual">Gender: Transsexual</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="transsexual">Transsexual</string>
     <!-- gender type array -->
 
     <!--  Zodiac array -->
-    <string name="aries">Horoscope: Aries (Mar 20 – Apr 20)</string>
-    <string name="taurus">Horoscope: Taurus (Apr 20 – May 21)</string>
-    <string name="gemini">Horoscope: Gemini (May 21 – Jun 21)</string>
-    <string name="cancer">Horoscope: Cancer (Jun 21 – Jul 23)</string>
-    <string name="leo">Horoscope: Leo (Jul 23 – Aug 23)</string>
-    <string name="virgo">Horoscope: Virgo (Aug 23 – Sep 23)</string>
-    <string name="libra">Horoscope: Libra (Sep 23 – Oct 23)</string>
-    <string name="scorpio">Horoscope: Scorpio (Oct 23 – Nov 22)</string>
-    <string name="sagittarius">Horoscope: Sagittarius (Nov 22 – Dec 22)</string>
-    <string name="capricorn">Horoscope: Capricorn (Dec 22 – Jan 20)</string>
-    <string name="aquarius">Horoscope: Aquarius (Jan 20 – Feb 18)</string>
-    <string name="pisces">Horoscope: Pisces (Feb 18 – Mar 20)</string>
+    <string name="aries">Aries (Mar 20 – Apr 20)</string>
+    <string name="taurus">Taurus (Apr 20 – May 21)</string>
+    <string name="gemini">Gemini (May 21 – Jun 21)</string>
+    <string name="cancer">Cancer (Jun 21 – Jul 23)</string>
+    <string name="leo">Leo (Jul 23 – Aug 23)</string>
+    <string name="virgo">Virgo (Aug 23 – Sep 23)</string>
+    <string name="libra">Libra (Sep 23 – Oct 23)</string>
+    <string name="scorpio">Scorpio (Oct 23 – Nov 22)</string>
+    <string name="sagittarius">Sagittarius (Nov 22 – Dec 22)</string>
+    <string name="capricorn">Capricorn (Dec 22 – Jan 20)</string>
+    <string name="aquarius">Aquarius (Jan 20 – Feb 18)</string>
+    <string name="pisces">Pisces (Feb 18 – Mar 20)</string>
 
-    <!-- gender type array -->
+    <!--  Zodiac array -->
 
     <!-- values-->
     <string name="not_specified">Not Specified</string>

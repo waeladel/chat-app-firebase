@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*   == This file is part of Tomahawk Player - <http://tomahawk-player.org> ===
+ *
+ *   Copyright 2012, Enno Gottschalk <mrmaffen@googlemail.com>
+ *
+ *   Tomahawk is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Tomahawk is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with Tomahawk. If not, see <http://www.gnu.org/licenses/>.
+ */
+-->
+<resources>
+
+    <string-array name="profile_user_gender">
+        <item>@string/male</item>
+        <item>@string/female</item>
+        <item>@string/transsexual</item>
+    </string-array>
+
+    <string-array name="user_interested_in">
+        <item>@string/men</item>
+        <item>@string/women</item>
+        <item>@string/both_men_women</item>
+    </string-array>
+
+    <string-array name="user_horoscope">
+        <item>@string/aries</item>
+        <item>@string/taurus</item>
+        <item>@string/gemini</item>
+        <item>@string/cancer</item>
+        <item>@string/leo</item>
+        <item>@string/virgo</item>
+        <item>@string/libra</item>
+        <item>@string/scorpio</item>
+        <item>@string/sagittarius</item>
+        <item>@string/capricorn</item>
+        <item>@string/aquarius</item>
+        <item>@string/pisces</item>
+    </string-array>
+
+    <string-array name="user_relationship">
+        <item>@string/single</item>
+        <item>@string/committed</item>
+        <item>@string/engaged</item>
+        <item>@string/married</item>
+        <item>@string/civil_union</item>
+        <item>@string/domestic_partnership</item>
+        <item>@string/open_relationship</item>
+        <item>@string/open_marriage</item>
+        <item>@string/separated</item>
+        <item>@string/divorced</item>
+        <item>@string/widowed</item>
+    </string-array>
+
+    <string-array name="yes_no">
+        <item>@string/yes</item>
+        <item>@string/no</item>
+    </string-array>
+
+</resources>

@@ -45,5 +45,6 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'// use -ktx for Kotlin
 
     implementation 'com.squareup.picasso:picasso:2.71828'//picasso for loading images
+    implementation 'com.github.aakira:expandable-layout:1.6.0@aar' // for Expandable Layout
 
 }

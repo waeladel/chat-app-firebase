@@ -14,4 +14,7 @@
     <color name="my_app_color_on_surface">#00574B</color>
     <color name="mtrl_scrim_color">#D81B60</color>
 
+    <color name="disabled_button">#E0E0E0</color>
+    <color name="transparent_edit_image">#80000000</color>
+
 </resources>
