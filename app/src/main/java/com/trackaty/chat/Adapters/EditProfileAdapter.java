@@ -55,10 +55,10 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public  final static int  BIO_INPUT_MAX_LINES = 4;
 
 
-    public ArrayList<Profile> userDataArrayList;
-    public ArrayList<Profile> aboutArrayList = new ArrayList<>();
-    public ArrayList<Profile> workArrayList = new ArrayList<>();
-    public ArrayList<Profile> habitsArrayList = new ArrayList<>();
+    public ArrayList<Profile> mProfileDataArrayList;
+    public ArrayList<Profile> aboutArrayList ;
+    public ArrayList<Profile> workArrayList ;
+    public ArrayList<Profile> habitsArrayList;
     public AboutAdapter aboutAdapter;
     public WorkAdapter workAdapter;
     public HabitsAdapter habitsAdapter;
@@ -68,9 +68,19 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
 
-    public EditProfileAdapter(Context context, ArrayList<Profile> userDataArrayList,ItemClickListener itemClickListener){
+    public EditProfileAdapter(Context context
+            , ArrayList<Profile> userDataArrayList
+            ,ArrayList<Profile> aboutArrayList
+            ,ArrayList<Profile> workArrayList
+            ,ArrayList<Profile> habitsArrayList
+            , ItemClickListener itemClickListener){
 
-        this.userDataArrayList = userDataArrayList;
+        this.mProfileDataArrayList = userDataArrayList;
+        this.aboutArrayList = aboutArrayList;
+        this.aboutArrayList = workArrayList;
+        this.aboutArrayList = habitsArrayList;
+
+
         this.context = context;
         this.itemClickListener = itemClickListener;
 
@@ -115,17 +125,17 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Log.i(TAG, "onBindViewHolder called="+ userDataArrayList.get(position).getKey());
+        Log.i(TAG, "onBindViewHolder called="+ mProfileDataArrayList.get(position).getKey());
 
         if (holder instanceof ImageHolder){
             ImageHolder imageHolder = (ImageHolder) holder;
 
-            switch (userDataArrayList.get(position).getKey()){
+            switch (mProfileDataArrayList.get(position).getKey()){
                 case "avatar":
                     imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         Picasso.get()
-                                .load(userDataArrayList.get(position).getValue())
+                                .load(mProfileDataArrayList.get(position).getValue())
                                 .placeholder(R.drawable.ic_user_account_grey_white )
                                 .error(R.drawable.ic_broken_image)
                                 .into(imageHolder.profileImage);
@@ -141,9 +151,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     break;
                 case "coverImage":
                     imageHolder.itemHeadline.setText(R.string.user_cover_headline);
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         Picasso.get()
-                                .load(userDataArrayList.get(position).getValue())
+                                .load(mProfileDataArrayList.get(position).getValue())
                                 .placeholder(R.drawable.ic_picture_gallery_white )
                                 .error(R.drawable.ic_broken_image)
                                 .into(imageHolder.coverImage);
@@ -167,11 +177,11 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof TextInputHolder){
             TextInputHolder textInputHolder = (TextInputHolder) holder;
 
-            switch (userDataArrayList.get(position).getKey()){
+            switch (mProfileDataArrayList.get(position).getKey()){
                 case "name":
                     // set Max length
-                    if(null != userDataArrayList.get(position).getValue()){
-                        textInputHolder.itemValue.setText(userDataArrayList.get(position).getValue());
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        textInputHolder.itemValue.setText(mProfileDataArrayList.get(position).getValue());
                     }
                     textInputHolder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(NAME_INPUT_MAX_LENGTH)});
 
@@ -190,11 +200,11 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     textInputHolder.inputLayout.setHelperText(context.getString(R.string.required_helper));
 
                     // Parce text to handel configuration change
-                    userDataArrayList.get(position).setValue("mama");
+                    mProfileDataArrayList.get(position).setValue("mama");
                     break;
                 case "biography":
-                    if(null != userDataArrayList.get(position).getValue()){
-                        textInputHolder.itemValue.setText(userDataArrayList.get(position).getValue());
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        textInputHolder.itemValue.setText(mProfileDataArrayList.get(position).getValue());
                     }
                     //textInputHolder.itemValue.setHint(R.string.user_biography_hint);
                     //textInputHolder.itemValue.setMaxLines(BIO_INPUT_MAX_LINES);
@@ -224,10 +234,10 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof TextHolder){
             TextHolder textHolder = (TextHolder) holder;
 
-            switch (userDataArrayList.get(position).getKey()){
+            switch (mProfileDataArrayList.get(position).getKey()){
                 case "age":
-                    if(null != userDataArrayList.get(position).getValue()){
-                        textHolder.itemValue.setText(userDataArrayList.get(position).getValue());
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        textHolder.itemValue.setText(mProfileDataArrayList.get(position).getValue());
                         textHolder.itemHeadline.setText(context.getString(R.string.user_birthday_headline));
                     }
                     break;
@@ -238,7 +248,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof SpinnerHolder){
             SpinnerHolder spinnerHolder = (SpinnerHolder) holder;
 
-            switch (userDataArrayList.get(position).getKey()){
+            switch (mProfileDataArrayList.get(position).getKey()){
                 case "relationship":
                     spinnerHolder.itemHeadline.setText(R.string.user_relationship_headline);
 
@@ -249,9 +259,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     spinnerHolder.itemValue.setAdapter(relationArrayAdapter );
 
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         // display selected item from the spinner ///
-                        switch (userDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
+                        switch (mProfileDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                             case "single":
                                 spinnerHolder.itemValue.setSelection(0);
                                 Log.d(TAG, "display 0 option on sorting spinner");
@@ -310,9 +320,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     spinnerHolder.itemValue.setAdapter(interestedArrayAdapter);
 
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         // display selected item from the spinner ///
-                        switch (userDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
+                        switch (mProfileDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                             case "men":
                                 spinnerHolder.itemValue.setSelection(0);
                                 Log.d(TAG, "display 0 option on sorting spinner");
@@ -339,9 +349,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     spinnerHolder.itemValue.setAdapter(genderArrayAdapter);
 
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         // display selected item from the spinner ///
-                        switch (userDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
+                        switch (mProfileDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                             case "male":
                                 spinnerHolder.itemValue.setSelection(0);
                                 Log.d(TAG, "display 0 option on sorting spinner");
@@ -367,9 +377,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     spinnerHolder.itemValue.setAdapter(horoscopeArrayAdapter);
 
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         // display selected item from the spinner ///
-                        switch (userDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
+                        switch (mProfileDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                             case "aries":
                                 spinnerHolder.itemValue.setSelection(0);
                                 Log.d(TAG, "display 0 option on sorting spinner");
@@ -428,9 +438,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof ExpandableHolder){
             final ExpandableHolder expandableHolder = (ExpandableHolder) holder;
 
-            switch (userDataArrayList.get(position).getKey()){
+            switch (mProfileDataArrayList.get(position).getKey()){
                 case SECTION_ABOUT_HEADLINE:
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         expandableHolder.sectionHeadline.setText(R.string.about_user_headline);
                         //expandableHolder.expandableLayout.collapse();
 
@@ -455,7 +465,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     break;
                 case SECTION_WORK_HEADLINE:
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         expandableHolder.sectionHeadline.setText(R.string.user_work_school_headline);
                         //expandableHolder.expandableLayout.collapse();
 
@@ -482,7 +492,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     break;
                 case SECTION_HABITS_HEADLINE:
-                    if(null != userDataArrayList.get(position).getValue()){
+                    if(null != mProfileDataArrayList.get(position).getValue()){
                         expandableHolder.sectionHeadline.setText(R.string.user_habits_hobbies_headline);
                         //expandableHolder.expandableLayout.collapse();
 
@@ -558,25 +568,25 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         }
 
-        /*switch (userDataArrayList.get(position).getSection()){
+        /*switch (mProfileDataArrayList.get(position).getSection()){
             case 1:
                 holder.sectionHeader.setText(R.string.about_user_headline);
-                Log.i(TAG, "about section="+ userDataArrayList.get(position).getKey());
+                Log.i(TAG, "about section="+ mProfileDataArrayList.get(position).getKey());
                 break;
             case 2:
                 holder.sectionHeader.setText(R.string.user_work_school_headline);
-                Log.i(TAG, "work education section="+ userDataArrayList.get(position).getKey());
+                Log.i(TAG, "work education section="+ mProfileDataArrayList.get(position).getKey());
 
                 break;
             case 3:
                 holder.sectionHeader.setText(R.string.user_Habits_Hobbies_headline);
-                Log.i(TAG, "habits section="+ userDataArrayList.get(position).getKey());
+                Log.i(TAG, "habits section="+ mProfileDataArrayList.get(position).getKey());
                 break;
         }
 
         // if not first item check if item above has the same header
-        if (position > 0 && userDataArrayList.get(position - 1).getSection()
-                == (userDataArrayList.get(position).getSection())) {
+        if (position > 0 && mProfileDataArrayList.get(position - 1).getSection()
+                == (mProfileDataArrayList.get(position).getSection())) {
             holder.divider.setVisibility(View.GONE);
             holder.sectionHeader.setVisibility(View.GONE);
         } else {
@@ -586,15 +596,15 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         // age text value and icons
-        if(userDataArrayList.get(position).getKey().equals("age")){
-            holder.itemValue.setText(context.getString(R.string.user_age_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("age")){
+            holder.itemValue.setText(context.getString(R.string.user_age_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
         }
 
         //gender text value and icons
-        if(userDataArrayList.get(position).getKey().equals("gender")){
+        if(mProfileDataArrayList.get(position).getKey().equals("gender")){
 
-            switch (userDataArrayList.get(position).getValue()) {
+            switch (mProfileDataArrayList.get(position).getValue()) {
                 case "female":
                     holder.itemValue.setText(R.string.female);
                     holder.itemIcon.setImageResource(R.drawable.ic_female);
@@ -615,20 +625,20 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }// end of gender text value and icons
 
         // nationality text value and icons
-        if(userDataArrayList.get(position).getKey().equals("nationality")){
-            holder.itemValue.setText(context.getString(R.string.user_country_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("nationality")){
+            holder.itemValue.setText(context.getString(R.string.user_country_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_flag_black_24dp);
         }
 
         // hometown text value and icons
-        if(userDataArrayList.get(position).getKey().equals("hometown")){
-            holder.itemValue.setText(context.getString(R.string.user_hometown_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("hometown")){
+            holder.itemValue.setText(context.getString(R.string.user_hometown_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
         }
 
         // horoscope text value and icons
-        if(userDataArrayList.get(position).getKey().equals("horoscope")){
-            switch (userDataArrayList.get(position).getValue()) {
+        if(mProfileDataArrayList.get(position).getKey().equals("horoscope")){
+            switch (mProfileDataArrayList.get(position).getValue()) {
                 case "aries":
                     holder.itemValue.setText(R.string.aries);
                     holder.itemIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
@@ -685,44 +695,44 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }//end of horoscope text value and icons
 
         // lives text value and icons
-        if(userDataArrayList.get(position).getKey().equals("lives")){
-            holder.itemValue.setText(context.getString(R.string.user_lives_in_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("lives")){
+            holder.itemValue.setText(context.getString(R.string.user_lives_in_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_home_black_24dp);
         }
 
         // politics text value and icons
-        if(userDataArrayList.get(position).getKey().equals("politics")){
-            holder.itemValue.setText(context.getString(R.string.user_politics_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("politics")){
+            holder.itemValue.setText(context.getString(R.string.user_politics_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_voting);
         }
 
         // religion text value and icons
-        if(userDataArrayList.get(position).getKey().equals("religion")){
-            holder.itemValue.setText(context.getString(R.string.user_religion_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("religion")){
+            holder.itemValue.setText(context.getString(R.string.user_religion_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_praying_hands);
         }
 
         // work text value and icons
-        if(userDataArrayList.get(position).getKey().equals("work")){
-            holder.itemValue.setText(context.getString(R.string.user_work_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("work")){
+            holder.itemValue.setText(context.getString(R.string.user_work_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_work_black_24dp);
         }
         // college text value and icons
-        if(userDataArrayList.get(position).getKey().equals("college")){
-            holder.itemValue.setText(context.getString(R.string.user_college_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("college")){
+            holder.itemValue.setText(context.getString(R.string.user_college_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
         }
 
     // college text value and icons
-        if(userDataArrayList.get(position).getKey().equals("school")){
-        holder.itemValue.setText(context.getString(R.string.user_school_value, userDataArrayList.get(position).getValue()));
+        if(mProfileDataArrayList.get(position).getKey().equals("school")){
+        holder.itemValue.setText(context.getString(R.string.user_school_value, mProfileDataArrayList.get(position).getValue()));
         holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
     }
 
         // smoke text value and icons
-        if(userDataArrayList.get(position).getKey().equals("smoke")){
+        if(mProfileDataArrayList.get(position).getKey().equals("smoke")){
             holder.itemIcon.setImageResource(R.drawable.ic_smoking_rooms_black_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.no)));
@@ -730,9 +740,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         // shisha text value and icons
-        if(userDataArrayList.get(position).getKey().equals("shisha")){
+        if(mProfileDataArrayList.get(position).getKey().equals("shisha")){
             holder.itemIcon.setImageResource(R.drawable.ic_shisha);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.no)));
@@ -740,9 +750,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         // drugs text value and icons
-        if(userDataArrayList.get(position).getKey().equals("drugs")){
+        if(mProfileDataArrayList.get(position).getKey().equals("drugs")){
             holder.itemIcon.setImageResource(R.drawable.ic_injection);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.no)));
@@ -750,9 +760,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         // drink text value and icons
-        if(userDataArrayList.get(position).getKey().equals("drink")){
+        if(mProfileDataArrayList.get(position).getKey().equals("drink")){
             holder.itemIcon.setImageResource(R.drawable.ic_drinking_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.no)));
@@ -760,58 +770,58 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         // athlete text value and icons
-        if(userDataArrayList.get(position).getKey().equals("athlete")){
+        if(mProfileDataArrayList.get(position).getKey().equals("athlete")){
             holder.itemIcon.setImageResource(R.drawable.ic_fitness_athlete_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.no)));
             }
         }
         // gamer text value and icons
-        if(userDataArrayList.get(position).getKey().equals("gamer")){
+        if(mProfileDataArrayList.get(position).getKey().equals("gamer")){
             holder.itemIcon.setImageResource(R.drawable.ic_games_black_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.no)));
             }
         }
         // travel text value and icons
-        if(userDataArrayList.get(position).getKey().equals("travel")){
+        if(mProfileDataArrayList.get(position).getKey().equals("travel")){
             holder.itemIcon.setImageResource(R.drawable.ic_flight_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.no)));
             }
         }
         // cook text value and icons
-        if(userDataArrayList.get(position).getKey().equals("cook")){
+        if(mProfileDataArrayList.get(position).getKey().equals("cook")){
             holder.itemIcon.setImageResource(R.drawable.ic_cook_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.no)));
             }
         }
         // read text value and icons
-        if(userDataArrayList.get(position).getKey().equals("read")){
+        if(mProfileDataArrayList.get(position).getKey().equals("read")){
             holder.itemIcon.setImageResource(R.drawable.ic_library_book_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
+            if(mProfileDataArrayList.get(position).getValue().equals("true")){
                 holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.yes)));
             }else{
                 holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.no)));
             }
         }*/
 
-       /* holder.itemValue.setText(userDataArrayList.get(position).getKey()+" value= "
-                +userDataArrayList.get(position).getValue());*/
+       /* holder.itemValue.setText(mProfileDataArrayList.get(position).getKey()+" value= "
+                +mProfileDataArrayList.get(position).getValue());*/
 
 
-        Log.i(TAG, "onBindViewHolder get value="+ userDataArrayList.get(position).getValue());
+        Log.i(TAG, "onBindViewHolder get value="+ mProfileDataArrayList.get(position).getValue());
 
-        //holder.itemValue.setText(userDataArrayList.indexOf(position));
+        //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
     private ObjectAnimator toggleRotation(ImageView expandButton, float from, float to) {
@@ -825,45 +835,46 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public int getItemCount() {
         //the size of the list
 
-        for (int i = 0; i < userDataArrayList.size(); i++) {
-            Log.d(TAG, "getItemCount ="+userDataArrayList.size());
+        /*for (int i = 0; i < mProfileDataArrayList.size(); i++) {
+            Log.d(TAG, "getItemCount ="+mProfileDataArrayList.size());
 
-            if (userDataArrayList.get(i).getSection() == SECTION_ABOUT
-                    && !userDataArrayList.get(i).getKey().equals(SECTION_ABOUT_HEADLINE)) {
-                Log.d(TAG, "userDataArrayList SECTION_ABOUT= " + userDataArrayList.get(i).getKey());
-                aboutArrayList.add(new Profile(userDataArrayList.get(i).getKey()
-                        ,userDataArrayList.get(i).getValue(), userDataArrayList.get(i).getSection()));
+            if (mProfileDataArrayList.get(i).getSection() == SECTION_ABOUT
+                    && !mProfileDataArrayList.get(i).getKey().equals(SECTION_ABOUT_HEADLINE)) {
+                Log.d(TAG, "mProfileDataArrayList SECTION_ABOUT= " + mProfileDataArrayList.get(i).getKey());
+                aboutArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
+                        ,mProfileDataArrayList.get(i).getValue(), mProfileDataArrayList.get(i).getSection()));
 
-                userDataArrayList.remove(userDataArrayList.get(i));
+                mProfileDataArrayList.remove(mProfileDataArrayList.get(i));
             }
 
-            if (userDataArrayList.get(i).getSection() == SECTION_WORK
-                    && !userDataArrayList.get(i).getKey().equals(SECTION_WORK_HEADLINE)) {
-                Log.d(TAG, "userDataArrayList SECTION_WORK= " + userDataArrayList.get(i).getKey());
-                workArrayList.add(new Profile(userDataArrayList.get(i).getKey()
-                        ,userDataArrayList.get(i).getValue(), userDataArrayList.get(i).getSection()));
+            if (mProfileDataArrayList.get(i).getSection() == SECTION_WORK
+                    && !mProfileDataArrayList.get(i).getKey().equals(SECTION_WORK_HEADLINE)) {
+                Log.d(TAG, "mProfileDataArrayList SECTION_WORK= " + mProfileDataArrayList.get(i).getKey());
+                workArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
+                        ,mProfileDataArrayList.get(i).getValue(), mProfileDataArrayList.get(i).getSection()));
 
-                userDataArrayList.remove(userDataArrayList.get(i));
+                mProfileDataArrayList.remove(mProfileDataArrayList.get(i));
             }
 
-            if (userDataArrayList.get(i).getSection() == SECTION_HABITS
-                    && !userDataArrayList.get(i).getKey().equals(SECTION_HABITS_HEADLINE)) {
-                Log.d(TAG, "userDataArrayList SECTION_HABITS= " + userDataArrayList.get(i).getKey());
-               habitsArrayList.add(new Profile(userDataArrayList.get(i).getKey()
-                        ,userDataArrayList.get(i).getValue(), userDataArrayList.get(i).getSection()));
+            if (mProfileDataArrayList.get(i).getSection() == SECTION_HABITS
+                    && !mProfileDataArrayList.get(i).getKey().equals(SECTION_HABITS_HEADLINE)) {
+                Log.d(TAG, "mProfileDataArrayList SECTION_HABITS= " + mProfileDataArrayList.get(i).getKey());
+               habitsArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
+                        ,mProfileDataArrayList.get(i).getValue(), mProfileDataArrayList.get(i).getSection()));
 
-                userDataArrayList.remove(userDataArrayList.get(i));
+                mProfileDataArrayList.remove(mProfileDataArrayList.get(i));
             }
 
-        }
-        return  userDataArrayList.size();
+        }*/
+        Log.d(TAG, "getItemCount ="+ mProfileDataArrayList.size());
+        return  mProfileDataArrayList.size();
         //return  10;
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        switch (userDataArrayList.get(position).getSection()){
+        switch (mProfileDataArrayList.get(position).getSection()){
             case 1:
                 return SECTION_IMAGE;
             case 2:

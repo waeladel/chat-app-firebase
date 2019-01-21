@@ -55,6 +55,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     public  final static String SECTION_WORK_HEADLINE  = "work_and_education";
     public  final static String SECTION_HABITS_HEADLINE  = "habits";
 
+    private static String PROFILE_LIST_STATE = "list_state";
+    private static String ABOUT_LIST_STATE = "about_list_state";
+    private static String WORK_LIST_STATE = "work_list_state";
+    private static String HABITS_LIST_STATE = "habits_list_state";
+
+
     public String currentUserId;
 
     // [START declare_database_ref]
@@ -63,9 +69,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
     private RecyclerView mEditProfileRecycler;
     private ArrayList<Profile> mProfileDataArrayList = new ArrayList<>();
+    private ArrayList<Profile> mAboutArrayList = new ArrayList<>();
+    private ArrayList<Profile> mWorkArrayList = new ArrayList<>();
+    private ArrayList<Profile> mHabitsArrayList = new ArrayList<>();
+
+
     private EditProfileAdapter mEditProfileAdapter;
 
-    private static String LIST_STATE = "list_state";
     private Parcelable savedRecyclerLayoutState;
     private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
@@ -118,7 +128,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
             Log.d(TAG, "isSavedInstance ="+isSavedInstance);
 
             // Do something with value if needed
-            mProfileDataArrayList = savedInstanceState.getParcelableArrayList(LIST_STATE);
+            mProfileDataArrayList = savedInstanceState.getParcelableArrayList(PROFILE_LIST_STATE);
+            mAboutArrayList = savedInstanceState.getParcelableArrayList(ABOUT_LIST_STATE);
+            mWorkArrayList = savedInstanceState.getParcelableArrayList(WORK_LIST_STATE);
+            mHabitsArrayList = savedInstanceState.getParcelableArrayList(HABITS_LIST_STATE);
+
             savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
             restorePreviousState(); // Restore data found in the Bundle
         }else{
@@ -129,8 +143,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
 
         // prepare the profile Adapter
-        /*mAboutArrayList = new ArrayList<>();
-        Profile profilewe = new Profile("mama", "no", 11);
+        /*Profile profilewe = new Profile("mama", "no", 11);
         mAboutArrayList.add(profilewe);
         mAboutArrayList.add(profilewe);
         mAboutArrayList.add(profilewe);
@@ -183,12 +196,21 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean ("isSavedInstance", true);
-        outState.putParcelableArrayList(LIST_STATE, mProfileDataArrayList);
+        outState.putParcelableArrayList(PROFILE_LIST_STATE, mProfileDataArrayList);
+        outState.putParcelableArrayList(ABOUT_LIST_STATE, mAboutArrayList);
+        outState.putParcelableArrayList(WORK_LIST_STATE, mWorkArrayList);
+        outState.putParcelableArrayList(HABITS_LIST_STATE, mHabitsArrayList);
         outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mEditProfileRecycler.getLayoutManager().onSaveInstanceState());
     }
 
     private void restorePreviousState() {
-        mEditProfileAdapter = new EditProfileAdapter(getActivityContext, mProfileDataArrayList,this);
+        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
+                , mProfileDataArrayList
+                , mAboutArrayList
+                , mWorkArrayList
+                , mHabitsArrayList
+                , this);
+
         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
         restoreLayoutManagerPosition();
@@ -263,7 +285,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         });
 
         // [END single_value_read]
-        mEditProfileAdapter = new EditProfileAdapter(getActivityContext, mProfileDataArrayList , this);
+        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
+                , mProfileDataArrayList
+                , mAboutArrayList
+                , mWorkArrayList
+                , mHabitsArrayList
+                , this);
     }
 
     private void getDynamicMethod(String fieldName, User user) {
@@ -305,8 +332,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                                     || fieldName.equals("school")){
                                 //add data for work section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_WORK);
-                                mProfileDataArrayList.add(profileData);
-
+                                //mProfileDataArrayList.add(profileData);
+                                mWorkArrayList.add(profileData);
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
                                     Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, method.invoke(user).toString(),SECTION_WORK);
@@ -321,7 +348,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                                     || fieldName.equals("religion")){
                                 //add data for about section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_ABOUT);
-                                mProfileDataArrayList.add(profileData);
+                                //mProfileDataArrayList.add(profileData);
+                                mAboutArrayList.add(profileData);
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
                                     Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, method.invoke(user).toString(),SECTION_ABOUT);
@@ -340,8 +368,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                                     || fieldName.equals("read")){
                                 //add data for habits section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_HABITS);
-                                mProfileDataArrayList.add(profileData);
-
+                                //mProfileDataArrayList.add(profileData);
+                                mHabitsArrayList.add(profileData);
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
                                     Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, method.invoke(user).toString(),SECTION_HABITS);

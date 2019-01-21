@@ -88,7 +88,7 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
 
         Log.i(TAG, "onBindViewHolder get value="+ habitsArrayList.get(position).getValue());
 
-        //holder.itemValue.setText(userDataArrayList.indexOf(position));
+        //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
     @Override

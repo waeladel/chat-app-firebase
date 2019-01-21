@@ -138,7 +138,7 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
 
         Log.i(TAG, "onBindViewHolder get value="+ workArrayList.get(position).getValue());
 
-        //holder.itemValue.setText(userDataArrayList.indexOf(position));
+        //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
     @Override

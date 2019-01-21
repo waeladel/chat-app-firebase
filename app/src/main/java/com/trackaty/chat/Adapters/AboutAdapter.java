@@ -191,7 +191,7 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
 
         Log.i(TAG, "onBindViewHolder get value="+ aboutArrayList.get(position).getValue());
 
-        //holder.itemValue.setText(userDataArrayList.indexOf(position));
+        //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
     @Override

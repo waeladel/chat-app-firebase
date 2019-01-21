@@ -288,13 +288,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
             }
         }
 
-       /* holder.itemValue.setText(userDataArrayList.get(position).getKey()+" value= "
-                +userDataArrayList.get(position).getValue());*/
+       /* holder.itemValue.setText(mProfileDataArrayList.get(position).getKey()+" value= "
+                +mProfileDataArrayList.get(position).getValue());*/
 
 
         Log.i(TAG, "onBindViewHolder get value="+ userDataArrayList.get(position).getValue());
 
-        //holder.itemValue.setText(userDataArrayList.indexOf(position));
+        //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
     @Override
