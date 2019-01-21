@@ -22,6 +22,7 @@ import com.github.aakira.expandablelayout.Utils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
 
@@ -62,15 +63,17 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public WorkAdapter workAdapter;
     public HabitsAdapter habitsAdapter;
 
-
-
     public Context context;
+    private ItemClickListener itemClickListener;
 
 
-    public EditProfileAdapter(Context context, ArrayList<Profile> userDataArrayList){
+
+    public EditProfileAdapter(Context context, ArrayList<Profile> userDataArrayList,ItemClickListener itemClickListener){
 
         this.userDataArrayList = userDataArrayList;
         this.context = context;
+        this.itemClickListener = itemClickListener;
+
         aboutAdapter = new AboutAdapter(context, aboutArrayList);
         workAdapter = new WorkAdapter(context, workArrayList);
         habitsAdapter = new HabitsAdapter(context, habitsArrayList);
@@ -86,7 +89,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             case 1:
                 // SECTION_IMAGE;
             View imageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_image_item, parent, false);
-            return new ImageHolder(imageView);
+            return new ImageHolder(imageView , itemClickListener);
             case 2:
                 // SECTION_EDIT_TEXT;
                 View textInputView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_item, parent, false);
@@ -107,7 +110,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 // SECTION_HABITS;
         }
         View expandableView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_expandable_parent, parent, false);
-        return new ExpandableHolder(expandableView);
+        return new ExpandableHolder(expandableView , itemClickListener);
     }
 
     @Override
@@ -149,8 +152,16 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     }
                     break;
+
             }
 
+            // needed only if i want the listener to be inside the adapter
+            /*imageHolder.setItemClickListener(new ItemClickListener() {
+                @Override
+                public void onClick(View view, int position, boolean isLongClick) {
+                    Log.d(TAG, "item clicked= " + position);
+                }
+            });*/
         }
 
         if (holder instanceof TextInputHolder){
@@ -177,6 +188,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     // Set Helper
                     textInputHolder.inputLayout.setHelperTextEnabled(true);
                     textInputHolder.inputLayout.setHelperText(context.getString(R.string.required_helper));
+
+                    // Parce text to handel configuration change
+                    userDataArrayList.get(position).setValue("mama");
                     break;
                 case "biography":
                     if(null != userDataArrayList.get(position).getValue()){
@@ -523,14 +537,24 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
 
-            expandableHolder.row.setOnClickListener(new View.OnClickListener() {
+            // click listener using interface
+            expandableHolder.setItemClickListener(new ItemClickListener() {
+                @Override
+                public void onClick(View view, int position, boolean isLongClick) {
+                    Log.i(TAG, "expandToggle id clicked= ");
+                    expandableHolder.expandableLayout.toggle();
+                }
+            });
+
+            // bad way for ClickListener without using interface
+            /*expandableHolder.row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.i(TAG, "expandToggle id clicked= ");
                     expandableHolder.expandableLayout.toggle();
 
                 }
-            });
+            });*/
 
         }
 
@@ -859,39 +883,55 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     // ViewHolder for user info list /////
-    public class ExpandableHolder extends RecyclerView.ViewHolder {
+    public class ExpandableHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
         private TextView  sectionHeadline;
         private ImageView expandButton;
         private RecyclerView expandableRecycler;
         private ExpandableRelativeLayout expandableLayout;
+        ItemClickListener itemClickListener;
 
 
-        public ExpandableHolder(View itemView) {
+        public ExpandableHolder(View itemView, ItemClickListener itemClickListener) {
             super(itemView);
-            //itemView = row;
+            this.itemClickListener = itemClickListener;
 
             row = itemView;
             sectionHeadline = row.findViewById(R.id.section_headline);
             expandButton = row.findViewById(R.id.expand_button);
             expandableLayout = row.findViewById(R.id.expandableLayout);
             expandableRecycler = row.findViewById(R.id.expandable_recycler);
+
+            row.setOnClickListener(this);
+
         }
 
+        @Override
+        public void onClick(View view) {
+            itemClickListener.onClick(view, getAdapterPosition(), false);
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
     }
 
     // ViewHolder for user images list /////
-    public class ImageHolder extends RecyclerView.ViewHolder {
+    public class ImageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
         private TextView itemHeadline;
         private ImageView profileImage, coverImage, icon;
         private View divider;
 
-        public ImageHolder(View itemView) {
+        ItemClickListener itemClickListener;
+
+
+        public ImageHolder(View itemView, ItemClickListener itemClickListener) {
             super(itemView);
-            //itemView = row;
+            this.itemClickListener = itemClickListener;
 
             row = itemView;
             itemHeadline = row.findViewById(R.id.item_title);
@@ -899,8 +939,21 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             coverImage = row.findViewById(R.id.cover_image);
             icon = row.findViewById(R.id.edit_profile_icon);
             divider = row.findViewById(R.id.top_divider);
+
+            row.setOnClickListener(this);
         }
 
+
+
+        @Override
+        public void onClick(View view) {
+            itemClickListener.onClick(view, getAdapterPosition(), false);
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
     }
 
     // ViewHolder for user textInputs list /////

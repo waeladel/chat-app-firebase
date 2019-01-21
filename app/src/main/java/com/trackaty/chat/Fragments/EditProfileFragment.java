@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.models.Profile;
@@ -37,7 +39,7 @@ import java.util.Collections;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EditProfileFragment extends Fragment {
+public class EditProfileFragment extends Fragment implements ItemClickListener {
 
     private final static String TAG = EditProfileFragment.class.getSimpleName();
 
@@ -60,8 +62,12 @@ public class EditProfileFragment extends Fragment {
     private DatabaseReference mUserRef;
 
     private RecyclerView mEditProfileRecycler;
-    private ArrayList<Profile> mUserArrayList;
+    private ArrayList<Profile> mProfileDataArrayList = new ArrayList<>();
     private EditProfileAdapter mEditProfileAdapter;
+
+    private static String LIST_STATE = "list_state";
+    private Parcelable savedRecyclerLayoutState;
+    private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
     /*private RecyclerView mAboutProfileRecycler;
     private AboutAdapter mAboutProfileAdapter;*/
@@ -98,89 +104,29 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
-        if (savedInstanceState != null) {
-            Boolean isSavedInstance = savedInstanceState.getBoolean("isSavedInstance");
-            Log.d(TAG, "isSavedInstance ="+isSavedInstance);
-
-            // Do something with value if needed
-            //restorePreviousState(); // Restore data found in the Bundle
-        }else{
-            //getRemoteData(); // No saved data, get data from remote
-        }
-
         // set to false to add expandable section header once every onCreateView
         mIsAboutAdded = false;
         mIsWorkAdded = false;
         mIsHabitsAdded = false;
 
-        mUserArrayList  = new ArrayList<>();
         // Initiate the RecyclerView
         mEditProfileRecycler = (RecyclerView) fragView.findViewById(R.id.edit_recycler);
         mEditProfileRecycler.setHasFixedSize(true);
 
-        if (getArguments() != null) {
-            currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+        if (savedInstanceState != null) {
+            Boolean isSavedInstance = savedInstanceState.getBoolean("isSavedInstance");
+            Log.d(TAG, "isSavedInstance ="+isSavedInstance);
 
-            // [START initialize_database_ref]
-            mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-            mUserRef = mDatabaseRef.child("users").child(currentUserId);
-
-            mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    // [START_EXCLUDE]
-                    if (dataSnapshot.exists()) {
-                        // Get user value
-                        User user = dataSnapshot.getValue(User.class);
-                            if (null!= user) {
-                                Field[] fields = user.getClass().getDeclaredFields();
-                                for (Field f : fields) {
-                                    Log.d(TAG, "fields=" + f.getName());
-                                    //Log.d(TAG, "fields="+f.get);
-                                    getDynamicMethod(f.getName(), user);
-                                }
-                                Log.d(TAG, "mUserArrayList sorted get size" + mUserArrayList.size());
-
-                                // sort ArrayList into sections then notify the adapter
-                                Collections.sort(mUserArrayList, new Sortbysection());
-
-                                for (int i = 0; i < mUserArrayList.size(); i++) {
-                                    Log.i(TAG, "mUserArrayList sorted" + mUserArrayList.get(i).getKey());
-                                }
-
-                                mEditProfileAdapter = new EditProfileAdapter(getActivityContext,mUserArrayList);
-
-                                //to stop scrolling
-        /*LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivityContext) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
+            // Do something with value if needed
+            mProfileDataArrayList = savedInstanceState.getParcelableArrayList(LIST_STATE);
+            savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+            restorePreviousState(); // Restore data found in the Bundle
+        }else{
+            if(getArguments() != null){
+                getRemoteData(); // No saved data, get data from remote
             }
-        };*/
-                                mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
-                                mEditProfileRecycler.setAdapter(mEditProfileAdapter);
-
-                                //mEditProfileAdapter.notifyDataSetChanged();
-                                //mAboutProfileAdapter.notifyDataSetChanged();
-                            /*String userName = dataSnapshot.child("name").getValue().toString();
-                            String currentUserId = dataSnapshot.getKey();*/
-                                Log.d(TAG, "user exist: Name=" + user.getName());
-                                }
-
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                    // [START_EXCLUDE]
-                    //setEditingEnabled(true);
-                    // [END_EXCLUDE]
-                }
-            });
-            // [END single_value_read]
         }
+
 
         // prepare the profile Adapter
         /*mAboutArrayList = new ArrayList<>();
@@ -235,8 +181,89 @@ public class EditProfileFragment extends Fragment {
     // Fires when a configuration change occurs and fragment needs to save state
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean ("isSavedInstance", true);
         super.onSaveInstanceState(outState);
+        outState.putBoolean ("isSavedInstance", true);
+        outState.putParcelableArrayList(LIST_STATE, mProfileDataArrayList);
+        outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mEditProfileRecycler.getLayoutManager().onSaveInstanceState());
+    }
+
+    private void restorePreviousState() {
+        mEditProfileAdapter = new EditProfileAdapter(getActivityContext, mProfileDataArrayList,this);
+        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
+        mEditProfileRecycler.setAdapter(mEditProfileAdapter);
+        restoreLayoutManagerPosition();
+        mEditProfileAdapter.notifyDataSetChanged();
+    }
+
+    private void restoreLayoutManagerPosition() {
+        if (savedRecyclerLayoutState != null) {
+            mEditProfileRecycler.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+        }
+    }
+
+    private void getRemoteData() {
+
+        currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+
+        // [START initialize_database_ref]
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUserRef = mDatabaseRef.child("users").child(currentUserId);
+
+        mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // [START_EXCLUDE]
+                if (dataSnapshot.exists()) {
+                    // Get user value
+                    User user = dataSnapshot.getValue(User.class);
+                    if (null!= user) {
+                        Field[] fields = user.getClass().getDeclaredFields();
+                        for (Field f : fields) {
+                            Log.d(TAG, "fields=" + f.getName());
+                            //Log.d(TAG, "fields="+f.get);
+                            getDynamicMethod(f.getName(), user);
+                        }
+                        Log.d(TAG, "mProfileDataArrayList sorted get size" + mProfileDataArrayList.size());
+
+                        // sort ArrayList into sections then notify the adapter
+                        Collections.sort(mProfileDataArrayList, new Sortbysection());
+
+                        for (int i = 0; i < mProfileDataArrayList.size(); i++) {
+                            Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
+                        }
+
+                        //to stop scrolling
+        /*LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivityContext) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };*/
+                        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
+                        mEditProfileRecycler.setAdapter(mEditProfileAdapter);
+
+                        //mEditProfileAdapter.notifyDataSetChanged();
+                        //mAboutProfileAdapter.notifyDataSetChanged();
+                            /*String userName = dataSnapshot.child("name").getValue().toString();
+                            String currentUserId = dataSnapshot.getKey();*/
+                        Log.d(TAG, "user exist: Name=" + user.getName());
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+                // [START_EXCLUDE]
+                //setEditingEnabled(true);
+                // [END_EXCLUDE]
+            }
+        });
+
+        // [END single_value_read]
+        mEditProfileAdapter = new EditProfileAdapter(getActivityContext, mProfileDataArrayList , this);
     }
 
     private void getDynamicMethod(String fieldName, User user) {
@@ -255,35 +282,35 @@ public class EditProfileFragment extends Fragment {
 
                             if((fieldName.equals("avatar") || fieldName.equals("coverImage"))){
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_IMAGE);
-                                mUserArrayList.add(profileData);
+                                mProfileDataArrayList.add(profileData);
 
                             }else if((fieldName.equals("name")
                                     || fieldName.equals("biography"))){
                             Profile profileData = new Profile(fieldName, method.invoke(user).toString(), SECTION_EDIT_TEXT);
-                            mUserArrayList.add(profileData);
+                            mProfileDataArrayList.add(profileData);
 
                             }else if(fieldName.equals("age")){
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(), SECTION_TEXT);
-                                mUserArrayList.add(profileData);
+                                mProfileDataArrayList.add(profileData);
 
                             }else if((fieldName.equals("relationship")
                                     || fieldName.equals("gender")
                                     || fieldName.equals("horoscope")
                                     || fieldName.equals("interestedIn"))){
                             Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_SPINNER);
-                            mUserArrayList.add(profileData);
+                            mProfileDataArrayList.add(profileData);
 
                             } else if(fieldName.equals("work")
                                     || fieldName.equals("college")
                                     || fieldName.equals("school")){
                                 //add data for work section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_WORK);
-                                mUserArrayList.add(profileData);
+                                mProfileDataArrayList.add(profileData);
 
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
                                     Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, method.invoke(user).toString(),SECTION_WORK);
-                                    mUserArrayList.add(aboutSectionData);
+                                    mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsWorkAdded = true; // to add only one expandable section header
 
@@ -294,11 +321,11 @@ public class EditProfileFragment extends Fragment {
                                     || fieldName.equals("religion")){
                                 //add data for about section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_ABOUT);
-                                mUserArrayList.add(profileData);
+                                mProfileDataArrayList.add(profileData);
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
                                     Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, method.invoke(user).toString(),SECTION_ABOUT);
-                                    mUserArrayList.add(aboutSectionData);
+                                    mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsAboutAdded = true; // to add only one expandable section header
 
@@ -313,12 +340,12 @@ public class EditProfileFragment extends Fragment {
                                     || fieldName.equals("read")){
                                 //add data for habits section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_HABITS);
-                                mUserArrayList.add(profileData);
+                                mProfileDataArrayList.add(profileData);
 
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
                                     Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, method.invoke(user).toString(),SECTION_HABITS);
-                                    mUserArrayList.add(habitsSectionData);
+                                    mProfileDataArrayList.add(habitsSectionData);
                                 }
                                 mIsHabitsAdded = true; // to add only one expandable section header
                             }
@@ -339,4 +366,9 @@ public class EditProfileFragment extends Fragment {
 
     }
 
+    // use interface to detect item click on the recycler adapter
+    @Override
+    public void onClick(View view, int position, boolean isLongClick) {
+        Log.d(TAG, "item clicked fragment= " + position);
+    }
 }
