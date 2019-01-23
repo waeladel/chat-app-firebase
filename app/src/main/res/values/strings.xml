@@ -133,6 +133,7 @@
     <string name="user_loved_by">Loved by %1$d people</string>
     <string name="user_pickedup_by">Received %1$d pick-up lines</string>
     <string name="user_age_value">Age: %1$s</string>
+    <string name="user_gender_value">Gender: %1$s</string>
     <string name="user_country_value">Nationality: %1$s</string>
     <string name="user_hometown_value">Hometown: %1$s</string>
     <string name="user_lives_in_value">Lives in: %1$s</string>

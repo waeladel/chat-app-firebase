@@ -317,7 +317,7 @@
             app:layout_constraintTop_toTopOf="@+id/interested_in_icon"
             tools:text="@tools:sample/date/ddmmyy" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/see_more_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -334,7 +334,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_interested_value" />
+            app:layout_constraintTop_toBottomOf="@+id/user_interested_value"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

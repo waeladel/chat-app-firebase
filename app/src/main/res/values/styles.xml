@@ -1,15 +1,36 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorOnPrimary">@color/colorAccent</item>
+        <item name="colorOnSurface">@color/colorAccent</item>
+
+
+        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.OutlinedButton</item>
+
     </style>
 
-    <!-- New MaterialComponents attributes. -->
+    <!--//to cut the shape of the button
+    <style name="myButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+        <item name="shapeAppearance">@style/myShapeButtonSyule</item>
 
+    </style>
+
+    <style name="myShapeButtonSyule">
+        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+        <item name="cornerFamilyTopRight">cut</item>
+        <item name="cornerFamilyBottomRight">cut</item>
+        <item name="cornerSize">18dp</item>
+
+    </style>-->
+
+    <!-- New MaterialComponents attributes. -->
     <!--<item name="colorPrimaryVariant">@color/my_app_primary_variant_color</item>
     <item name="colorSecondaryVariant">@color/my_app_secondary_variant_color</item>
     <item name="colorSurface">@color/my_app_surface_color</item>

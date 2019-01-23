@@ -61,7 +61,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private static String HABITS_LIST_STATE = "habits_list_state";
 
 
-    public String currentUserId;
+    private User currentUser;
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
@@ -136,8 +136,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
             savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
             restorePreviousState(); // Restore data found in the Bundle
         }else{
-            if(getArguments() != null){
-                getRemoteData(); // No saved data, get data from remote
+            if(getArguments()!= null){
+                currentUser = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUser();//logged in user
+                Log.d(TAG,  "name= " + currentUser.getName() + "pickups=" + currentUser.getPickupCounter());
+                showCurrentUser(currentUser); // No saved data, get data from remote
             }
         }
 
@@ -211,6 +213,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                 , mHabitsArrayList
                 , this);
 
+        Log.d(TAG, "mWorkArrayList college 0="+mWorkArrayList.get(0).getValue());
+        Log.d(TAG, "mWorkArrayList college 1="+mWorkArrayList.get(1).getValue());
+        Log.d(TAG, "mWorkArrayList college 2="+mWorkArrayList.get(2).getValue());
+
         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
         restoreLayoutManagerPosition();
@@ -223,27 +229,16 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         }
     }
 
-    private void getRemoteData() {
-
-        currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+    private void showCurrentUser(User currentUser) {
 
         // [START initialize_database_ref]
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUserRef = mDatabaseRef.child("users").child(currentUserId);
 
-        mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                if (dataSnapshot.exists()) {
-                    // Get user value
-                    User user = dataSnapshot.getValue(User.class);
-                    if (null!= user) {
-                        Field[] fields = user.getClass().getDeclaredFields();
+                    if (null!= currentUser) {
+                        Field[] fields = currentUser.getClass().getDeclaredFields();
                         for (Field f : fields) {
                             Log.d(TAG, "fields=" + f.getName());
                             //Log.d(TAG, "fields="+f.get);
-                            getDynamicMethod(f.getName(), user);
+                            getDynamicMethod(f.getName(), currentUser);
                         }
                         Log.d(TAG, "mProfileDataArrayList sorted get size" + mProfileDataArrayList.size());
 
@@ -254,48 +249,30 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                             Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
                         }
 
-                        //to stop scrolling
-        /*LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivityContext) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };*/
+                        // [END single_value_read]
+                        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
+                                , mProfileDataArrayList
+                                , mAboutArrayList
+                                , mWorkArrayList
+                                , mHabitsArrayList
+                                , this);
+
                         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
                         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
 
                         //mEditProfileAdapter.notifyDataSetChanged();
                         //mAboutProfileAdapter.notifyDataSetChanged();
                             /*String userName = dataSnapshot.child("name").getValue().toString();
-                            String currentUserId = dataSnapshot.getKey();*/
-                        Log.d(TAG, "user exist: Name=" + user.getName());
+                            String currentUser = dataSnapshot.getKey();*/
+                        Log.d(TAG, "user exist: Name=" + currentUser.getName());
                     }
 
                 }
 
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                // [START_EXCLUDE]
-                //setEditingEnabled(true);
-                // [END_EXCLUDE]
-            }
-        });
+    private void getDynamicMethod(String fieldName, User currentUser) {
 
-        // [END single_value_read]
-        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
-                , mProfileDataArrayList
-                , mAboutArrayList
-                , mWorkArrayList
-                , mHabitsArrayList
-                , this);
-    }
-
-    private void getDynamicMethod(String fieldName, User user) {
-
-        Method[] methods = user.getClass().getMethods();
+        Method[] methods = currentUser.getClass().getMethods();
 
         for (Method method : methods) {
             if ((method.getName().startsWith("get")) && (method.getName().length() == (fieldName.length() + 3))) {
@@ -303,40 +280,40 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                     // Method found, run it
                     try {
                         // check if is not null or empty
-                        if (method.invoke(user) != null){
-                            Log.d(TAG, "Method=" + method.invoke(user));
+                        if (method.invoke(currentUser) != null){
+                            Log.d(TAG, "Method=" + method.invoke(currentUser));
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
                             if((fieldName.equals("avatar") || fieldName.equals("coverImage"))){
-                                Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_IMAGE);
+                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_IMAGE);
                                 mProfileDataArrayList.add(profileData);
 
                             }else if((fieldName.equals("name")
                                     || fieldName.equals("biography"))){
-                            Profile profileData = new Profile(fieldName, method.invoke(user).toString(), SECTION_EDIT_TEXT);
+                            Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(), SECTION_EDIT_TEXT);
                             mProfileDataArrayList.add(profileData);
 
                             }else if(fieldName.equals("age")){
-                                Profile profileData = new Profile(fieldName, method.invoke(user).toString(), SECTION_TEXT);
+                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(), SECTION_TEXT);
                                 mProfileDataArrayList.add(profileData);
 
                             }else if((fieldName.equals("relationship")
                                     || fieldName.equals("gender")
                                     || fieldName.equals("horoscope")
                                     || fieldName.equals("interestedIn"))){
-                            Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_SPINNER);
+                            Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_SPINNER);
                             mProfileDataArrayList.add(profileData);
 
                             } else if(fieldName.equals("work")
                                     || fieldName.equals("college")
                                     || fieldName.equals("school")){
                                 //add data for work section
-                                Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_WORK);
+                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_WORK);
                                 //mProfileDataArrayList.add(profileData);
                                 mWorkArrayList.add(profileData);
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, method.invoke(user).toString(),SECTION_WORK);
+                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, method.invoke(currentUser).toString(),SECTION_WORK);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsWorkAdded = true; // to add only one expandable section header
@@ -347,12 +324,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                                     || fieldName.equals("politics")
                                     || fieldName.equals("religion")){
                                 //add data for about section
-                                Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_ABOUT);
+                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_ABOUT);
                                 //mProfileDataArrayList.add(profileData);
                                 mAboutArrayList.add(profileData);
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, method.invoke(user).toString(),SECTION_ABOUT);
+                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, method.invoke(currentUser).toString(),SECTION_ABOUT);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsAboutAdded = true; // to add only one expandable section header
@@ -367,12 +344,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                                     || fieldName.equals("gamer")
                                     || fieldName.equals("read")){
                                 //add data for habits section
-                                Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_HABITS);
+                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_HABITS);
                                 //mProfileDataArrayList.add(profileData);
                                 mHabitsArrayList.add(profileData);
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
-                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, method.invoke(user).toString(),SECTION_HABITS);
+                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, method.invoke(currentUser).toString(),SECTION_HABITS);
                                     mProfileDataArrayList.add(habitsSectionData);
                                 }
                                 mIsHabitsAdded = true; // to add only one expandable section header

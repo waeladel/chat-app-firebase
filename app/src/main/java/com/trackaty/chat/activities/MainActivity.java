@@ -26,6 +26,7 @@ import com.trackaty.chat.models.User;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.NavDirections;
@@ -56,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public String currentUserEmail;
     public Uri currentUserPhoto;
     public Boolean currentUserVerified;
+    private User mUser;
+    private String mUserId;
+
 
     private boolean isFirstloaded; // boolean to check if back button is clicked on startActivityForResult
     //initialize the FirebaseAuth instance
@@ -96,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         navController = Navigation.findNavController(this, R.id.host_fragment);
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
@@ -128,9 +135,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mTextMessage = (TextView) findViewById(R.id.message);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Log.d(TAG, "MainActivity onCreate");
 
         mAuth = FirebaseAuth.getInstance();
@@ -187,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (id){
             case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
-                goToProfile(currentUserId);
+                goToProfile(currentUserId, mUserId, mUser);
 
                 break;
             case R.id.action_menu_invite:
@@ -361,16 +367,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // Get user value
-                    User user = dataSnapshot.getValue(User.class);
+                    mUser = dataSnapshot.getValue(User.class);
+                    mUserId = dataSnapshot.getKey();
                     /*String userName = dataSnapshot.child("name").getValue().toString();
                     String currentUserId = dataSnapshot.getKey();*/
-                    if (user != null) {
-                        Log.d(TAG, "user exist: Name=" + user.getName());
+                    if (mUser != null) {
+                        Log.d(TAG, "user exist: Name=" + mUser.getName());
                     }
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
                     //completeProfile(currentUserId, currentUserName, currentUserEmail);
+                    //completeProfile(mUser);
                 }
 
             }
@@ -400,14 +408,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private void goToProfile(String currentUserId) {
+    private void goToProfile(String currentUserId,String userId,  User user) {
         if(currentUserId != null && !TextUtils.isEmpty(currentUserId)){
             Log.i(TAG, "UserId not null");
 
-            String userId = currentUserId;
-
-            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUserId, userId);
-
+            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUserId, userId, user);
             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
             //check if we are on Main Fragment not on complete Profile already

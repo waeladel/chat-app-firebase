@@ -9,5 +9,7 @@
     <dimen name="small_text_size">10sp</dimen>
 
     <dimen name="button_padding">16dp</dimen>
+    <dimen name="elevation">4dp</dimen>
+
 
 </resources>

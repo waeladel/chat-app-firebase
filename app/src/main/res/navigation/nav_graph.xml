@@ -47,13 +47,16 @@
         <action
             android:id="@+id/action_profile_to_moreProfile"
             app:destination="@id/moreProfileFragment" />
+        <action
+            android:id="@+id/action_profile_to_editProfile"
+            app:destination="@id/editProfileFragment" />
         <argument
             android:name="userId"
             app:argType="string"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_profile_to_editProfile"
-            app:destination="@id/editProfileFragment" />
+        <argument
+            android:name="user"
+            app:argType="com.trackaty.chat.models.User" />
     </fragment>
     <fragment
         android:id="@+id/moreProfileFragment"
@@ -67,6 +70,9 @@
             android:name="userId"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="user"
+            app:argType="com.trackaty.chat.models.User" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
@@ -74,7 +80,7 @@
         android:label="fragment_edit_profile"
         tools:layout="@layout/fragment_edit_profile" >
         <argument
-            android:name="currentUserId"
-            app:argType="string" />
+            android:name="currentUser"
+            app:argType="com.trackaty.chat.models.User" />
     </fragment>
 </navigation>

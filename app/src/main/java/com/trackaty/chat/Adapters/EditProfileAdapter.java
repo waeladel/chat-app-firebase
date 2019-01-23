@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -200,7 +201,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     textInputHolder.inputLayout.setHelperText(context.getString(R.string.required_helper));
 
                     // Parce text to handel configuration change
-                    mProfileDataArrayList.get(position).setValue("mama");
+                    //mProfileDataArrayList.get(position).setValue("mama");
                     break;
                 case "biography":
                     if(null != mProfileDataArrayList.get(position).getValue()){

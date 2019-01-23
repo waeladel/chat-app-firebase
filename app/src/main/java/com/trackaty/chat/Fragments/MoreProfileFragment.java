@@ -38,7 +38,9 @@ import java.util.Collections;
 public class MoreProfileFragment extends Fragment {
 
     private final static String TAG = MoreProfileFragment.class.getSimpleName();
-    public String currentUserId, userId;
+    private String mCurrentUserId, mUserId;
+    private User mUser;
+
 
     public  final static int SECTION_ABOUT = 1;
     public  final static int SECTION_WORK = 2;
@@ -47,14 +49,14 @@ public class MoreProfileFragment extends Fragment {
 
 
     // [START declare_database_ref]
-    private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUserRef;
+    /*private DatabaseReference mDatabaseRef;
+    private DatabaseReference mUserRef;*/
 
     private RecyclerView mProfileRecycler;
     private ArrayList <Profile> mUserArrayList;
     private ProfileAdapter mProfileAdapter;
 
-    private Context getActivityContext;
+    private Context mActivityContext;
 
 
 
@@ -69,76 +71,6 @@ public class MoreProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_more_profile, container, false);
 
-        if (getArguments() != null) {
-            currentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId();
-            userId =  MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
-
-            Log.d(TAG, "currentUserId= " + currentUserId);
-
-            // [START initialize_database_ref]
-            mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-            if(null != currentUserId && currentUserId.equals(userId)) {// it's logged in user profile
-                mUserRef = mDatabaseRef.child("users").child(currentUserId);
-            }else{
-                mUserRef = mDatabaseRef.child("users").child(userId); // it's another user
-            }
-
-
-            // [START single_value_read]
-            //ValueEventListener postListener = new ValueEventListener() {
-            //mUserRef.addValueEventListener(postListener);
-            mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    // [START_EXCLUDE]
-                    if (dataSnapshot.exists()) {
-                        // Get user value
-                        User user = dataSnapshot.getValue(User.class);
-                        if (null!= user) {
-                            Field[] fields = user.getClass().getFields();
-                            for (Field f : fields) {
-                                Log.d(TAG, "fields=" + f.getName());
-                                //Log.d(TAG, "fields="+f.get);
-                                getDynamicMethod(f.getName(), user);
-                            }
-                            Log.d(TAG, "mUserArrayList sorted get size" + mUserArrayList.size());
-
-                            // sort ArrayList into sections then notify the adapter
-                            Collections.sort(mUserArrayList, new Sortbysection());
-
-                            for (int i = 0; i < mUserArrayList.size(); i++) {
-                                Log.i(TAG, "mUserArrayList sorted" + mUserArrayList.get(i).getKey());
-                            }
-
-                            mProfileAdapter.notifyDataSetChanged();
-                            /*String userName = dataSnapshot.child("name").getValue().toString();
-                            String currentUserId = dataSnapshot.getKey();*/
-                            Log.d(TAG, "user exist: Name=" + user.getName());
-                        } else {
-                            // User is null, error out
-                            Log.w(TAG, "User is null, no such user");
-                            //completeProfile(currentUserId, currentUserName, currentUserEmail);
-
-                        }
-
-                    }
-
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                    // [START_EXCLUDE]
-                    //setEditingEnabled(true);
-                    // [END_EXCLUDE]
-                }
-            });
-            // [END single_value_read]
-
-        }
-
-
         // prepare the Adapter
         mUserArrayList  = new ArrayList<>();
         /*mUserArrayList.add("mama");
@@ -147,21 +79,66 @@ public class MoreProfileFragment extends Fragment {
         mUserArrayList.add("tata");
         mUserArrayList.add("kaka");*/
 
-        mProfileAdapter  = new ProfileAdapter(getActivityContext,mUserArrayList);
+        mProfileAdapter  = new ProfileAdapter(mActivityContext,mUserArrayList);
 
         // Initiate the RecyclerView
         mProfileRecycler  = (RecyclerView) fragView.findViewById(R.id.profile_recycler);
         mProfileRecycler.setHasFixedSize(true);
-        mProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
+        mProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
         mProfileRecycler.setAdapter(mProfileAdapter);
+
+        if (getArguments() != null) {
+            mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId();
+            mUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
+            mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
+
+            // [display parcelable data]
+            if (null != mCurrentUserId && mCurrentUserId.equals(mUserId)) {
+                // it's logged in user profile
+                showCurrentUser(mUser);
+            } else {
+                // it's another user
+                //mUserRef = mDatabaseRef.child("users").child(mUserId);
+                //showUser(mUserId);
+            }
+        }
 
         return fragView;
     }
 
+    private void showCurrentUser(User user) {
+        if (user != null) {
+
+            Field[] fields = user.getClass().getFields();
+            for (Field f : fields) {
+                Log.d(TAG, "fields=" + f.getName());
+                //Log.d(TAG, "fields="+f.get);
+                getDynamicMethod(f.getName(), user);
+            }
+            Log.d(TAG, "mUserArrayList sorted get size" + mUserArrayList.size());
+
+            // sort ArrayList into sections then notify the adapter
+            Collections.sort(mUserArrayList, new Sortbysection());
+
+            for (int i = 0; i < mUserArrayList.size(); i++) {
+                Log.i(TAG, "mUserArrayList sorted" + mUserArrayList.get(i).getKey());
+            }
+
+            mProfileAdapter.notifyDataSetChanged();
+                            /*String userName = dataSnapshot.child("name").getValue().toString();
+                            String mCurrentUserId = dataSnapshot.getKey();*/
+            Log.d(TAG, "user exist: Name=" + user.getName());
+
+        }
+
+    }
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        getActivityContext = context;
+        mActivityContext = context;
     }
 
     private void getDynamicMethod(String fieldName, User user) {

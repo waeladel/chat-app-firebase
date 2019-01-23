@@ -1,10 +1,12 @@
 package com.trackaty.chat.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.database.IgnoreExtraProperties;
 
-
 @IgnoreExtraProperties
-public class User {
+public class User implements Parcelable {
 
     private String name;
     private String avatar;
@@ -14,6 +16,7 @@ public class User {
     private int PickupCounter;
     private String relationship;
     private String interestedIn;
+
     public String gender;
     public Integer age;
     public String horoscope;
@@ -41,6 +44,104 @@ public class User {
     public User() {
 
     }
+
+    protected User(Parcel in) {
+        name = in.readString();
+        avatar = in.readString();
+        coverImage = in.readString();
+        biography = in.readString();
+        loveCounter = in.readInt();
+        PickupCounter = in.readInt();
+        relationship = in.readString();
+        interestedIn = in.readString();
+        gender = in.readString();
+        if (in.readByte() == 0) {
+            age = null;
+        } else {
+            age = in.readInt();
+        }
+        horoscope = in.readString();
+        nationality = in.readString();
+        lives = in.readString();
+        hometown = in.readString();
+        religion = in.readString();
+        politics = in.readString();
+        work = in.readString();
+        college = in.readString();
+        school = in.readString();
+        byte tmpSmoke = in.readByte();
+        smoke = tmpSmoke == 0 ? null : tmpSmoke == 1;
+        byte tmpShisha = in.readByte();
+        shisha = tmpShisha == 0 ? null : tmpShisha == 1;
+        byte tmpDrugs = in.readByte();
+        drugs = tmpDrugs == 0 ? null : tmpDrugs == 1;
+        byte tmpDrink = in.readByte();
+        drink = tmpDrink == 0 ? null : tmpDrink == 1;
+        byte tmpAthlete = in.readByte();
+        athlete = tmpAthlete == 0 ? null : tmpAthlete == 1;
+        byte tmpGamer = in.readByte();
+        gamer = tmpGamer == 0 ? null : tmpGamer == 1;
+        byte tmpTravel = in.readByte();
+        travel = tmpTravel == 0 ? null : tmpTravel == 1;
+        byte tmpCook = in.readByte();
+        cook = tmpCook == 0 ? null : tmpCook == 1;
+        byte tmpRead = in.readByte();
+        read = tmpRead == 0 ? null : tmpRead == 1;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(avatar);
+        dest.writeString(coverImage);
+        dest.writeString(biography);
+        dest.writeInt(loveCounter);
+        dest.writeInt(PickupCounter);
+        dest.writeString(relationship);
+        dest.writeString(interestedIn);
+        dest.writeString(gender);
+        if (age == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(age);
+        }
+        dest.writeString(horoscope);
+        dest.writeString(nationality);
+        dest.writeString(lives);
+        dest.writeString(hometown);
+        dest.writeString(religion);
+        dest.writeString(politics);
+        dest.writeString(work);
+        dest.writeString(college);
+        dest.writeString(school);
+        dest.writeByte((byte) (smoke == null ? 0 : smoke ? 1 : 2));
+        dest.writeByte((byte) (shisha == null ? 0 : shisha ? 1 : 2));
+        dest.writeByte((byte) (drugs == null ? 0 : drugs ? 1 : 2));
+        dest.writeByte((byte) (drink == null ? 0 : drink ? 1 : 2));
+        dest.writeByte((byte) (athlete == null ? 0 : athlete ? 1 : 2));
+        dest.writeByte((byte) (gamer == null ? 0 : gamer ? 1 : 2));
+        dest.writeByte((byte) (travel == null ? 0 : travel ? 1 : 2));
+        dest.writeByte((byte) (cook == null ? 0 : cook ? 1 : 2));
+        dest.writeByte((byte) (read == null ? 0 : read ? 1 : 2));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 
     public String getName() {
         return name;

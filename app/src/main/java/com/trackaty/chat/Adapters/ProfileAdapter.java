@@ -79,15 +79,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
             switch (userDataArrayList.get(position).getValue()) {
                 case "male":
-                    holder.itemValue.setText(R.string.male);
+                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.male)));
                     holder.itemIcon.setImageResource(R.drawable.ic_male);
                     break;
                 case "female":
-                    holder.itemValue.setText(R.string.female);
+                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.female)));
                     holder.itemIcon.setImageResource(R.drawable.ic_female);
                     break;
                 case"transsexual":
-                    holder.itemValue.setText(R.string.transsexual);
+                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.transsexual)));
                     holder.itemIcon.setImageResource(R.drawable.ic_transsexual);
                     break;
                 default:
