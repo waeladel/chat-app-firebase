@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void goToProfile(String currentUserId,String userId,  User user) {
-        if(currentUserId != null && !TextUtils.isEmpty(currentUserId)){
+        if(currentUserId != null && !TextUtils.isEmpty(currentUserId) && user != null){
             Log.i(TAG, "UserId not null");
 
             NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUserId, userId, user);

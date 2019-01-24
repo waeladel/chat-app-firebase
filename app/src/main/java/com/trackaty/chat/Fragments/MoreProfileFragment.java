@@ -1,6 +1,7 @@
 package com.trackaty.chat.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -57,8 +58,7 @@ public class MoreProfileFragment extends Fragment {
     private ProfileAdapter mProfileAdapter;
 
     private Context mActivityContext;
-
-
+    private Activity activity;
 
     public MoreProfileFragment() {
         // Required empty public constructor
@@ -104,6 +104,10 @@ public class MoreProfileFragment extends Fragment {
             }
         }
 
+        if(activity != null){
+            activity.setTitle(R.string.more_profile_frag_title);
+        }
+
         return fragView;
     }
 
@@ -139,6 +143,9 @@ public class MoreProfileFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mActivityContext = context;
+        if (context instanceof Activity){// check if context is an activity
+            activity =(Activity) context;
+        }
     }
 
     private void getDynamicMethod(String fieldName, User user) {

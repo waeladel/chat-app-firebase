@@ -1,10 +1,10 @@
 package com.trackaty.chat.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,14 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.github.aakira.expandablelayout.ExpandableLayout;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
@@ -79,18 +73,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private Parcelable savedRecyclerLayoutState;
     private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
-    /*private RecyclerView mAboutProfileRecycler;
-    private AboutAdapter mAboutProfileAdapter;*/
+    private Context activityContext;
+    private Activity activity;
 
-    private Context getActivityContext;
 
     private static Boolean mIsAboutAdded ;
     private static Boolean mIsWorkAdded ;
     private static Boolean mIsHabitsAdded ;
-
-    private ImageView expandButton;
-    ExpandableLayout expandableLayout;
-
 
 
     public EditProfileFragment() {
@@ -143,44 +132,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
             }
         }
 
-
-        // prepare the profile Adapter
-        /*Profile profilewe = new Profile("mama", "no", 11);
-        mAboutArrayList.add(profilewe);
-        mAboutArrayList.add(profilewe);
-        mAboutArrayList.add(profilewe);
-        mAboutArrayList.add(profilewe);*/
-
-
-
-        ///////prepare the about Adapter///////
-        /*mAboutProfileArrayList  = new ArrayList<>();
-        Profile profile = new Profile("mama", "no", 2);
-        mAboutProfileArrayList.add(profile);
-        mAboutProfileArrayList.add(profile);
-        mAboutProfileArrayList.add(profile);
-        mAboutProfileArrayList.add(profile);
-
-        mAboutProfileAdapter = new AboutAdapter(getActivityContext,mAboutProfileArrayList);
-
-        // Initiate the about RecyclerView
-        mAboutProfileRecycler = (RecyclerView) fragView.findViewById(R.id.expandable_recycler);
-        mAboutProfileRecycler.setHasFixedSize(true);
-
-        mAboutProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
-        mAboutProfileRecycler.setAdapter(mAboutProfileAdapter);
-
-        expandButton= (ImageView) fragView.findViewById(R.id.expand_button);
-        expandableLayout = (ExpandableLayout) fragView.findViewById(R.id.expandableLayout);
-
-        expandButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "expandToggle id clicked= ");
-                expandableLayout.toggle();
-
-            }
-        });*/
+        if(activity != null){
+            activity.setTitle(R.string.edit_profile_frag_title);
+        }
 
         return fragView;
     }
@@ -190,7 +144,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        getActivityContext = context;
+        activityContext = context;
+
+        if (context instanceof Activity){// check if context is an activity
+            activity =(Activity) context;
+        }
     }
 
     // Fires when a configuration change occurs and fragment needs to save state
@@ -206,7 +164,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     }
 
     private void restorePreviousState() {
-        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
+        mEditProfileAdapter = new EditProfileAdapter(activityContext
                 , mProfileDataArrayList
                 , mAboutArrayList
                 , mWorkArrayList
@@ -217,7 +175,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         Log.d(TAG, "mWorkArrayList college 1="+mWorkArrayList.get(1).getValue());
         Log.d(TAG, "mWorkArrayList college 2="+mWorkArrayList.get(2).getValue());
 
-        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
+        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
         restoreLayoutManagerPosition();
         mEditProfileAdapter.notifyDataSetChanged();
@@ -250,14 +208,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                         }
 
                         // [END single_value_read]
-                        mEditProfileAdapter = new EditProfileAdapter(getActivityContext
+                        mEditProfileAdapter = new EditProfileAdapter(activityContext
                                 , mProfileDataArrayList
                                 , mAboutArrayList
                                 , mWorkArrayList
                                 , mHabitsArrayList
                                 , this);
 
-                        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(getActivityContext));
+                        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
                         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
 
                         //mEditProfileAdapter.notifyDataSetChanged();
@@ -375,5 +333,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "item clicked fragment= " + position);
+        switch (mProfileDataArrayList.get(position).getKey()) {
+
+            case "avatar":
+                break;
+            case "coverImage":
+                break;
+        }
+
     }
 }

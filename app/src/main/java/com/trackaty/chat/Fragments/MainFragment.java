@@ -1,6 +1,8 @@
 package com.trackaty.chat.Fragments;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -18,6 +20,9 @@ import com.trackaty.chat.R;
  * create an instance of this fragment.
  */
 public class MainFragment extends Fragment {
+
+    private Context mActivityContext;
+    private Activity activity;
 
 
     public MainFragment() {
@@ -46,7 +51,19 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        if(activity != null){
+            activity.setTitle(R.string.main_frag_title);
+        }
         return inflater.inflate(R.layout.fragment_main, container, false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActivityContext = context;
+        if (context instanceof Activity){// check if context is an activity
+            activity =(Activity) context;
+        }
     }
 
 }

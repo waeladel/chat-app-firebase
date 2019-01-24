@@ -1,6 +1,7 @@
 package com.trackaty.chat.Fragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -52,6 +53,8 @@ public class ProfileFragment extends Fragment {
             mLovedByValue, mPickUpValue, mRelationship, mInterested;
 
     private Context mActivityContext;
+    private Activity activity;
+
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -122,7 +125,7 @@ public class ProfileFragment extends Fragment {
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId)) { // it's logged in user profile
+                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
                         Log.i(TAG, "going to edit profile fragment= ");
                         NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
                         NavController navController = Navigation.findNavController(view);
@@ -141,12 +144,19 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "SeeMoreButton id clicked= ");
-                NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId, mUserId, mUser);
-                NavController navController = Navigation.findNavController(v);
-                navController.navigate(direction);
+                if (null != mCurrentUserId && mUserId  != null && mUser != null) {
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId, mUserId, mUser);
+                    NavController navController = Navigation.findNavController(v);
+                    navController.navigate(direction);
+                }
+
 
             }
         });
+
+        if(activity != null){
+            activity.setTitle(R.string.profile_frag_title);
+        }
 
         return fragView;
     }
@@ -274,6 +284,10 @@ public class ProfileFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mActivityContext = context;
+
+        if (context instanceof Activity){// check if context is an activity
+            activity =(Activity) context;
+        }
     }
 
 
