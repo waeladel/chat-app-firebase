@@ -194,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
                 goToProfile(currentUserId, mUserId, mUser);
-
                 break;
             case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 1  INVITE clicked ");
@@ -219,6 +218,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 Log.d(TAG, "Google sign out succeeded");
                             }
                         });*/
+                break;
+            case android.R.id.home:
+                onBackPressed();
                 break;
         }
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Adapters.ProfileAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.User;
 
@@ -104,10 +106,6 @@ public class MoreProfileFragment extends Fragment {
             }
         }
 
-        if(activity != null){
-            activity.setTitle(R.string.more_profile_frag_title);
-        }
-
         return fragView;
     }
 
@@ -146,6 +144,18 @@ public class MoreProfileFragment extends Fragment {
         if (context instanceof Activity){// check if context is an activity
             activity =(Activity) context;
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(((MainActivity)getActivity())!= null){
+            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.more_profile_frag_title);
+            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+
+        }
+
     }
 
     private void getDynamicMethod(String fieldName, User user) {

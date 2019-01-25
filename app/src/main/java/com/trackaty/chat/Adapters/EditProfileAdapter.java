@@ -108,7 +108,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             case 3:
                 // SECTION_TEXT;
                 View textView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_child_item, parent, false);
-                return new TextHolder(textView);
+                return new TextHolder(textView, itemClickListener);
             case 4:
                 // SECTION_SPINNER;
                 View spinnerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_spinner_item, parent, false);
@@ -976,7 +976,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         private TextInputLayout inputLayout;
 
 
-        public TextInputHolder(View itemView) {
+        public TextInputHolder(View itemView ) {
             super(itemView);
             //itemView = row;
             row = itemView;
@@ -988,20 +988,35 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     // ViewHolder for user textInputs list /////
-    public class TextHolder extends RecyclerView.ViewHolder {
+    public class TextHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         View row;
         private TextView itemHeadline, itemValue;
+        ItemClickListener itemClickListener;
 
-        public TextHolder(View itemView) {
+        public TextHolder(View itemView, ItemClickListener itemClickListener) {
             super(itemView);
             //itemView = row;
+            this.itemClickListener = itemClickListener;
+
             row = itemView;
             itemHeadline = row.findViewById(R.id.section_header);
             itemValue = row.findViewById(R.id.item_value);
 
+            row.setOnClickListener(this);
+
+
         }
 
+        @Override
+        public void onClick(View view) {
+            itemClickListener.onClick(view, getAdapterPosition(), false);
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
     }
 
     // ViewHolder for user SpinnerHolder list /////

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.trackaty.chat.R;
+import com.trackaty.chat.activities.MainActivity;
 
 
 /**
@@ -51,9 +53,9 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        if(activity != null){
+        /*if(activity != null){
             activity.setTitle(R.string.main_frag_title);
-        }
+        }*/
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
@@ -63,6 +65,16 @@ public class MainFragment extends Fragment {
         mActivityContext = context;
         if (context instanceof Activity){// check if context is an activity
             activity =(Activity) context;
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(((MainActivity)getActivity())!= null){
+            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.main_frag_title);
+            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(false);
         }
     }
 

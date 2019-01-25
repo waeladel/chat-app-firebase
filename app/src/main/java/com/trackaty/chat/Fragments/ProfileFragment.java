@@ -7,6 +7,7 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -28,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
+import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.User;
 
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
@@ -153,10 +155,6 @@ public class ProfileFragment extends Fragment {
 
             }
         });
-
-        if(activity != null){
-            activity.setTitle(R.string.profile_frag_title);
-        }
 
         return fragView;
     }
@@ -288,6 +286,18 @@ public class ProfileFragment extends Fragment {
         if (context instanceof Activity){// check if context is an activity
             activity =(Activity) context;
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(((MainActivity)getActivity())!= null){
+            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.profile_frag_title);
+            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+
+        }
+
     }
 
 

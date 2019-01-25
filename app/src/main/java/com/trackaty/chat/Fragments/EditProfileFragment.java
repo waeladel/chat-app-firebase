@@ -3,8 +3,12 @@ package com.trackaty.chat.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,20 +18,33 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageActivity;
+import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.User;
+import com.yanzhenjie.album.Action;
+import com.yanzhenjie.album.Album;
+import com.yanzhenjie.album.AlbumFile;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import static android.app.Activity.RESULT_OK;
+import static com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE;
+import static com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_EXTRA_RESULT;
 
 
 /**
@@ -53,6 +70,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private static String ABOUT_LIST_STATE = "about_list_state";
     private static String WORK_LIST_STATE = "work_list_state";
     private static String HABITS_LIST_STATE = "habits_list_state";
+
+    public static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
+    public static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
 
 
     private User currentUser;
@@ -81,6 +101,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private static Boolean mIsWorkAdded ;
     private static Boolean mIsHabitsAdded ;
 
+    private Uri mAvatarOriginalUri;
+    private Uri mCoverOriginalUri;
+    private Uri mAvatarUri;
+    private Uri mCoverUri;
+    //StorageReference avatarRef = mStorageRef.child("images")
+
+
+    private ArrayList<AlbumFile> mMediaFiles;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -132,10 +160,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
             }
         }
 
-        if(activity != null){
-            activity.setTitle(R.string.edit_profile_frag_title);
-        }
-
         return fragView;
     }
 
@@ -149,6 +173,22 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         if (context instanceof Activity){// check if context is an activity
             activity =(Activity) context;
         }
+
+        /*Album.initialize(AlbumConfig.newBuilder(activity)
+                .setAlbumLoader(new MediaLoader())
+                .build());*/
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(((MainActivity)getActivity())!= null){
+            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.edit_profile_frag_title);
+            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+
+        }
+
     }
 
     // Fires when a configuration change occurs and fragment needs to save state
@@ -336,10 +376,131 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         switch (mProfileDataArrayList.get(position).getKey()) {
 
             case "avatar":
+                Log.d(TAG, "avatar item clicked= " + position);
+                selectMedia(true);
                 break;
             case "coverImage":
+                Log.d(TAG, "coverImage item clicked= " + position);
+                selectMedia(false);
+                break;
+            case "age":
+                Log.d(TAG, "age item clicked= " + position);
                 break;
         }
 
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "requestCode ="+ requestCode);
+
+        switch (requestCode){
+            case CROP_IMAGE_AVATAR_REQUEST_CODE:
+                Log.d(TAG, "AVATAR_CROP_PICTURE requestCode= "+ requestCode);
+                CropImage.ActivityResult avatarResult = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK) {
+                    mAvatarOriginalUri = avatarResult.getOriginalUri();
+                    mAvatarUri = avatarResult.getUri();
+                    Log.d(TAG, "mAvatarOriginalUri = "+ mAvatarOriginalUri);
+                    Log.d(TAG, "mAvatarUri = "+ mAvatarUri);
+
+                    /*sPhotoResultUri = result.getUri();
+                    mProfileImageButton.setImageURI(sPhotoResultUri);*/
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Exception error = avatarResult.getError();
+                    Toast.makeText(activityContext, error.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+            case CROP_IMAGE_COVER_REQUEST_CODE:
+                Log.d(TAG, "COVER CROP_PICTURE requestCode= "+ requestCode);
+                CropImage.ActivityResult coverResult = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK) {
+                    mCoverOriginalUri = coverResult.getOriginalUri();
+                    mCoverUri = coverResult.getUri();
+                    Log.d(TAG, "mCoverOriginalUri = "+ mCoverOriginalUri);
+                    Log.d(TAG, "mCoverUri = "+ mCoverUri);
+                    /*sPhotoResultUri = result.getUri();
+                    mProfileImageButton.setImageURI(sPhotoResultUri);*/
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Exception error = coverResult.getError();
+                    Toast.makeText(activityContext, error.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void selectMedia(final boolean isAvater) {
+        Album.image(this) // Image and video mix options.
+                .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
+                .requestCode(200) // The request code will be returned in the listener.
+                .columnCount(2) // The number of columns in the page list.
+                //.selectCount(1)  // Choose up to a few images.
+                .camera(true) // Whether the camera appears in the Item.
+                .onResult(new Action<ArrayList<AlbumFile>>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull ArrayList<AlbumFile> result) {
+                        // accept the result.
+                        mMediaFiles = result;
+                        AlbumFile albumFile = mMediaFiles.get(0);
+                        Uri MediaUri = Uri.parse(albumFile.getPath()) ;
+
+                        Log.d(TAG, "MediaType" +albumFile.getMediaType());
+                        Log.d(TAG, "MediaUri" +MediaUri);
+
+                        cropImage(MediaUri, isAvater);
+                    }
+                })
+                .onCancel(new Action<String>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull String result) {
+                        // The user canceled the operation.
+                    }
+                })
+                .start();
+
+    }
+
+
+
+    private void cropImage(Uri mediaUri, boolean isAvater) {
+        if(isAvater){
+            Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+                    //.setGuidelines(CropImageView.Guidelines.ON)
+                    .setAllowRotation(true)
+                    .setAutoZoomEnabled(true)
+                    .setCropShape(CropImageView.CropShape.OVAL)
+                    //.setAspectRatio(1,1)
+                    .setFixAspectRatio(true)
+                    //.setMaxCropResultSize(600, 600)
+                    .setMinCropResultSize(300,300)
+                    .setRequestedSize(300,300)//resize
+                    .getIntent(activityContext);
+                    //.start(activityContext, this);
+            this.startActivityForResult(intent, CROP_IMAGE_AVATAR_REQUEST_CODE );
+
+        }else{
+
+            Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+                    //.setGuidelines(CropImageView.Guidelines.ON)
+                    .setAllowRotation(true)
+                    .setAutoZoomEnabled(true)
+                    .setAspectRatio(2,1)
+                    //.setMaxCropResultSize(600, 600)
+                    .setMinCropResultSize(300,300)
+                    .setRequestedSize(600,300) //resize
+                    .getIntent(activityContext);
+                    //.start(activityContext, this);
+            this.startActivityForResult(intent, CROP_IMAGE_COVER_REQUEST_CODE);
+        }
+
+        Log.d(TAG, "cropImage starts" +mediaUri);
+
+
+    }
+
 }
