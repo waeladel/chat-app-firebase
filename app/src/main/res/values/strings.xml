@@ -28,6 +28,7 @@
     <string name="unknown_error">Unknown error occurred</string>
     <string name="google_play_services_error">Connection failed</string>
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
+    <string name="download_image_error">Sorry, couldn\'t download your image.</string>
 
 
     <!--hints and titles-->
@@ -87,7 +88,8 @@
     <string name="profile_image_description">Your Profile picture</string>
     <string name="add_image_button_description">Add Profile picture</string>
     <string name="expand_button_description">Expand button</string>
-
+    <string name="original_profile_image_description">Profile Image</string>
+    <string name="loading_animation">Loading animation</string>
 
 
     <!-- Relationship array -->
@@ -164,6 +166,7 @@
     <string name="more_profile_frag_title">More Info</string>
     <string name="profile_frag_title">Profile</string>
     <string name="main_frag_title">Find</string>
+    <string name="display_image_title">Profile Photo</string>
 
     <!-- countryText.setText(getString(R.string.country, country.getName()));-->
 

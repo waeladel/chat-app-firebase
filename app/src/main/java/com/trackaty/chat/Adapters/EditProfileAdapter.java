@@ -140,6 +140,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             switch (mProfileDataArrayList.get(position).getKey()){
                 case "avatar":
+                    // set frame layout to WRAP_CONTENT
+                    float factor = imageHolder.frameLayout.getContext().getResources().getDisplayMetrics().density;
+
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = (int)(100 * factor);
+                    layoutParams.height = (int)(100 * factor);
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);
+
                     imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
                     if(null != mProfileDataArrayList.get(position).getValue()){
                         Picasso.get()
@@ -156,16 +164,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
                         ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
                         imageHolder.profileImage.setColorFilter(colorFilter);
-
                     }
-
-                    // set frame layout to WRAP_CONTENT
-                    layoutParams = imageHolder.frameLayout.getLayoutParams();
-                    layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    imageHolder.frameLayout.setLayoutParams(layoutParams);
-
                     break;
                 case "coverImage":
+                    // set frame layout to MATCH_PARENT
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);
+
                     imageHolder.itemHeadline.setText(R.string.user_cover_headline);
                     if(null != mProfileDataArrayList.get(position).getValue()){
                         Picasso.get()
@@ -178,11 +184,6 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
 
                     }
-
-                    // set frame layout to MATCH_PARENT
-                    layoutParams = imageHolder.frameLayout.getLayoutParams();
-                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                    imageHolder.frameLayout.setLayoutParams(layoutParams);
                     break;
 
             }

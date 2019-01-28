@@ -4,7 +4,6 @@ package com.trackaty.chat.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import top.zibin.luban.Luban;
 import top.zibin.luban.OnCompressListener;
 
-import android.os.Environment;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -86,7 +84,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
     private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
     private static final String AVATAR_ORIGINAL_NAME = "original_avatar.jpg";
-    private static final String COVER_ORIGINAL_STATE = "original_cover.jpg";
+    private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
 
     public  final static String IMAGE_HOLDER_POSITION = "position";
 
@@ -524,7 +522,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                 userRef = mStorageRef.child("images/"+currentUserId +"/"+ AVATAR_ORIGINAL_NAME);
                 break;
             case "original cover":
-                userRef = mStorageRef.child("images/"+currentUserId +"/"+ COVER_ORIGINAL_STATE);
+                userRef = mStorageRef.child("images/"+currentUserId +"/"+ COVER_ORIGINAL_NAME);
                 break;
             default:
                 userRef = mStorageRef.child("images/"+currentUserId+AVATAR_THUMBNAIL_NAME);

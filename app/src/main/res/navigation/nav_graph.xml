@@ -57,6 +57,9 @@
         <argument
             android:name="user"
             app:argType="com.trackaty.chat.models.User" />
+        <action
+            android:id="@+id/action_profile_to_displayImage"
+            app:destination="@id/displayImageFragment" />
     </fragment>
     <fragment
         android:id="@+id/moreProfileFragment"
@@ -84,6 +87,18 @@
             app:argType="com.trackaty.chat.models.User" />
         <argument
             android:name="currentUserId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/displayImageFragment"
+        android:name="com.trackaty.chat.Fragments.DisplayImageFragment"
+        android:label="fragment_display_image"
+        tools:layout="@layout/fragment_display_image" >
+        <argument
+            android:name="userId"
+            app:argType="string" />
+        <argument
+            android:name="imageName"
             app:argType="string" />
     </fragment>
 </navigation>

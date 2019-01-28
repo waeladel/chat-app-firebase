@@ -9,6 +9,7 @@ android {
         applicationId "com.trackaty.chat"
         minSdkVersion 16
         targetSdkVersion 28
+       // multiDexEnabled true // Enabling multidex support.
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -23,12 +24,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation 'com.android.support:multidex:1.0.3' // for multidex
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
     implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0-alpha01'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
-
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-database:16.0.6'
     implementation 'com.google.firebase:firebase-auth:16.1.0'
@@ -53,5 +54,9 @@ dependencies {
 
     implementation 'top.zibin:Luban:1.0.8' // for compressing original image
     implementation 'io.reactivex:rxandroid:1.2.1' // for compressing original image
+    //implementation 'com.github.chrisbanes:PhotoView:1.2.6' // for image zoom
+    //implementation 'com.github.MikeOrtiz:TouchImageView:2.1.1'
+    //implementation 'com.ablanco.zoomy:zoomy:1.1.0'
+    //implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0' // for image zoom
 
 }

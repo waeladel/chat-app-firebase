@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -22,11 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
@@ -41,6 +36,9 @@ import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
 public class ProfileFragment extends Fragment {
 
     private final static String TAG = ProfileFragment.class.getSimpleName();
+
+    private static final String AVATAR_ORIGINAL_NAME = "original_avatar.jpg";
+    private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
 
     private String mCurrentUserId, mUserId;
     private User mUser;
@@ -137,6 +135,30 @@ public class ProfileFragment extends Fragment {
                         //blockUser();
                     }
 
+                }
+            });
+
+            mCover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                  if (mUserId != null) {
+                        Log.i(TAG, "going to Cover image view");
+                        NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, COVER_ORIGINAL_NAME);
+                        NavController navController = Navigation.findNavController(view);
+                        navController.navigate(direction);
+                    }
+                }
+            });
+
+            mAvatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                   if (mUserId != null) {
+                        Log.i(TAG, "going to Avatar image view");
+                        NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, AVATAR_ORIGINAL_NAME);
+                        NavController navController = Navigation.findNavController(view);
+                        navController.navigate(direction);
+                    }
                 }
             });
 
