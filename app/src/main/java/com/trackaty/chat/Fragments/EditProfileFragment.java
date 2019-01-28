@@ -4,6 +4,7 @@ package com.trackaty.chat.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -12,7 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import top.zibin.luban.Luban;
+import top.zibin.luban.OnCompressListener;
 
+import android.os.Environment;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,9 +24,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageActivity;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
@@ -31,6 +43,7 @@ import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.models.Variables;
 import com.yanzhenjie.album.Action;
 import com.yanzhenjie.album.Album;
 import com.yanzhenjie.album.AlbumFile;
@@ -43,8 +56,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static android.app.Activity.RESULT_OK;
-import static com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE;
-import static com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_EXTRA_RESULT;
 
 
 /**
@@ -66,16 +77,27 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     public  final static String SECTION_WORK_HEADLINE  = "work_and_education";
     public  final static String SECTION_HABITS_HEADLINE  = "habits";
 
-    private static String PROFILE_LIST_STATE = "list_state";
-    private static String ABOUT_LIST_STATE = "about_list_state";
-    private static String WORK_LIST_STATE = "work_list_state";
-    private static String HABITS_LIST_STATE = "habits_list_state";
+    private static final String PROFILE_LIST_STATE = "list_state";
+    private static final String ABOUT_LIST_STATE = "about_list_state";
+    private static final String WORK_LIST_STATE = "work_list_state";
+    private static final String HABITS_LIST_STATE = "habits_list_state";
+    private static final String VARIABLES_LIST_STATE = "variables_list_state";
+
+    private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
+    private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
+    private static final String AVATAR_ORIGINAL_NAME = "original_avatar.jpg";
+    private static final String COVER_ORIGINAL_STATE = "original_cover.jpg";
+
+    public  final static String IMAGE_HOLDER_POSITION = "position";
+
 
     public static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
     public static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
 
 
     private User currentUser;
+    private String currentUserId;
+
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
@@ -86,6 +108,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private ArrayList<Profile> mAboutArrayList = new ArrayList<>();
     private ArrayList<Profile> mWorkArrayList = new ArrayList<>();
     private ArrayList<Profile> mHabitsArrayList = new ArrayList<>();
+    private ArrayList<Variables> mVariablesArrayList = new ArrayList<>();
+
 
 
     private EditProfileAdapter mEditProfileAdapter;
@@ -105,8 +129,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     private Uri mCoverOriginalUri;
     private Uri mAvatarUri;
     private Uri mCoverUri;
-    //StorageReference avatarRef = mStorageRef.child("images")
 
+    private StorageReference mStorageRef;
+    private StorageReference mImagesRef;
 
     private ArrayList<AlbumFile> mMediaFiles;
 
@@ -140,6 +165,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         mEditProfileRecycler = (RecyclerView) fragView.findViewById(R.id.edit_recycler);
         mEditProfileRecycler.setHasFixedSize(true);
 
+        // [START create_storage_reference]
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        mImagesRef = mStorageRef.child("images");
+
         if (savedInstanceState != null) {
             Boolean isSavedInstance = savedInstanceState.getBoolean("isSavedInstance");
             Log.d(TAG, "isSavedInstance ="+isSavedInstance);
@@ -149,12 +178,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
             mAboutArrayList = savedInstanceState.getParcelableArrayList(ABOUT_LIST_STATE);
             mWorkArrayList = savedInstanceState.getParcelableArrayList(WORK_LIST_STATE);
             mHabitsArrayList = savedInstanceState.getParcelableArrayList(HABITS_LIST_STATE);
+            mVariablesArrayList = savedInstanceState.getParcelableArrayList(VARIABLES_LIST_STATE);
 
             savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
             restorePreviousState(); // Restore data found in the Bundle
         }else{
             if(getArguments()!= null){
                 currentUser = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUser();//logged in user
+                currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user id
                 Log.d(TAG,  "name= " + currentUser.getName() + "pickups=" + currentUser.getPickupCounter());
                 showCurrentUser(currentUser); // No saved data, get data from remote
             }
@@ -200,6 +231,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
         outState.putParcelableArrayList(ABOUT_LIST_STATE, mAboutArrayList);
         outState.putParcelableArrayList(WORK_LIST_STATE, mWorkArrayList);
         outState.putParcelableArrayList(HABITS_LIST_STATE, mHabitsArrayList);
+        outState.putParcelableArrayList(VARIABLES_LIST_STATE, mVariablesArrayList);
+
         outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mEditProfileRecycler.getLayoutManager().onSaveInstanceState());
     }
 
@@ -209,6 +242,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                 , mAboutArrayList
                 , mWorkArrayList
                 , mHabitsArrayList
+                , mVariablesArrayList
                 , this);
 
         Log.d(TAG, "mWorkArrayList college 0="+mWorkArrayList.get(0).getValue());
@@ -247,12 +281,18 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                             Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
                         }
 
-                        // [END single_value_read]
+                        // [set settings variable for collapse and progress icon]
+                        for (int i = 0; i < 5; i++) {
+                            mVariablesArrayList.add(new Variables(false));
+                        }
+
+                        // [initialize the adapter]
                         mEditProfileAdapter = new EditProfileAdapter(activityContext
                                 , mProfileDataArrayList
                                 , mAboutArrayList
                                 , mWorkArrayList
                                 , mHabitsArrayList
+                                , mVariablesArrayList
                                 , this);
 
                         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
@@ -377,14 +417,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
             case "avatar":
                 Log.d(TAG, "avatar item clicked= " + position);
-                selectMedia(true);
+                selectMedia(true, position);
                 break;
             case "coverImage":
                 Log.d(TAG, "coverImage item clicked= " + position);
-                selectMedia(false);
+                selectMedia(false, position);
                 break;
             case "age":
                 Log.d(TAG, "age item clicked= " + position);
+                //mEditProfileAdapter.notifyDataSetChanged();
                 break;
         }
 
@@ -394,47 +435,165 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "requestCode ="+ requestCode);
+        if (data != null) {
+            int position = data.getExtras().getInt(IMAGE_HOLDER_POSITION,0);
+            switch (requestCode){
+                case CROP_IMAGE_AVATAR_REQUEST_CODE:
+                    Log.d(TAG, "AVATAR_CROP_PICTURE requestCode= "+ requestCode);
+                    Log.d(TAG, "AVATAR_CROP_PICTURE position= "+ position);
+                    CropImage.ActivityResult avatarResult = CropImage.getActivityResult(data);
+                    if (resultCode == RESULT_OK) {
+                        mAvatarOriginalUri = avatarResult.getOriginalUri();
+                        mAvatarUri = avatarResult.getUri();
+                        compressImage(mAvatarOriginalUri,"original avatar" ,position);
+                        uploadImage(mAvatarUri, "avatar", position);
+                        Log.d(TAG, "mAvatarOriginalUri = "+ mAvatarOriginalUri);
+                        Log.d(TAG, "mAvatarUri = "+ mAvatarUri);
 
-        switch (requestCode){
-            case CROP_IMAGE_AVATAR_REQUEST_CODE:
-                Log.d(TAG, "AVATAR_CROP_PICTURE requestCode= "+ requestCode);
-                CropImage.ActivityResult avatarResult = CropImage.getActivityResult(data);
-                if (resultCode == RESULT_OK) {
-                    mAvatarOriginalUri = avatarResult.getOriginalUri();
-                    mAvatarUri = avatarResult.getUri();
-                    Log.d(TAG, "mAvatarOriginalUri = "+ mAvatarOriginalUri);
-                    Log.d(TAG, "mAvatarUri = "+ mAvatarUri);
+                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                        Exception error = avatarResult.getError();
+                        Toast.makeText(activityContext, error.toString(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                    break;
+                case CROP_IMAGE_COVER_REQUEST_CODE:
+                    Log.d(TAG, "COVER CROP_PICTURE requestCode= "+ requestCode);
+                    Log.d(TAG, "COVER CROP_PICTURE position= "+ position);
+                    CropImage.ActivityResult coverResult = CropImage.getActivityResult(data);
+                    if (resultCode == RESULT_OK) {
+                        mCoverOriginalUri = coverResult.getOriginalUri();
+                        mCoverUri = coverResult.getUri();
+                        Log.d(TAG, "mCoverOriginalUri = "+ mCoverOriginalUri);
+                        Log.d(TAG, "mCoverUri = "+ mCoverUri);
+                        //uploadImage(mCoverUri, "coverImage", position);
+                        compressImage(mCoverOriginalUri,"original cover" ,position);
+                        uploadImage(mCoverUri, "coverImage", position);
+                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                        Exception error = coverResult.getError();
+                        Toast.makeText(activityContext, error.toString(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                    break;
+            }
+        }
 
-                    /*sPhotoResultUri = result.getUri();
-                    mProfileImageButton.setImageURI(sPhotoResultUri);*/
-                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Exception error = avatarResult.getError();
-                    Toast.makeText(activityContext, error.toString(),
-                            Toast.LENGTH_LONG).show();
-                }
+    }
+
+    private void compressImage(final Uri imageUri, final String type, final int position) {
+        File imageFile = new File(imageUri.getPath());
+        Luban.get(getContext())
+                .load(imageFile)                     // pass image to be compressed
+                .putGear(Luban.THIRD_GEAR)      // set compression level, defaults to 3
+                .setCompressListener(new OnCompressListener() { // Set up return
+
+                    @Override
+                    public void onStart() {
+                        //Called when compression starts, display loading UI here
+                        Log.d(TAG, "compress :onStart= ");
+                    }
+                    @Override
+                    public void onSuccess(File file) {
+                        //Called when compression finishes successfully, provides compressed image
+                        Log.d(TAG, "compress :onSuccess= "+file.getPath());
+                        Uri compressImageUri = Uri.fromFile(file);
+                        uploadImage(compressImageUri, type, position);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        //Called if an error has been encountered while compressing
+                        Log.d(TAG, "compress :onError= "+e);
+                        uploadImage(imageUri, type, position);
+
+                    }
+                }).launch();    // Start compression
+    }
+
+    private void uploadImage(Uri imageUri, final String type, final int position) {
+        //Uri fileUri = Uri.fromFile(new File(imageUri.getPath()));
+        StorageReference userRef ; //= mStorageRef.child("images/"+currentUserId+"avatar.jpg");
+
+        switch (type){
+            case "avatar":
+                userRef = mStorageRef.child("images/"+currentUserId +"/"+ AVATAR_THUMBNAIL_NAME);
                 break;
-            case CROP_IMAGE_COVER_REQUEST_CODE:
-                Log.d(TAG, "COVER CROP_PICTURE requestCode= "+ requestCode);
-                CropImage.ActivityResult coverResult = CropImage.getActivityResult(data);
-                if (resultCode == RESULT_OK) {
-                    mCoverOriginalUri = coverResult.getOriginalUri();
-                    mCoverUri = coverResult.getUri();
-                    Log.d(TAG, "mCoverOriginalUri = "+ mCoverOriginalUri);
-                    Log.d(TAG, "mCoverUri = "+ mCoverUri);
-                    /*sPhotoResultUri = result.getUri();
-                    mProfileImageButton.setImageURI(sPhotoResultUri);*/
-                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Exception error = coverResult.getError();
-                    Toast.makeText(activityContext, error.toString(),
-                            Toast.LENGTH_LONG).show();
-                }
+            case "coverImage":
+                userRef = mStorageRef.child("images/"+currentUserId +"/"+ COVER_THUMBNAIL_NAME );
+                break;
+            case "original avatar":
+                userRef = mStorageRef.child("images/"+currentUserId +"/"+ AVATAR_ORIGINAL_NAME);
+                break;
+            case "original cover":
+                userRef = mStorageRef.child("images/"+currentUserId +"/"+ COVER_ORIGINAL_STATE);
                 break;
             default:
+                userRef = mStorageRef.child("images/"+currentUserId+AVATAR_THUMBNAIL_NAME);
                 break;
+        }
+
+        // Create the file metadata
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setContentType("image/jpg")
+                .build();
+
+        // Upload file and metadata to the path 'images/mountains.jpg'
+        UploadTask uploadTask = userRef.putFile(imageUri, metadata);
+
+        if(type.equals("avatar") || type.equals("coverImage")){
+            // Listen for state changes, errors, and completion of the upload.
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    System.out.println("Upload is " + progress + "% done");
+                    mVariablesArrayList.set(position, new Variables(true));
+                    mEditProfileAdapter.notifyItemChanged(position);
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // Handle successful uploads on complete
+                    Log.d(TAG, "uploads :onSuccess");
+                    //mVariablesArrayList.get(0).setProgressIsVisible(false);
+                }
+            });// [END of Listen for state changes, errors, and completion of the upload]
+
+            // [get DownloadUrl]
+            final StorageReference finalUserRef = userRef;
+            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    // Continue with the task to get the download URL
+                    return finalUserRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        mProfileDataArrayList.set(position,new Profile(type, downloadUri.toString(),SECTION_IMAGE));
+                        //mVariablesArrayList.get(position).setValue(false);
+                        mVariablesArrayList.set(position, new Variables(false));
+                        mEditProfileAdapter.notifyItemChanged(position);
+
+                    } else {
+                        // Handle failures
+                        Log.d(TAG, "uploads :FailureL");
+                        Toast.makeText(activity, R.string.upload_image_error,
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+
         }
     }
 
-    private void selectMedia(final boolean isAvater) {
+    private void selectMedia(final boolean isAvater, final int position) {
         Album.image(this) // Image and video mix options.
                 .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
                 .requestCode(200) // The request code will be returned in the listener.
@@ -452,7 +611,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                         Log.d(TAG, "MediaType" +albumFile.getMediaType());
                         Log.d(TAG, "MediaUri" +MediaUri);
 
-                        cropImage(MediaUri, isAvater);
+                        cropImage(MediaUri, isAvater, position);
                     }
                 })
                 .onCancel(new Action<String>() {
@@ -467,13 +626,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
 
 
-    private void cropImage(Uri mediaUri, boolean isAvater) {
+    private void cropImage(Uri mediaUri, boolean isAvater, int position) {
         if(isAvater){
             Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
                     //.setGuidelines(CropImageView.Guidelines.ON)
                     .setAllowRotation(true)
                     .setAutoZoomEnabled(true)
                     .setCropShape(CropImageView.CropShape.OVAL)
+                    .setActivityTitle(getString(R.string.crop_activity_title))
+                    .setCropMenuCropButtonTitle(getString(R.string.upload_button))
                     //.setAspectRatio(1,1)
                     .setFixAspectRatio(true)
                     //.setMaxCropResultSize(600, 600)
@@ -481,6 +642,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                     .setRequestedSize(300,300)//resize
                     .getIntent(activityContext);
                     //.start(activityContext, this);
+            //intent.putExtra(IMAGE_HOLDER_POSITION,position);
+            Bundle mBundle = new Bundle();
+            mBundle.putInt(IMAGE_HOLDER_POSITION,position);
+            intent.putExtras(mBundle);
+
             this.startActivityForResult(intent, CROP_IMAGE_AVATAR_REQUEST_CODE );
 
         }else{
@@ -489,12 +655,18 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
                     //.setGuidelines(CropImageView.Guidelines.ON)
                     .setAllowRotation(true)
                     .setAutoZoomEnabled(true)
+                    .setActivityTitle(getString(R.string.crop_activity_title))
+                    .setCropMenuCropButtonTitle(getString(R.string.upload_button))
                     .setAspectRatio(2,1)
                     //.setMaxCropResultSize(600, 600)
                     .setMinCropResultSize(300,300)
                     .setRequestedSize(600,300) //resize
                     .getIntent(activityContext);
                     //.start(activityContext, this);
+            //intent.putExtra(IMAGE_HOLDER_POSITION,position);
+            Bundle mBundle = new Bundle();
+            mBundle.putInt(IMAGE_HOLDER_POSITION,position);
+            intent.putExtras(mBundle);
             this.startActivityForResult(intent, CROP_IMAGE_COVER_REQUEST_CODE);
         }
 

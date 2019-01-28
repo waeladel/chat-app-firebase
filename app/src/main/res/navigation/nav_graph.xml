@@ -82,5 +82,8 @@
         <argument
             android:name="currentUser"
             app:argType="com.trackaty.chat.models.User" />
+        <argument
+            android:name="currentUserId"
+            app:argType="string" />
     </fragment>
 </navigation>

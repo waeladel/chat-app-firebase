@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -13,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,10 +26,12 @@ import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
+import com.trackaty.chat.models.Variables;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,6 +62,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public ArrayList<Profile> aboutArrayList ;
     public ArrayList<Profile> workArrayList ;
     public ArrayList<Profile> habitsArrayList;
+    public ArrayList<Variables> variablesArrayList;
+
     public AboutAdapter aboutAdapter;
     public WorkAdapter workAdapter;
     public HabitsAdapter habitsAdapter;
@@ -74,12 +78,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ,ArrayList<Profile> aboutArrayList
             ,ArrayList<Profile> workArrayList
             ,ArrayList<Profile> habitsArrayList
+            ,ArrayList<Variables> variablesArrayList
             , ItemClickListener itemClickListener){
 
         this.mProfileDataArrayList = userDataArrayList;
         this.aboutArrayList = aboutArrayList;
         this.aboutArrayList = workArrayList;
         this.aboutArrayList = habitsArrayList;
+        this.variablesArrayList = variablesArrayList;
 
 
         this.context = context;
@@ -130,6 +136,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         if (holder instanceof ImageHolder){
             ImageHolder imageHolder = (ImageHolder) holder;
+            ViewGroup.LayoutParams layoutParams;
 
             switch (mProfileDataArrayList.get(position).getKey()){
                 case "avatar":
@@ -140,7 +147,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 .placeholder(R.drawable.ic_user_account_grey_white )
                                 .error(R.drawable.ic_broken_image)
                                 .into(imageHolder.profileImage);
-                        imageHolder.coverImage.setVisibility(View.GONE);
+                        imageHolder.coverImage.setVisibility(View.INVISIBLE);
+                        imageHolder.profileImage.setVisibility(View.VISIBLE);
                         imageHolder.divider.setVisibility(View.INVISIBLE);
                         imageHolder.icon.setImageResource(R.drawable.ic_user_account_grey_white);
 
@@ -148,7 +156,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
                         ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
                         imageHolder.profileImage.setColorFilter(colorFilter);
+
                     }
+
+                    // set frame layout to WRAP_CONTENT
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);
+
                     break;
                 case "coverImage":
                     imageHolder.itemHeadline.setText(R.string.user_cover_headline);
@@ -158,12 +173,25 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 .placeholder(R.drawable.ic_picture_gallery_white )
                                 .error(R.drawable.ic_broken_image)
                                 .into(imageHolder.coverImage);
-                        imageHolder.profileImage.setVisibility(View.GONE);
+                        imageHolder.coverImage.setVisibility(View.VISIBLE);
+                        imageHolder.profileImage.setVisibility(View.INVISIBLE);
                         imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
 
                     }
+
+                    // set frame layout to MATCH_PARENT
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);
                     break;
 
+            }
+
+            // hide progress animation when done
+            if(variablesArrayList != null && variablesArrayList.get(position).getValue()){
+                imageHolder.progressIcon.setVisibility(View.VISIBLE);
+            }else{
+                imageHolder.progressIcon.setVisibility(View.GONE);
             }
 
             // needed only if i want the listener to be inside the adapter
@@ -935,9 +963,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         View row;
         private TextView itemHeadline;
-        private ImageView profileImage, coverImage, icon;
+        private ImageView profileImage, coverImage, icon, progressIcon;
         private View divider;
-
+        private FrameLayout frameLayout;
         ItemClickListener itemClickListener;
 
 
@@ -950,6 +978,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             profileImage = row.findViewById(R.id.profile_image);
             coverImage = row.findViewById(R.id.cover_image);
             icon = row.findViewById(R.id.edit_profile_icon);
+            progressIcon = row.findViewById(R.id.progress_icon);
+            frameLayout = row.findViewById(R.id.image_frameLayout);
+
             divider = row.findViewById(R.id.top_divider);
 
             row.setOnClickListener(this);
@@ -1037,8 +1068,6 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
     }
-
-
 
 
 }

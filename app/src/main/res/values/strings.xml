@@ -16,15 +16,19 @@
 
     <string name="see_more_about_button">See more about %1$s</string>
     <string name="see_more_button">See more</string>
+    <string name="upload_button">Upload</string>
+
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
-    <!--toast messages -->
+    <!--toast and error messages -->
     <string name="sign_in_cancelled">Sign in has been cancelled</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="unknown_error">Unknown error occurred</string>
     <string name="google_play_services_error">Connection failed</string>
+    <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
+
 
     <!--hints and titles-->
     <string name="user_statistics_headline">Statistics</string>
@@ -75,6 +79,7 @@
     <string name="user_college_helper">E.g., Studied at Harvard University</string>
     <string name="user_school_helper">E.g., Studied at Santa Monica High School</string>
 
+    <string name="crop_activity_title">Crop</string>
 
 
     <!--Images content Description-->

@@ -129,7 +129,7 @@ public class ProfileFragment extends Fragment {
                 public void onClick(View view) {
                     if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
                         Log.i(TAG, "going to edit profile fragment= ");
-                        NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
+                        NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser,mCurrentUserId);
                         NavController navController = Navigation.findNavController(view);
                         navController.navigate(direction);
                     } else {

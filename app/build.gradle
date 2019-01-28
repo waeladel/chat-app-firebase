@@ -30,17 +30,17 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
     implementation 'com.google.firebase:firebase-core:16.0.6'
-    implementation 'com.google.firebase:firebase-database:16.0.5'
+    implementation 'com.google.firebase:firebase-database:16.0.6'
     implementation 'com.google.firebase:firebase-auth:16.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.firebase:firebase-storage:16.0.1'
+    implementation 'com.google.firebase:firebase-storage:16.0.5'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
-    def nav_version = "1.0.0-alpha09"
+    def nav_version = "1.0.0-alpha11"
     implementation "android.arch.navigation:navigation-fragment:$nav_version" // use -ktx for Kotlin
     implementation "android.arch.navigation:navigation-ui:$nav_version"
     implementation 'androidx.recyclerview:recyclerview:1.0.0'// use -ktx for Kotlin
@@ -50,5 +50,8 @@ dependencies {
 
     implementation 'com.yanzhenjie:album:2.0.2' //for gallery and camera
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+    implementation 'top.zibin:Luban:1.0.8' // for compressing original image
+    implementation 'io.reactivex:rxandroid:1.2.1' // for compressing original image
 
 }
