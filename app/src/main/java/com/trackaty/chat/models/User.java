@@ -6,7 +6,9 @@ import android.os.Parcelable;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
-public class User implements Parcelable {
+public class User  implements Parcelable{
+
+    private Long created;
 
     private String name;
     private String avatar;
@@ -18,7 +20,7 @@ public class User implements Parcelable {
     private String interestedIn;
 
     public String gender;
-    public Integer age;
+    public Long age;
     public String horoscope;
     public String nationality;
     public String lives;
@@ -46,6 +48,11 @@ public class User implements Parcelable {
     }
 
     protected User(Parcel in) {
+        if (in.readByte() == 0) {
+            created = null;
+        } else {
+            created = in.readLong();
+        }
         name = in.readString();
         avatar = in.readString();
         coverImage = in.readString();
@@ -58,7 +65,7 @@ public class User implements Parcelable {
         if (in.readByte() == 0) {
             age = null;
         } else {
-            age = in.readInt();
+            age = in.readLong();
         }
         horoscope = in.readString();
         nationality = in.readString();
@@ -89,48 +96,6 @@ public class User implements Parcelable {
         read = tmpRead == 0 ? null : tmpRead == 1;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(avatar);
-        dest.writeString(coverImage);
-        dest.writeString(biography);
-        dest.writeInt(loveCounter);
-        dest.writeInt(PickupCounter);
-        dest.writeString(relationship);
-        dest.writeString(interestedIn);
-        dest.writeString(gender);
-        if (age == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(age);
-        }
-        dest.writeString(horoscope);
-        dest.writeString(nationality);
-        dest.writeString(lives);
-        dest.writeString(hometown);
-        dest.writeString(religion);
-        dest.writeString(politics);
-        dest.writeString(work);
-        dest.writeString(college);
-        dest.writeString(school);
-        dest.writeByte((byte) (smoke == null ? 0 : smoke ? 1 : 2));
-        dest.writeByte((byte) (shisha == null ? 0 : shisha ? 1 : 2));
-        dest.writeByte((byte) (drugs == null ? 0 : drugs ? 1 : 2));
-        dest.writeByte((byte) (drink == null ? 0 : drink ? 1 : 2));
-        dest.writeByte((byte) (athlete == null ? 0 : athlete ? 1 : 2));
-        dest.writeByte((byte) (gamer == null ? 0 : gamer ? 1 : 2));
-        dest.writeByte((byte) (travel == null ? 0 : travel ? 1 : 2));
-        dest.writeByte((byte) (cook == null ? 0 : cook ? 1 : 2));
-        dest.writeByte((byte) (read == null ? 0 : read ? 1 : 2));
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
@@ -142,6 +107,14 @@ public class User implements Parcelable {
             return new User[size];
         }
     };
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
 
     public String getName() {
         return name;
@@ -215,11 +188,11 @@ public class User implements Parcelable {
         this.gender = gender;
     }
 
-    public Integer getAge() {
+    public Long getAge() {
         return age;
     }
 
-    public void setAge(Integer age) {
+    public void setAge(Long age) {
         this.age = age;
     }
 
@@ -245,6 +218,14 @@ public class User implements Parcelable {
 
     public void setLives(String lives) {
         this.lives = lives;
+    }
+
+    public String getHometown() {
+        return hometown;
+    }
+
+    public void setHometown(String hometown) {
+        this.hometown = hometown;
     }
 
     public String getReligion() {
@@ -359,12 +340,52 @@ public class User implements Parcelable {
         this.read = read;
     }
 
-    public String getHometown() {
-        return hometown;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setHometown(String hometown) {
-        this.hometown = hometown;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (created == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(created);
+        }
+        dest.writeString(name);
+        dest.writeString(avatar);
+        dest.writeString(coverImage);
+        dest.writeString(biography);
+        dest.writeInt(loveCounter);
+        dest.writeInt(PickupCounter);
+        dest.writeString(relationship);
+        dest.writeString(interestedIn);
+        dest.writeString(gender);
+        if (age == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(age);
+        }
+        dest.writeString(horoscope);
+        dest.writeString(nationality);
+        dest.writeString(lives);
+        dest.writeString(hometown);
+        dest.writeString(religion);
+        dest.writeString(politics);
+        dest.writeString(work);
+        dest.writeString(college);
+        dest.writeString(school);
+        dest.writeByte((byte) (smoke == null ? 0 : smoke ? 1 : 2));
+        dest.writeByte((byte) (shisha == null ? 0 : shisha ? 1 : 2));
+        dest.writeByte((byte) (drugs == null ? 0 : drugs ? 1 : 2));
+        dest.writeByte((byte) (drink == null ? 0 : drink ? 1 : 2));
+        dest.writeByte((byte) (athlete == null ? 0 : athlete ? 1 : 2));
+        dest.writeByte((byte) (gamer == null ? 0 : gamer ? 1 : 2));
+        dest.writeByte((byte) (travel == null ? 0 : travel ? 1 : 2));
+        dest.writeByte((byte) (cook == null ? 0 : cook ? 1 : 2));
+        dest.writeByte((byte) (read == null ? 0 : read ? 1 : 2));
     }
 }
 // [END blog_user_class]

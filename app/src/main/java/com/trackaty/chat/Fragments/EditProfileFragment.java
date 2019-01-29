@@ -2,6 +2,8 @@ package com.trackaty.chat.Fragments;
 
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
@@ -37,6 +41,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
@@ -50,7 +55,9 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
 import static android.app.Activity.RESULT_OK;
@@ -59,7 +66,7 @@ import static android.app.Activity.RESULT_OK;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EditProfileFragment extends Fragment implements ItemClickListener {
+public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final static String TAG = EditProfileFragment.class.getSimpleName();
 
@@ -407,27 +414,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
     }
 
-    // use interface to detect item click on the recycler adapter
-    @Override
-    public void onClick(View view, int position, boolean isLongClick) {
-        Log.d(TAG, "item clicked fragment= " + position);
-        switch (mProfileDataArrayList.get(position).getKey()) {
-
-            case "avatar":
-                Log.d(TAG, "avatar item clicked= " + position);
-                selectMedia(true, position);
-                break;
-            case "coverImage":
-                Log.d(TAG, "coverImage item clicked= " + position);
-                selectMedia(false, position);
-                break;
-            case "age":
-                Log.d(TAG, "age item clicked= " + position);
-                //mEditProfileAdapter.notifyDataSetChanged();
-                break;
-        }
-
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -673,4 +659,54 @@ public class EditProfileFragment extends Fragment implements ItemClickListener {
 
     }
 
+    // use interface to detect item click on the recycler adapter
+    @Override
+    public void onClick(View view, int position, boolean isLongClick) {
+        Log.d(TAG, "item clicked fragment= " + position);
+        switch (mProfileDataArrayList.get(position).getKey()) {
+
+            case "avatar":
+                Log.d(TAG, "avatar item clicked= " + position);
+                selectMedia(true, position);
+                break;
+            case "coverImage":
+                Log.d(TAG, "coverImage item clicked= " + position);
+                selectMedia(false, position);
+                break;
+            case "age":
+                //mEditProfileAdapter.notifyDataSetChanged();
+                DatePickerFragment datePicker = new DatePickerFragment();
+                if (getFragmentManager() != null) {
+                    datePicker.setCallBack(ondate); //Set Call back to capture selected date
+                    datePicker.show(getFragmentManager(),"date picker");
+                    Log.i(TAG, "datePicker show clicked ");
+                }
+                break;
+        }
+
+    }
+
+    //A call back to capture selected date
+    OnDateSetListener ondate = new OnDateSetListener() {
+
+        public void onDateSet(DatePicker view, int year, int monthOfYear,int dayOfMonth) {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR, year);
+            c.set(Calendar.MONTH, monthOfYear);
+            c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
+
+            for (int i = 0; i < mProfileDataArrayList.size(); i++) {
+                if(mProfileDataArrayList.get(i).getKey().equals("age")){
+                    mProfileDataArrayList.set(i, new Profile("age",birthDate,SECTION_TEXT ));
+                    mEditProfileAdapter.notifyItemChanged(i);
+                }
+                Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
+            }
+            /*c.getTimeInMillis();
+            DateHelper.getAge(c.getTime());
+            c.getTime();*/
+        }
+    };
 }
+
