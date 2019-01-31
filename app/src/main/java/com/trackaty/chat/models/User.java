@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
-public class User  implements Parcelable{
+public class User implements Parcelable{
 
     private Long created;
 
@@ -40,12 +40,34 @@ public class User  implements Parcelable{
     public Boolean cook;
     public Boolean read;
 
+    private String phone;
+    private String facebook;
+    private String instagram;
+    private String twitter;
+    private String snapchat;
+    private String tumblr;
+    private String vk;
+    private String askfm;
+    private String curiouscat;
+    private String saraha;
+    private String pinterest;
+    private String soundcloud;
+    private String spotify;
+    private String anghami;
+    private String twitch;
+    private String youtube;
+    private String linkedIn;
+    private String wikipedia;
+    private String website;
+
+
     // startedAt: firebase.database.ServerValue.TIMESTAMP
     //private Date joined;// anotation to put server timestamp
 
     public User() {
 
     }
+
 
     protected User(Parcel in) {
         if (in.readByte() == 0) {
@@ -94,6 +116,25 @@ public class User  implements Parcelable{
         cook = tmpCook == 0 ? null : tmpCook == 1;
         byte tmpRead = in.readByte();
         read = tmpRead == 0 ? null : tmpRead == 1;
+        phone = in.readString();
+        facebook = in.readString();
+        instagram = in.readString();
+        twitter = in.readString();
+        snapchat = in.readString();
+        tumblr = in.readString();
+        vk = in.readString();
+        askfm = in.readString();
+        curiouscat = in.readString();
+        saraha = in.readString();
+        pinterest = in.readString();
+        soundcloud = in.readString();
+        spotify = in.readString();
+        anghami = in.readString();
+        twitch = in.readString();
+        youtube = in.readString();
+        linkedIn = in.readString();
+        wikipedia = in.readString();
+        website = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -340,6 +381,158 @@ public class User  implements Parcelable{
         this.read = read;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getFacebook() {
+        return facebook;
+    }
+
+    public void setFacebook(String facebook) {
+        this.facebook = facebook;
+    }
+
+    public String getInstagram() {
+        return instagram;
+    }
+
+    public void setInstagram(String instagram) {
+        this.instagram = instagram;
+    }
+
+    public String getTwitter() {
+        return twitter;
+    }
+
+    public void setTwitter(String twitter) {
+        this.twitter = twitter;
+    }
+
+    public String getSnapchat() {
+        return snapchat;
+    }
+
+    public void setSnapchat(String snapchat) {
+        this.snapchat = snapchat;
+    }
+
+    public String getTumblr() {
+        return tumblr;
+    }
+
+    public void setTumblr(String tumblr) {
+        this.tumblr = tumblr;
+    }
+
+    public String getVk() {
+        return vk;
+    }
+
+    public void setVk(String vk) {
+        this.vk = vk;
+    }
+
+    public String getAskfm() {
+        return askfm;
+    }
+
+    public void setAskfm(String askfm) {
+        this.askfm = askfm;
+    }
+
+    public String getCuriouscat() {
+        return curiouscat;
+    }
+
+    public void setCuriouscat(String curiouscat) {
+        this.curiouscat = curiouscat;
+    }
+
+    public String getSaraha() {
+        return saraha;
+    }
+
+    public void setSaraha(String saraha) {
+        this.saraha = saraha;
+    }
+
+    public String getPinterest() {
+        return pinterest;
+    }
+
+    public void setPinterest(String pinterest) {
+        this.pinterest = pinterest;
+    }
+
+    public String getSoundcloud() {
+        return soundcloud;
+    }
+
+    public void setSoundcloud(String soundcloud) {
+        this.soundcloud = soundcloud;
+    }
+
+    public String getSpotify() {
+        return spotify;
+    }
+
+    public void setSpotify(String spotify) {
+        this.spotify = spotify;
+    }
+
+    public String getAnghami() {
+        return anghami;
+    }
+
+    public void setAnghami(String anghami) {
+        this.anghami = anghami;
+    }
+
+    public String getTwitch() {
+        return twitch;
+    }
+
+    public void setTwitch(String twitch) {
+        this.twitch = twitch;
+    }
+
+    public String getYoutube() {
+        return youtube;
+    }
+
+    public void setYoutube(String youtube) {
+        this.youtube = youtube;
+    }
+
+    public String getLinkedIn() {
+        return linkedIn;
+    }
+
+    public void setLinkedIn(String linkedIn) {
+        this.linkedIn = linkedIn;
+    }
+
+    public String getWikipedia() {
+        return wikipedia;
+    }
+
+    public void setWikipedia(String wikipedia) {
+        this.wikipedia = wikipedia;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -386,6 +579,25 @@ public class User  implements Parcelable{
         dest.writeByte((byte) (travel == null ? 0 : travel ? 1 : 2));
         dest.writeByte((byte) (cook == null ? 0 : cook ? 1 : 2));
         dest.writeByte((byte) (read == null ? 0 : read ? 1 : 2));
+        dest.writeString(phone);
+        dest.writeString(facebook);
+        dest.writeString(instagram);
+        dest.writeString(twitter);
+        dest.writeString(snapchat);
+        dest.writeString(tumblr);
+        dest.writeString(vk);
+        dest.writeString(askfm);
+        dest.writeString(curiouscat);
+        dest.writeString(saraha);
+        dest.writeString(pinterest);
+        dest.writeString(soundcloud);
+        dest.writeString(spotify);
+        dest.writeString(anghami);
+        dest.writeString(twitch);
+        dest.writeString(youtube);
+        dest.writeString(linkedIn);
+        dest.writeString(wikipedia);
+        dest.writeString(website);
     }
 }
 // [END blog_user_class]

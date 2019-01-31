@@ -43,6 +43,7 @@
     <string name="user_birthday_headline">Birth date</string>
     <string name="user_work_school_headline">Work and education</string>
     <string name="user_habits_hobbies_headline">Habits and hobbies</string>
+    <string name="user_social_headline">Social and contacts</string>
     <string name="user_body_decorations_headline">Body decorations</string>
     <string name="user_avatar_headline">Profile Picture</string>
     <string name="user_cover_headline">Cover Picture</string>
@@ -70,6 +71,28 @@
     <string name="user_college_headline">College</string>
     <string name="user_school_headline">School</string>
 
+    <string name="user_phone_hint">Phone number</string>
+    <string name="user_facebook_hint">Facebook username</string>
+    <string name="user_instagram_hint">Instagram username</string>
+    <string name="user_twitter_hint">Twitter username</string>
+    <string name="user_snapchat_hint">Snapchat username</string>
+    <string name="user_tumblr_hint">Tumblr username</string>
+    <string name="user_vk_hint">VK screen name</string>
+    <string name="user_askfm_hint">Ask.fm username</string>
+    <string name="user_curiouscat_hint">CuriousCat username</string>
+    <string name="user_saraha_hint">Saraha username</string>
+    <string name="user_pinterest_hint">Pinterest username</string>
+    <string name="user_soundcloud_hint">SoundCloud username</string>
+    <string name="user_spotify_hint">Spotify username</string>
+    <string name="user_anghami_hint">Anghami Id</string>
+    <string name="user_twitch_hint">Twitch username</string>
+    <string name="user_youtube_hint">YouTube channel</string>
+    <string name="user_linkedIn_hint">LinkedIn username</string>
+    <string name="user_wikipedia_hint">Wikipedia page</string>
+    <string name="user_website_hint">Website URL</string>
+
+
+
     <string name="required_helper">*Required</string>
     <string name="user_nationality_helper">E.g., France or Germany</string>
     <string name="user_lives_helper">E.g., Paris, France</string>
@@ -79,6 +102,26 @@
     <string name="user_work_helper">E.g., A Doctor in El Camino Hospital</string>
     <string name="user_college_helper">E.g., Studied at Harvard University</string>
     <string name="user_school_helper">E.g., Studied at Santa Monica High School</string>
+
+    <string name="user_Phone_helper">E.g., 010xxxxxxxx</string>
+    <string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
+    <string name="user_instagram_helper">Username without: https://instagram.com/</string>
+    <string name="user_twitter_helper">Username without: https://twitter.com/ or @ symbol</string>
+    <string name="user_snapchat_helper">Username without: https://snapchat.com/add/</string>
+    <string name="user_tumblr_helper">Username without: .tumblr.com/</string>
+    <string name="user_vk_helper">User ID or screen name without: https://vk.com/</string>
+    <string name="user_askfm_helper">Username without: https://ask.fm/</string>
+    <string name="user_curiouscat_helper">Username without: https://curiouscat.me/</string>
+    <string name="user_saraha_helper">Username without: .sarahah.com</string>
+    <string name="user_pinterest_helper">Username without: https://pinterest.com/</string>
+    <string name="user_soundcloud_helper">Username without: https://soundcloud.com/</string>
+    <string name="user_spotify_helper">Username of Id without: https://open.spotify.com/user/</string>
+    <string name="user_anghami_helper">User Id without: https://play.anghami.com/profile/</string>
+    <string name="user_twitch_helper">Username without: https://twitch.tv/</string>
+    <string name="user_youtube_helper">Your channel link</string>
+    <string name="user_linkedIn_helper">Username without: https://linkedin.com/in/</string>
+    <string name="user_wikipedia_helper">Your wikipedia page link</string>
+    <string name="user_website_helper">Your website link</string>
 
     <string name="crop_activity_title">Crop</string>
 
@@ -133,6 +176,29 @@
     <string name="pisces">Pisces (Feb 18 – Mar 20)</string>
 
     <!--  Zodiac array -->
+
+    <!--  Social and contacts array-->
+    <string name="phone">Phone number</string>
+    <string name="facebook">Facebook</string>
+    <string name="instagram">Instagram</string>
+    <string name="twitter">Twitter</string>
+    <string name="snapchat">Snapchat</string>
+    <string name="tumblr">Tumblr</string>
+    <string name="vk">VK</string>
+    <string name="askfm">Ask.fm</string>
+    <string name="curiouscat">Curious cat</string>
+    <string name="saraha">Saraha</string>
+    <string name="pinterest">Pinterest</string>
+    <string name="soundcloud">SoundCloud</string>
+    <string name="spotify">Spotify</string>
+    <string name="anghami">Anghami</string>
+    <string name="twitch">Twitch</string>
+    <string name="youtube">YouTube</string>
+    <string name="linkedIn">LinkedIn</string>
+    <string name="wikipedia">wikipedia</string>
+    <string name="website">Website</string>
+
+    <!--  Social and contacts array-->
 
     <!-- values-->
     <string name="not_specified">Not Specified</string>

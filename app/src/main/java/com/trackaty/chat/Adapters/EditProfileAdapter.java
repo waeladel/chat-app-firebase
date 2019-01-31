@@ -31,7 +31,6 @@ import com.trackaty.chat.models.Variables;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,34 +38,38 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final static String TAG = EditProfileAdapter.class.getSimpleName();
 
-    public  final static int SECTION_IMAGE = 1;
-    public  final static int SECTION_EDIT_TEXT = 2;
-    public  final static int SECTION_TEXT = 3;
-    public  final static int SECTION_SPINNER = 4;
-    public  final static int SECTION_ABOUT = 5;
-    public  final static int SECTION_WORK = 6;
-    public  final static int SECTION_HABITS = 7;
+    private  static final int SECTION_IMAGE = 1;
+    private  static final int SECTION_EDIT_TEXT = 2;
+    private  static final int SECTION_TEXT = 3;
+    private  static final int SECTION_SPINNER = 4;
+    private  static final int SECTION_ABOUT = 5;
+    private  static final int SECTION_WORK = 6;
+    private  static final int SECTION_HABITS = 7;
+    private  static final int SECTION_SOCIAL = 8;
 
-    public  final static String SECTION_ABOUT_HEADLINE = "about";
-    public  final static String SECTION_WORK_HEADLINE  = "work_and_education";
-    public  final static String SECTION_HABITS_HEADLINE  = "habits";
+    private  static final String SECTION_ABOUT_HEADLINE = "about";
+    private  static final String SECTION_WORK_HEADLINE  = "work_and_education";
+    private  static final String SECTION_HABITS_HEADLINE  = "habits";
+    public  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
 
-    public  final static int  NAME_INPUT_MAX_LENGTH = 40;
-    public  final static int  NAME_INPUT_MAX_LINES = 1;
+    private  static final int  NAME_INPUT_MAX_LENGTH = 40;
+    private  static final int  NAME_INPUT_MAX_LINES = 1;
 
-    public  final static int  BIO_INPUT_MAX_LENGTH = 201;
-    public  final static int  BIO_INPUT_MAX_LINES = 4;
+    private  static final int  BIO_INPUT_MAX_LENGTH = 201;
+    private  static final int  BIO_INPUT_MAX_LINES = 4;
 
 
     public ArrayList<Profile> mProfileDataArrayList;
     public ArrayList<Profile> aboutArrayList ;
     public ArrayList<Profile> workArrayList ;
     public ArrayList<Profile> habitsArrayList;
+    public ArrayList<Profile> socialArrayList;
     public ArrayList<Variables> variablesArrayList;
 
     public AboutAdapter aboutAdapter;
     public WorkAdapter workAdapter;
     public HabitsAdapter habitsAdapter;
+    public SocialAdapter socialAdapter;
 
     public Context context;
     private ItemClickListener itemClickListener;
@@ -78,6 +81,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ,ArrayList<Profile> aboutArrayList
             ,ArrayList<Profile> workArrayList
             ,ArrayList<Profile> habitsArrayList
+            ,ArrayList<Profile> socialArrayList
             ,ArrayList<Variables> variablesArrayList
             , ItemClickListener itemClickListener){
 
@@ -85,6 +89,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.aboutArrayList = aboutArrayList;
         this.aboutArrayList = workArrayList;
         this.aboutArrayList = habitsArrayList;
+        this.socialArrayList = socialArrayList;
         this.variablesArrayList = variablesArrayList;
 
 
@@ -94,6 +99,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         aboutAdapter = new AboutAdapter(context, aboutArrayList);
         workAdapter = new WorkAdapter(context, workArrayList);
         habitsAdapter = new HabitsAdapter(context, habitsArrayList);
+        socialAdapter = new SocialAdapter (context, socialArrayList);
 
 
     }
@@ -125,6 +131,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 // SECTION_WORK;
             case 7:
                 // SECTION_HABITS;
+            case 8:
+                // SECTION_SOCIAL;
         }
         View expandableView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_expandable_parent, parent, false);
         return new ExpandableHolder(expandableView , itemClickListener);
@@ -547,6 +555,32 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         });*/
                     }
                     break;
+                case SECTION_SOCIAL_HEADLINE:
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        expandableHolder.sectionHeadline.setText(R.string.user_social_headline);
+                        //expandableHolder.expandableLayout.collapse();
+
+                        //aboutAdapter = new AboutAdapter(context, habitsArrayList);
+
+                        // Initiate the about RecyclerView
+                        expandableHolder.expandableRecycler.setHasFixedSize(true);
+
+                        expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
+                        expandableHolder.expandableRecycler.setAdapter(socialAdapter);
+                        //viewHolder.setIsRecyclable(false);
+                        //viewHolder.expandableLayout.setInRecyclerView(true);
+                        /*viewHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
+                            @Override
+                            public void onPreOpen() {
+
+                            }
+
+                            @Override
+                            public void onPreClose() {
+                            }
+                        });*/
+                    }
+                    break;
 
             }
 
@@ -919,8 +953,10 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return SECTION_WORK;
             case 7:
                 return SECTION_HABITS;
+            case 8:
+                return SECTION_SOCIAL;
         }
-        return 8;
+        return 9;
     }
 
     // ViewHolder for user info list /////

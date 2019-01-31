@@ -70,22 +70,27 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final static String TAG = EditProfileFragment.class.getSimpleName();
 
-    public  final static int SECTION_IMAGE = 1;
-    public  final static int SECTION_EDIT_TEXT = 2;
-    public  final static int SECTION_TEXT = 3;
-    public  final static int SECTION_SPINNER = 4;
-    public  final static int SECTION_ABOUT = 5;
-    public  final static int SECTION_WORK = 6;
-    public  final static int SECTION_HABITS = 7;
+    private  static final int SECTION_IMAGE = 1;
+    private  static final int SECTION_EDIT_TEXT = 2;
+    private  static final int SECTION_TEXT = 3;
+    private  static final int SECTION_SPINNER = 4;
+    private  static final int SECTION_ABOUT = 5;
+    private  static final int SECTION_WORK = 6;
+    private  static final int SECTION_HABITS = 7;
+    private  static final int SECTION_SOCIAL = 8;
+
 
     public  final static String SECTION_ABOUT_HEADLINE = "about";
     public  final static String SECTION_WORK_HEADLINE  = "work_and_education";
     public  final static String SECTION_HABITS_HEADLINE  = "habits";
+    public  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
+
 
     private static final String PROFILE_LIST_STATE = "list_state";
     private static final String ABOUT_LIST_STATE = "about_list_state";
     private static final String WORK_LIST_STATE = "work_list_state";
     private static final String HABITS_LIST_STATE = "habits_list_state";
+    private static final String SOCIAL_LIST_STATE = "social_list_state";
     private static final String VARIABLES_LIST_STATE = "variables_list_state";
 
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
@@ -113,6 +118,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private ArrayList<Profile> mAboutArrayList = new ArrayList<>();
     private ArrayList<Profile> mWorkArrayList = new ArrayList<>();
     private ArrayList<Profile> mHabitsArrayList = new ArrayList<>();
+    private ArrayList<Profile> mSocialArrayList = new ArrayList<>();
     private ArrayList<Variables> mVariablesArrayList = new ArrayList<>();
 
 
@@ -126,6 +132,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private Activity activity;
 
 
+    private static Boolean mIsSocialAdded ;
     private static Boolean mIsAboutAdded ;
     private static Boolean mIsWorkAdded ;
     private static Boolean mIsHabitsAdded ;
@@ -162,6 +169,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         View fragView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
         // set to false to add expandable section header once every onCreateView
+        mIsSocialAdded = false;
         mIsAboutAdded = false;
         mIsWorkAdded = false;
         mIsHabitsAdded = false;
@@ -184,6 +192,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             mWorkArrayList = savedInstanceState.getParcelableArrayList(WORK_LIST_STATE);
             mHabitsArrayList = savedInstanceState.getParcelableArrayList(HABITS_LIST_STATE);
             mVariablesArrayList = savedInstanceState.getParcelableArrayList(VARIABLES_LIST_STATE);
+            mSocialArrayList = savedInstanceState.getParcelableArrayList(SOCIAL_LIST_STATE);
 
             savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
             restorePreviousState(); // Restore data found in the Bundle
@@ -236,6 +245,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         outState.putParcelableArrayList(ABOUT_LIST_STATE, mAboutArrayList);
         outState.putParcelableArrayList(WORK_LIST_STATE, mWorkArrayList);
         outState.putParcelableArrayList(HABITS_LIST_STATE, mHabitsArrayList);
+        outState.putParcelableArrayList(SOCIAL_LIST_STATE, mSocialArrayList);
         outState.putParcelableArrayList(VARIABLES_LIST_STATE, mVariablesArrayList);
 
         outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mEditProfileRecycler.getLayoutManager().onSaveInstanceState());
@@ -247,6 +257,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 , mAboutArrayList
                 , mWorkArrayList
                 , mHabitsArrayList
+                , mSocialArrayList
                 , mVariablesArrayList
                 , this);
 
@@ -297,6 +308,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 , mAboutArrayList
                                 , mWorkArrayList
                                 , mHabitsArrayList
+                                , mSocialArrayList
                                 , mVariablesArrayList
                                 , this);
 
@@ -322,41 +334,77 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 if (method.getName().toLowerCase().endsWith(fieldName.toLowerCase())) {
                     // Method found, run it
                     try {
-                        // check if is not null or empty
+
+                        String value;
+                        // check if method is null
                         if (method.invoke(currentUser) != null){
-                            Log.d(TAG, "Method=" + method.invoke(currentUser));
+                            value = method.invoke(currentUser).toString();
+                        }else{
+                            value = "";
+                        }
+                            Log.d(TAG, "Method=" + value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
                             if((fieldName.equals("avatar") || fieldName.equals("coverImage"))){
-                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_IMAGE);
+                                Profile profileData = new Profile(fieldName, value,SECTION_IMAGE);
                                 mProfileDataArrayList.add(profileData);
 
                             }else if((fieldName.equals("name")
                                     || fieldName.equals("biography"))){
-                            Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(), SECTION_EDIT_TEXT);
+                            Profile profileData = new Profile(fieldName, value, SECTION_EDIT_TEXT);
                             mProfileDataArrayList.add(profileData);
 
                             }else if(fieldName.equals("age")){
-                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(), SECTION_TEXT);
+                                Profile profileData = new Profile(fieldName, value, SECTION_TEXT);
                                 mProfileDataArrayList.add(profileData);
+
+                            }else if((fieldName.equals("phone")
+                                    || fieldName.equals("facebook")
+                                    || fieldName.equals("instagram")
+                                    || fieldName.equals("twitter")
+                                    || fieldName.equals("snapchat")
+                                    || fieldName.equals("tumblr")
+                                    || fieldName.equals("vk")
+                                    || fieldName.equals("askfm")
+                                    || fieldName.equals("curiouscat")
+                                    || fieldName.equals("saraha")
+                                    || fieldName.equals("pinterest")
+                                    || fieldName.equals("soundcloud")
+                                    || fieldName.equals("spotify")
+                                    || fieldName.equals("anghami")
+                                    || fieldName.equals("twitch")
+                                    || fieldName.equals("youtube")
+                                    || fieldName.equals("linkedIn")
+                                    || fieldName.equals("wikipedia")
+                                    || fieldName.equals("website"))){
+                                //add data for social recycler
+                                Profile profileData = new Profile(fieldName, value,SECTION_SOCIAL);
+                                //mProfileDataArrayList.add(profileData);
+                                mSocialArrayList.add(profileData);
+                                if(!mIsSocialAdded){
+                                    Log.d(TAG, "mIsSocialAdded=" + mIsSocialAdded);
+                                    Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, value,SECTION_SOCIAL);
+                                    mProfileDataArrayList.add(socialData);
+                                }
+                                mIsSocialAdded = true; // to add only one expandable section header
 
                             }else if((fieldName.equals("relationship")
                                     || fieldName.equals("gender")
                                     || fieldName.equals("horoscope")
                                     || fieldName.equals("interestedIn"))){
-                            Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_SPINNER);
+                            Profile profileData = new Profile(fieldName, value,SECTION_SPINNER);
                             mProfileDataArrayList.add(profileData);
 
                             } else if(fieldName.equals("work")
                                     || fieldName.equals("college")
                                     || fieldName.equals("school")){
                                 //add data for work section
-                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_WORK);
+                                Profile profileData = new Profile(fieldName, value,SECTION_WORK);
                                 //mProfileDataArrayList.add(profileData);
                                 mWorkArrayList.add(profileData);
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, method.invoke(currentUser).toString(),SECTION_WORK);
+                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, value,SECTION_WORK);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsWorkAdded = true; // to add only one expandable section header
@@ -367,12 +415,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                     || fieldName.equals("politics")
                                     || fieldName.equals("religion")){
                                 //add data for about section
-                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_ABOUT);
+                                Profile profileData = new Profile(fieldName, value,SECTION_ABOUT);
                                 //mProfileDataArrayList.add(profileData);
                                 mAboutArrayList.add(profileData);
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, method.invoke(currentUser).toString(),SECTION_ABOUT);
+                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, value,SECTION_ABOUT);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsAboutAdded = true; // to add only one expandable section header
@@ -387,18 +435,16 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                     || fieldName.equals("gamer")
                                     || fieldName.equals("read")){
                                 //add data for habits section
-                                Profile profileData = new Profile(fieldName, method.invoke(currentUser).toString(),SECTION_HABITS);
+                                Profile profileData = new Profile(fieldName, value,SECTION_HABITS);
                                 //mProfileDataArrayList.add(profileData);
                                 mHabitsArrayList.add(profileData);
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
-                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, method.invoke(currentUser).toString(),SECTION_HABITS);
+                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, value,SECTION_HABITS);
                                     mProfileDataArrayList.add(habitsSectionData);
                                 }
                                 mIsHabitsAdded = true; // to add only one expandable section header
                             }
-
-                        }
 
                     } catch (IllegalAccessException e) {
                         Log.e(TAG, "Could not determine method: " + method.getName());
