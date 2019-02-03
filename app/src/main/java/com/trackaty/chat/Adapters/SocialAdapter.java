@@ -1,7 +1,10 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +26,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
     private final static String TAG = SocialAdapter.class.getSimpleName();
 
-    public  final static int  BIG_INPUT_MAX_LENGTH = 80;
+    public  final static int  BIG_INPUT_MAX_LENGTH = 100;
     public  final static int  SMALL_INPUT_MAX_LENGTH = 50;
 
     public  final static int  BIG_INPUT_MAX_LINES = 4;
@@ -47,7 +50,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         //Log.i(TAG, "onBindViewHolder called="+ habitsArrayList.get(position));
 
         switch (socialArrayList.get(position).getKey()) {
@@ -58,6 +61,9 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
                 holder.inputLayout.setHint(context.getString(R.string.user_phone_hint));//Set Hint/label
                 holder.inputLayout.setHelperText(context.getString(R.string.user_Phone_helper)); // Set Helper
+
+                // capitalize every first letter
+                holder.itemValue.setInputType(InputType.TYPE_CLASS_PHONE);
                 break;
             case "facebook":
                 if (null != socialArrayList.get(position).getValue()) {
@@ -98,6 +104,14 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
                 holder.inputLayout.setHint(context.getString(R.string.user_tumblr_hint));//Set Hint/label
                 holder.inputLayout.setHelperText(context.getString(R.string.user_tumblr_helper)); // Set Helper
+                break;
+            case "pubg":
+                if (null != socialArrayList.get(position).getValue()) {
+                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                }
+                setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
+                holder.inputLayout.setHint(context.getString(R.string.user_pubg_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(context.getString(R.string.user_pubg_helper)); // Set Helper
                 break;
             case "vk":
                 if (null != socialArrayList.get(position).getValue()) {
@@ -191,7 +205,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 if (null != socialArrayList.get(position).getValue()) {
                     holder.itemValue.setText(socialArrayList.get(position).getValue());
                 }
-                setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
+                setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
+                holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH);
                 holder.inputLayout.setHint(context.getString(R.string.user_wikipedia_hint));//Set Hint/label
                 holder.inputLayout.setHelperText(context.getString(R.string.user_wikipedia_helper)); // Set Helper
                 break;
@@ -199,18 +214,15 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 if (null != socialArrayList.get(position).getValue()) {
                     holder.itemValue.setText(socialArrayList.get(position).getValue());
                 }
-                setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
+                setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
+                holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH);
                 holder.inputLayout.setHint(context.getString(R.string.user_website_hint));//Set Hint/label
                 holder.inputLayout.setHelperText(context.getString(R.string.user_website_helper)); // Set Helper
                 break;
         }
 
-        // capitalize every first letter
-        holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT
-                | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
-                | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 
-        Log.d(TAG, "onBindViewHolder get value="+ socialArrayList.get(position).getValue());
+        //Log.d(TAG, "onBindViewHolder get value="+ socialArrayList.get(position).getValue());
 
         //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
@@ -239,6 +251,25 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
             itemValue = row.findViewById(R.id.edit_profile_value);
             inputLayout = row.findViewById(R.id.edit_profile_InputLayout);
 
+            itemValue.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence editable, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    Log.d(TAG, "Editable = "+ editable.toString()+ " position= "+getAdapterPosition());
+                    if(TextUtils.isEmpty(editable)){
+                        socialArrayList.get(getAdapterPosition()).setValue(null);
+                    }else{
+                        socialArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                    }
+                }
+            });
         }
 
     }

@@ -1,7 +1,10 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +52,7 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         //Log.i(TAG, "onBindViewHolder called="+ habitsArrayList.get(position));
 
         switch (workArrayList.get(position).getKey()) {
@@ -136,8 +139,6 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                 break;
         }
 
-        Log.i(TAG, "onBindViewHolder get value="+ workArrayList.get(position).getValue());
-
         //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
@@ -164,6 +165,26 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
             row = itemView;
             itemValue = row.findViewById(R.id.edit_profile_value);
             inputLayout = row.findViewById(R.id.edit_profile_InputLayout);
+
+            itemValue.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence editable, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
+                    if(TextUtils.isEmpty(editable)){
+                        workArrayList.get(getAdapterPosition()).setValue(null);
+                    }else{
+                        workArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                    }
+                }
+            });
 
         }
 

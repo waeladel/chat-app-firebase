@@ -2,7 +2,6 @@ package com.trackaty.chat.Fragments;
 
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +19,9 @@ import top.zibin.luban.OnCompressListener;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
@@ -28,9 +29,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
@@ -41,7 +45,6 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
@@ -61,6 +64,7 @@ import java.util.Calendar;
 import java.util.Collections;
 
 import static android.app.Activity.RESULT_OK;
+import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
 
 
 /**
@@ -69,6 +73,8 @@ import static android.app.Activity.RESULT_OK;
 public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final static String TAG = EditProfileFragment.class.getSimpleName();
+
+    private final int MENUITEM_SAVE_Id = 1;
 
     private  static final int SECTION_IMAGE = 1;
     private  static final int SECTION_EDIT_TEXT = 2;
@@ -147,19 +153,23 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private ArrayList<AlbumFile> mMediaFiles;
 
+    private Long birthInMillis;
+
     public EditProfileFragment() {
         // Required empty public constructor
     }
 
     // This method will only be called once when the retained
     // Fragment is first created.
-    /*@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Retain this fragment across configuration changes.
-        setRetainInstance(true);
-    }*/
+        //setRetainInstance(true);
+        //show Menu
+        setHasOptionsMenu(true);
+    }
 
 
     @Override
@@ -167,7 +177,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
-
         // set to false to add expandable section header once every onCreateView
         mIsSocialAdded = false;
         mIsAboutAdded = false;
@@ -183,8 +192,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         mImagesRef = mStorageRef.child("images");
 
         if (savedInstanceState != null) {
-            Boolean isSavedInstance = savedInstanceState.getBoolean("isSavedInstance");
-            Log.d(TAG, "isSavedInstance ="+isSavedInstance);
+            currentUserId = savedInstanceState.getString("currentUserId");
+            Log.d(TAG, "isSavedInstance ="+currentUserId);
 
             // Do something with value if needed
             mProfileDataArrayList = savedInstanceState.getParcelableArrayList(PROFILE_LIST_STATE);
@@ -204,6 +213,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 showCurrentUser(currentUser); // No saved data, get data from remote
             }
         }
+
+        // [START database reference]
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUserRef = mDatabaseRef.child("users").child(currentUserId);
 
         return fragView;
     }
@@ -225,6 +238,34 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        /*inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu,inflater);*/
+        MenuItem saveItem = menu.add(Menu.NONE, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.ic_save_black_24dp), getResources().getString(R.string.menu_save)));
+        //saveItem.setIcon( R.drawable.ic_save_black_24dp );
+        saveItem.setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        //inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id){
+            case MENUITEM_SAVE_Id:
+                Log.d(TAG, "MenuItem = SAVE");
+                profileSave();
+                break;
+        }
+
+        //noinspection SimplifiableIfStatement
+        /*if (id == R.id.action_settings) {
+            return true;
+        }*/
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
@@ -240,7 +281,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean ("isSavedInstance", true);
+        outState.putString ("currentUserId", currentUserId);
         outState.putParcelableArrayList(PROFILE_LIST_STATE, mProfileDataArrayList);
         outState.putParcelableArrayList(ABOUT_LIST_STATE, mAboutArrayList);
         outState.putParcelableArrayList(WORK_LIST_STATE, mWorkArrayList);
@@ -340,9 +381,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                         if (method.invoke(currentUser) != null){
                             value = method.invoke(currentUser).toString();
                         }else{
-                            value = "";
+                            value = null;
                         }
-                            Log.d(TAG, "Method=" + value);
+                            Log.d(TAG, "Method=" +method.getName()+" = "+ value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
                             if((fieldName.equals("avatar") || fieldName.equals("coverImage"))){
@@ -354,7 +395,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             Profile profileData = new Profile(fieldName, value, SECTION_EDIT_TEXT);
                             mProfileDataArrayList.add(profileData);
 
-                            }else if(fieldName.equals("age")){
+                            }else if(fieldName.equals("birthDate")){
                                 Profile profileData = new Profile(fieldName, value, SECTION_TEXT);
                                 mProfileDataArrayList.add(profileData);
 
@@ -364,6 +405,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                     || fieldName.equals("twitter")
                                     || fieldName.equals("snapchat")
                                     || fieldName.equals("tumblr")
+                                    || fieldName.equals("pubg")
                                     || fieldName.equals("vk")
                                     || fieldName.equals("askfm")
                                     || fieldName.equals("curiouscat")
@@ -383,7 +425,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 mSocialArrayList.add(profileData);
                                 if(!mIsSocialAdded){
                                     Log.d(TAG, "mIsSocialAdded=" + mIsSocialAdded);
-                                    Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, value,SECTION_SOCIAL);
+                                    Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, "",SECTION_SOCIAL);
                                     mProfileDataArrayList.add(socialData);
                                 }
                                 mIsSocialAdded = true; // to add only one expandable section header
@@ -404,7 +446,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 mWorkArrayList.add(profileData);
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, value,SECTION_WORK);
+                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, "",SECTION_WORK);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsWorkAdded = true; // to add only one expandable section header
@@ -420,7 +462,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 mAboutArrayList.add(profileData);
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, value,SECTION_ABOUT);
+                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, "",SECTION_ABOUT);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsAboutAdded = true; // to add only one expandable section header
@@ -440,7 +482,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 mHabitsArrayList.add(profileData);
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
-                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, value,SECTION_HABITS);
+                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, "",SECTION_HABITS);
                                     mProfileDataArrayList.add(habitsSectionData);
                                 }
                                 mIsHabitsAdded = true; // to add only one expandable section header
@@ -701,16 +743,258 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }
 
         Log.d(TAG, "cropImage starts" +mediaUri);
-
-
     }
+
+    private void profileSave() {
+
+        //Log.d(TAG, "currentUser getCreatedLong= "+currentUser.getCreatedLong());
+        if(currentUser.getCreated()== null){
+            currentUser.setCreated(ServerValue.TIMESTAMP);
+        }
+        for (int i = 0; i < mProfileDataArrayList.size(); i++) {
+            Log.d(TAG, "profileSave Key= "+mProfileDataArrayList.get(i).getKey()+" Value= "+ mProfileDataArrayList.get(i).getValue());
+            switch (mProfileDataArrayList.get(i).getKey()){
+                case "avatar":
+                    currentUser.setAvatar(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "coverImage":
+                    currentUser.setCoverImage(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "name":
+                    currentUser.setName(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "biography":
+                    currentUser.setBiography(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "birthDate":
+                    if(birthInMillis != null){
+                        currentUser.setBirthDate(birthInMillis);
+                    }
+                    break;
+                case "relationship":
+                    currentUser.setRelationship(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "gender":
+                    currentUser.setGender(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "horoscope":
+                    currentUser.setHoroscope(mProfileDataArrayList.get(i).getValue());
+                    break;
+                case "interestedIn":
+                    currentUser.setInterestedIn(mProfileDataArrayList.get(i).getValue());
+                    break;
+            }
+        }// end of mProfileDataArrayList loop
+
+        for (int i = 0; i < mWorkArrayList.size(); i++) {
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mWorkArrayList.get(i).getKey());
+            switch (mWorkArrayList.get(i).getKey()){
+                case "work":
+                    currentUser.setWork(mWorkArrayList.get(i).getValue());
+                    break;
+                case "college":
+                    currentUser.setCollege(mWorkArrayList.get(i).getValue());
+                    break;
+                case "school":
+                    currentUser.setSchool(mWorkArrayList.get(i).getValue());
+                    break;
+            }
+        }// end of mWorkArrayList loop
+
+        for (int i = 0; i < mAboutArrayList.size(); i++) {
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mAboutArrayList.get(i).getKey());
+            switch (mAboutArrayList.get(i).getKey()){
+                case "nationality":
+                    currentUser.setNationality(mAboutArrayList.get(i).getValue());
+                    break;
+                case "hometown":
+                    currentUser.setHometown(mAboutArrayList.get(i).getValue());
+                    break;
+                case "lives":
+                    currentUser.setLives(mAboutArrayList.get(i).getValue());
+                    break;
+                case "politics":
+                    currentUser.setPolitics(mAboutArrayList.get(i).getValue());
+                    break;
+                case "religion":
+                    currentUser.setReligion(mAboutArrayList.get(i).getValue());
+                    break;
+            }
+        }// end of mAboutArrayList loop
+
+        for (int i = 0; i < mHabitsArrayList.size(); i++) {
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mHabitsArrayList.get(i).getKey());
+            switch (mHabitsArrayList.get(i).getKey()){
+                case "athlete":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setAthlete(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setAthlete(false);
+                    }else{
+                        currentUser.setAthlete(null);
+                    }
+                    break;
+                case "smoke":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setSmoke(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setSmoke(false);
+                    }else{
+                        currentUser.setSmoke(null);
+                    }
+                    break;
+                case "travel":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setTravel(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setTravel(false);
+                    }else{
+                        currentUser.setTravel(null);
+                    }
+                    break;
+                case "shisha":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setShisha(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setShisha(false);
+                    }else{
+                        currentUser.setShisha(null);
+                    }
+                    break;
+                case "cook":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setCook(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setCook(false);
+                    }else{
+                        currentUser.setCook(null);
+                    }
+                    break;
+                case "drink":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setDrink(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setDrink(false);
+                    }else{
+                        currentUser.setDrink(null);
+                    }
+                    break;
+                case "drugs":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setDrugs(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setDrugs(false);
+                    }else{
+                        currentUser.setDrugs(null);
+                    }
+                case "gamer":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setGamer(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setGamer(false);
+                    }else{
+                        currentUser.setGamer(null);
+                    }
+                    break;
+                case "read":
+                    if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
+                        currentUser.setRead(true);
+                    }else if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("false")){
+                        currentUser.setRead(false);
+                    }else{
+                        currentUser.setRead(null);
+                    }
+                    break;
+            }
+        }// end of mHabitsArrayList loop
+
+        for (int i = 0; i < mSocialArrayList.size(); i++) {
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mSocialArrayList.get(i).getKey());
+            switch (mSocialArrayList.get(i).getKey()){
+                case "phone":
+                    currentUser.setPhone(mSocialArrayList.get(i).getValue());
+                    break;
+                case "facebook":
+                    currentUser.setFacebook(mSocialArrayList.get(i).getValue());
+                    break;
+                case "instagram":
+                    currentUser.setInstagram(mSocialArrayList.get(i).getValue());
+                    break;
+                case "twitter":
+                    currentUser.setTwitter(mSocialArrayList.get(i).getValue());
+                    break;
+                case "snapchat":
+                    currentUser.setSnapchat(mSocialArrayList.get(i).getValue());
+                    break;
+                case "tumblr":
+                    currentUser.setTumblr(mSocialArrayList.get(i).getValue());
+                    break;
+                case "vk":
+                    currentUser.setVk(mSocialArrayList.get(i).getValue());
+                    break;
+                case "askfm":
+                    currentUser.setAskfm(mSocialArrayList.get(i).getValue());
+                    break;
+                case "curiouscat":
+                    currentUser.setCuriouscat(mSocialArrayList.get(i).getValue());
+                    break;
+                case "saraha":
+                    currentUser.setSaraha(mSocialArrayList.get(i).getValue());
+                    break;
+                case "pinterest":
+                    currentUser.setPinterest(mSocialArrayList.get(i).getValue());
+                    break;
+                case "soundcloud":
+                    currentUser.setSoundcloud(mSocialArrayList.get(i).getValue());
+                    break;
+                case "spotify":
+                    currentUser.setSpotify(mSocialArrayList.get(i).getValue());
+                    break;
+                case "anghami":
+                    currentUser.setAnghami(mSocialArrayList.get(i).getValue());
+                    break;
+                case "twitch":
+                    currentUser.setTwitch(mSocialArrayList.get(i).getValue());
+                    break;
+                case "youtube":
+                    currentUser.setYoutube(mSocialArrayList.get(i).getValue());
+                    break;
+                case "linkedIn":
+                    currentUser.setLinkedIn(mSocialArrayList.get(i).getValue());
+                    break;
+                case "wikipedia":
+                    currentUser.setWikipedia(mSocialArrayList.get(i).getValue());
+                    break;
+                case "website":
+                    currentUser.setWebsite(mSocialArrayList.get(i).getValue());
+                    break;
+            }
+        }// end of mSocialArrayList loop
+
+        mUserRef.setValue(currentUser).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "mUserRef onSuccess");
+                // ...
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Write failed
+                        Toast.makeText(getActivity(), R.string.update_profile_error,
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
 
     // use interface to detect item click on the recycler adapter
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "item clicked fragment= " + position);
         switch (mProfileDataArrayList.get(position).getKey()) {
-
             case "avatar":
                 Log.d(TAG, "avatar item clicked= " + position);
                 selectMedia(true, position);
@@ -719,9 +1003,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 Log.d(TAG, "coverImage item clicked= " + position);
                 selectMedia(false, position);
                 break;
-            case "age":
+            case "birthDate":
                 //mEditProfileAdapter.notifyDataSetChanged();
-                DatePickerFragment datePicker = new DatePickerFragment();
+                DatePickerFragment datePicker;
+                if(null != currentUser.getBirthDate()){
+                     datePicker = DatePickerFragment.newInstance(currentUser.getBirthDate());
+                }else{
+                     datePicker = new DatePickerFragment();
+                }
                 if (getFragmentManager() != null) {
                     datePicker.setCallBack(ondate); //Set Call back to capture selected date
                     datePicker.show(getFragmentManager(),"date picker");
@@ -740,17 +1029,18 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             c.set(Calendar.YEAR, year);
             c.set(Calendar.MONTH, monthOfYear);
             c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
+            //String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
+            birthInMillis = c.getTimeInMillis(); // so store birth on the database
 
             for (int i = 0; i < mProfileDataArrayList.size(); i++) {
-                if(mProfileDataArrayList.get(i).getKey().equals("age")){
-                    mProfileDataArrayList.set(i, new Profile("age",birthDate,SECTION_TEXT ));
+                if(mProfileDataArrayList.get(i).getKey().equals("birthDate")){
+                    mProfileDataArrayList.set(i, new Profile("birthDate",String.valueOf(birthInMillis),SECTION_TEXT ));
                     mEditProfileAdapter.notifyItemChanged(i);
                 }
                 Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
             }
             /*c.getTimeInMillis();
-            DateHelper.getAge(c.getTime());
+            DateHelper.getBirthDate(c.getTime());
             c.getTime();*/
         }
     };

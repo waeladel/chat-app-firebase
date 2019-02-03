@@ -178,7 +178,7 @@ public class MoreProfileFragment extends Fragment {
                                 //add data for work section
                                 Profile profileData = new Profile(fieldName, method.invoke(user).toString(),SECTION_WORK);
                                 mUserArrayList.add(profileData);
-                            }else if(fieldName.equals("age")
+                            }else if(fieldName.equals("birthDate")
                                     || fieldName.equals("gender")
                                     || fieldName.equals("nationality")
                                     || fieldName.equals("hometown")

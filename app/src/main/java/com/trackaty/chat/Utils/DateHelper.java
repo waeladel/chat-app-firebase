@@ -31,18 +31,18 @@ public abstract class DateHelper {
      * @param birthdate
      * @return Age from the current date
      */
-    public static float getAge(final Date birthdate) {
+    public static int getAge(final Date birthdate) {
         return getAge(Calendar.getInstance().getTime(), birthdate);
     }
 
     /**
-     * Calculating age from a current date
+     * Calculating birthDate from a current date
      *
      * @param current
      * @param birthdate
      * @return Age from the current (arg) date
      */
-    public static float getAge(final Date current, final Date birthdate) {
+    public static int getAge(final Date current, final Date birthdate) {
 
         if (birthdate == null) {
             return 0;
@@ -58,7 +58,7 @@ public abstract class DateHelper {
 
             c.setTimeInMillis(current.getTime() - birthdate.getTime());
 
-            float result = 0;
+            int result = 0;
             result = c.get(Calendar.YEAR) - 1970;
             result += (float) c.get(Calendar.MONTH) / (float) 12;
             return result;

@@ -49,6 +49,7 @@
 
     <string-array name="user_relationship">
         <item>@string/single</item>
+        <item>@string/searching</item>
         <item>@string/committed</item>
         <item>@string/engaged</item>
         <item>@string/married</item>
@@ -62,6 +63,7 @@
     </string-array>
 
     <string-array name="yes_no">
+        <item>@string/not_specified</item>
         <item>@string/yes</item>
         <item>@string/no</item>
     </string-array>

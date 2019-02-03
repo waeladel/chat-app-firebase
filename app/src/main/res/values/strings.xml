@@ -6,9 +6,11 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="title_log_out">Log Out</string>
-    <string name="action_profile">Profile</string>
+    <string name="menu_log_out">Log Out</string>
+    <string name="menu_action_profile">Profile</string>
     <string name="menu_invite">Invite Friends</string>
+    <string name="menu_save">Save</string>
+
     <string name="love_button_hint">Love</string>
     <string name="message_button_hint">Message</string>
     <string name="block_button">Block</string>
@@ -29,6 +31,7 @@
     <string name="google_play_services_error">Connection failed</string>
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
+    <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
 
 
     <!--hints and titles-->
@@ -57,7 +60,7 @@
     <string name="user_drugs_headline">Drugs</string>
     <string name="user_drink_headline">Drink</string>
     <string name="user_athlete_headline">Athlete</string>
-    <string name="user_gamer_headline">Gamer</string>
+    <string name="user_gamer_headline">Games</string>
     <string name="user_travel_headline">Travel</string>
     <string name="user_cook_headline">Cook</string>
     <string name="user_read_headline">Read</string>
@@ -77,6 +80,7 @@
     <string name="user_twitter_hint">Twitter username</string>
     <string name="user_snapchat_hint">Snapchat username</string>
     <string name="user_tumblr_hint">Tumblr username</string>
+    <string name="user_pubg_hint">PUBG name</string>
     <string name="user_vk_hint">VK screen name</string>
     <string name="user_askfm_hint">Ask.fm username</string>
     <string name="user_curiouscat_hint">CuriousCat username</string>
@@ -109,6 +113,7 @@
     <string name="user_twitter_helper">Username without: https://twitter.com/ or @ symbol</string>
     <string name="user_snapchat_helper">Username without: https://snapchat.com/add/</string>
     <string name="user_tumblr_helper">Username without: .tumblr.com/</string>
+    <string name="user_pubg_helper">Full player name or character ID</string>
     <string name="user_vk_helper">User ID or screen name without: https://vk.com/</string>
     <string name="user_askfm_helper">Username without: https://ask.fm/</string>
     <string name="user_curiouscat_helper">Username without: https://curiouscat.me/</string>
@@ -137,6 +142,7 @@
 
     <!-- Relationship array -->
     <string name="single">Single</string>
+    <string name="searching">Actively searching</string>
     <string name="committed">In a relationship</string>
     <string name="engaged">Engaged</string>
     <string name="married">Married</string>
@@ -201,11 +207,10 @@
     <!--  Social and contacts array-->
 
     <!-- values-->
-    <string name="not_specified">Not Specified</string>
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>
     <string name="user_loved_by">Loved by %1$d people</string>
     <string name="user_pickedup_by">Received %1$d pick-up lines</string>
-    <string name="user_age_value">Age: %1$s</string>
+    <string name="user_age_value">Age: %1$d</string>
     <string name="user_gender_value">Gender: %1$s</string>
     <string name="user_country_value">Nationality: %1$s</string>
     <string name="user_hometown_value">Hometown: %1$s</string>
@@ -224,6 +229,8 @@
     <string name="user_travel_value">Travel: %1$s</string>
     <string name="user_cook_value">Cook: %1$s</string>
     <string name="user_read_value">Read: %1$s</string>
+
+    <string name="not_specified">Not Specified</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 

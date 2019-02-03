@@ -9,9 +9,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -68,9 +70,11 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
         }
 
-        // age text value and icons
-        if(userDataArrayList.get(position).getKey().equals("age")){
-            holder.itemValue.setText(context.getString(R.string.user_age_value, userDataArrayList.get(position).getValue()));
+        // birthDate text value and icons
+        if(userDataArrayList.get(position).getKey().equals("birthDate")){
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(Long.parseLong(userDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(context.getString(R.string.user_age_value, DateHelper.getAge(c.getTime())));
             holder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
         }
 

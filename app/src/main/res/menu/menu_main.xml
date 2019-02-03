@@ -6,7 +6,7 @@
     <item
         android:id="@+id/action_profile"
         android:orderInCategory="1"
-        android:title="@string/action_profile"
+        android:title="@string/menu_action_profile"
         app:showAsAction="never" />
 
     <item
@@ -18,6 +18,6 @@
     <item
         android:id="@+id/action_log_out"
         android:orderInCategory="3"
-        android:title="@string/title_log_out"
+        android:title="@string/menu_log_out"
         app:showAsAction="never" />
 </menu>

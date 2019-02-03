@@ -3,12 +3,16 @@ package com.trackaty.chat.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.ServerValue;
+
+import java.util.Map;
 
 @IgnoreExtraProperties
 public class User implements Parcelable{
 
-    private Long created;
+    private Object created ;
 
     private String name;
     private String avatar;
@@ -20,7 +24,7 @@ public class User implements Parcelable{
     private String interestedIn;
 
     public String gender;
-    public Long age;
+    public Long birthDate;
     public String horoscope;
     public String nationality;
     public String lives;
@@ -46,6 +50,7 @@ public class User implements Parcelable{
     private String twitter;
     private String snapchat;
     private String tumblr;
+    private String pubg;
     private String vk;
     private String askfm;
     private String curiouscat;
@@ -65,16 +70,10 @@ public class User implements Parcelable{
     //private Date joined;// anotation to put server timestamp
 
     public User() {
-
+        created = ServerValue.TIMESTAMP;
     }
 
-
     protected User(Parcel in) {
-        if (in.readByte() == 0) {
-            created = null;
-        } else {
-            created = in.readLong();
-        }
         name = in.readString();
         avatar = in.readString();
         coverImage = in.readString();
@@ -85,9 +84,9 @@ public class User implements Parcelable{
         interestedIn = in.readString();
         gender = in.readString();
         if (in.readByte() == 0) {
-            age = null;
+            birthDate = null;
         } else {
-            age = in.readLong();
+            birthDate = in.readLong();
         }
         horoscope = in.readString();
         nationality = in.readString();
@@ -122,6 +121,7 @@ public class User implements Parcelable{
         twitter = in.readString();
         snapchat = in.readString();
         tumblr = in.readString();
+        pubg = in.readString();
         vk = in.readString();
         askfm = in.readString();
         curiouscat = in.readString();
@@ -149,11 +149,16 @@ public class User implements Parcelable{
         }
     };
 
-    public Long getCreated() {
+    public Object getCreated() {
         return created;
     }
 
-    public void setCreated(Long created) {
+    @Exclude
+    public long getCreatedLong() {
+        return (long) created;
+    }
+
+    public void setCreated(Object created) {
         this.created = created;
     }
 
@@ -229,12 +234,12 @@ public class User implements Parcelable{
         this.gender = gender;
     }
 
-    public Long getAge() {
-        return age;
+    public Long getBirthDate() {
+        return birthDate;
     }
 
-    public void setAge(Long age) {
-        this.age = age;
+    public void setBirthDate(Long birthDate) {
+        this.birthDate = birthDate;
     }
 
     public String getHoroscope() {
@@ -429,6 +434,14 @@ public class User implements Parcelable{
         this.tumblr = tumblr;
     }
 
+    public String getPubg() {
+        return pubg;
+    }
+
+    public void setPubg(String pubg) {
+        this.pubg = pubg;
+    }
+
     public String getVk() {
         return vk;
     }
@@ -540,12 +553,6 @@ public class User implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (created == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(created);
-        }
         dest.writeString(name);
         dest.writeString(avatar);
         dest.writeString(coverImage);
@@ -555,11 +562,11 @@ public class User implements Parcelable{
         dest.writeString(relationship);
         dest.writeString(interestedIn);
         dest.writeString(gender);
-        if (age == null) {
+        if (birthDate == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeLong(age);
+            dest.writeLong(birthDate);
         }
         dest.writeString(horoscope);
         dest.writeString(nationality);
@@ -585,6 +592,7 @@ public class User implements Parcelable{
         dest.writeString(twitter);
         dest.writeString(snapchat);
         dest.writeString(tumblr);
+        dest.writeString(pubg);
         dest.writeString(vk);
         dest.writeString(askfm);
         dest.writeString(curiouscat);

@@ -5,12 +5,16 @@ import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -28,7 +32,9 @@ import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Variables;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -139,7 +145,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         Log.i(TAG, "onBindViewHolder called="+ mProfileDataArrayList.get(position).getKey());
 
         if (holder instanceof ImageHolder){
@@ -178,6 +184,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     // set frame layout to MATCH_PARENT
                     layoutParams = imageHolder.frameLayout.getLayoutParams();
                     layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                     imageHolder.frameLayout.setLayoutParams(layoutParams);
 
                     imageHolder.itemHeadline.setText(R.string.user_cover_headline);
@@ -273,10 +280,13 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             TextHolder textHolder = (TextHolder) holder;
 
             switch (mProfileDataArrayList.get(position).getKey()){
-                case "age":
+                case "birthDate":
+                    textHolder.itemHeadline.setText(context.getString(R.string.user_birthday_headline));
                     if(null != mProfileDataArrayList.get(position).getValue()){
-                        textHolder.itemValue.setText(mProfileDataArrayList.get(position).getValue());
-                        textHolder.itemHeadline.setText(context.getString(R.string.user_birthday_headline));
+                        Calendar c = Calendar.getInstance();
+                        c.setTimeInMillis(Long.parseLong(mProfileDataArrayList.get(position).getValue()));
+                        String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
+                        textHolder.itemValue.setText(birthDate);
                     }
                     break;
             }
@@ -299,53 +309,123 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     if(null != mProfileDataArrayList.get(position).getValue()){
                         // display selected item from the spinner ///
+                        /*int spinnerPosition = relationArrayAdapter.getPosition(mProfileDataArrayList.get(position).getValue());
+                        spinnerHolder.itemValue.setSelection(spinnerPosition);*/
                         switch (mProfileDataArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                             case "single":
                                 spinnerHolder.itemValue.setSelection(0);
                                 Log.d(TAG, "display 0 option on sorting spinner");
                                 break;
-                            case "committed":
+                            case "searching":
                                 spinnerHolder.itemValue.setSelection(1);
                                 Log.d(TAG, "display 1 option on sorting spinner");
                                 break;
-                            case "engaged":
+                            case "committed":
                                 spinnerHolder.itemValue.setSelection(2);
                                 Log.d(TAG, "display 2 option on sorting spinner");
                                 break;
-                            case "married":
+                            case "engaged":
                                 spinnerHolder.itemValue.setSelection(3);
                                 Log.d(TAG, "display 3 option on sorting spinner");
                                 break;
-                            case "civil union":
+                            case "married":
                                 spinnerHolder.itemValue.setSelection(4);
                                 Log.d(TAG, "display 4 option on sorting spinner");
                                 break;
-                            case "domestic partnership":
+                            case "civil union":
                                 spinnerHolder.itemValue.setSelection(5);
                                 Log.d(TAG, "display 5 option on sorting spinner");
                                 break;
-                            case "open relationship":
+                            case "domestic partnership":
                                 spinnerHolder.itemValue.setSelection(6);
                                 Log.d(TAG, "display 6 option on sorting spinner");
                                 break;
-                            case "open marriage":
+                            case "open relationship":
                                 spinnerHolder.itemValue.setSelection(7);
                                 Log.d(TAG, "display 7 option on sorting spinner");
                                 break;
-                            case "separated":
+                            case "open marriage":
                                 spinnerHolder.itemValue.setSelection(8);
                                 Log.d(TAG, "display 8 option on sorting spinner");
                                 break;
-                            case "divorced":
+                            case "separated":
                                 spinnerHolder.itemValue.setSelection(9);
                                 Log.d(TAG, "display 9 option on sorting spinner");
                                 break;
-                            case "widowed":
+                            case "divorced":
                                 spinnerHolder.itemValue.setSelection(10);
                                 Log.d(TAG, "display 10 option on sorting spinner");
                                 break;
+                            case "widowed":
+                                spinnerHolder.itemValue.setSelection(11);
+                                Log.d(TAG, "display 11 option on sorting spinner");
+                                break;
                         }
                     }
+
+                    spinnerHolder.itemValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
+                        // your code here for onItemSelected
+                        switch (selectedItemPosition){ // display sorting option selected from shared preference
+                            case 0:
+                                mProfileDataArrayList.get(position).setValue("single");
+                                Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 1:
+                                mProfileDataArrayList.get(position).setValue("searching");
+                                Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 2:
+                                mProfileDataArrayList.get(position).setValue("committed");
+                                Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 3:
+                                mProfileDataArrayList.get(position).setValue("engaged");
+                                Log.d(TAG, "spinner item 3 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 4:
+                                mProfileDataArrayList.get(position).setValue("married");
+                                Log.d(TAG, "spinner item 4 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 5:
+                                mProfileDataArrayList.get(position).setValue("civil union");
+                                Log.d(TAG, "spinner item 5 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 6:
+                                mProfileDataArrayList.get(position).setValue("domestic partnership");
+                                Log.d(TAG, "spinner item 6 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 7:
+                                mProfileDataArrayList.get(position).setValue("open relationship");
+                                Log.d(TAG, "spinner item 7 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 8:
+                                mProfileDataArrayList.get(position).setValue("open marriage");
+                                Log.d(TAG, "spinner item 8 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 9:
+                                mProfileDataArrayList.get(position).setValue("separated");
+                                Log.d(TAG, "spinner item 9 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 10:
+                                mProfileDataArrayList.get(position).setValue("divorced");
+                                Log.d(TAG, "spinner item 10 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                            case 11:
+                                mProfileDataArrayList.get(position).setValue("widowed");
+                                Log.d(TAG, "spinner item 11 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                break;
+                        }
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        // your code here
+                    }
+
+                });
 
                     break;
                 case "interestedIn":
@@ -375,6 +455,34 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 break;
                         }
                     }
+
+                    spinnerHolder.itemValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
+                            // your code here for onItemSelected
+                            switch (selectedItemPosition){ // display sorting option selected from shared preference
+                                case 0:
+                                    mProfileDataArrayList.get(position).setValue("men");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 1:
+                                    mProfileDataArrayList.get(position).setValue("women");
+                                    Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 2:
+                                    mProfileDataArrayList.get(position).setValue("both");
+                                    Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                            }
+
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+
+                    });
                     break;
 
                 case "gender":
@@ -404,6 +512,31 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 break;
                         }
                     }
+
+                    spinnerHolder.itemValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
+                            // your code here for onItemSelected
+                            switch (selectedItemPosition){ // display sorting option selected from shared preference
+                                case 0:
+                                    mProfileDataArrayList.get(position).setValue("male");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 1:
+                                    mProfileDataArrayList.get(position).setValue("female");
+                                    Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 2:
+                                    mProfileDataArrayList.get(position).setValue("transsexual");
+                                    Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                            }
+                        }
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+                    });
                     break;
                 case "horoscope":
                     spinnerHolder.itemHeadline.setText(R.string.user_horoscope_headline);
@@ -468,6 +601,67 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 break;
                         }
                     }
+
+                    spinnerHolder.itemValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
+                            // your code here for onItemSelected
+                            switch (selectedItemPosition){ // display sorting option selected from shared preference
+                                case 0:
+                                    mProfileDataArrayList.get(position).setValue("aries");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 1:
+                                    mProfileDataArrayList.get(position).setValue("taurus");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 2:
+                                    mProfileDataArrayList.get(position).setValue("gemini");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 3:
+                                    mProfileDataArrayList.get(position).setValue("cancer");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 4:
+                                    mProfileDataArrayList.get(position).setValue("leo");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 5:
+                                    mProfileDataArrayList.get(position).setValue("virgo");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 6:
+                                    mProfileDataArrayList.get(position).setValue("libra");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 7:
+                                    mProfileDataArrayList.get(position).setValue("scorpio");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 8:
+                                    mProfileDataArrayList.get(position).setValue("sagittarius");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 9:
+                                    mProfileDataArrayList.get(position).setValue("capricorn");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 10:
+                                    mProfileDataArrayList.get(position).setValue("aquarius");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                                case 11:
+                                    mProfileDataArrayList.get(position).setValue("pisces");
+                                    Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
+                                    break;
+                            }
+                        }
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+                    });
                     break;
             }
 
@@ -594,8 +788,6 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
             expandableHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
-
-
                 @Override
                 public void onPreOpen() {
                     Log.i(TAG, "expandableLayout onOpened "+expandableHolder.expandableLayout.getClosePosition());
@@ -659,8 +851,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         }
 
-        // age text value and icons
-        if(mProfileDataArrayList.get(position).getKey().equals("age")){
+        // birthDate text value and icons
+        if(mProfileDataArrayList.get(position).getKey().equals("birthDate")){
             holder.itemValue.setText(context.getString(R.string.user_age_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
         }
@@ -1050,6 +1242,22 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             row = itemView;
             itemValue = row.findViewById(R.id.edit_profile_value);
             inputLayout = row.findViewById(R.id.edit_profile_InputLayout);
+
+            itemValue.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence editable, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
+                    mProfileDataArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                }
+            });
 
         }
 

@@ -225,6 +225,10 @@ public class ProfileFragment extends Fragment {
                         mRelationship.setText(R.string.single);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_favorite_border_black_24dp);
                         break;
+                    case "searching":
+                        mRelationship.setText(R.string.searching);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_search_black_24dp);
+                        break;
                     case "committed":
                         mRelationship.setText(R.string.committed);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_two_hearts);

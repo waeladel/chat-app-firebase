@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -40,18 +41,21 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         //Log.i(TAG, "onBindViewHolder called="+ habitsArrayList.get(position));
 
         if(null != habitsArrayList.get(position).getValue()){
             switch (habitsArrayList.get(position).getValue()){ // display sorting option selected from shared preference
                 case "true":
-                    holder.itemValue.setSelection(0);
+                    holder.itemValue.setSelection(1);
                     Log.d(TAG, "display 0 option on sorting spinner");
                     break;
                 case "false":
-                    holder.itemValue.setSelection(1);
+                    holder.itemValue.setSelection(2);
                     Log.d(TAG, "display 1 option on sorting spinner");
+                    break;
+                default:
+                    holder.itemValue.setSelection(0);
                     break;
             }
         }
@@ -86,8 +90,6 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
                 break;
         }
 
-        Log.i(TAG, "onBindViewHolder get value="+ habitsArrayList.get(position).getValue());
-
         //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
 
@@ -114,6 +116,33 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
             row = itemView;
             itemValue = row.findViewById(R.id.item_value);
             itemTitle = row.findViewById(R.id.item_title);
+
+            itemValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
+                    // your code here for onItemSelected
+                    switch (selectedItemPosition){ // display sorting option selected from shared preference
+                        case 1:
+                            habitsArrayList.get(getAdapterPosition()).setValue("true");
+                            Log.d(TAG, "spinner item 0 is selected= " +habitsArrayList.get(getAdapterPosition()).getValue());
+                            break;
+                        case 2:
+                            habitsArrayList.get(getAdapterPosition()).setValue("false");
+                            Log.d(TAG, "spinner item 1 is selected= " +habitsArrayList.get(getAdapterPosition()).getValue());
+                            break;
+                        default:
+                            habitsArrayList.get(getAdapterPosition()).setValue(null);
+                            break;
+                    }
+
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                    // your code here
+                }
+
+            });
 
         }
 
