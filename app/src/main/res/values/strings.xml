@@ -108,10 +108,33 @@
     <string name="user_school_helper">E.g., Studied at Santa Monica High School</string>
 
     <string name="user_Phone_helper">E.g., 010xxxxxxxx</string>
-    <string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
+    <string name="user_facebook_helper">Username or ID profile link</string>
+    <string name="user_instagram_helper">Username or profile link</string>
+    <string name="user_twitter_helper">Username without @ or profile link</string>
+    <string name="user_snapchat_helper">Username or stories link</string>
+    <string name="user_tumblr_helper">Username or profile link</string>
+    <string name="user_pubg_helper">Full player name or character ID</string>
+    <string name="user_vk_helper">User ID, screen name or profile link</string>
+    <string name="user_askfm_helper">Username or profile link</string>
+    <string name="user_curiouscat_helper">Username or profile link</string>
+    <string name="user_saraha_helper">Username or profile link</string>
+    <string name="user_pinterest_helper">Username or profile link</string>
+    <string name="user_soundcloud_helper">Username or profile link</string>
+    <string name="user_spotify_helper">Username, ID or profile link</string>
+    <string name="user_anghami_helper">User Id or profile link</string>
+    <string name="user_twitch_helper">Username or profile link</string>
+    <string name="user_youtube_helper">Your channel link</string>
+    <string name="user_linkedIn_helper">Username or profile link</string>
+    <string name="user_wikipedia_helper">Your wikipedia page link</string>
+    <string name="user_website_helper">Your website link</string>
+
+    <string name="user_pubg_clipboard_label">PUBG name</string>
+    <string name="user_pubg_clipboard_toast">PUBG name has been copied to clipboard</string>
+
+    <!--<string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
     <string name="user_instagram_helper">Username without: https://instagram.com/</string>
     <string name="user_twitter_helper">Username without: https://twitter.com/ or @ symbol</string>
-    <string name="user_snapchat_helper">Username without: https://snapchat.com/add/</string>
+    <string name="user_snapchat_helper">Username without: https://story.snapchat.com/s/</string>
     <string name="user_tumblr_helper">Username without: .tumblr.com/</string>
     <string name="user_pubg_helper">Full player name or character ID</string>
     <string name="user_vk_helper">User ID or screen name without: https://vk.com/</string>
@@ -126,7 +149,7 @@
     <string name="user_youtube_helper">Your channel link</string>
     <string name="user_linkedIn_helper">Username without: https://linkedin.com/in/</string>
     <string name="user_wikipedia_helper">Your wikipedia page link</string>
-    <string name="user_website_helper">Your website link</string>
+    <string name="user_website_helper">Your website link</string>-->
 
     <string name="crop_activity_title">Crop</string>
 
@@ -205,6 +228,12 @@
     <string name="website">Website</string>
 
     <!--  Social and contacts array-->
+
+    <!-- public array -->
+    <string name="social_public">Public, anyone can see it</string>
+    <string name="social_private">Private, I must approve a reveal request</string>
+
+    <!-- gender type array -->
 
     <!-- values-->
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>

@@ -5,9 +5,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.models.Profile;
@@ -18,279 +20,384 @@ import java.util.Calendar;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder> {
+public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final static String TAG = ProfileAdapter.class.getSimpleName();
+
+
+    private  static final int SECTION_ABOUT = 500;
+    private  static final int SECTION_SOCIAL = 600;
+    private  static final int SECTION_WORK = 700;
+    private  static final int SECTION_HABITS = 800;
 
     public ArrayList<Profile> userDataArrayList;
     public Context context;
 
+    private ItemClickListener itemClickListener;
 
-    public ProfileAdapter(Context context, ArrayList<Profile> userDataArrayList){
+
+
+    public ProfileAdapter(Context context, ArrayList<Profile> userDataArrayList , ItemClickListener itemClickListener){
         this.userDataArrayList = userDataArrayList;
         this.context = context;
-
+        this.itemClickListener = itemClickListener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_info_item, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        if(viewType == SECTION_SOCIAL){
+            View ButtonView = LayoutInflater.from(parent.getContext()).inflate(R.layout.profile_social_button_item, parent, false);
+            return new ButtonsViewHolder(ButtonView, itemClickListener);
+        }else{
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_info_item, parent, false);
+            return new ViewHolder(view);
+        }
+
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.i(TAG, "onBindViewHolder called="+ userDataArrayList.get(position));
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        //Log.i(TAG, "onBindViewHolder called="+ userDataArrayList.get(position));
 
-        switch (userDataArrayList.get(position).getSection()){
-            case 1:
-                holder.sectionHeader.setText(R.string.about_user_headline);
-                Log.i(TAG, "about section="+ userDataArrayList.get(position).getKey());
-                break;
-            case 2:
-                holder.sectionHeader.setText(R.string.user_work_school_headline);
-                Log.i(TAG, "work education section="+ userDataArrayList.get(position).getKey());
+        if (holder instanceof ButtonsViewHolder){
+            ButtonsViewHolder buttonHolder = (ButtonsViewHolder) holder;
 
-                break;
-            case 3:
-                holder.sectionHeader.setText(R.string.user_habits_hobbies_headline);
-                Log.i(TAG, "habits section="+ userDataArrayList.get(position).getKey());
-                break;
-        }
+            buttonHolder.sectionHeader.setText(R.string.user_social_headline);
+            Log.d(TAG, "social section="+ userDataArrayList.get(position).getKey());
 
-        // if not first item check if item above has the same header
-        if (position > 0 && userDataArrayList.get(position - 1).getSection()
-                == (userDataArrayList.get(position).getSection())) {
-            holder.divider.setVisibility(View.GONE);
-            holder.sectionHeader.setVisibility(View.GONE);
-        } else {
-            holder.divider.setVisibility(View.VISIBLE);
-            holder.sectionHeader.setVisibility(View.VISIBLE);
+            // if not first item check if item above has the same header
+            if (position > 0 && userDataArrayList.get(position - 1).getSection()
+                    == (userDataArrayList.get(position).getSection())) {
+                buttonHolder.divider.setVisibility(View.GONE);
+                buttonHolder.sectionHeader.setVisibility(View.GONE);
+            } else {
+                buttonHolder.divider.setVisibility(View.VISIBLE);
+                buttonHolder.sectionHeader.setVisibility(View.VISIBLE);
+            }
 
-        }
-
-        // birthDate text value and icons
-        if(userDataArrayList.get(position).getKey().equals("birthDate")){
-            Calendar c = Calendar.getInstance();
-            c.setTimeInMillis(Long.parseLong(userDataArrayList.get(position).getValue()));
-            holder.itemValue.setText(context.getString(R.string.user_age_value, DateHelper.getAge(c.getTime())));
-            holder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
-        }
-
-        //gender text value and icons
-        if(userDataArrayList.get(position).getKey().equals("gender")){
-
-            switch (userDataArrayList.get(position).getValue()) {
-                case "male":
-                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.male)));
-                    holder.itemIcon.setImageResource(R.drawable.ic_male);
+            switch (userDataArrayList.get(position).getKey()) {
+                case "phone":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_phone_black_24dp) , null, null, null);
                     break;
-                case "female":
-                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.female)));
-                    holder.itemIcon.setImageResource(R.drawable.ic_female);
+                case "facebook":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_facebook) , null, null, null);
                     break;
-                case"transsexual":
-                    holder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.transsexual)));
-                    holder.itemIcon.setImageResource(R.drawable.ic_transsexual);
+                case "instagram":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_instagram) , null, null, null);
                     break;
-                default:
-                    holder.itemValue.setText(R.string.not_specified);
-                    holder.itemIcon.setVisibility(View.INVISIBLE);
+                case "twitter":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_twitter) , null, null, null);
+                    break;
+                case "snapchat":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_snapchat) , null, null, null);
+                    break;
+                case "tumblr":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_tumblr) , null, null, null);
+                    break;
+                case "pubg":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_pubg_text) , null, null, null);
+                    //buttonHolder.itemValue.setEnabled(false);
+                    break;
+                case "vk":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_vk_social_logotype) , null, null, null);
+                    break;
+                case "askfm":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_askfm) , null, null, null);
+                    break;
+                case "curiouscat":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_curiouscat) , null, null, null);
+                    break;
+                case "saraha":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_saraha) , null, null, null);
+                    break;
+                case "pinterest":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_pinterest) , null, null, null);
+                    break;
+                case "soundcloud":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_soundcloud) , null, null, null);
+                    break;
+                case "spotify":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_spotify) , null, null, null);
+                    break;
+                case "anghami":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_anghami_black) , null, null, null);
+                    break;
+                case "twitch":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_twitch) , null, null, null);
+                    break;
+                case "youtube":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_youtube) , null, null, null);
+                    break;
+                case "linkedIn":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_linkedin) , null, null, null);
+                    break;
+                case "wikipedia":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_wikipedia_logo) , null, null, null);
+                    break;
+                case "website":
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(context.getResources().getDrawable(R.drawable.ic_website_black_24dp) , null, null, null);
+                    break;
+
+            }
+
+            buttonHolder.itemValue.setText(userDataArrayList.get(position).getValue());
+
+        }else{
+            ViewHolder viewHolder = (ViewHolder) holder;
+            Log.d(TAG, "about section="+ userDataArrayList.get(position).getKey());
+
+            switch (userDataArrayList.get(position).getSection()){
+                case SECTION_ABOUT:
+                    viewHolder.sectionHeader.setText(R.string.about_user_headline);
+                    Log.d(TAG, "about section="+ userDataArrayList.get(position).getKey());
+                    break;
+                case SECTION_WORK:
+                    viewHolder.sectionHeader.setText(R.string.user_work_school_headline);
+                    Log.d(TAG, "work education section="+ userDataArrayList.get(position).getKey());
+
+                    break;
+                case SECTION_HABITS:
+                    viewHolder.sectionHeader.setText(R.string.user_habits_hobbies_headline);
+                    Log.d(TAG, "habits section="+ userDataArrayList.get(position).getKey());
                     break;
             }
-        }// end of gender text value and icons
 
-        // nationality text value and icons
-        if(userDataArrayList.get(position).getKey().equals("nationality")){
-            holder.itemValue.setText(context.getString(R.string.user_country_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_flag_black_24dp);
-        }
+            // if not first item check if item above has the same header
+            if (position > 0 && userDataArrayList.get(position - 1).getSection()
+                    == (userDataArrayList.get(position).getSection())) {
+                viewHolder.divider.setVisibility(View.GONE);
+                viewHolder.sectionHeader.setVisibility(View.GONE);
+            } else {
+                viewHolder.divider.setVisibility(View.VISIBLE);
+                viewHolder.sectionHeader.setVisibility(View.VISIBLE);
 
-        // hometown text value and icons
-        if(userDataArrayList.get(position).getKey().equals("hometown")){
-            holder.itemValue.setText(context.getString(R.string.user_hometown_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
-        }
-
-        // horoscope text value and icons
-        if(userDataArrayList.get(position).getKey().equals("horoscope")){
-            switch (userDataArrayList.get(position).getValue()) {
-                case "aries":
-                    holder.itemValue.setText(R.string.aries);
-                    holder.itemIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
-                    break;
-                case "taurus":
-                    holder.itemValue.setText(R.string.taurus);
-                    holder.itemIcon.setImageResource(R.drawable.ic_taurus_zodiac_symbol_of_bull_head_front);
-                    break;
-                case"gemini":
-                    holder.itemValue.setText(R.string.gemini);
-                    holder.itemIcon.setImageResource(R.drawable.ic_gemini_zodiac_symbol_of_two_twins_faces);
-                    break;
-                case"cancer":
-                    holder.itemValue.setText(R.string.cancer);
-                    holder.itemIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette);
-                    break;
-                case"leo":
-                    holder.itemValue.setText(R.string.leo);
-                    holder.itemIcon.setImageResource(R.drawable.ic_leo_astrological_sign);
-                    break;
-                case"virgo":
-                    holder.itemValue.setText(R.string.virgo);
-                    holder.itemIcon.setImageResource(R.drawable.ic_virgo_woman_head_shape_symbol);
-                    break;
-                case"libra":
-                    holder.itemValue.setText(R.string.libra);
-                    holder.itemIcon.setImageResource(R.drawable.ic_libra_scale_balance_symbol);
-                    break;
-                case"scorpio":
-                    holder.itemValue.setText(R.string.scorpio);
-                    holder.itemIcon.setImageResource(R.drawable.ic_scorpio_vertical_animal_shape_of_zodiac_symbol);
-                    break;
-                case"sagittarius":
-                    holder.itemValue.setText(R.string.sagittarius);
-                    holder.itemIcon.setImageResource(R.drawable.ic_sagittarius_arch_and_arrow_symbol);
-                    break;
-                case"capricorn":
-                    holder.itemValue.setText(R.string.capricorn);
-                    holder.itemIcon.setImageResource(R.drawable.ic_capricorn_goat_animal_shape_of_zodiac_sign);
-                    break;
-                case"aquarius":
-                    holder.itemValue.setText(R.string.aquarius);
-                    holder.itemIcon.setImageResource(R.drawable.ic_aquarius_water_container_symbol);
-                    break;
-                case"pisces":
-                    holder.itemValue.setText(R.string.pisces);
-                    holder.itemIcon.setImageResource(R.drawable.ic_pisces_astrological_sign_symbol);
-                    break;
-                default:
-                    holder.itemValue.setText(R.string.horoscope_not_specified);
-                    holder.itemIcon.setVisibility(View.INVISIBLE);
-                    break;
             }
-        }//end of horoscope text value and icons
 
-        // lives text value and icons
-        if(userDataArrayList.get(position).getKey().equals("lives")){
-            holder.itemValue.setText(context.getString(R.string.user_lives_in_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_home_black_24dp);
-        }
 
-        // politics text value and icons
-        if(userDataArrayList.get(position).getKey().equals("politics")){
-            holder.itemValue.setText(context.getString(R.string.user_politics_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_voting);
-        }
-
-        // religion text value and icons
-        if(userDataArrayList.get(position).getKey().equals("religion")){
-            holder.itemValue.setText(context.getString(R.string.user_religion_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_praying_hands);
-        }
-
-        // work text value and icons
-        if(userDataArrayList.get(position).getKey().equals("work")){
-            holder.itemValue.setText(context.getString(R.string.user_work_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_work_black_24dp);
-        }
-        // college text value and icons
-        if(userDataArrayList.get(position).getKey().equals("college")){
-            holder.itemValue.setText(context.getString(R.string.user_college_value, userDataArrayList.get(position).getValue()));
-            holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
-        }
-
-    // college text value and icons
-        if(userDataArrayList.get(position).getKey().equals("school")){
-        holder.itemValue.setText(context.getString(R.string.user_school_value, userDataArrayList.get(position).getValue()));
-        holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
-    }
-
-        // smoke text value and icons
-        if(userDataArrayList.get(position).getKey().equals("smoke")){
-            holder.itemIcon.setImageResource(R.drawable.ic_smoking_rooms_black_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.no)));
+            // birthDate text value and icons
+            if(userDataArrayList.get(position).getKey().equals("birthDate")){
+                Calendar c = Calendar.getInstance();
+                c.setTimeInMillis(Long.parseLong(userDataArrayList.get(position).getValue()));
+                viewHolder.itemValue.setText(context.getString(R.string.user_age_value, DateHelper.getAge(c.getTime())));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
             }
-        }
 
-        // shisha text value and icons
-        if(userDataArrayList.get(position).getKey().equals("shisha")){
-            holder.itemIcon.setImageResource(R.drawable.ic_shisha);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.no)));
-            }
-        }
+            //gender text value and icons
+            if(userDataArrayList.get(position).getKey().equals("gender")){
 
-        // drugs text value and icons
-        if(userDataArrayList.get(position).getKey().equals("drugs")){
-            holder.itemIcon.setImageResource(R.drawable.ic_injection);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.no)));
-            }
-        }
+                switch (userDataArrayList.get(position).getValue()) {
+                    case "male":
+                        viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.male)));
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_male);
+                        break;
+                    case "female":
+                        viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.female)));
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_female);
+                        break;
+                    case"transsexual":
+                        viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.transsexual)));
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_transsexual);
+                        break;
+                    default:
+                        viewHolder.itemValue.setText(R.string.not_specified);
+                        viewHolder.itemIcon.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }// end of gender text value and icons
 
-        // drink text value and icons
-        if(userDataArrayList.get(position).getKey().equals("drink")){
-            holder.itemIcon.setImageResource(R.drawable.ic_drinking_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.no)));
+            // nationality text value and icons
+            if(userDataArrayList.get(position).getKey().equals("nationality")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_country_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_flag_black_24dp);
             }
-        }
 
-        // athlete text value and icons
-        if(userDataArrayList.get(position).getKey().equals("athlete")){
-            holder.itemIcon.setImageResource(R.drawable.ic_fitness_athlete_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.no)));
+            // hometown text value and icons
+            if(userDataArrayList.get(position).getKey().equals("hometown")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_hometown_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
             }
-        }
-        // gamer text value and icons
-        if(userDataArrayList.get(position).getKey().equals("gamer")){
-            holder.itemIcon.setImageResource(R.drawable.ic_games_black_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.no)));
+
+            // horoscope text value and icons
+            if(userDataArrayList.get(position).getKey().equals("horoscope")){
+                switch (userDataArrayList.get(position).getValue()) {
+                    case "aries":
+                        viewHolder.itemValue.setText(R.string.aries);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
+                        break;
+                    case "taurus":
+                        viewHolder.itemValue.setText(R.string.taurus);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_taurus_zodiac_symbol_of_bull_head_front);
+                        break;
+                    case"gemini":
+                        viewHolder.itemValue.setText(R.string.gemini);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_gemini_zodiac_symbol_of_two_twins_faces);
+                        break;
+                    case"cancer":
+                        viewHolder.itemValue.setText(R.string.cancer);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette);
+                        break;
+                    case"leo":
+                        viewHolder.itemValue.setText(R.string.leo);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_leo_astrological_sign);
+                        break;
+                    case"virgo":
+                        viewHolder.itemValue.setText(R.string.virgo);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_virgo_woman_head_shape_symbol);
+                        break;
+                    case"libra":
+                        viewHolder.itemValue.setText(R.string.libra);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_libra_scale_balance_symbol);
+                        break;
+                    case"scorpio":
+                        viewHolder.itemValue.setText(R.string.scorpio);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_scorpio_vertical_animal_shape_of_zodiac_symbol);
+                        break;
+                    case"sagittarius":
+                        viewHolder.itemValue.setText(R.string.sagittarius);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_sagittarius_arch_and_arrow_symbol);
+                        break;
+                    case"capricorn":
+                        viewHolder.itemValue.setText(R.string.capricorn);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_capricorn_goat_animal_shape_of_zodiac_sign);
+                        break;
+                    case"aquarius":
+                        viewHolder.itemValue.setText(R.string.aquarius);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_aquarius_water_container_symbol);
+                        break;
+                    case"pisces":
+                        viewHolder.itemValue.setText(R.string.pisces);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_pisces_astrological_sign_symbol);
+                        break;
+                    default:
+                        viewHolder.itemValue.setText(R.string.horoscope_not_specified);
+                        viewHolder.itemIcon.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }//end of horoscope text value and icons
+
+            // lives text value and icons
+            if(userDataArrayList.get(position).getKey().equals("lives")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_lives_in_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_home_black_24dp);
             }
-        }
-        // travel text value and icons
-        if(userDataArrayList.get(position).getKey().equals("travel")){
-            holder.itemIcon.setImageResource(R.drawable.ic_flight_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.no)));
+
+            // politics text value and icons
+            if(userDataArrayList.get(position).getKey().equals("politics")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_politics_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_voting);
             }
-        }
-        // cook text value and icons
-        if(userDataArrayList.get(position).getKey().equals("cook")){
-            holder.itemIcon.setImageResource(R.drawable.ic_cook_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.no)));
+
+            // religion text value and icons
+            if(userDataArrayList.get(position).getKey().equals("religion")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_religion_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_praying_hands);
             }
-        }
-        // read text value and icons
-        if(userDataArrayList.get(position).getKey().equals("read")){
-            holder.itemIcon.setImageResource(R.drawable.ic_library_book_24dp);
-            if(userDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.yes)));
-            }else{
-                holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.no)));
+
+            // work text value and icons
+            if(userDataArrayList.get(position).getKey().equals("work")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_work_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_work_black_24dp);
             }
-        }
+            // college text value and icons
+            if(userDataArrayList.get(position).getKey().equals("college")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_college_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
+            }
+
+            // college text value and icons
+            if(userDataArrayList.get(position).getKey().equals("school")){
+                viewHolder.itemValue.setText(context.getString(R.string.user_school_value, userDataArrayList.get(position).getValue()));
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
+            }
+
+            // smoke text value and icons
+            if(userDataArrayList.get(position).getKey().equals("smoke")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_smoking_rooms_black_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.no)));
+                }
+            }
+
+            // shisha text value and icons
+            if(userDataArrayList.get(position).getKey().equals("shisha")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_shisha);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.no)));
+                }
+            }
+
+            // drugs text value and icons
+            if(userDataArrayList.get(position).getKey().equals("drugs")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_injection);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.no)));
+                }
+            }
+
+            // drink text value and icons
+            if(userDataArrayList.get(position).getKey().equals("drink")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_drinking_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.no)));
+                }
+            }
+
+            // athlete text value and icons
+            if(userDataArrayList.get(position).getKey().equals("athlete")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_fitness_athlete_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.no)));
+                }
+            }
+            // gamer text value and icons
+            if(userDataArrayList.get(position).getKey().equals("gamer")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_games_black_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.no)));
+                }
+            }
+            // travel text value and icons
+            if(userDataArrayList.get(position).getKey().equals("travel")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_flight_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.no)));
+                }
+            }
+            // cook text value and icons
+            if(userDataArrayList.get(position).getKey().equals("cook")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_cook_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.no)));
+                }
+            }
+            // read text value and icons
+            if(userDataArrayList.get(position).getKey().equals("read")){
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_library_book_24dp);
+                if(userDataArrayList.get(position).getValue().equals("true")){
+                    viewHolder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.yes)));
+                }else{
+                    viewHolder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.no)));
+                }
+            }
+        }//end of if instance of
 
        /* holder.itemValue.setText(mProfileDataArrayList.get(position).getKey()+" value= "
                 +mProfileDataArrayList.get(position).getValue());*/
@@ -306,6 +413,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
         //the size of the list
         return  userDataArrayList.size();
         //return  10;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        Log.d(TAG, "getSection()= "+ (userDataArrayList.get(position).getSection()));
+        if(userDataArrayList.get(position).getSection()== SECTION_SOCIAL){
+            return SECTION_SOCIAL;
+        }else{
+            return SECTION_ABOUT;
+        }
     }
 
     /// ViewHolder for trips list /////
@@ -329,6 +447,42 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
         }
 
+    }
+
+    /// ViewHolder for trips list /////
+    public class ButtonsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
+        View row;
+        private Button itemValue;
+        private TextView  sectionHeader;
+        private View divider;
+        ItemClickListener itemClickListener;
+
+
+        public ButtonsViewHolder(View itemView, ItemClickListener itemClickListener) {
+            super(itemView);
+            //itemView = row;
+            this.itemClickListener = itemClickListener;
+
+            row = itemView;
+            itemValue = row.findViewById(R.id.social_button);
+            sectionHeader = row.findViewById(R.id.section_header);
+            divider = row.findViewById(R.id.section_divider);
+
+            itemValue.setOnClickListener(this);
+
+
+        }
+
+        @Override
+        public void onClick(View view) {
+            itemClickListener.onClick(view, getAdapterPosition(), false);
+        }
+
+        /*// needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }*/
     }
 
 

@@ -1,0 +1,1 @@
+package com.trackaty.chat.Utils;import com.trackaty.chat.models.Profile;import com.trackaty.chat.models.Social;import java.util.Comparator;public class SortSocial implements Comparator<Social>{    // Used for sorting in ascending order of    // roll number    public int compare(Social a, Social b)    {        return a.getOrder() - b.getOrder();    }}

@@ -296,6 +296,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/interested_divider" />
 
+
         <ImageView
             android:id="@+id/interested_in_icon"
             android:layout_width="24dp"
@@ -317,15 +318,6 @@
             app:layout_constraintTop_toTopOf="@+id/interested_in_icon"
             tools:text="@tools:sample/date/ddmmyy" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/social_buttons_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_interested_value" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/see_more_button"
             android:layout_width="0dp"
@@ -343,7 +335,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/social_buttons_recycler"/>
+            app:layout_constraintTop_toBottomOf="@+id/user_interested_value"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

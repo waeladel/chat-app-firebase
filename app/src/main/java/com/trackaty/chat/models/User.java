@@ -14,9 +14,9 @@ public class User implements Parcelable{
 
     private Object created ;
 
-    private String name;
     private String avatar;
     private String coverImage;
+    private String name;
     private String biography;
     private int loveCounter;
     private int PickupCounter;
@@ -26,44 +26,48 @@ public class User implements Parcelable{
     public String gender;
     public Long birthDate;
     public String horoscope;
-    public String nationality;
     public String lives;
     public String hometown;
+    public String nationality;
     public String religion;
     public String politics;
     public String work;
     public String college;
     public String school;
+
     public Boolean smoke;
     public Boolean shisha;
     public Boolean drugs;
     public Boolean drink;
-    public Boolean athlete;
     public Boolean gamer;
-    public Boolean travel;
     public Boolean cook;
     public Boolean read;
+    public Boolean athlete;
+    public Boolean travel;
 
-    private String phone;
-    private String facebook;
-    private String instagram;
-    private String twitter;
-    private String snapchat;
-    private String tumblr;
-    private String pubg;
-    private String vk;
-    private String askfm;
-    private String curiouscat;
-    private String saraha;
-    private String pinterest;
-    private String soundcloud;
-    private String spotify;
-    private String anghami;
-    private String twitch;
-    private String youtube;
-    private String linkedIn;
-    private String wikipedia;
-    private String website;
+
+
+    public String phone;
+    public String facebook;
+    public String instagram;
+    public String twitter;
+    public String snapchat;
+    public String tumblr;
+    public String pubg;
+    public String vk;
+    public String askfm;
+    public String curiouscat;
+    public String saraha;
+    public String pinterest;
+    public String soundcloud;
+    public String spotify;
+    public String anghami;
+    public String twitch;
+    public String youtube;
+    public String linkedIn;
+    public String wikipedia;
+    public String website;
+
 
 
     // startedAt: firebase.database.ServerValue.TIMESTAMP
@@ -151,11 +155,6 @@ public class User implements Parcelable{
 
     public Object getCreated() {
         return created;
-    }
-
-    @Exclude
-    public long getCreatedLong() {
-        return (long) created;
     }
 
     public void setCreated(Object created) {

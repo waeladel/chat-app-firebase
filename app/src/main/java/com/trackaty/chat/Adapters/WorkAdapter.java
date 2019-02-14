@@ -59,8 +59,9 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
             case "work":
                 if (null != workArrayList.get(position).getValue()) {
                     holder.itemValue.setText(workArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);
@@ -86,8 +87,9 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
             case "college":
                 if (null != workArrayList.get(position).getValue()) {
                     holder.itemValue.setText(workArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);
@@ -113,8 +115,9 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
             case "school":
                 if (null != workArrayList.get(position).getValue()) {
                     holder.itemValue.setText(workArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);

@@ -59,8 +59,9 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
             case "nationality":
                 if(null != aboutArrayList.get(position).getValue()){
                     holder.itemValue.setText(aboutArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue ,SMALL_INPUT_MAX_LENGTH);
@@ -86,8 +87,9 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
             case "lives":
                 if(null != aboutArrayList.get(position).getValue()){
                     holder.itemValue.setText(aboutArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue ,SMALL_INPUT_MAX_LENGTH);
@@ -113,8 +115,9 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
             case "hometown":
                 if(null != aboutArrayList.get(position).getValue()){
                     holder.itemValue.setText(aboutArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(SMALL_INPUT_MAX_LENGTH)});
                 setMaxLength(holder.itemValue ,SMALL_INPUT_MAX_LENGTH);
@@ -140,8 +143,9 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
             case "religion":
                 if(null != aboutArrayList.get(position).getValue()){
                     holder.itemValue.setText(aboutArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(BIG_INPUT_MAX_LENGTH )});
                 setMaxLength(holder.itemValue ,BIG_INPUT_MAX_LENGTH);
@@ -167,8 +171,9 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
             case "politics":
                 if(null != aboutArrayList.get(position).getValue()){
                     holder.itemValue.setText(aboutArrayList.get(position).getValue());
+                }else{
+                    holder.itemValue.setText(null);
                 }
-
                 // set Max length
                 //holder.itemValue.setFilters(new InputFilter[] {new InputFilter.LengthFilter(BIG_INPUT_MAX_LENGTH )});
                 setMaxLength(holder.itemValue ,BIG_INPUT_MAX_LENGTH);

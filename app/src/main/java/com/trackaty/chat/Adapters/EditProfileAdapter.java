@@ -30,6 +30,7 @@ import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
+import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.Variables;
 
 import java.text.DateFormat;
@@ -44,14 +45,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final static String TAG = EditProfileAdapter.class.getSimpleName();
 
-    private  static final int SECTION_IMAGE = 1;
-    private  static final int SECTION_EDIT_TEXT = 2;
-    private  static final int SECTION_TEXT = 3;
-    private  static final int SECTION_SPINNER = 4;
-    private  static final int SECTION_ABOUT = 5;
-    private  static final int SECTION_WORK = 6;
-    private  static final int SECTION_HABITS = 7;
-    private  static final int SECTION_SOCIAL = 8;
+    private  static final int SECTION_IMAGE = 100;
+    private  static final int SECTION_EDIT_TEXT = 200;
+    private  static final int SECTION_TEXT = 300;
+    private  static final int SECTION_SPINNER = 400;
+    private  static final int SECTION_ABOUT = 500;
+    private  static final int SECTION_WORK = 600;
+    private  static final int SECTION_HABITS = 700;
+    private  static final int SECTION_SOCIAL = 800;
 
     private  static final String SECTION_ABOUT_HEADLINE = "about";
     private  static final String SECTION_WORK_HEADLINE  = "work_and_education";
@@ -69,7 +70,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public ArrayList<Profile> aboutArrayList ;
     public ArrayList<Profile> workArrayList ;
     public ArrayList<Profile> habitsArrayList;
-    public ArrayList<Profile> socialArrayList;
+    public ArrayList<Social> socialArrayList;
     public ArrayList<Variables> variablesArrayList;
 
     public AboutAdapter aboutAdapter;
@@ -87,7 +88,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ,ArrayList<Profile> aboutArrayList
             ,ArrayList<Profile> workArrayList
             ,ArrayList<Profile> habitsArrayList
-            ,ArrayList<Profile> socialArrayList
+            ,ArrayList<Social> socialArrayList
             ,ArrayList<Variables> variablesArrayList
             , ItemClickListener itemClickListener){
 
@@ -115,29 +116,29 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         switch (viewType){
-            case 1:
+            case 100:
                 // SECTION_IMAGE;
             View imageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_image_item, parent, false);
             return new ImageHolder(imageView , itemClickListener);
-            case 2:
+            case 200:
                 // SECTION_EDIT_TEXT;
                 View textInputView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_item, parent, false);
                 return new TextInputHolder(textInputView);
-            case 3:
+            case 300:
                 // SECTION_TEXT;
                 View textView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_child_item, parent, false);
                 return new TextHolder(textView, itemClickListener);
-            case 4:
+            case 400:
                 // SECTION_SPINNER;
                 View spinnerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_spinner_item, parent, false);
                 return new SpinnerHolder(spinnerView);
-            case 5:
+            case 500:
                 // SECTION_ABOUT;
-            case 6:
+            case 600:
                 // SECTION_WORK;
-            case 7:
+            case 700:
                 // SECTION_HABITS;
-            case 8:
+            case 800:
                 // SECTION_SOCIAL;
         }
         View expandableView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_expandable_parent, parent, false);
@@ -1106,7 +1107,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             if (mProfileDataArrayList.get(i).getSection() == SECTION_WORK
                     && !mProfileDataArrayList.get(i).getKey().equals(SECTION_WORK_HEADLINE)) {
                 Log.d(TAG, "mProfileDataArrayList SECTION_WORK= " + mProfileDataArrayList.get(i).getKey());
-                workArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
+                socialArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
                         ,mProfileDataArrayList.get(i).getValue(), mProfileDataArrayList.get(i).getSection()));
 
                 mProfileDataArrayList.remove(mProfileDataArrayList.get(i));
@@ -1131,24 +1132,24 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public int getItemViewType(int position) {
 
         switch (mProfileDataArrayList.get(position).getSection()){
-            case 1:
+            case 100:
                 return SECTION_IMAGE;
-            case 2:
+            case 200:
                 return SECTION_EDIT_TEXT;
-            case 3:
+            case 300:
                 return SECTION_TEXT;
-            case 4:
+            case 400:
                 return SECTION_SPINNER;
-            case 5:
+            case 500:
                 return SECTION_ABOUT;
-            case 6:
+            case 600:
                 return SECTION_WORK;
-            case 7:
+            case 700:
                 return SECTION_HABITS;
-            case 8:
+            case 800:
                 return SECTION_SOCIAL;
         }
-        return 9;
+        return 900;
     }
 
     // ViewHolder for user info list /////

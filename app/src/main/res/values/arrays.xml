@@ -68,4 +68,9 @@
         <item>@string/no</item>
     </string-array>
 
+    <string-array name="is_public">
+        <item>@string/social_public</item>
+        <item>@string/social_private</item>
+    </string-array>
+
 </resources>

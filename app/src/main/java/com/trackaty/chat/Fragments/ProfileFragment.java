@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,9 +25,13 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Adapters.ProfileSocailAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
+import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.User;
+
+import java.util.ArrayList;
 
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
 
@@ -90,7 +96,6 @@ public class ProfileFragment extends Fragment {
         mInterestedIcon = (ImageView) fragView.findViewById(R.id.interested_in_icon);
         mmRelationshipIcon = (ImageView) fragView.findViewById(R.id.relationship_icon);
 
-
         if(getArguments() != null) {
             mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
             mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
@@ -113,14 +118,15 @@ public class ProfileFragment extends Fragment {
                 //getResources().getColor(R.color.colorPrimary));
                 mLovedByHint.setEnabled(false);
                 mMessageHint.setEnabled(false);
-                showCurrentUser();
             } else {
                 // it's another user
                 mBlockEditButton.setImageResource(R.drawable.ic_block_24dp);
                 mBlockEditHint.setText(R.string.block_button);
                 //mUserRef = mDatabaseRef.child("users").child(mUserId);
                 //showUser(mUserId);
-        }
+            }
+            // display user data
+            showCurrentUser();
 
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -184,8 +190,10 @@ public class ProfileFragment extends Fragment {
     private void showCurrentUser() {
         // [display parcelable data]
         if (mUser != null) {
-            // Get user value
 
+            // Get user social dynamic methods
+
+            // Get user values
             if (null != mUser.getCoverImage()) {
                 Picasso.get()
                         .load(mUser.getCoverImage())

@@ -34,7 +34,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
@@ -45,9 +44,11 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
+import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
 import com.yanzhenjie.album.Action;
@@ -58,7 +59,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -74,16 +74,16 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final static String TAG = EditProfileFragment.class.getSimpleName();
 
-    private final int MENUITEM_SAVE_Id = 1;
+    private final int MENU_ITEM_SAVE_ID = 1;
 
-    private  static final int SECTION_IMAGE = 1;
-    private  static final int SECTION_EDIT_TEXT = 2;
-    private  static final int SECTION_TEXT = 3;
-    private  static final int SECTION_SPINNER = 4;
-    private  static final int SECTION_ABOUT = 5;
-    private  static final int SECTION_WORK = 6;
-    private  static final int SECTION_HABITS = 7;
-    private  static final int SECTION_SOCIAL = 8;
+    private  static final int SECTION_IMAGE = 100;
+    private  static final int SECTION_EDIT_TEXT = 200;
+    private  static final int SECTION_TEXT = 300;
+    private  static final int SECTION_SPINNER = 400;
+    private  static final int SECTION_ABOUT = 500;
+    private  static final int SECTION_WORK = 600;
+    private  static final int SECTION_HABITS = 700;
+    private  static final int SECTION_SOCIAL = 800;
 
 
     public  final static String SECTION_ABOUT_HEADLINE = "about";
@@ -124,7 +124,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private ArrayList<Profile> mAboutArrayList = new ArrayList<>();
     private ArrayList<Profile> mWorkArrayList = new ArrayList<>();
     private ArrayList<Profile> mHabitsArrayList = new ArrayList<>();
-    private ArrayList<Profile> mSocialArrayList = new ArrayList<>();
+    private ArrayList<Social> mSocialArrayList = new ArrayList<>();
     private ArrayList<Variables> mVariablesArrayList = new ArrayList<>();
 
 
@@ -195,7 +195,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             currentUserId = savedInstanceState.getString("currentUserId");
             Log.d(TAG, "isSavedInstance ="+currentUserId);
 
-            // Do something with value if needed
+            // Get savedInstanceState and do something with value if needed
             mProfileDataArrayList = savedInstanceState.getParcelableArrayList(PROFILE_LIST_STATE);
             mAboutArrayList = savedInstanceState.getParcelableArrayList(ABOUT_LIST_STATE);
             mWorkArrayList = savedInstanceState.getParcelableArrayList(WORK_LIST_STATE);
@@ -252,7 +252,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         int id = item.getItemId();
 
         switch (id){
-            case MENUITEM_SAVE_Id:
+            case MENU_ITEM_SAVE_ID:
                 Log.d(TAG, "MenuItem = SAVE");
                 profileSave();
                 break;
@@ -333,6 +333,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
                         // sort ArrayList into sections then notify the adapter
                         Collections.sort(mProfileDataArrayList, new Sortbysection());
+                        Collections.sort(mAboutArrayList, new Sortbysection());
+                        Collections.sort(mWorkArrayList, new Sortbysection());
+                        Collections.sort(mHabitsArrayList, new Sortbysection());
+                        Collections.sort(mSocialArrayList, new SortSocial());
+
 
                         for (int i = 0; i < mProfileDataArrayList.size(); i++) {
                             Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
@@ -386,20 +391,40 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             Log.d(TAG, "Method=" +method.getName()+" = "+ value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
-                            if((fieldName.equals("avatar") || fieldName.equals("coverImage"))){
-                                Profile profileData = new Profile(fieldName, value,SECTION_IMAGE);
-                                mProfileDataArrayList.add(profileData);
+                            if(fieldName.equals("avatar") || fieldName.equals("coverImage")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_IMAGE, SECTION_IMAGE));
+                            }
 
-                            }else if((fieldName.equals("name")
-                                    || fieldName.equals("biography"))){
-                            Profile profileData = new Profile(fieldName, value, SECTION_EDIT_TEXT);
-                            mProfileDataArrayList.add(profileData);
+                        if(fieldName.equals("name")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_EDIT_TEXT, SECTION_EDIT_TEXT));
+                        }
+                        if(fieldName.equals("biography")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_EDIT_TEXT+1, SECTION_EDIT_TEXT));
+                        }
+                        if(fieldName.equals("birthDate")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_TEXT, SECTION_TEXT));
+                        }
 
-                            }else if(fieldName.equals("birthDate")){
-                                Profile profileData = new Profile(fieldName, value, SECTION_TEXT);
-                                mProfileDataArrayList.add(profileData);
+                        if((fieldName.equals("gender")
+                                || fieldName.equals("interestedIn")
+                                || fieldName.equals("relationship")
+                                || fieldName.equals("horoscope"))){
 
-                            }else if((fieldName.equals("phone")
+                            if(fieldName.equals("gender")){
+                                mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_SPINNER+1 , SECTION_SPINNER));
+                            }
+                            if(fieldName.equals("interestedIn")){
+                                mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_SPINNER+2, SECTION_SPINNER));
+                            }
+                            if(fieldName.equals("relationship")){
+                                mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_SPINNER+3, SECTION_SPINNER));
+                            }
+                            if(fieldName.equals("horoscope")){
+                                mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_SPINNER+4 , SECTION_SPINNER));
+                            }
+                        }
+
+                        if((fieldName.equals("phone")
                                     || fieldName.equals("facebook")
                                     || fieldName.equals("instagram")
                                     || fieldName.equals("twitter")
@@ -420,69 +445,170 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                     || fieldName.equals("wikipedia")
                                     || fieldName.equals("website"))){
                                 //add data for social recycler
-                                Profile profileData = new Profile(fieldName, value,SECTION_SOCIAL);
-                                //mProfileDataArrayList.add(profileData);
-                                mSocialArrayList.add(profileData);
+                            if(fieldName.equals("phone")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+1 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("facebook")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+2 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("instagram")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+3 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("twitter")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+4 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("snapchat")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+5 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("tumblr")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+6 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("pubg")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+7 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("vk")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+8 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("askfm")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+9 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("curiouscat")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+10 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("saraha")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+11 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("pinterest")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+12 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("soundcloud")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+13 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("spotify")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+14 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("anghami")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+15 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("twitch")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+16 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("youtube")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+17 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("linkedIn")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+18 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("wikipedia")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+19 ,SECTION_SOCIAL));
+                            }
+                            if(fieldName.equals("website")){
+                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+20 ,SECTION_SOCIAL));
+                            }
+
                                 if(!mIsSocialAdded){
                                     Log.d(TAG, "mIsSocialAdded=" + mIsSocialAdded);
-                                    Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, "",SECTION_SOCIAL);
+                                    Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, "",SECTION_SOCIAL, SECTION_SOCIAL);
                                     mProfileDataArrayList.add(socialData);
                                 }
                                 mIsSocialAdded = true; // to add only one expandable section header
 
-                            }else if((fieldName.equals("relationship")
-                                    || fieldName.equals("gender")
-                                    || fieldName.equals("horoscope")
-                                    || fieldName.equals("interestedIn"))){
-                            Profile profileData = new Profile(fieldName, value,SECTION_SPINNER);
-                            mProfileDataArrayList.add(profileData);
+                            }
 
-                            } else if(fieldName.equals("work")
+                            else if(fieldName.equals("work")
                                     || fieldName.equals("college")
                                     || fieldName.equals("school")){
-                                //add data for work section
-                                Profile profileData = new Profile(fieldName, value,SECTION_WORK);
-                                //mProfileDataArrayList.add(profileData);
-                                mWorkArrayList.add(profileData);
+
+                            if(fieldName.equals("work")){
+                                mWorkArrayList.add(new Profile(fieldName, value,SECTION_WORK+1, SECTION_WORK));
+                            }
+                            if(fieldName.equals("college")){
+                                mWorkArrayList.add(new Profile(fieldName, value,SECTION_WORK+2, SECTION_WORK));
+                            }
+                            if(fieldName.equals("school")){
+                                mWorkArrayList.add(new Profile(fieldName, value,SECTION_WORK+3, SECTION_WORK));
+                            }
+
                                 if(!mIsWorkAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, "",SECTION_WORK);
+                                    Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, "",SECTION_WORK, SECTION_WORK);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsWorkAdded = true; // to add only one expandable section header
 
-                            }else if(fieldName.equals("nationality")
+                            }
+
+                            if(fieldName.equals("lives")
                                     || fieldName.equals("hometown")
-                                    || fieldName.equals("lives")
+                                    || fieldName.equals("nationality")
                                     || fieldName.equals("politics")
                                     || fieldName.equals("religion")){
+
                                 //add data for about section
-                                Profile profileData = new Profile(fieldName, value,SECTION_ABOUT);
-                                //mProfileDataArrayList.add(profileData);
-                                mAboutArrayList.add(profileData);
+                                if(fieldName.equals("lives")){
+                                    mAboutArrayList.add(new Profile(fieldName, value,SECTION_ABOUT+ 1, SECTION_ABOUT));
+                                }
+                                if(fieldName.equals("hometown")){
+                                    mAboutArrayList.add(new Profile(fieldName, value,SECTION_ABOUT+ 2, SECTION_ABOUT));
+                                }
+                                if(fieldName.equals("nationality")){
+                                    mAboutArrayList.add(new Profile(fieldName, value,SECTION_ABOUT+ 3, SECTION_ABOUT));
+                                }
+                                if(fieldName.equals("politics")){
+                                    mAboutArrayList.add(new Profile(fieldName, value,SECTION_ABOUT+4, SECTION_ABOUT));
+                                }
+                                if(fieldName.equals("religion")){
+                                    mAboutArrayList.add(new Profile(fieldName, value,SECTION_ABOUT+5, SECTION_ABOUT));
+                                }
+
                                 if(!mIsAboutAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
-                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, "",SECTION_ABOUT);
+                                    Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, "",SECTION_ABOUT, SECTION_ABOUT);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
                                 mIsAboutAdded = true; // to add only one expandable section header
 
-                            }else if(fieldName.equals("athlete")
-                                    || fieldName.equals("smoke")
-                                    || fieldName.equals("travel")
+                            }else if(fieldName.equals("smoke")
                                     || fieldName.equals("shisha")
-                                    || fieldName.equals("cook")
-                                    || fieldName.equals("drink")
                                     || fieldName.equals("drugs")
+                                    || fieldName.equals("drink")
                                     || fieldName.equals("gamer")
-                                    || fieldName.equals("read")){
+                                    || fieldName.equals("cook")
+                                    || fieldName.equals("read")
+                                    || fieldName.equals("athlete")
+                                    || fieldName.equals("travel")){
                                 //add data for habits section
-                                Profile profileData = new Profile(fieldName, value,SECTION_HABITS);
-                                //mProfileDataArrayList.add(profileData);
-                                mHabitsArrayList.add(profileData);
+                                if(fieldName.equals("smoke")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+1, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("shisha")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+2, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("drugs")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+3, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("drink")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+4, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("gamer")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+5, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("cook")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+6, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("read")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+7, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("athlete")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+8, SECTION_HABITS));
+                                }
+                                if(fieldName.equals("travel")){
+                                    mHabitsArrayList.add(new Profile(fieldName, value,SECTION_HABITS+9, SECTION_HABITS));
+                                }
+
                                 if(!mIsHabitsAdded){
                                     Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
-                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, "",SECTION_HABITS);
+                                    Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, "",SECTION_HABITS, SECTION_HABITS);
                                     mProfileDataArrayList.add(habitsSectionData);
                                 }
                                 mIsHabitsAdded = true; // to add only one expandable section header
@@ -648,7 +774,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-                        mProfileDataArrayList.set(position,new Profile(type, downloadUri.toString(),SECTION_IMAGE));
+                        mProfileDataArrayList.set(position,new Profile(type, downloadUri.toString(),SECTION_IMAGE, SECTION_IMAGE));
                         //mVariablesArrayList.get(position).setValue(false);
                         mVariablesArrayList.set(position, new Variables(false));
                         mEditProfileAdapter.notifyItemChanged(position);
@@ -748,9 +874,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private void profileSave() {
 
         //Log.d(TAG, "currentUser getCreatedLong= "+currentUser.getCreatedLong());
-        if(currentUser.getCreated()== null){
+        /* //apparently it's updated automatically
+        if( currentUser != null && currentUser.getCreated() == null){
+            Log.d(TAG, "profileSave getCreated= "+currentUser.getCreated());
             currentUser.setCreated(ServerValue.TIMESTAMP);
-        }
+        }*/
+
         for (int i = 0; i < mProfileDataArrayList.size(); i++) {
             Log.d(TAG, "profileSave Key= "+mProfileDataArrayList.get(i).getKey()+" Value= "+ mProfileDataArrayList.get(i).getValue());
             switch (mProfileDataArrayList.get(i).getKey()){
@@ -929,6 +1058,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 case "tumblr":
                     currentUser.setTumblr(mSocialArrayList.get(i).getValue());
                     break;
+                case "pubg":
+                    currentUser.setPubg(mSocialArrayList.get(i).getValue());
+                    break;
                 case "vk":
                     currentUser.setVk(mSocialArrayList.get(i).getValue());
                     break;
@@ -990,7 +1122,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     }
 
 
-    // use interface to detect item click on the recycler adapter
+    // user interface to detect item click on the recycler adapter
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "item clicked fragment= " + position);
@@ -1034,7 +1166,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
             for (int i = 0; i < mProfileDataArrayList.size(); i++) {
                 if(mProfileDataArrayList.get(i).getKey().equals("birthDate")){
-                    mProfileDataArrayList.set(i, new Profile("birthDate",String.valueOf(birthInMillis),SECTION_TEXT ));
+                    mProfileDataArrayList.set(i, new Profile("birthDate",String.valueOf(birthInMillis),SECTION_TEXT, SECTION_TEXT ));
                     mEditProfileAdapter.notifyItemChanged(i);
                 }
                 Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());

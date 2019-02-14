@@ -3,41 +3,43 @@ package com.trackaty.chat.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Profile implements Parcelable{
+public class Social implements Parcelable {
 
     private String key;
     private String value;
+    private String isPublic;
     private int order;
     private int section;
 
-    public Profile() {
+    public Social() {
 
     }
 
-
-    public Profile(String key, String value, int order, int section) {
+    public Social(String key, String value, String isPublic, int order, int section) {
         this.key = key;
         this.value = value;
+        this.isPublic = isPublic;
         this.order = order;
         this.section = section;
     }
 
-    protected Profile(Parcel in) {
+    protected Social(Parcel in) {
         key = in.readString();
         value = in.readString();
+        isPublic = in.readString();
         order = in.readInt();
         section = in.readInt();
     }
 
-    public static final Creator<Profile> CREATOR = new Creator<Profile>() {
+    public static final Creator<Social> CREATOR = new Creator<Social>() {
         @Override
-        public Profile createFromParcel(Parcel in) {
-            return new Profile(in);
+        public Social createFromParcel(Parcel in) {
+            return new Social(in);
         }
 
         @Override
-        public Profile[] newArray(int size) {
-            return new Profile[size];
+        public Social[] newArray(int size) {
+            return new Social[size];
         }
     };
 
@@ -55,6 +57,14 @@ public class Profile implements Parcelable{
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(String isPublic) {
+        this.isPublic = isPublic;
     }
 
     public int getOrder() {
@@ -82,6 +92,7 @@ public class Profile implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(key);
         dest.writeString(value);
+        dest.writeString(isPublic);
         dest.writeInt(order);
         dest.writeInt(section);
     }

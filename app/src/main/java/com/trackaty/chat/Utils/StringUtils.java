@@ -33,5 +33,4 @@ public class StringUtils {
         textView.setFilters(inputFilterArray.toArray(new InputFilter[0]));
     }
 
-
 }
