@@ -167,6 +167,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
+                    // clear mUser object in case user will log in with another account
+                    if(mUser != null ){
+                        mUser = null;
+                    }
                     initiateLogin(); // start login activity
                 }
             }
@@ -218,6 +222,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 Log.d(TAG, "Google sign out succeeded");
                             }
                         });*/
+                // finish all activities and fragments to start fresh
+                //finishAffinity();
+                //finish();
                 break;
             case android.R.id.home:
                 onBackPressed();
@@ -237,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         if(isFirstloaded){ // only add the Listener when loaded for the first time
             mAuth.addAuthStateListener(mAuthListener);
+            Log.d(TAG, "onStart mAuthListener added");
         }
         Log.d(TAG, "MainActivity onStart");
         Log.d(TAG, "mAuthListener="+ mAuthListener);

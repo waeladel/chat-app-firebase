@@ -20,13 +20,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    /*compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }*/
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //implementation 'com.android.support:multidex:1.0.3' // for multidex
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
-    implementation 'com.google.android.material:material:1.1.0-alpha02'
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha02'
+    implementation 'com.google.android.material:material:1.1.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0-alpha01'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
@@ -41,10 +45,11 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
-    def nav_version = "1.0.0-alpha11"
+    def nav_version = "1.0.0-rc01"
     implementation "android.arch.navigation:navigation-fragment:$nav_version" // use -ktx for Kotlin
     implementation "android.arch.navigation:navigation-ui:$nav_version"
     implementation 'androidx.recyclerview:recyclerview:1.0.0'// use -ktx for Kotlin
+    //implementation 'androidx.cardview:cardview:1.0.0'
 
     implementation 'com.squareup.picasso:picasso:2.71828'//picasso for loading images
     implementation 'com.github.aakira:expandable-layout:1.6.0@aar' // for Expandable Layout
@@ -54,4 +59,11 @@ dependencies {
 
     implementation 'top.zibin:Luban:1.0.8' // for compressing original image
     implementation 'io.reactivex:rxandroid:1.2.1' // for compressing original image
+
+
+    implementation 'android.arch.paging:runtime:2.1.0' //Add the paging library
+    //implementation 'android.arch.lifecycle:extensions:1.1.1' //Adding Lifecycle
+    //implementation "android.arch.lifecycle:viewmodel:1.1.1" //Adding ViewModel
+    //annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+
 }

@@ -8,6 +8,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
 import java.util.Map;
+import java.util.Objects;
 
 @IgnoreExtraProperties
 public class User implements Parcelable{
@@ -155,6 +156,11 @@ public class User implements Parcelable{
 
     public Object getCreated() {
         return created;
+    }
+
+    @Exclude
+    public long getCreatedLong() {
+        return (long) created;
     }
 
     public void setCreated(Object created) {
@@ -606,5 +612,6 @@ public class User implements Parcelable{
         dest.writeString(wikipedia);
         dest.writeString(website);
     }
+
 }
 // [END blog_user_class]

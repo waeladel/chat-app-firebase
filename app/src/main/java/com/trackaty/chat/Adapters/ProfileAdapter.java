@@ -476,7 +476,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         @Override
         public void onClick(View view) {
-            itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getAdapterPosition(), false);
+            }
         }
 
         /*// needed only if i want the listener to be inside the adapter
