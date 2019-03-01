@@ -97,11 +97,10 @@ public class MainFragment extends Fragment {
             public void onChanged(@Nullable final PagedList<User> items) {
                 System.out.println("mama onChanged");
                 if (items != null ){
-                Log.d(TAG, "mama submitList size" +  items.size());
-                mUsersAdapter.submitList(items);
-
+                /*Log.d(TAG, "mama submitList size" +  items.size());
+                mUsersAdapter.submitList(items);*/
                 //delay submitList till items size is not 0
-                   /*new java.util.Timer().schedule(
+                   new java.util.Timer().schedule(
                             new java.util.TimerTask() {
                                 @Override
                                 public void run() {
@@ -112,7 +111,7 @@ public class MainFragment extends Fragment {
                                 }
                             },
                             5000
-                    );*/
+                    );
 
                 }
             }

@@ -9,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.models.UserId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,11 @@ public class UsersRepository {
                         // loop throw users value
                         List<User> usersList = new ArrayList<>();
                         for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            usersList.add(userSnapshot.getValue(User.class));
+                            User user = userSnapshot.getValue(User.class);
+                            if (user != null) {
+                                user.setKey(userSnapshot.getKey());
+                            }
+                            usersList.add(user);
                             Log.d(TAG, "mama getUsers dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
                         }
 
@@ -100,7 +105,11 @@ public class UsersRepository {
                         // loop throw users value
                         List<User> usersList = new ArrayList<>();
                         for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            usersList.add(userSnapshot.getValue(User.class));
+                            User user = userSnapshot.getValue(User.class);
+                            if (user != null) {
+                                user.setKey(userSnapshot.getKey());
+                            }
+                            usersList.add(user);
                             Log.d(TAG, "mama getUsers dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
                         }
 
@@ -159,7 +168,11 @@ public class UsersRepository {
                     // loop throw users value
                     List<User> usersList = new ArrayList<>();
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        usersList.add(userSnapshot.getValue(User.class));
+                        User user = userSnapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setKey(userSnapshot.getKey());
+                        }
+                        usersList.add(user);
                         Log.d(TAG, "mama getUsersAfter dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
                     }
 
@@ -210,7 +223,11 @@ public class UsersRepository {
                     // loop throw users value
                     List<User> usersList = new ArrayList<>();
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        usersList.add(userSnapshot.getValue(User.class));
+                        User user = userSnapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setKey(userSnapshot.getKey());
+                        }
+                        usersList.add(user);
                         Log.d(TAG, "mama getUsersBefore dataSnapshot. getSnapshotKeys= " +  userSnapshot.getKey());
                     }
 

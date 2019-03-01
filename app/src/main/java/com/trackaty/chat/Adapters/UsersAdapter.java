@@ -7,7 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.models.User;
@@ -15,7 +19,8 @@ import com.trackaty.chat.models.User;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertViewHolder> {
 
     private final static String TAG = UsersAdapter.class.getSimpleName();
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
     public UsersAdapter() {
         super(DIFF_CALLBACK);
@@ -32,7 +38,6 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
     @Override
     public ConcertViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
-
         return new ConcertViewHolder(view);
     }
 
@@ -41,14 +46,56 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
     @Override
     public void onBindViewHolder(@NonNull ConcertViewHolder holder, final int position) {
 
-        User user = getItem(position);
+        final User user = getItem(position);
         if (user != null) {
             //holder.bindTo(user);
             //Log.d(TAG, "mama  onBindViewHolder. users key"  +  user.getCreatedLong()+ "name: "+user.getName());
+            // click listener using interface
+
+            holder.setItemClickListener(new ItemClickListener(){
+
+                @Override
+                public void onClick(View view, int position, boolean isLongClick) {
+
+                    switch (view.getId()) {
+                        case R.id.profile_image: // only avatar is clicked
+                            //mListener.onTextViewNameClick(view, getAdapterPosition());
+                            Log.i(TAG, "user avatar clicked= "+view.getId());
+                            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUser.getUid(), user.getKey(), user);
+                            //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+                            //check if we are on Main Fragment not on complete Profile already
+                            Navigation.findNavController(view).navigate(directions);
+
+                            /*Navigation.findNavController(this, R.id.host_fragment)
+                            .navigate(directions);*/
+                            break;
+                        default://-1 entire row is clicked
+                            //mListener.onTextViewNameClick(view, getAdapterPosition());
+                            Log.i(TAG, "user row clicked= "+view.getId());
+                            break;
+                    }
+
+                }
+            });
+
+            /*holder.userAvatar.setItemClickListener(new ItemClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.i(TAG, "user Avatar= "+user.getKey());
+                    NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUser.getUid(), user.getKey(), user);
+                    //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+                    //check if we are on Main Fragment not on complete Profile already
+                    Navigation.findNavController(view).navigate(directions);
+                }
+            });*/
 
             // user name text value
             if (null != user.getName()) {
-                holder.userName.setText(user.getName());
+                holder.userName.setText(user.getName()+user.getKey());
+            }else{
+                holder.userName.setText(null);
             }
 
             if (null != user.getAvatar()) {
@@ -215,8 +262,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 // if the two items are the same
                 @Override
                 public boolean areItemsTheSame(User oldUser, User newUser) {
-                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + (oldUser.getCreatedLong() == newUser.getCreatedLong()));
-                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());
+                    /*Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + (oldUser.getCreatedLong() == newUser.getCreatedLong()));
+                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());*/
                     return oldUser.getCreatedLong() == newUser.getCreatedLong();
                     //return true;
                 }
@@ -224,10 +271,10 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 // if the content of two items is the same
                 @Override
                 public boolean areContentsTheSame(User oldUser, User newUser) {
-                    Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame object " + (oldUser.equals(newUser)));
+                   /* Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame object " + (oldUser.equals(newUser)));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame Names() " + (oldUser.getName().equals(newUser.getName())));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame old name: " + oldUser.getName() + " new name: "+newUser.getName());
-
+*/
                     // NOTE: if you use equals, your object must properly override Object#equals()
                     // Incorrectly returning false here will result in too many animations.
                     //TODO override equals method on User object
@@ -238,11 +285,13 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
 
     /// ViewHolder for trips list /////
-    public class ConcertViewHolder extends RecyclerView.ViewHolder {
+    public class ConcertViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
         private TextView userName, userAge;
         private ImageView userAvatar, ageIcon, genderIcon, horoscopeIcon, relationIcon;
+        ItemClickListener itemClickListener;
+
 
         public ConcertViewHolder(View itemView) {
             super(itemView);
@@ -257,8 +306,34 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
             horoscopeIcon =  row.findViewById(R.id.horoscope_icon);
             relationIcon =  row.findViewById(R.id.relationship_icon);
 
+            userAvatar.setOnClickListener(this);
+            row.setOnClickListener(this);
+
         }
 
+        @Override
+        public void onClick(View view) {
+            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getAdapterPosition(), false);
+                /*switch (view.getId()) {
+                    case R.id.profile_image:
+                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        Log.i(TAG, "user avatar clicked= "+view.getId());
+                        itemClickListener.onAvatarClick(view, getAdapterPosition(), false);
+                        break;
+                    default://-1
+                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        Log.i(TAG, "user row clicked= "+view.getId());
+                        itemClickListener.onRowClick(view, getAdapterPosition(), false);
+                        break;
+                }*/
+            }
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
     }
 
 }

@@ -13,6 +13,8 @@ import java.util.Objects;
 @IgnoreExtraProperties
 public class User implements Parcelable{
 
+
+    private String key;
     private Object created ;
 
     private String avatar;
@@ -153,6 +155,11 @@ public class User implements Parcelable{
             return new User[size];
         }
     };
+
+    @Exclude
+    public String getKey() { return key; }
+    @Exclude
+    public void setKey(String key) { this.key = key; }
 
     public Object getCreated() {
         return created;

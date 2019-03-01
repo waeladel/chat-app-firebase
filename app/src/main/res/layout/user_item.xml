@@ -42,8 +42,8 @@
 
     <ImageView
         android:id="@+id/age_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/small_icon"
+        android:layout_height="@dimen/small_icon"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -58,8 +58,8 @@
 
     <ImageView
         android:id="@+id/gender_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/small_icon"
+        android:layout_height="@dimen/small_icon"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -74,8 +74,8 @@
 
     <ImageView
         android:id="@+id/horoscope_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/small_icon"
+        android:layout_height="@dimen/small_icon"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -89,8 +89,8 @@
 
     <ImageView
         android:id="@+id/relationship_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/small_icon"
+        android:layout_height="@dimen/small_icon"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
