@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -157,10 +158,11 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
-            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.more_profile_frag_title);
-            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
-
+            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+            actionbar.setTitle(R.string.more_profile_frag_title);
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeButtonEnabled(true);
+            actionbar.setDisplayShowCustomEnabled(false);
         }
 
     }

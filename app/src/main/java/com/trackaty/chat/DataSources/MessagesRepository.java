@@ -8,8 +8,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
-import com.trackaty.chat.models.UserId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,64 +18,58 @@ import androidx.annotation.NonNull;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
-public class UsersRepository {
+public class MessagesRepository {
 
-    private final static String TAG = UsersRepository.class.getSimpleName();
+    private final static String TAG = MessagesRepository.class.getSimpleName();
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUsersRef;
-    //List<User> usersList ;
-    //List<User> entireUsersList ;
+    private DatabaseReference mMessagesRef;
     private Boolean isFirstLoaded = true;
-    public ValueEventListener usersChangesListener;
+    public ValueEventListener MessagesChangesListener;
 
-    public UsersRepository(){
+    public MessagesRepository(String chatKey){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUsersRef = mDatabaseRef.child("users");
-        //usersList = new ArrayList<>();
-        //entireUsersList = new ArrayList<>();
+        // use received chatKey to create a database ref
+        mMessagesRef = mDatabaseRef.child("messages").child(chatKey);
         isFirstLoaded = true;
-        Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + isFirstLoaded);
-
+        Log.d(TAG, "mama MessagesRepository init. isFirstLoaded= " + isFirstLoaded);
     }
 
     // get initial data
-    public void getUsers(Long initialKey, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadInitialCallback<User> callback){
-        //DatabaseReference usersRef = mDatabaseRef.child("users");
+    public void getMessages(String initialKey, final int size,
+                            @NonNull final ItemKeyedDataSource.LoadInitialCallback<Message> callback){
+
         if(initialKey == null){// if it's loaded for the first time. Key is null
             Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
-                    .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
+            mMessagesRef.orderByKey()//limitToLast to start from the last (page size) items
+                    .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
+                        List<Message> messagesList = new ArrayList<>();
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
                             }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+                            messagesList.add(message);
+                            Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(usersList.size() == 0){
+                        if(messagesList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                        Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
-
-                            //initial load
+                        //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
+                        callback.onResult(messagesList);
+
                     /*else{
                         //next pages load
                         //callback.onResult(usersList);
@@ -90,42 +84,42 @@ public class UsersRepository {
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                     // Getting Post failed, log a message
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                    Log.w(TAG, "mama loadPost:onCancelled", databaseError.toException());
                 }
             });
         }else{// not the first load. Key is the last seen key
             Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
+            mMessagesRef.orderByKey()
                     .startAt(initialKey)
-                    .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
+                    .limitToLast(size) //limitToLast to start from the last (page size) items
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
+                        List<Message> messagesList = new ArrayList<>();
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
                             }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+                            messagesList.add(message);
+                            Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(usersList.size() == 0){
+                        if(messagesList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                        Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
 
-                            //initial load
+                        //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
+                        callback.onResult(messagesList);
+
                     /*else{
                         //next pages load
                         //callback.onResult(usersList);
@@ -150,15 +144,15 @@ public class UsersRepository {
     }
 
     // to get next data
-    public void getUsersAfter(final Long key, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
+    public void getMessagesAfter(final String key, final int size,
+                         @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
         /*if(key == entireUsersList.get(entireUsersList.size()-1).getCreatedLong()){
             Log.d(TAG, "mama getUsersAfter init. afterKey= " +  key+ "entireUsersList= "+entireUsersList.get(entireUsersList.size()-1).getCreatedLong());
             return;
         }*/
 
         Log.d(TAG, "mama getUsersAfter. AfterKey= " + key);
-        mUsersRef.orderByChild("created")
+        mMessagesRef.orderByKey()
                 .startAt(key)
                 .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -166,29 +160,28 @@ public class UsersRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
+                    List<Message> messagesList = new ArrayList<>();
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        if(!key.equals(snapshot.getKey())){ // if snapshot key = startAt key? don't add it again
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
+                            }
+                            messagesList.add(message);
+                            Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersAfter dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
                     }
 
-                    if(usersList.size() == 0){
+                    if(messagesList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getUsersAfter usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                    Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial After
-                        callback.onResult(usersList);
+                    //initial After
+                    callback.onResult(messagesList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
-                    }
 
                 } else {
                     Log.w(TAG, "mama getUsersAfter no users exist");
@@ -206,14 +199,14 @@ public class UsersRepository {
     }
 
     // to get previous data
-    public void getUsersBefore(final Long key, final int size,
-                              @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
+    public void getMessagesBefore(final String key, final int size,
+                              @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
         Log.d(TAG, "mama getUsersBefore. BeforeKey= " +  key);
 
         /*if(key == entireUsersList.get(0).getCreatedLong()){
             return;
         }*/
-        mUsersRef.orderByChild("created")
+        mMessagesRef.orderByKey()
                 .endAt(key)
                 .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -221,30 +214,32 @@ public class UsersRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
+                    List<Message> messagesList = new ArrayList<>();
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        if(!key.equals(snapshot.getKey())){ // if snapshot key = startAt key? don't add it again
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
+                            }
+                            messagesList.add(message);
+                            Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+
                         }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersBefore dataSnapshot. getSnapshotKeys= " +  userSnapshot.getKey());
+
                     }
 
-                    if(usersList.size() == 0){
+                    if(messagesList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getUsersBefore usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                    Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
 
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial before
-                        callback.onResult(usersList);
+                     //initial before
+                     callback.onResult(messagesList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
-                    }
+
                     //initial load
                        /* ((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList, 0, usersList.size());*/
@@ -270,11 +265,11 @@ public class UsersRepository {
     }*/
 
     // to invalidate the data whenever a change happen
-    public void usersChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
+    public void MessagesChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
 
-        final Query query = mUsersRef.orderByChild("created");
+        final Query query = mMessagesRef.orderByKey();
 
-        usersChangesListener  = new ValueEventListener() {
+        MessagesChangesListener = new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -282,8 +277,8 @@ public class UsersRepository {
                     isFirstLoaded = true;
                     Log.d(TAG, "mama entireUsersList Invalidated:");
                     // Remove post value event listener
-                    if (usersChangesListener != null) {
-                        query.removeEventListener(usersChangesListener);
+                    if (MessagesChangesListener != null) {
+                        query.removeEventListener(MessagesChangesListener);
                         Log.d(TAG, "mama usersChanged Invalidated removeEventListener");
                     }
                     ((ItemKeyedDataSource.InvalidatedCallback)InvalidatedCallback).onInvalidated();
@@ -319,7 +314,7 @@ public class UsersRepository {
                 // ...
             }
         };
-        query.addValueEventListener(usersChangesListener);
+        query.addValueEventListener(MessagesChangesListener);
         //mUsersRef.addValueEventListener(eventListener);
     }
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -80,9 +81,6 @@ public class MainFragment extends Fragment {
         mUserArrayList  = new ArrayList<>();
         mUsersAdapter = new UsersAdapter();
 
-        // Initiate viewModel for this fragment instance
-        viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
-
         // Initiate the RecyclerView
         mUsersRecycler = (RecyclerView) fragView.findViewById(R.id.users_recycler);
         mUsersRecycler.setHasFixedSize(true);
@@ -91,34 +89,6 @@ public class MainFragment extends Fragment {
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
 
         //observe when a change happen to usersList live data
-        //viewModel.getPagedListObservable().observe(this, new Observer<PagedList<User>>() {
-        viewModel.usersList.observe(this, new Observer<PagedList<User>>() {
-            @Override
-            public void onChanged(@Nullable final PagedList<User> items) {
-                System.out.println("mama onChanged");
-                if (items != null ){
-                /*Log.d(TAG, "mama submitList size" +  items.size());
-                mUsersAdapter.submitList(items);*/
-                //delay submitList till items size is not 0
-                   new java.util.Timer().schedule(
-                            new java.util.TimerTask() {
-                                @Override
-                                public void run() {
-                                    // your code here
-                                    Log.d(TAG, "mama submitList size" +  items.size());
-                                    mUsersAdapter.submitList(items);
-
-                                }
-                            },
-                            5000
-                    );
-
-                }
-            }
-        });
-
-        //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
-
         mUsersRecycler.setAdapter(mUsersAdapter);
 
         // just a test to compare two objects
@@ -165,10 +135,42 @@ public class MainFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
-            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.main_frag_title);
-            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(false);
+            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+            actionbar.setTitle(R.string.main_frag_title);
+            actionbar.setDisplayHomeAsUpEnabled(false);
+            actionbar.setHomeButtonEnabled(false);
+            actionbar.setDisplayShowCustomEnabled(false);
         }
+
+        // Initiate viewModel for this fragment instance
+        viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        //viewModel.getPagedListObservable().observe(this, new Observer<PagedList<User>>() {
+        viewModel.usersList.observe(this, new Observer<PagedList<User>>() {
+            @Override
+            public void onChanged(@Nullable final PagedList<User> items) {
+                System.out.println("mama onChanged");
+                if (items != null ){
+                /*Log.d(TAG, "mama submitList size" +  items.size());
+                mUsersAdapter.submitList(items);*/
+                    //delay submitList till items size is not 0
+                    new java.util.Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    // your code here
+                                    Log.d(TAG, "mama submitList size" +  items.size());
+                                    mUsersAdapter.submitList(items);
+
+                                }
+                            },
+                            5000
+                    );
+
+                }
+            }
+        });
+
+        //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
     }
 
 }

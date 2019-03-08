@@ -7,12 +7,11 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,13 +24,9 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
 import com.squareup.picasso.Picasso;
-import com.trackaty.chat.Adapters.ProfileSocailAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
-import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.User;
-
-import java.util.ArrayList;
 
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
 
@@ -85,7 +80,7 @@ public class ProfileFragment extends Fragment {
         mLovedByHint = (TextView) fragView.findViewById(R.id.love_text);
         mMessageHint = (TextView) fragView.findViewById(R.id.message_text);
         mCover = (ImageView) fragView.findViewById(R.id.coverImage);
-        mAvatar = (ImageView) fragView.findViewById(R.id.profile_image);
+        mAvatar = (ImageView) fragView.findViewById(R.id.user_image);
         mUserName = (TextView) fragView.findViewById(R.id.user_name_text);
         mUserBio = (TextView) fragView.findViewById(R.id.user_bio_text);
         mBlockEditHint = (TextView) fragView.findViewById(R.id.block_edit_text);
@@ -326,13 +321,11 @@ public class ProfileFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
-            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.profile_frag_title);
-            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
-
+            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+            actionbar.setTitle(R.string.profile_frag_title);
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeButtonEnabled(true);
+            actionbar.setDisplayShowCustomEnabled(false);
         }
-
     }
-
-
 }

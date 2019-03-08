@@ -30,7 +30,7 @@
         app:navGraph="@navigation/nav_graph" />
 
     <TextView
-        android:id="@+id/message"
+        android:id="@+id/message_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"

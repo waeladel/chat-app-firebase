@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // [START initialize_database_ref]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+        mTextMessage = (TextView) findViewById(R.id.message_text);
 
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Log.d(TAG, "MainActivity onCreate");

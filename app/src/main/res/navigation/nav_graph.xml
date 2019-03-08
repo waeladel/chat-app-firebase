@@ -17,7 +17,12 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_main_to_profile"
-            app:destination="@id/profileFragment" />
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/fui_slide_in_right"
+            app:exitAnim="@anim/fui_slide_out_left" />
+        <action
+            android:id="@+id/action_mainFrag_to_messagesFrag"
+            app:destination="@id/messagesFragment" />
     </fragment>
     <fragment
         android:id="@+id/completeProfileFragment"
@@ -100,5 +105,22 @@
         <argument
             android:name="imageName"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/messagesFragment"
+        android:name="com.trackaty.chat.Fragments.MessagesFragment"
+        android:label="messages_fragment"
+        tools:layout="@layout/messages_fragment" >
+        <argument
+            android:name="currentUserId"
+            app:argType="string" />
+        <argument
+            android:name="user"
+            app:argType="com.trackaty.chat.models.User" />
+        <action
+            android:id="@+id/action_messagesFrag_to_profileFrag"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/fui_slide_in_right"
+            app:exitAnim="@anim/fui_slide_out_left" />
     </fragment>
 </navigation>

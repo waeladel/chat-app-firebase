@@ -8,7 +8,6 @@ import android.graphics.PorterDuffColorFilter;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -1208,7 +1207,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             row = itemView;
             itemHeadline = row.findViewById(R.id.item_title);
-            profileImage = row.findViewById(R.id.profile_image);
+            profileImage = row.findViewById(R.id.user_image);
             coverImage = row.findViewById(R.id.cover_image);
             icon = row.findViewById(R.id.edit_profile_icon);
             progressIcon = row.findViewById(R.id.progress_icon);

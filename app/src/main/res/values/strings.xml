@@ -32,6 +32,8 @@
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
+    <string name="send_message_error">Sorry, couldn\'t send your message.</string>
+
 
 
     <!--hints and titles-->
@@ -95,6 +97,8 @@
     <string name="user_wikipedia_hint">Wikipedia page</string>
     <string name="user_website_hint">Website URL</string>
 
+    <string name="send_message_hint">Type a message…</string>
+
 
 
     <string name="required_helper">*Required</string>
@@ -131,6 +135,8 @@
     <string name="user_pubg_clipboard_label">PUBG name</string>
     <string name="user_pubg_clipboard_toast">PUBG name has been copied to clipboard</string>
 
+
+
     <!--<string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
     <string name="user_instagram_helper">Username without: https://instagram.com/</string>
     <string name="user_twitter_helper">Username without: https://twitter.com/ or @ symbol</string>
@@ -161,6 +167,8 @@
     <string name="expand_button_description">Expand button</string>
     <string name="original_profile_image_description">Profile Image</string>
     <string name="loading_animation">Loading animation</string>
+    <string name="send_text_icon">Send message</string>
+
 
 
 

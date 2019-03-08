@@ -58,14 +58,14 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 public void onClick(View view, int position, boolean isLongClick) {
 
                     switch (view.getId()) {
-                        case R.id.profile_image: // only avatar is clicked
+                        case R.id.user_image: // only avatar is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user avatar clicked= "+view.getId());
-                            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUser.getUid(), user.getKey(), user);
+                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUser.getUid(), user.getKey(), user);
                             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
                             //check if we are on Main Fragment not on complete Profile already
-                            Navigation.findNavController(view).navigate(directions);
+                            Navigation.findNavController(view).navigate(ProfileDirection);
 
                             /*Navigation.findNavController(this, R.id.host_fragment)
                             .navigate(directions);*/
@@ -73,6 +73,14 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         default://-1 entire row is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user row clicked= "+view.getId());
+                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(currentUser.getUid(),user);
+                            //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+                            //check if we are on Main Fragment not on complete Profile already
+                            Navigation.findNavController(view).navigate(MessageDirection);
+
+                            /*Navigation.findNavController(this, R.id.host_fragment)
+                            .navigate(directions);*/
                             break;
                     }
 
@@ -98,7 +106,15 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 holder.userName.setText(null);
             }
 
+            // user biography text value
+            if (null != user.getBiography()) {
+                holder.userBio.setText(user.getBiography());
+            }else{
+                holder.userBio.setText(null);
+            }
+
             if (null != user.getAvatar()) {
+                holder.userAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
                 Picasso.get()
                         .load(user.getAvatar())
                         .placeholder(R.drawable.ic_user_account_grey_white)
@@ -123,27 +139,6 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 holder.userAge.setVisibility(View.INVISIBLE);
                 holder.ageIcon.setVisibility(View.INVISIBLE);
             }// end of  birthDate text value and icons
-
-            //gender text value and icons
-            if(null != user.getGender()){
-                holder.genderIcon.setVisibility(View.VISIBLE);
-                switch (user.getGender()) {
-                    case "male":
-                        holder.genderIcon.setImageResource(R.drawable.ic_male);
-                        break;
-                    case "female":
-                        holder.genderIcon.setImageResource(R.drawable.ic_female);
-                        break;
-                    case"transsexual":
-                        holder.genderIcon.setImageResource(R.drawable.ic_transsexual);
-                        break;
-                    default:
-                        holder.genderIcon.setVisibility(View.INVISIBLE);
-                        break;
-                }
-            }else{
-                holder.genderIcon.setVisibility(View.INVISIBLE);
-            }// end of gender text value and icons
 
             // horoscope text value and icons
             if(null != user.getHoroscope()){
@@ -192,6 +187,48 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
             }else{
                 holder.horoscopeIcon.setVisibility(View.INVISIBLE);
             }//end of horoscope text value and icons
+
+            //gender text value and icons
+            if(null != user.getGender()){
+                holder.genderIcon.setVisibility(View.VISIBLE);
+                switch (user.getGender()) {
+                    case "male":
+                        holder.genderIcon.setImageResource(R.drawable.ic_male);
+                        break;
+                    case "female":
+                        holder.genderIcon.setImageResource(R.drawable.ic_female);
+                        break;
+                    case"transsexual":
+                        holder.genderIcon.setImageResource(R.drawable.ic_transsexual);
+                        break;
+                    default:
+                        holder.genderIcon.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }else{
+                holder.genderIcon.setVisibility(View.INVISIBLE);
+            }// end of gender text value and icons
+
+            //interestedIn text value and icons
+            if(null != user.getInterestedIn()){
+                holder.interestedIcon.setVisibility(View.VISIBLE);
+                switch (user.getInterestedIn()) {
+                    case "men":
+                        holder.interestedIcon.setImageResource(R.drawable.ic_business_man);
+                        break;
+                    case "women":
+                        holder.interestedIcon.setImageResource(R.drawable.ic_business_woman);
+                        break;
+                    case "both":
+                        holder.interestedIcon.setImageResource(R.drawable.ic_wc_men_and_women_24dp);
+                        break;
+                    default:
+                        holder.interestedIcon.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }else{
+                holder.interestedIcon.setVisibility(View.INVISIBLE);
+            }// end of interestedIn text value and icons
 
             // relationship text value and icons
             if (null != user.getRelationship()) {
@@ -288,8 +325,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
     public class ConcertViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
-        private TextView userName, userAge;
-        private ImageView userAvatar, ageIcon, genderIcon, horoscopeIcon, relationIcon;
+        private TextView userName, userBio, userAge;
+        private ImageView userAvatar, ageIcon,interestedIcon,  genderIcon, horoscopeIcon, relationIcon;
         ItemClickListener itemClickListener;
 
 
@@ -299,10 +336,12 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
             row = itemView;
             userName = row.findViewById(R.id.user_name);
+            userBio = row.findViewById(R.id.message_text);
             userAge  = row.findViewById(R.id.age_value);
-            userAvatar =  row.findViewById(R.id.profile_image);
+            userAvatar =  row.findViewById(R.id.user_image);
             ageIcon =  row.findViewById(R.id.age_icon);
             genderIcon =  row.findViewById(R.id.gender_icon);
+            interestedIcon =  row.findViewById(R.id.interested_icon);
             horoscopeIcon =  row.findViewById(R.id.horoscope_icon);
             relationIcon =  row.findViewById(R.id.relationship_icon);
 

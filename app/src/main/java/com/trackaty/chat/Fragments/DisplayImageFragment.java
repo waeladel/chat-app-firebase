@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -93,6 +94,9 @@ public class DisplayImageFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
+                loadingIcon.setVisibility(View.GONE);
+                Toast.makeText(activity, R.string.download_image_error,
+                        Toast.LENGTH_LONG).show();
             }
         });
 
@@ -113,9 +117,11 @@ public class DisplayImageFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
-            ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.display_image_title);
-            ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((MainActivity)getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+            actionbar.setTitle(R.string.display_image_title);
+            actionbar.setDisplayHomeAsUpEnabled(true);
+            actionbar.setHomeButtonEnabled(true);
+            actionbar.setDisplayShowCustomEnabled(false);
         }
 
     }
