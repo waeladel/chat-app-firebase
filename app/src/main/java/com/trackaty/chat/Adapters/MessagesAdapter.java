@@ -1,13 +1,10 @@
 package com.trackaty.chat.Adapters;
 
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -16,32 +13,28 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-import com.trackaty.chat.Fragments.MainFragmentDirections;
-import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.models.Message;
-import com.trackaty.chat.models.User;
-import com.yanzhenjie.album.widget.photoview.PhotoViewAttacher;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MessagesAdapter extends PagedListAdapter<Message, MessagesAdapter.MessageViewHolder> {
+public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
 
     private final static String TAG = MessagesAdapter.class.getSimpleName();
     FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    String currentUserId = currentUser != null ? currentUser.getUid() : null;
 
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
     private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
+    private static final int VIEW_TYPE_MESSAGE_SENT = 1;
+    private static final int VIEW_TYPE_MESSAGE_RECEIVED = 2;
 
     private StorageReference mStorageRef;
 
@@ -53,62 +46,111 @@ public class MessagesAdapter extends PagedListAdapter<Message, MessagesAdapter.M
 
     @NonNull
     @Override
-    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_item, parent, false);
-        return new MessageViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        View view;
+        switch (viewType){
+            case VIEW_TYPE_MESSAGE_RECEIVED:
+                //// If some other user sent the message
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_received_item, parent, false);
+                return new ReceivedMessageHolder(view);
+            case VIEW_TYPE_MESSAGE_SENT:
+                // // If the current user is the sender of the message;
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_sent_item , parent, false);
+                return new SentMessageHolder(view);
+            default:
+                //// If some other user sent the message
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_received_item, parent, false);
+                return new ReceivedMessageHolder(view);
+
+        }
+        // default
+        /*view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_received_item, parent, false);
+        return new SentMessageHolder(view);*/
     }
 
 
 
     @Override
-    public void onBindViewHolder(@NonNull final MessageViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
 
         final Message message = getItem(position);
-        if (message != null) {
-            //holder.bindTo(user);
-            //Log.d(TAG, "mama  onBindViewHolder. users key"  +  user.getCreatedLong()+ "name: "+user.getName());
-            // click listener using interface
-            // user name text value
-            if (null != message.getMessage()) {
-                holder.mMessage.setText(message.getMessage()+ message.getKey());
-            }else{
-                holder.mMessage.setText(null);
-            }
 
-            if (null != message.getSender()) {
-                // [START create_storage_reference]
-                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
-                mStorageRef.child("images/"+message.getSender()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        // Got the download URL for 'users/me/profile.png'
-                        Picasso.get()
-                                .load(uri)
-                                .placeholder(R.drawable.ic_user_account_grey_white)
-                                .error(R.drawable.ic_broken_image)
-                                .into(holder.mAvatar);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                        holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
-                    }
-                });
-            }else{
-                // Handle if getSender() is null
-                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
-            }
+        if (holder instanceof ReceivedMessageHolder){
+            final ReceivedMessageHolder ReceivedHolder = (ReceivedMessageHolder) holder;
 
-            if (null != message.getCreated()) {
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(message.getCreatedLong());
-                String sentTime = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(c.getTime());
-                holder.mSentTime.setText(sentTime);
-            }else{
-                holder.mSentTime.setText(null);
+            if (message != null) {
+                //holder.bindTo(user);
+                //Log.d(TAG, "mama  onBindViewHolder. users key"  +  user.getCreatedLong()+ "name: "+user.getName());
+                // click listener using interface
+                // user name text value
+                if (null != message.getMessage()) {
+                    ReceivedHolder.mMessage.setText(message.getMessage()+ message.getKey());
+                }else{
+                    ReceivedHolder.mMessage.setText(null);
+                }
+
+                if (null != message.getSender()) {
+                    // [START create_storage_reference]
+                    //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                    mStorageRef.child("images/"+message.getSender()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // Got the download URL for 'users/me/profile.png'
+                            Picasso.get()
+                                    .load(uri)
+                                    .placeholder(R.drawable.ic_user_account_grey_white)
+                                    .error(R.drawable.ic_broken_image)
+                                    .into(ReceivedHolder.mAvatar);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle any errors
+                            ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                        }
+                    });
+                }else{
+                    // Handle if getSender() is null
+                    ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                }
+
+                if (null != message.getCreated()) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTimeInMillis(message.getCreatedLong());
+                    String sentTime = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(c.getTime());
+                    ReceivedHolder.mSentTime.setText(sentTime);
+                }else{
+                    ReceivedHolder.mSentTime.setText(null);
+                }
             }
         }
+
+        if (holder instanceof SentMessageHolder){
+            SentMessageHolder SentHolder = (SentMessageHolder) holder;
+
+            if (message != null) {
+                //holder.bindTo(user);
+                //Log.d(TAG, "mama  onBindViewHolder. users key"  +  user.getCreatedLong()+ "name: "+user.getName());
+                // click listener using interface
+                // user name text value
+                if (null != message.getMessage()) {
+                    SentHolder.mMessage.setText(message.getMessage()+ message.getKey());
+                }else{
+                    SentHolder.mMessage.setText(null);
+                }
+
+                if (null != message.getCreated()) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTimeInMillis(message.getCreatedLong());
+                    String sentTime = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(c.getTime());
+                    SentHolder.mSentTime.setText(sentTime);
+                }else{
+                    SentHolder.mSentTime.setText(null);
+                }
+            }
+        }
+
     }
 
 
@@ -142,16 +184,42 @@ public class MessagesAdapter extends PagedListAdapter<Message, MessagesAdapter.M
                 }
             };
 
+    // Determines the appropriate ViewType according to the sender of the message.
+    @Override
+    public int getItemViewType(int position) {
 
-    /// ViewHolder for trips list /////
-    public class MessageViewHolder extends RecyclerView.ViewHolder {
+        Message message = getItem(position);
+
+        if(null!= message.getSender() && null != currentUserId && currentUserId.equals(message.getSender())){
+            // If the current user is the sender of the message
+            return VIEW_TYPE_MESSAGE_SENT;
+        }else{// it's a message from chat user
+            // If some other user sent the message
+            return VIEW_TYPE_MESSAGE_RECEIVED;
+        }
+
+    }
+
+   /* @Override
+    public void submitList(PagedList<Message> pagedList) {
+        super.submitList(pagedList);
+    }
+
+    @Override
+    public void onCurrentListChanged(@Nullable PagedList<Message> currentList) {
+        super.onCurrentListChanged(currentList);
+    }*/
+
+
+    /// ViewHolder for ReceivedMessages list /////
+    public class ReceivedMessageHolder extends RecyclerView.ViewHolder {
 
         View row;
         private TextView mMessage, mSentTime;
         private CircleImageView mAvatar;
 
 
-        public MessageViewHolder(View itemView) {
+        public ReceivedMessageHolder(View itemView) {
             super(itemView);
             //itemView = row;
 
@@ -161,6 +229,26 @@ public class MessagesAdapter extends PagedListAdapter<Message, MessagesAdapter.M
             mSentTime = row.findViewById(R.id.sent_time);
         }
 
+
+    }
+
+    /// ViewHolder for SentMessages list /////
+    public class SentMessageHolder extends RecyclerView.ViewHolder {
+
+        View row;
+        private TextView mMessage, mSentTime;
+        private CircleImageView mAvatar;
+
+
+        public SentMessageHolder(View itemView) {
+            super(itemView);
+            //itemView = row;
+
+            row = itemView;
+            mMessage = row.findViewById(R.id.message_text);
+            mAvatar = row.findViewById(R.id.user_image);
+            mSentTime = row.findViewById(R.id.sent_time);
+        }
 
     }
 

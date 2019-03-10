@@ -29,8 +29,8 @@ public class MessagesViewModel extends ViewModel {
         Log.d(TAG, "Message MessagesViewModel init");
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(10)//10
-                .setInitialLoadSizeHint(10)//30
+                .setPageSize(20)//10
+                .setInitialLoadSizeHint(20)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();
