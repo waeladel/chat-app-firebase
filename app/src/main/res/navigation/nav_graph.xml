@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_mainFrag_to_messagesFrag"
             app:destination="@id/messagesFragment" />
+        <action
+            android:id="@+id/action_mainFragt_to_chatsFrag"
+            app:destination="@+id/chatsFragment" />
     </fragment>
     <fragment
         android:id="@+id/completeProfileFragment"
@@ -122,5 +125,14 @@
             app:destination="@id/profileFragment"
             app:enterAnim="@anim/fui_slide_in_right"
             app:exitAnim="@anim/fui_slide_out_left" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatsFragment"
+        android:name="com.trackaty.chat.Fragments.ChatsFragment"
+        android:label="chats_fragment"
+        tools:layout="@layout/chats_fragment" >
+        <action
+            android:id="@+id/action_chatsFragment_to_mainFragment2"
+            app:destination="@id/mainFragment" />
     </fragment>
 </navigation>

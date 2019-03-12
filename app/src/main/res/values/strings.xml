@@ -278,6 +278,7 @@
     <string name="profile_frag_title">Profile</string>
     <string name="main_frag_title">Find</string>
     <string name="display_image_title">Profile Photo</string>
+    <string name="chats_frag_title">Chats</string>
 
     <!-- countryText.setText(getString(R.string.country, country.getName()));-->
 

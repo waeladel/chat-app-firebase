@@ -14,7 +14,7 @@ import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
 public class MessagesViewModel extends ViewModel {
-    // TODO: Implement the ViewModel
+
     private final static String TAG = MessagesViewModel.class.getSimpleName();
     private MessagesDataFactory messagesDataFactory;
     private PagedList.Config config;
@@ -42,7 +42,7 @@ public class MessagesViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
-        Log.d(TAG, "mama UsersViewModel onCleared:");
+        Log.d(TAG, "mama MessagesViewModel onCleared:");
         super.onCleared();
     }
 

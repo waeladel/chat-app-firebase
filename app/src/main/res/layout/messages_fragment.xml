@@ -42,7 +42,7 @@
 
 
         <EditText
-            android:id="@+id/message_text"
+            android:id="@+id/last_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

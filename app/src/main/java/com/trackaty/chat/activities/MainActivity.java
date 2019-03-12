@@ -22,11 +22,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.NavDirections;
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mUserRef;
 
+    private MainActivityViewModel mMainViewModel;// ViewMode for getting the latest current user id
+
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -80,9 +85,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.title_home);
+                    goToMain();
                     return true;
                 case R.id.navigation_dashboard:
                     mTextMessage.setText(R.string.title_dashboard);
+                    goToChats();
                     return true;
                 case R.id.navigation_notifications:
                     mTextMessage.setText(R.string.title_notifications);
@@ -107,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
 
+        // update CurrentUserId for all observer fragments
+        mMainViewModel = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
+
         /*navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
 
             @Override
@@ -122,9 +132,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Log.d(TAG, "destination Label= "+ destination.getLabel());
                 Log.d(TAG, "destination id= "+ destination.getId());
 
+
                 if("fragment_main".equals(destination.getLabel())){
                    bottomNavigation.setVisibility(View.VISIBLE);
-
+                }else if(("chats_fragment".equals(destination.getLabel()))){
+                    bottomNavigation.setVisibility(View.VISIBLE);
                 }else{
                     bottomNavigation.setVisibility(View.GONE);
                 }
@@ -134,13 +146,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // [START initialize_database_ref]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
-        mTextMessage = (TextView) findViewById(R.id.message_text);
+        mTextMessage = (TextView) findViewById(R.id.last_message);
 
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Log.d(TAG, "MainActivity onCreate");
 
         mAuth = FirebaseAuth.getInstance();
         isFirstloaded = true; // first time to open the app
+
+        //mMainViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
         //initialize the AuthStateListener method
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -156,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     currentUserPhoto = user.getPhotoUrl();
                     currentUserVerified = user.isEmailVerified();
 
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d(TAG, "onAuthStateChanged:signed_in: user userId " + currentUserId);
                     Log.d(TAG, "onAuthStateChanged:signed_in_getDisplayName:" + user.getDisplayName());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
@@ -164,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     isUserExist(currentUserId); // if not start complete profile
 
+                    // update CurrentUserId for all observer fragments
+                    mMainViewModel.updateCurrentUserId(currentUserId);
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -175,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
         };
-
 
     }//End of onCreate
 
@@ -435,8 +450,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         }
     }
+    // Go to Chats fragment
+    private void goToChats() {
 
+       /* NavDirections directions = MainFragmentDirections.actionMainFragtToChatsFrag();
+        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
+        //check if we are not on chat fragment already
+        if (R.id.chatsFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(directions);
+        }*/
 
+        //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.chatsFragment);
+        navController.navigate(R.id.chatsFragment);
+                /*Navigation.findNavController(this, R.id.host_fragment)
+                        .navigate(directions);*/
+
+    }
+
+    // Go to Chats fragment
+    private void goToMain() {
+
+       /* NavDirections directions = MainFragmentDirections.actionMainFragtToChatsFrag();
+        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+
+        //check if we are not on chat fragment already
+        if (R.id.chatsFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(directions);
+        }*/
+
+        //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
+        navController.navigate(R.id.mainFragment);
+
+                /*Navigation.findNavController(this, R.id.host_fragment)
+                        .navigate(directions);*/
+
+    }
 
 }

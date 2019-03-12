@@ -23,7 +23,7 @@
         tools:text="@tools:sample/cities" />
 
     <TextView
-        android:id="@+id/message_text"
+        android:id="@+id/last_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -64,7 +64,7 @@
         android:src="@drawable/ic_cake_black_24dp"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/user_image"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -76,7 +76,7 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_male"
         app:layout_constraintStart_toEndOf="@+id/horoscope_icon"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         tools:ignore="ContentDescription" />
 
 
@@ -89,7 +89,7 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_aries_symbol"
         app:layout_constraintStart_toEndOf="@+id/age_value"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -101,7 +101,7 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_favorite_border_black_24dp"
         app:layout_constraintStart_toEndOf="@+id/interested_icon"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         tools:ignore="ContentDescription" />
 
     <TextView
@@ -121,7 +121,7 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_business_man"
         app:layout_constraintStart_toEndOf="@+id/gender_icon"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         tools:ignore="ContentDescription" />
 
 

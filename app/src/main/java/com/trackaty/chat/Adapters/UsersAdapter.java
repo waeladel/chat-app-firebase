@@ -336,7 +336,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
             row = itemView;
             userName = row.findViewById(R.id.user_name);
-            userBio = row.findViewById(R.id.message_text);
+            userBio = row.findViewById(R.id.last_message);
             userAge  = row.findViewById(R.id.age_value);
             userAvatar =  row.findViewById(R.id.user_image);
             ageIcon =  row.findViewById(R.id.age_icon);

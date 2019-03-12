@@ -46,6 +46,7 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
@@ -105,7 +106,7 @@ public class MessagesFragment extends Fragment {
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mUserId= " + mUserId + " name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
         }
 
-        mMessage = (EditText) fragView.findViewById(R.id.message_text);
+        mMessage = (EditText) fragView.findViewById(R.id.last_message);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -308,8 +309,6 @@ public class MessagesFragment extends Fragment {
                 public void onChanged(@Nullable final PagedList<Message> items) {
                     System.out.println("mama onChanged");
                     if (items != null ){
-
-
                         //delay submitList till items size is not 0
                        new java.util.Timer().schedule(
                                 new java.util.TimerTask() {
@@ -319,7 +318,9 @@ public class MessagesFragment extends Fragment {
                                         Log.d(TAG, "mama messages submitList size" +  items.size());
                                         mMessagesAdapter.submitList(items);
                                         // Scroll to last item
-                                        mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                        if(items.size()>0){// stop scroll to bottom if there are no items
+                                            mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                        }
                                         // Scroll to last item on the list
                                         //int position = mMessagesRecycler.getAdapter().getItemCount()-1;
                                         /*int position = mMessagesAdapter.getItemCount()-1;
@@ -347,7 +348,18 @@ public class MessagesFragment extends Fragment {
         Message message = new Message(messageText, mCurrentUserId, "wael", false , ServerValue.TIMESTAMP);
         Map<String, Object> messageValues = message.toMap();
 
-        Chat chat = new Chat(mCurrentUserId, mUserId, messageText );
+        // Create members array list, it's better to loop throw  selected members
+        ArrayList <String> members = new ArrayList<>();
+        members.add(mCurrentUserId);
+        members.add(mUserId);
+
+        // Create members Hash list, it's better to loop throw  selected members
+        Map<String, Boolean> allMembers = new HashMap<>();
+        allMembers.put(mCurrentUserId, true);
+        allMembers.put(mUserId, true);
+
+        // Create chat map
+        Chat chat = new Chat(mCurrentUserId, mUserId, messageText, members, allMembers);
         Map<String, Object> chatValues = chat.toMap();
         /*Map<String, Object> chatValues = new HashMap<>();
         chatValues.put("lastMessage", messageText);

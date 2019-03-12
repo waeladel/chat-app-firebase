@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:id="@+id/message_text"
+        android:id="@+id/last_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
@@ -31,7 +31,7 @@
         android:singleLine="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/message_text"
+        app:layout_constraintTop_toBottomOf="@+id/last_message"
         app:layout_constraintVertical_bias="0.0"
         tools:text="@tools:sample/date/hhmm" />
 

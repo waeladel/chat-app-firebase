@@ -2,100 +2,98 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.models.User;
+import com.trackaty.chat.models.Chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
-public class UsersRepository {
+public class ChatsRepository {
 
-    private final static String TAG = UsersRepository.class.getSimpleName();
+    private final static String TAG = ChatsRepository.class.getSimpleName();
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUsersRef;
-    //List<User> usersList ;
-    //List<User> entireUsersList ;
+    private DatabaseReference mChatsRef;
     private Boolean isFirstLoaded = true;
-    public ValueEventListener usersChangesListener;
+    public ValueEventListener ChatsChangesListener;
 
-    //initialize the FirebaseAuth instance
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private LiveData<String> currentUserId;
-    //private LiveData<User> currentUser;
-    private MutableLiveData<User>currentUser;
-
-
-    public UsersRepository(){
+    public ChatsRepository(String userKey){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUsersRef = mDatabaseRef.child("users");
-        //usersList = new ArrayList<>();
-        //entireUsersList = new ArrayList<>();
+        // use received chatKey to create a database ref
+        mChatsRef = mDatabaseRef.child("userChats").child(userKey);
         isFirstLoaded = true;
-        currentUser = new MutableLiveData<>();
-        Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + isFirstLoaded);
-
+        Log.d(TAG, "mama ChatsRepository init. isFirstLoaded= " + isFirstLoaded);
     }
 
-
     // get initial data
-    public void getUsers(Long initialKey, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadInitialCallback<User> callback){
-        //DatabaseReference usersRef = mDatabaseRef.child("users");
+    public void getChats(Long initialKey, final int size,
+                            @NonNull final ItemKeyedDataSource.LoadInitialCallback<Chat> callback){
+
         if(initialKey == null){// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
+            Log.d(TAG, "mama getChats initialKey= " +  initialKey);
+            mChatsRef.orderByChild("lastSent")//limitToLast to start from the last (page size) items
                     .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
+                        List<Chat> chatsList = new ArrayList<>();
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            Chat chat = snapshot.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setKey(snapshot.getKey());
+
+                                // loop to get all chat members array
+                                for (int i = 0; i < chat.getMembers().size(); i++) {
+                                    //Log.d(TAG, "mama getChats "+snapshot.getKey()+" getMember= "+ chat.getMembers().get(i));
+                                }
+
+                                // loop to get all chat members HashMap
+                                Iterator iterator = chat.getMemberHash().entrySet().iterator();
+                                while (iterator.hasNext()) {
+                                    Map.Entry pair = (Map.Entry)iterator.next();
+                                    Log.d(TAG, "mama getChats getMember= "+pair.getKey() + " = " + pair.getValue());
+                                    iterator.remove(); // avoids a ConcurrentModificationException
+                                }
+
                             }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+                            chatsList.add(chat);
+                            Log.d(TAG, "mama getChats = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(usersList.size() == 0){
+                        if(chatsList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                        Log.d(TAG, "mama getChats usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
 
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
-
-                            //initial load
+                        //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
+                        Collections.reverse(chatsList);
+                        callback.onResult(chatsList);
+
                     /*else{
                         //next pages load
                         //callback.onResult(usersList);
                         //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
                     }*/
                     } else {
-                        Log.w(TAG, "mama getMessages no users exist");
+                        Log.w(TAG, "mama getChats no users exist");
                     }
 
                 }
@@ -103,49 +101,50 @@ public class UsersRepository {
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                     // Getting Post failed, log a message
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                    Log.w(TAG, "mama loadPost:onCancelled", databaseError.toException());
                 }
             });
         }else{// not the first load. Key is the last seen key
-            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
+            Log.d(TAG, "mama getChats initialKey= " +  initialKey);
+            mChatsRef.orderByChild("lastSent")
                     .startAt(initialKey)
-                    .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
+                    .limitToFirst(size) //limitToLast to start from the last (page size) items
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
+                        List<Chat> chatsList = new ArrayList<>();
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            Chat chat = snapshot.getValue(Chat.class);
+                            if (chat != null) {
+                                chat.setKey(snapshot.getKey());
                             }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+                            chatsList.add(chat);
+                            Log.d(TAG, "mama getChats = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(usersList.size() == 0){
+                        if(chatsList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                        Log.d(TAG, "mama getChats usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
 
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
 
-                            //initial load
+                        //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
+                        Collections.reverse(chatsList);
+                        callback.onResult(chatsList);
+
                     /*else{
                         //next pages load
                         //callback.onResult(usersList);
                         //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
                     }*/
                     } else {
-                        Log.w(TAG, "mama getMessages no users exist");
+                        Log.w(TAG, "mama getChats no users exist");
                     }
 
                 }
@@ -163,15 +162,14 @@ public class UsersRepository {
     }
 
     // to get next data
-    public void getUsersAfter(final Long key, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
+    public void getChatsAfter(final Long key, final int size,
+                         @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
         /*if(key == entireUsersList.get(entireUsersList.size()-1).getCreatedLong()){
             Log.d(TAG, "mama getUsersAfter init. afterKey= " +  key+ "entireUsersList= "+entireUsersList.get(entireUsersList.size()-1).getCreatedLong());
             return;
         }*/
-
-        Log.d(TAG, "mama getUsersAfter. AfterKey= " + key);
-        mUsersRef.orderByChild("created")
+        Log.d(TAG, "mama getChatsAfter. AfterKey= " + key);
+        mChatsRef.orderByChild("lastSent")
                 .startAt(key)
                 .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -179,32 +177,31 @@ public class UsersRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
+                    List<Chat> chatsList = new ArrayList<>();
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        Chat chat = snapshot.getValue(Chat.class);
+                        if (chat != null) {
+                            chat.setKey(snapshot.getKey());
                         }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersAfter dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+                        chatsList.add(chat);
+                        Log.d(TAG, "mama getChatsAfter = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
+
                     }
 
-                    if(usersList.size() == 0){
+                    if(chatsList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getUsersAfter usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                    Log.d(TAG, "mama getChatsAfter usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
 
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial After
-                        callback.onResult(usersList);
+                    //initial After
+                    Collections.reverse(chatsList);
+                    callback.onResult(chatsList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
-                    }
 
                 } else {
-                    Log.w(TAG, "mama getUsersAfter no users exist");
+                    Log.w(TAG, "mama getChatsAfter no users exist");
                 }
 
             }
@@ -219,14 +216,14 @@ public class UsersRepository {
     }
 
     // to get previous data
-    public void getUsersBefore(final Long key, final int size,
-                              @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
-        Log.d(TAG, "mama getUsersBefore. BeforeKey= " +  key);
+    public void getChatsBefore(final Long key, final int size,
+                              @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
+        Log.d(TAG, "mama getChatsBefore. BeforeKey= " +  key);
 
         /*if(key == entireUsersList.get(0).getCreatedLong()){
             return;
         }*/
-        mUsersRef.orderByChild("created")
+        mChatsRef.orderByChild("lastSent")
                 .endAt(key)
                 .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -234,35 +231,35 @@ public class UsersRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
+                    List<Chat> chatsList = new ArrayList<>();
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        Chat chat = snapshot.getValue(Chat.class);
+                        if (chat != null) {
+                            chat.setKey(snapshot.getKey());
                         }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersBefore dataSnapshot. getSnapshotKeys= " +  userSnapshot.getKey());
+                        chatsList.add(chat);
+                        Log.d(TAG, "mama getChatsBefore = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
+
                     }
 
-                    if(usersList.size() == 0){
+                    if(chatsList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getUsersBefore usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
+                    Log.d(TAG, "mama getChatsBefore usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
 
 
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial before
-                        callback.onResult(usersList);
+                     //initial before
+                    Collections.reverse(chatsList);
+                     callback.onResult(chatsList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
-                    }
+
                     //initial load
                        /* ((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList, 0, usersList.size());*/
                 } else {
-                    Log.w(TAG, "mama getUsersBefore no users exist");
+                    Log.w(TAG, "mama getChatsBefore no users exist");
                 }
 
             }
@@ -283,11 +280,11 @@ public class UsersRepository {
     }*/
 
     // to invalidate the data whenever a change happen
-    public void usersChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
+    public void ChatsChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
 
-        final Query query = mUsersRef.orderByChild("created");
+        final Query query = mChatsRef.orderByChild("lastSent");
 
-        usersChangesListener  = new ValueEventListener() {
+        ChatsChangesListener = new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -295,8 +292,8 @@ public class UsersRepository {
                     isFirstLoaded = true;
                     Log.d(TAG, "mama entireUsersList Invalidated:");
                     // Remove post value event listener
-                    if (usersChangesListener != null) {
-                        query.removeEventListener(usersChangesListener);
+                    if (ChatsChangesListener != null) {
+                        query.removeEventListener(ChatsChangesListener);
                         Log.d(TAG, "mama usersChanged Invalidated removeEventListener");
                     }
                     ((ItemKeyedDataSource.InvalidatedCallback)InvalidatedCallback).onInvalidated();
@@ -332,7 +329,7 @@ public class UsersRepository {
                 // ...
             }
         };
-        query.addValueEventListener(usersChangesListener);
+        query.addValueEventListener(ChatsChangesListener);
         //mUsersRef.addValueEventListener(eventListener);
     }
 
@@ -345,41 +342,4 @@ public class UsersRepository {
         }
     }*/
 
-    public MutableLiveData<User> getCurrentUser(String userId){
-
-        //final MutableLiveData<User> currentUser = new MutableLiveData<>();
-        Log.d(TAG, "getCurrentUser initiated: " + userId);
-        // [START single_value_read]
-        mUsersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                Log.d(TAG, "getCurrentUser dataSnapshot key: ");
-                if (dataSnapshot.exists()) {
-                    // Get user value
-                    Log.d(TAG, "getCurrentUser dataSnapshot key: " + dataSnapshot.getKey());
-                    //currentUser = dataSnapshot.getValue(User.class);
-                    currentUser.postValue(dataSnapshot.getValue(User.class));
-                } else {
-                    // User is null, error out
-                    Log.w(TAG, "User is null, no such user");
-                    //completeProfile(currentUserId, currentUserName, currentUserEmail);
-                    //completeProfile(mUser);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                // [START_EXCLUDE]
-                //setEditingEnabled(true);
-                // [END_EXCLUDE]
-            }
-        });
-        // [END single_value_read]
-        return currentUser;
-    }
-
- }
-
+}

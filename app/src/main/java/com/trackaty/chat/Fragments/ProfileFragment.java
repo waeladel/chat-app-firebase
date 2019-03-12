@@ -78,7 +78,7 @@ public class ProfileFragment extends Fragment {
         mLovedByButton = (FloatingActionButton) fragView.findViewById(R.id.love_button);
         mMessageButton = (FloatingActionButton) fragView.findViewById(R.id.message_button);
         mLovedByHint = (TextView) fragView.findViewById(R.id.love_text);
-        mMessageHint = (TextView) fragView.findViewById(R.id.message_text);
+        mMessageHint = (TextView) fragView.findViewById(R.id.last_message);
         mCover = (ImageView) fragView.findViewById(R.id.coverImage);
         mAvatar = (ImageView) fragView.findViewById(R.id.user_image);
         mUserName = (TextView) fragView.findViewById(R.id.user_name_text);
