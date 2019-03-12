@@ -4,9 +4,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @IgnoreExtraProperties
@@ -17,20 +15,20 @@ public class Chat {
     private String receiver;
     private String lastMessage;
     private Object lastSent ;
-    private List<String> members = new ArrayList<>();
-    public Map<String, Boolean> memberHash = new HashMap<>();
+    //private List<String> members = new ArrayList<>();
+    private Map<String, Boolean> members = new HashMap<>();
 
 
     public Chat() {
 
     }
 
-    public Chat( String sender, String receiver, String lastMessage, ArrayList<String> members, Map<String, Boolean> memberHash) {
+    public Chat( String sender, String receiver, String lastMessage, Map<String, Boolean> members) {
         this.sender = sender;
         this.receiver = receiver;
         this.lastMessage = lastMessage;
+        //this.members = members;
         this.members = members;
-        this.memberHash = memberHash;
     }
 
     // [START post_to_map]
@@ -40,8 +38,8 @@ public class Chat {
         result.put(sender, true);
         result.put(receiver, true);
         result.put("lastMessage", lastMessage);
+        //result.put("members", members);
         result.put("members", members);
-        result.put("memberHash", memberHash);
         result.put("lastSent", ServerValue.TIMESTAMP);
 
         return result;
@@ -78,20 +76,20 @@ public class Chat {
         this.lastSent = lastSent;
     }
 
-    public List<String> getMembers() {
+   /* public List<String> getMembers() {
         return members;
     }
 
     public void setMembers(List<String> members) {
         this.members = members;
 
+    }*/
+
+    public Map<String, Boolean> getMembers() {
+        return members;
     }
 
-    public Map<String, Boolean> getMemberHash() {
-        return memberHash;
-    }
-
-    public void setMemberHash(Map<String, Boolean> memberHash) {
-        this.memberHash = memberHash;
+    public void setMembers(Map<String, Boolean> members) {
+        this.members = members;
     }
 }

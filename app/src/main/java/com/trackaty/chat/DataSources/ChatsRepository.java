@@ -57,13 +57,12 @@ public class ChatsRepository {
                             if (chat != null) {
                                 chat.setKey(snapshot.getKey());
 
-                                // loop to get all chat members array
+                                /*// loop to get all chat members array
                                 for (int i = 0; i < chat.getMembers().size(); i++) {
-                                    //Log.d(TAG, "mama getChats "+snapshot.getKey()+" getMember= "+ chat.getMembers().get(i));
-                                }
-
+                                    Log.d(TAG, "mama getChats "+snapshot.getKey()+" getMember= "+ chat.getMembers().get(i));
+                                }*/
                                 // loop to get all chat members HashMap
-                                Iterator iterator = chat.getMemberHash().entrySet().iterator();
+                                Iterator iterator = chat.getMembers().entrySet().iterator();
                                 while (iterator.hasNext()) {
                                     Map.Entry pair = (Map.Entry)iterator.next();
                                     Log.d(TAG, "mama getChats getMember= "+pair.getKey() + " = " + pair.getValue());

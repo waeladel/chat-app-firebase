@@ -348,18 +348,18 @@ public class MessagesFragment extends Fragment {
         Message message = new Message(messageText, mCurrentUserId, "wael", false , ServerValue.TIMESTAMP);
         Map<String, Object> messageValues = message.toMap();
 
-        // Create members array list, it's better to loop throw  selected members
+        /*// Create members array list, it's better to loop throw  selected members
         ArrayList <String> members = new ArrayList<>();
         members.add(mCurrentUserId);
-        members.add(mUserId);
+        members.add(mUserId);*/
 
         // Create members Hash list, it's better to loop throw  selected members
-        Map<String, Boolean> allMembers = new HashMap<>();
-        allMembers.put(mCurrentUserId, true);
-        allMembers.put(mUserId, true);
+        Map<String, Boolean> members = new HashMap<>();
+        members.put(mCurrentUserId, true);
+        members.put(mUserId, true);
 
         // Create chat map
-        Chat chat = new Chat(mCurrentUserId, mUserId, messageText, members, allMembers);
+        Chat chat = new Chat(mCurrentUserId, mUserId, messageText, members);
         Map<String, Object> chatValues = chat.toMap();
         /*Map<String, Object> chatValues = new HashMap<>();
         chatValues.put("lastMessage", messageText);
