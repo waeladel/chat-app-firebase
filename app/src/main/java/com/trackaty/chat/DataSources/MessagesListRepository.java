@@ -8,87 +8,79 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.FirebaseListeners;
+import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
-public class ChatsRepository {
+public class MessagesListRepository {
 
-    private final static String TAG = ChatsRepository.class.getSimpleName();
+    private final static String TAG = MessagesListRepository.class.getSimpleName();
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mChatsRef;
+    private DatabaseReference mMessagesRef;
+    private DatabaseReference mUsersRef;
     private Boolean isFirstLoaded = true;
-    public ValueEventListener ChatsChangesListener;
+    private ValueEventListener MessagesChangesListener;
+    private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    private MutableLiveData<User> mUser;
 
-    public ChatsRepository(String userKey){
+
+    public MessagesListRepository(String chatKey){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // use received chatKey to create a database ref
-        mChatsRef = mDatabaseRef.child("userChats").child(userKey);
+        mMessagesRef = mDatabaseRef.child("messages").child(chatKey);
+        mUsersRef = mDatabaseRef.child("users");
         isFirstLoaded = true;
-        Log.d(TAG, "mama ChatsRepository init. isFirstLoaded= " + isFirstLoaded);
+        Log.d(TAG, "mama MessagesListRepository init. isFirstLoaded= " + isFirstLoaded);
+
+        if(mListenersList == null){
+            mListenersList = new ArrayList<>();
+            Log.d(TAG, "mama MessagesRepository init. mListenersList size= " + mListenersList.size());
+        }
     }
 
     // get initial data
-    public void getChats(Long initialKey, final int size,
-                            @NonNull final ItemKeyedDataSource.LoadInitialCallback<Chat> callback){
+    public void getMessages(String initialKey, final int size,
+                            @NonNull final ItemKeyedDataSource.LoadInitialCallback<Message> callback){
 
         if(initialKey == null){// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getChats initialKey= " +  initialKey);
-            mChatsRef.orderByChild("lastSent")//limitToLast to start from the last (page size) items
-                    .limitToFirst(size)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
+            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
+            mMessagesRef.orderByKey()//limitToLast to start from the last (page size) items
+                    .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<Chat> chatsList = new ArrayList<>();
+                        List<Message> messagesList = new ArrayList<>();
                         for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                            Chat chat = snapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setKey(snapshot.getKey());
-
-                                /*// loop to get all chat members array
-                                for (int i = 0; i < chat.getMembers().size(); i++) {
-                                    Log.d(TAG, "mama getChats "+snapshot.getKey()+" getMember= "+ chat.getMembers().get(i));
-                                }*/
-                                /*// loop to get all chat members HashMap
-                                Log.d(TAG, "mama Chats getMember =" +chat.getMembers());
-                                Iterator iterator = chat.getMembers().entrySet().iterator();
-                                while (iterator.hasNext()) {
-                                    Map.Entry pair = (Map.Entry)iterator.next();
-                                    Log.d(TAG, "mama getChats getMember= "+pair.getKey() + " = " + pair.getValue());
-                                    iterator.remove(); // avoids a ConcurrentModificationException
-                                }*/
-
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
                             }
-
-                            chatsList.add(chat);
-                            Log.d(TAG, "mama getChats = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                            messagesList.add(message);
+                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(chatsList.size() == 0){
+                        if(messagesList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getChats usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                        Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
                         //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                        Collections.reverse(chatsList);
-                        callback.onResult(chatsList);
+                        callback.onResult(messagesList);
 
                     /*else{
                         //next pages load
@@ -96,7 +88,7 @@ public class ChatsRepository {
                         //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
                     }*/
                     } else {
-                        Log.w(TAG, "mama getChats no users exist");
+                        Log.w(TAG, "mama getMessages no users exist");
                     }
 
                 }
@@ -108,38 +100,37 @@ public class ChatsRepository {
                 }
             });
         }else{// not the first load. Key is the last seen key
-            Log.d(TAG, "mama getChats initialKey= " +  initialKey);
-            mChatsRef.orderByChild("lastSent")
+            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
+            mMessagesRef.orderByKey()
                     .startAt(initialKey)
-                    .limitToFirst(size) //limitToLast to start from the last (page size) items
+                    .limitToLast(size) //limitToLast to start from the last (page size) items
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<Chat> chatsList = new ArrayList<>();
+                        List<Message> messagesList = new ArrayList<>();
                         for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                            Chat chat = snapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setKey(snapshot.getKey());
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
                             }
-                            chatsList.add(chat);
-                            Log.d(TAG, "mama getChats = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                            messagesList.add(message);
+                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
 
-                        if(chatsList.size() == 0){
+                        if(messagesList.size() == 0){
                             return;
                         }
 
-                        Log.d(TAG, "mama getChats usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                        Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
 
                         //initial load
                         /*((ItemKeyedDataSource.LoadInitialCallback)callback)
                                 .onResult(usersList, 0, 14);*/
-                        Collections.reverse(chatsList);
-                        callback.onResult(chatsList);
+                        callback.onResult(messagesList);
 
                     /*else{
                         //next pages load
@@ -147,7 +138,7 @@ public class ChatsRepository {
                         //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
                     }*/
                     } else {
-                        Log.w(TAG, "mama getChats no users exist");
+                        Log.w(TAG, "mama getMessages no users exist");
                     }
 
                 }
@@ -165,14 +156,15 @@ public class ChatsRepository {
     }
 
     // to get next data
-    public void getChatsAfter(final Long key, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
+    public void getMessagesAfter(final String key, final int size,
+                         @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
         /*if(key == entireUsersList.get(entireUsersList.size()-1).getCreatedLong()){
             Log.d(TAG, "mama getUsersAfter init. afterKey= " +  key+ "entireUsersList= "+entireUsersList.get(entireUsersList.size()-1).getCreatedLong());
             return;
         }*/
-        Log.d(TAG, "mama getChatsAfter. AfterKey= " + key);
-        mChatsRef.orderByChild("lastSent")
+
+        Log.d(TAG, "mama getUsersAfter. AfterKey= " + key);
+        mMessagesRef.orderByKey()
                 .startAt(key)
                 .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -180,31 +172,31 @@ public class ChatsRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<Chat> chatsList = new ArrayList<>();
+                    List<Message> messagesList = new ArrayList<>();
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                        Chat chat = snapshot.getValue(Chat.class);
-                        if (chat != null) {
-                            chat.setKey(snapshot.getKey());
+                        if(!key.equals(snapshot.getKey())){ // if snapshot key = startAt key? don't add it again
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
+                            }
+                            messagesList.add(message);
+                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                         }
-                        chatsList.add(chat);
-                        Log.d(TAG, "mama getChatsAfter = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
-
                     }
 
-                    if(chatsList.size() == 0){
+                    if(messagesList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getChatsAfter usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                    Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
                     //initial After
-                    Collections.reverse(chatsList);
-                    callback.onResult(chatsList);
+                    callback.onResult(messagesList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
 
                 } else {
-                    Log.w(TAG, "mama getChatsAfter no users exist");
+                    Log.w(TAG, "mama getUsersAfter no users exist");
                 }
 
             }
@@ -219,14 +211,14 @@ public class ChatsRepository {
     }
 
     // to get previous data
-    public void getChatsBefore(final Long key, final int size,
-                              @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
-        Log.d(TAG, "mama getChatsBefore. BeforeKey= " +  key);
+    public void getMessagesBefore(final String key, final int size,
+                              @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
+        Log.d(TAG, "mama getUsersBefore. BeforeKey= " +  key);
 
         /*if(key == entireUsersList.get(0).getCreatedLong()){
             return;
         }*/
-        mChatsRef.orderByChild("lastSent")
+        mMessagesRef.orderByKey()
                 .endAt(key)
                 .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -234,27 +226,29 @@ public class ChatsRepository {
                 // [START_EXCLUDE]
                 if (dataSnapshot.exists()) {
                     // loop throw users value
-                    List<Chat> chatsList = new ArrayList<>();
+                    List<Message> messagesList = new ArrayList<>();
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                        Chat chat = snapshot.getValue(Chat.class);
-                        if (chat != null) {
-                            chat.setKey(snapshot.getKey());
+                        if(!key.equals(snapshot.getKey())){ // if snapshot key = startAt key? don't add it again
+                            Message message = snapshot.getValue(Message.class);
+                            if (message != null) {
+                                message.setKey(snapshot.getKey());
+                            }
+                            messagesList.add(message);
+                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+
                         }
-                        chatsList.add(chat);
-                        Log.d(TAG, "mama getChatsBefore = "+ chat.getLastMessage()+" getSnapshotKey= " +  snapshot.getKey());
 
                     }
 
-                    if(chatsList.size() == 0){
+                    if(messagesList.size() == 0){
                         return;
                     }
 
-                    Log.d(TAG, "mama getChatsBefore usersList.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                    Log.d(TAG, "mama getMessages usersList.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
 
 
                      //initial before
-                    Collections.reverse(chatsList);
-                     callback.onResult(chatsList);
+                     callback.onResult(messagesList);
                         /*((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList);*/
 
@@ -262,7 +256,7 @@ public class ChatsRepository {
                        /* ((ItemKeyedDataSource.LoadCallback)callback)
                                 .onResult(usersList, 0, usersList.size());*/
                 } else {
-                    Log.w(TAG, "mama getChatsBefore no users exist");
+                    Log.w(TAG, "mama getUsersBefore no users exist");
                 }
 
             }
@@ -283,11 +277,11 @@ public class ChatsRepository {
     }*/
 
     // to invalidate the data whenever a change happen
-    public void ChatsChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
+    public void MessagesChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
 
-        final Query query = mChatsRef.orderByChild("lastSent");
+        final Query query = mMessagesRef.orderByKey();
 
-        ChatsChangesListener = new ValueEventListener() {
+        MessagesChangesListener = new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -295,8 +289,8 @@ public class ChatsRepository {
                     isFirstLoaded = true;
                     Log.d(TAG, "mama entireUsersList Invalidated:");
                     // Remove post value event listener
-                    if (ChatsChangesListener != null) {
-                        query.removeEventListener(ChatsChangesListener);
+                    if (MessagesChangesListener != null) {
+                        query.removeEventListener(MessagesChangesListener);
                         Log.d(TAG, "mama usersChanged Invalidated removeEventListener");
                     }
                     ((ItemKeyedDataSource.InvalidatedCallback)InvalidatedCallback).onInvalidated();
@@ -311,15 +305,12 @@ public class ChatsRepository {
                     Log.d(TAG, "mama entireUsersList Invalidated:");
                     return;
                 }
-
                 if (dataSnapshot.exists()) {
                     // loop throw users value
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
                         entireUsersList.add(userSnapshot.getValue(User.class));
                     }
-
                     Log.d(TAG, "mama entireUsersList size= "+entireUsersList.size()+"dataSnapshot count= "+dataSnapshot.getChildrenCount());
-
                 } else {
                     Log.w(TAG, "mama usersChanged no users exist");
                 }*/
@@ -332,8 +323,16 @@ public class ChatsRepository {
                 // ...
             }
         };
-        query.addValueEventListener(ChatsChangesListener);
+
+        query.addValueEventListener(MessagesChangesListener);
         //mUsersRef.addValueEventListener(eventListener);
+        mListenersList.add(new FirebaseListeners(query, MessagesChangesListener));
+
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "MessagesListRepository Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "MessagesListRepository Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "MessagesListRepository Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
     }
 
     /*public Single<List<User>> getAnimals(int count){
@@ -344,5 +343,24 @@ public class ChatsRepository {
             User.getArrayValue(User.class);
         }
     }*/
+
+    public void removeListeners(){
+
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "remove Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+
+            if(null != mListenersList.get(i).getListener()){
+                mListenersList.get(i).getQueryOrRef().removeEventListener(mListenersList.get(i).getListener());
+            }
+            /*if(null != mListenersList.get(i).getReference()){
+                mListenersList.get(i).getReference().removeEventListener(mListenersList.get(i).getListener());
+            }else if(null != mListenersList.get(i).getQuery()){
+                mListenersList.get(i).getQuery().removeEventListener(mListenersList.get(i).getListener());
+            }*/
+        }
+        mListenersList.clear();
+    }
 
 }

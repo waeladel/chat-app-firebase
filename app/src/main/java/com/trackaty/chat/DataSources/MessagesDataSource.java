@@ -3,7 +3,6 @@ package com.trackaty.chat.DataSources;
 import android.util.Log;
 
 import com.trackaty.chat.models.Message;
-import com.trackaty.chat.models.User;
 
 import androidx.annotation.NonNull;
 import androidx.paging.ItemKeyedDataSource;
@@ -12,11 +11,11 @@ public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
 
     private final static String TAG = MessagesDataSource.class.getSimpleName();
     private String mChatKey;
-    private MessagesRepository messagesRepository;
+    private MessagesListRepository messagesRepository;
 
     // get chatKey on the constructor
     public MessagesDataSource(String chatKey){
-        messagesRepository = new MessagesRepository(chatKey);
+        messagesRepository = new MessagesListRepository(chatKey);
         this.mChatKey = chatKey;
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
             invalidate();

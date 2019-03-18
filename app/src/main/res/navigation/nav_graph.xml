@@ -117,14 +117,21 @@
         <argument
             android:name="currentUserId"
             app:argType="string" />
-        <argument
-            android:name="user"
-            app:argType="com.trackaty.chat.models.User" />
         <action
             android:id="@+id/action_messagesFrag_to_profileFrag"
             app:destination="@id/profileFragment"
             app:enterAnim="@anim/fui_slide_in_right"
             app:exitAnim="@anim/fui_slide_out_left" />
+        <argument
+            android:name="chatId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="chatUserId"
+            app:argType="string" />
+        <argument
+            android:name="isGroup"
+            app:argType="boolean" />
     </fragment>
     <fragment
         android:id="@+id/chatsFragment"
@@ -132,7 +139,11 @@
         android:label="chats_fragment"
         tools:layout="@layout/chats_fragment" >
         <action
-            android:id="@+id/action_chatsFragment_to_mainFragment2"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_chatsFragment_to_messagesFragment"
+            app:destination="@id/messagesFragment" />
+        <action
+            android:id="@+id/action_chatsFragment_to_profileFragment"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/fui_slide_in_right" />
     </fragment>
 </navigation>

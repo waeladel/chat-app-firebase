@@ -1,6 +1,7 @@
 package com.trackaty.chat.Adapters;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +11,27 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Fragments.ChatsFragmentDirections;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.Message;
+import com.trackaty.chat.models.User;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,8 +40,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder> {
 
     private final static String TAG = ChatsAdapter.class.getSimpleName();
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    String currentUserId = currentUser != null ? currentUser.getUid() : null;
+
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private String currentUserId ;
 
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
     private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
@@ -43,6 +55,11 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
         super(DIFF_CALLBACK);
         // [START create_storage_reference]
         mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser != null){
+            currentUserId = currentUser.getUid();
+        }
     }
 
     @NonNull
@@ -60,7 +77,6 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
         final Chat chat = getItem(position);
         if (chat != null) {
-
             // LastMessage text value
             if (null != chat.getLastMessage()) {
                 holder.mLastMessage.setText(chat.getLastMessage()+ chat.getKey());
@@ -78,6 +94,109 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                 holder.mLastSentTime.setText(null);
             }
 
+            // participants' avatars and names
+            if (null != chat.getMembers()) {
+                // loop to get all chat members HashMap
+                //String participantId;
+                final List<User> membersList = new ArrayList<>();
+                for (Object o : chat.getMembers().entrySet()) {
+                    Map.Entry pair = (Map.Entry) o;
+                    Log.d(TAG, "mama Chats getMember = " + pair.getKey() + " = " + pair.getValue() + currentUser.getUid());
+
+                    if (!currentUser.getUid().equals(pair.getKey())) {
+                        User user = chat.getMembers().get(String.valueOf(pair.getKey()));
+                        if (user != null) {
+                            user.setKey(String.valueOf(pair.getKey()));
+                            membersList.add(user);
+                            Log.d(TAG, "mama Chats membersListSize=" + membersList.size());
+                            Log.d(TAG, "mama Chats getMember name=" + user.getName());
+                        }
+                    }
+                    //iterator.remove(); // avoids a ConcurrentModificationException
+                }
+
+                holder.setItemClickListener(new ItemClickListener(){
+                    @Override
+                    public void onClick(View view, int position, boolean isLongClick) {
+
+                        if(membersList.size()== 1){
+                            // it's private chat
+                            switch (view.getId()) {
+                                case R.id.user_image: // only avatar is clicked
+                                    Log.i(TAG, "user avatar clicked= "+view.getId());
+                                    Log.i(TAG, "user avatar currenUserId= "+currentUserId+ " userId " + membersList.get(0).getKey() );
+                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment(currentUserId, membersList.get(0).getKey(), membersList.get(0));
+                                    Navigation.findNavController(view).navigate(ProfileDirection);
+                                    break;
+                                default://-1 entire row is clicked
+                                    Log.i(TAG, "user row clicked= "+view.getId());
+                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(currentUserId , chat.getKey(), membersList.get(0).getKey(), false);
+                                    Navigation.findNavController(view).navigate(MessageDirection);
+                                    break;
+                            }
+                        }else{
+                            // it's group chat
+                            switch (view.getId()) {
+                                case R.id.user_image: // only avatar is clicked
+                                    /*Log.i(TAG, "user avatar clicked= "+view.getId());
+                                    NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUserId, membersList.get(0).getKey(), membersList.get(0));
+                                    Navigation.findNavController(view).navigate(ProfileDirection);*/
+                                    break;
+                                default://-1 entire row is clicked
+                                    Log.i(TAG, "user row clicked= "+view.getId());
+                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(currentUserId , chat.getKey(), membersList.get(0).getKey(),true);
+                                    Navigation.findNavController(view).navigate(MessageDirection);
+                                    break;
+                            }
+                        }
+
+
+                    }
+                });
+
+                switch (membersList.size()){
+                    case 1:// there is only one member other than current user
+                        Log.d(TAG, "mama getChats membersList name= "+membersList.get(0).getName());
+                        Log.d(TAG, "mama getChats membersList key= "+membersList.get(0).getKey());
+                        Log.d(TAG, "mama getChats membersList avatar= "+membersList.get(0).getAvatar());
+                        // names text value
+                        if (null != membersList.get(0).getName()) {
+                            holder.mChatTitle.setText(membersList.get(0).getName());
+                        }else{
+                            holder.mChatTitle.setText(null);
+                        }
+                        // [START create_storage_reference]
+                        //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                        mStorageRef.child("images/"+membersList.get(0).getKey()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                // Got the download URL for 'users/me/profile.png'
+                                Picasso.get()
+                                        .load(uri)
+                                        .placeholder(R.drawable.ic_user_account_grey_white)
+                                        .error(R.drawable.ic_broken_image)
+                                        .into(holder.mAvatar);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                // Handle any errors
+                                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                            }
+                        });
+
+                        break;
+                    case 2:// there is 2 member other than current user
+                        Log.d(TAG, "mama getChats getMember= "+membersList.get(0));
+                        Log.d(TAG, "mama getChats getMember= "+membersList.get(1));
+                        break;
+                }
+
+
+            }else{
+                Log.d(TAG, "mama Chats= null");
+                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+            }
 
         }
 
@@ -128,11 +247,12 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
 
     /// ViewHolder for ReceivedMessages list /////
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
         private TextView mLastMessage, mLastSentTime, mChatTitle;
         private CircleImageView mAvatar;
+        ItemClickListener itemClickListener;
 
 
         public ViewHolder(View itemView) {
@@ -143,9 +263,24 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
             mLastMessage = row.findViewById(R.id.last_message);
             mAvatar = row.findViewById(R.id.user_image);
             mLastSentTime = row.findViewById(R.id.last_sent);
+            mChatTitle = row.findViewById(R.id.user_name);
+
+            mAvatar.setOnClickListener(this);
+            row.setOnClickListener(this);
         }
 
 
+        @Override
+        public void onClick(View view) {
+            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getAdapterPosition(), false);
+            }
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
     }
 
 }

@@ -28,10 +28,15 @@ import androidx.recyclerview.widget.RecyclerView;
 public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertViewHolder> {
 
     private final static String TAG = UsersAdapter.class.getSimpleName();
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseUser currentUser;
+    private String currentUserId;
 
     public UsersAdapter() {
         super(DIFF_CALLBACK);
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser != null){
+            currentUserId = currentUser.getUid();
+        }
     }
 
     @NonNull
@@ -56,14 +61,12 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
                 @Override
                 public void onClick(View view, int position, boolean isLongClick) {
-
                     switch (view.getId()) {
                         case R.id.user_image: // only avatar is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user avatar clicked= "+view.getId());
-                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUser.getUid(), user.getKey(), user);
+                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUserId, user.getKey(), user);
                             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-
                             //check if we are on Main Fragment not on complete Profile already
                             Navigation.findNavController(view).navigate(ProfileDirection);
 
@@ -73,9 +76,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         default://-1 entire row is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user row clicked= "+view.getId());
-                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(currentUser.getUid(),user);
+                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(currentUserId,null, user.getKey(),false);
                             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-
                             //check if we are on Main Fragment not on complete Profile already
                             Navigation.findNavController(view).navigate(MessageDirection);
 

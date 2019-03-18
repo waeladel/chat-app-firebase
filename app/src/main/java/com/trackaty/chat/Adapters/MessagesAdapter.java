@@ -90,10 +90,10 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     ReceivedHolder.mMessage.setText(null);
                 }
 
-                if (null != message.getSender()) {
+                if (null != message.getSenderId()) {
                     // [START create_storage_reference]
                     //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
-                    mStorageRef.child("images/"+message.getSender()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    mStorageRef.child("images/"+message.getSenderId()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
                             // Got the download URL for 'users/me/profile.png'
@@ -111,7 +111,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                         }
                     });
                 }else{
-                    // Handle if getSender() is null
+                    // Handle if getSenderId() is null
                     ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
                 }
 
@@ -190,7 +190,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
         Message message = getItem(position);
 
-        if(null!= message.getSender() && null != currentUserId && currentUserId.equals(message.getSender())){
+        if(null!= message.getSenderId() && null != currentUserId && currentUserId.equals(message.getSenderId())){
             // If the current user is the sender of the message
             return VIEW_TYPE_MESSAGE_SENT;
         }else{// it's a message from chat user

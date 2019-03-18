@@ -22,6 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.Adapters.ChatsAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.ChatsViewModel;
@@ -43,6 +45,7 @@ public class ChatsFragment extends Fragment {
     private ArrayList<Chat> mChatsArrayList;
     private ChatsAdapter mChatsAdapter;
 
+    private FirebaseUser mCurrentUser;
     private String mCurrentUserId;
 
     private Context mActivityContext;
@@ -93,29 +96,37 @@ public class ChatsFragment extends Fragment {
             ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
             actionbar.setTitle(R.string.chats_frag_title);
             // disable back button because we are using bottom nav
+            actionbar.setDisplayHomeAsUpEnabled(false);
+            actionbar.setHomeButtonEnabled(false);
+            actionbar.setDisplayShowCustomEnabled(false);
             /*actionbar.setDisplayHomeAsUpEnabled(true);
             actionbar.setHomeButtonEnabled(true);
             actionbar.setDisplayShowCustomEnabled(false);*/
 
-            // update the CurrentUserId whenever it changes due to log out
-            mMainViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
-            mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {
+            mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if(mCurrentUser != null){
+                mCurrentUserId = mCurrentUser.getUid();
+            }
+
+            /*mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {
                 @Override
                 public void onChanged(final String userId) {
-                    Log.d(TAG, "onChanged user userId= "+userId);
+                    Log.d(TAG, "onChanged user userId= " + userId);
                     mCurrentUserId = userId;
+                }
+             });*/
 
                     //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
 
-                    mChatsViewModel = ViewModelProviders.of(ChatsFragment.this, new ViewModelProvider.Factory() {
+                    mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
                         @NonNull
                         @Override
                         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                            return (T)new ChatsViewModel (userId);
+                            return (T)new ChatsViewModel (mCurrentUserId);
                         }
                     }).get(ChatsViewModel.class);
 
-                    mChatsViewModel.itemPagedList.observe(ChatsFragment.this, new Observer<PagedList<Chat>>() {
+                    mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {
                         @Override
                         public void onChanged(@Nullable final PagedList<Chat> items) {
                             System.out.println("mama onChanged");
@@ -137,17 +148,18 @@ public class ChatsFragment extends Fragment {
                         }
                     });
 
-
-                }
-            });
         }
 
+        /*// update the CurrentUserId whenever it changes due to log out
+        mMainViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
+
+        // update the CurrentUser whenever it changes
         mMainViewModel.getCurrentUser().observe(this, new Observer<User>() {
             @Override
             public void onChanged(User user) {
                 Log.d(TAG, "onChanged user userId name= "+user.getName());
             }
-        });
+        });*/
 
     }
 

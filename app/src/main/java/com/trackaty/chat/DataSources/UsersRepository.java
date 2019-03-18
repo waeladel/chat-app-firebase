@@ -3,7 +3,6 @@ package com.trackaty.chat.DataSources;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -13,7 +12,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -40,6 +41,33 @@ public class UsersRepository {
     //private LiveData<User> currentUser;
     private MutableLiveData<User>currentUser;
 
+    // HashMap to keep track of Firebase Listeners
+    //private ValueEventListener currentUserListener;
+    private HashMap<DatabaseReference, ValueEventListener> mListenersMap;
+    // a listener for currentUser changes
+    private ValueEventListener currentUserListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // Get user value
+                Log.d(TAG, "getCurrentUser dataSnapshot key: "
+                        + dataSnapshot.getKey()+" Listener = "+currentUserListener);
+                //currentUser = dataSnapshot.getValue(User.class);
+                currentUser.postValue(dataSnapshot.getValue(User.class));
+            } else {
+                // User is null, error out
+                Log.w(TAG, "User is null, no such user");
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+
+        }
+    };
+
 
     public UsersRepository(){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -48,6 +76,7 @@ public class UsersRepository {
         //entireUsersList = new ArrayList<>();
         isFirstLoaded = true;
         currentUser = new MutableLiveData<>();
+        mListenersMap =  new HashMap<>();
         Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + isFirstLoaded);
 
     }
@@ -345,41 +374,25 @@ public class UsersRepository {
         }
     }*/
 
-    public MutableLiveData<User> getCurrentUser(String userId){
+    /*public MutableLiveData<User> getCurrentUser(String userId){
 
+        DatabaseReference currentUserRef = mUsersRef.child(userId);
         //final MutableLiveData<User> currentUser = new MutableLiveData<>();
         Log.d(TAG, "getCurrentUser initiated: " + userId);
-        // [START single_value_read]
-        mUsersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                Log.d(TAG, "getCurrentUser dataSnapshot key: ");
-                if (dataSnapshot.exists()) {
-                    // Get user value
-                    Log.d(TAG, "getCurrentUser dataSnapshot key: " + dataSnapshot.getKey());
-                    //currentUser = dataSnapshot.getValue(User.class);
-                    currentUser.postValue(dataSnapshot.getValue(User.class));
-                } else {
-                    // User is null, error out
-                    Log.w(TAG, "User is null, no such user");
-                    //completeProfile(currentUserId, currentUserName, currentUserEmail);
-                    //completeProfile(mUser);
-                }
 
-            }
+        //mListenersMap.put(postSnapshot.getRef(), currentUserListener);
+        currentUserRef.addValueEventListener(currentUserListener);
+        mListenersMap.put(currentUserRef, currentUserListener);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                // [START_EXCLUDE]
-                //setEditingEnabled(true);
-                // [END_EXCLUDE]
-            }
-        });
-        // [END single_value_read]
+        for (Map.Entry<DatabaseReference, ValueEventListener> entry : mListenersMap.entrySet()) {
+            DatabaseReference ref = entry.getKey();
+            ValueEventListener listener = entry.getValue();
+            Log.d(TAG, "Map getCurrentUser. ref= " + ref+ " listener= "+listener);
+            //ref.removeEventListener(listener);
+        }
+
         return currentUser;
-    }
+    }*/
 
  }
 

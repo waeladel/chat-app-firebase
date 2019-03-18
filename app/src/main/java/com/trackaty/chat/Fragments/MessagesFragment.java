@@ -38,6 +38,7 @@ import com.google.firebase.database.ServerValue;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Adapters.MessagesAdapter;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.ViewModels.MessagesViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
@@ -46,7 +47,6 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
@@ -67,9 +67,11 @@ public class MessagesFragment extends Fragment {
 
 
 
-    private MessagesViewModel mViewModel;
-    private String mCurrentUserId, mUserId , mChatId;
-    private User mUser;
+    private MessagesViewModel mMessagesViewModel;
+    private MainActivityViewModel mMainViewModel;
+    private String mCurrentUserId, mChatUserId, mChatId;
+    private User mChatUser, mCurrentUser ;
+    private Boolean isGroup;
 
     private Context mActivityContext;
     private Activity activity;
@@ -97,13 +99,17 @@ public class MessagesFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
         if(getArguments() != null) {
-            mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
-            mUser = MessagesFragmentArgs.fromBundle(getArguments()).getUser();// any user
-            mUserId = mUser.getKey();
-
-            // join mCurrentUserId and mUserId to generate a chat Key
-            mChatId = getJoinedKeys(mCurrentUserId , mUserId);
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mUserId= " + mUserId + " name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
+            //mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+            mChatUserId = MessagesFragmentArgs.fromBundle(getArguments()).getChatUserId();// any user
+            mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
+            isGroup = MessagesFragmentArgs.fromBundle(getArguments()).getIsGroup();
+            if(null != MessagesFragmentArgs.fromBundle(getArguments()).getChatId()){
+                mChatId = MessagesFragmentArgs.fromBundle(getArguments()).getChatId();
+            }else{
+                // Chat ID is not passed from MainFragment, we need to create
+                mChatId = getJoinedKeys(mCurrentUserId , mChatUserId);
+            }
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
         }
 
         mMessage = (EditText) fragView.findViewById(R.id.last_message);
@@ -141,7 +147,7 @@ public class MessagesFragment extends Fragment {
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
                         Log.d(TAG, "dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
                         //userSnapshot.getValue().String.class;
-                        if(userSnapshot.hasChild(mUserId)){
+                        if(userSnapshot.hasChild(mChatUserId)){
                             mChatId =  userSnapshot.getKey();
                             Log.d(TAG, "dataSnapshot hasChild= " +  userSnapshot.getKey()+ " count "+userSnapshot.getChildrenCount());
                             // chat room already exist. fetch data
@@ -172,7 +178,7 @@ public class MessagesFragment extends Fragment {
 
 
         /* //// a better query, no need to get all chats for current user, just chat key for his room with the receiver
-        mChatsRef.orderByChild(mCurrentUserId).equalTo(mUserId).addValueEventListener(new ValueEventListener() {
+        mChatsRef.orderByChild(mCurrentUserId).equalTo(mChatUserId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // [START_EXCLUDE]
@@ -213,7 +219,7 @@ public class MessagesFragment extends Fragment {
             public void onClick(View v) {
                 Log.i(TAG, "mSendButton is clicked ");
                 String messageText = mMessage.getText().toString().trim();
-                Log.d(TAG, "getJoinedKeys ="+getJoinedKeys(mCurrentUserId , mUserId));
+                Log.d(TAG, "getJoinedKeys ="+getJoinedKeys(mCurrentUserId , mChatUserId));
                 if(!TextUtils.isEmpty(messageText)){
                     sendMessage(mChatId, messageText);
                 }
@@ -264,18 +270,87 @@ public class MessagesFragment extends Fragment {
             mLastSeen = (TextView) actionBarView.findViewById(R.id.last_seen);
             mUserPhoto = (CircleImageView) actionBarView.findViewById(R.id.user_image);
 
-            mUserName.setText(getFirstWord(mUser.getName()));
-            //ToDo: Display last online not user's name
-            mLastSeen.setText(getFirstWord(mUser.getName()));
+            // get Current User Id and object from main ViewModel
 
-            // Get user values
-            if (null != mUser.getAvatar()) {
-                Picasso.get()
-                        .load(mUser.getAvatar())
-                        .placeholder(R.drawable.ic_user_account_grey_white)
-                        .error(R.drawable.ic_broken_image)
-                        .into(mUserPhoto);
+            // update the CurrentUserId whenever it changes due to log out
+            mMainViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
+            /*mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(final String userId) {
+                    Log.d(TAG, "onChanged user userId= "+userId);
+                    mCurrentUserId = userId;
+                    // join mCurrentUserId and mChatUserId to generate a chat Key
+                    if(mChatId == null){
+                        // Chat ID is not passed from MainFragment, we need to create
+                        mChatId = getJoinedKeys(mCurrentUserId , mChatUserId);
+                    }
+                    Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId);
+                }
+            });*/ // End init  mMessagesViewModel getChatUser//
+
+
+
+
+            //mMessagesViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
+
+            // start init  mMessagesViewModel here after mCurrentUserId is received//
+            // extend mMessagesViewModel to pass Chat Key value //
+            mMessagesViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+                @NonNull
+                @Override
+                public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                    return (T)new MessagesViewModel (mChatId);
+                }
+            }).get(MessagesViewModel.class);
+
+            mMessagesViewModel.itemPagedList.observe(this, new Observer<PagedList<Message>>() {
+                @Override
+                public void onChanged(@Nullable final PagedList<Message> items) {
+                    System.out.println("mama onChanged");
+                    if (items != null ){
+                        // your code here
+                        Log.d(TAG, "mama messages submitList size" +  items.size());
+                        mMessagesAdapter.submitList(items);
+                        // Scroll to last item
+                        if(items.size()>0){// stop scroll to bottom if there are no items
+                            mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                        }
+                    }
+                }
+            });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
+
+            // get Chat User
+            if(!isGroup){
+                mMessagesViewModel.getChatUser(mChatUserId).observe(this, new Observer<User>() {
+                    @Override
+                    public void onChanged(User user) {
+                        Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
+                        mChatUser = user;
+                        // display ChatUser name
+                        mUserName.setText(getFirstWord(mChatUser.getName()));
+                        //ToDo: Display last online not user's name
+                        mLastSeen.setText(getFirstWord(mChatUser.getName()));
+
+                        // Get user values
+                        if (null != mChatUser.getAvatar()) {
+                            Picasso.get()
+                                    .load(mChatUser.getAvatar())
+                                    .placeholder(R.drawable.ic_user_account_grey_white)
+                                    .error(R.drawable.ic_broken_image)
+                                    .into(mUserPhoto);
+                        }
+
+                    }
+                });
             }
+
+            mMainViewModel.getCurrentUser().observe(this, new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    Log.d(TAG, "onChanged CurrentUser userId name= "+user.getName());
+                    mCurrentUser = user;
+                }
+            });
 
             // Open user profile with custom actionBar is clicked //
             actionBarView.setOnClickListener(new View.OnClickListener() {
@@ -283,7 +358,7 @@ public class MessagesFragment extends Fragment {
                 public void onClick(View view) {
                     //mListener.onTextViewNameClick(view, getAdapterPosition());
                     Log.i(TAG, "user avatar or name clicked");
-                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mCurrentUserId, mUser.getKey(), mUser);
+                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mCurrentUserId, mChatUser.getKey(), mChatUser);
 
                     //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
@@ -294,50 +369,6 @@ public class MessagesFragment extends Fragment {
                 }
             });
 
-        //mViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
-        // extend ViewModel to pass Chat Key value //
-        mViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
-                @NonNull
-                @Override
-                public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                    return (T)new MessagesViewModel (mChatId);
-                }
-            }).get(MessagesViewModel.class);
-
-        mViewModel.itemPagedList.observe(this, new Observer<PagedList<Message>>() {
-                @Override
-                public void onChanged(@Nullable final PagedList<Message> items) {
-                    System.out.println("mama onChanged");
-                    if (items != null ){
-                        //delay submitList till items size is not 0
-                       new java.util.Timer().schedule(
-                                new java.util.TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        // your code here
-                                        Log.d(TAG, "mama messages submitList size" +  items.size());
-                                        mMessagesAdapter.submitList(items);
-                                        // Scroll to last item
-                                        if(items.size()>0){// stop scroll to bottom if there are no items
-                                            mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                        }
-                                        // Scroll to last item on the list
-                                        //int position = mMessagesRecycler.getAdapter().getItemCount()-1;
-                                        /*int position = mMessagesAdapter.getItemCount()-1;
-                                        Log.d(TAG, "mama last position= " +  position);
-
-                                        if(position >= 0 ){
-                                            mMessagesRecycler.smoothScrollToPosition(position);
-                                            //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                        }*/
-                                    }
-                                },
-                                5000
-                        );
-
-                    }
-                }
-            });
     }
 
 }
@@ -345,21 +376,24 @@ public class MessagesFragment extends Fragment {
     private void sendMessage(String mChatId, String messageText) {
 
         String  messageKey = mMessagesRef.push().getKey();
-        Message message = new Message(messageText, mCurrentUserId, "wael", false , ServerValue.TIMESTAMP);
+        Message message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false);
         Map<String, Object> messageValues = message.toMap();
 
         /*// Create members array list, it's better to loop throw  selected members
         ArrayList <String> members = new ArrayList<>();
         members.add(mCurrentUserId);
-        members.add(mUserId);*/
+        members.add(mChatUserId);*/
+
+        Log.d(TAG, "sendMessage CurrentUserId= "+mCurrentUserId+ " userId= "+ mChatUserId + " chatUser= "+ mChatUser);
+
 
         // Create members Hash list, it's better to loop throw  selected members
-        Map<String, Boolean> members = new HashMap<>();
-        members.put(mCurrentUserId, true);
-        members.put(mUserId, true);
+        Map<String, User> members = new HashMap<>();
+        members.put(mCurrentUserId, mCurrentUser);
+        members.put(mChatUserId, mChatUser);
 
         // Create chat map
-        Chat chat = new Chat(mCurrentUserId, mUserId, messageText, members);
+        Chat chat = new Chat(messageText, members);
         Map<String, Object> chatValues = chat.toMap();
         /*Map<String, Object> chatValues = new HashMap<>();
         chatValues.put("lastMessage", messageText);
@@ -376,7 +410,7 @@ public class MessagesFragment extends Fragment {
 
         // only if Lookup is needed
         childUpdates.put("/userChats/" + mCurrentUserId + "/" + mChatId, chatValues);
-        childUpdates.put("/userChats/" + mUserId + "/" + mChatId, chatValues);
+        childUpdates.put("/userChats/" + mChatUserId + "/" + mChatId, chatValues);
 
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -411,7 +445,7 @@ public class MessagesFragment extends Fragment {
 
         Map<String, Object> chatValues = new HashMap<>();
         chatValues.put(mCurrentUserId, true);
-        chatValues.put(mUserId, true);
+        chatValues.put(mChatUserId, true);
         chatValues.put("lastMessage", messageText);
         chatValues.put("lastSent", ServerValue.TIMESTAMP);
 

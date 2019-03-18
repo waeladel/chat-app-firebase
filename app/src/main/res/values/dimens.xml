@@ -8,6 +8,7 @@
     <dimen name="small_text_size">10sp</dimen>
     <dimen name="small_icon">18dp</dimen>
     <dimen name="small_avatar">36dp</dimen>
+    <dimen name="medium_avatar">72dp</dimen>
     <dimen name="button_padding">16dp</dimen>
     <dimen name="elevation">4dp</dimen>
 

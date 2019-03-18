@@ -11,21 +11,17 @@ import java.util.Map;
 public class Chat {
 
     private String key;
-    private String sender;
-    private String receiver;
     private String lastMessage;
     private Object lastSent ;
     //private List<String> members = new ArrayList<>();
-    private Map<String, Boolean> members = new HashMap<>();
+    private Map<String, User> members = new HashMap<>();
 
 
     public Chat() {
 
     }
 
-    public Chat( String sender, String receiver, String lastMessage, Map<String, Boolean> members) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public Chat( String lastMessage, Map<String, User> members) {
         this.lastMessage = lastMessage;
         //this.members = members;
         this.members = members;
@@ -35,8 +31,6 @@ public class Chat {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put(sender, true);
-        result.put(receiver, true);
         result.put("lastMessage", lastMessage);
         //result.put("members", members);
         result.put("members", members);
@@ -85,11 +79,11 @@ public class Chat {
 
     }*/
 
-    public Map<String, Boolean> getMembers() {
+    public Map<String, User> getMembers() {
         return members;
     }
 
-    public void setMembers(Map<String, Boolean> members) {
+    public void setMembers(Map<String, User> members) {
         this.members = members;
     }
 }

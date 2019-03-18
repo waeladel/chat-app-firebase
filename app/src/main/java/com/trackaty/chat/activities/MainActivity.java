@@ -106,13 +106,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         navController = Navigation.findNavController(this, R.id.host_fragment);
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // update CurrentUserId for all observer fragments
         mMainViewModel = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mTextMessage = (TextView) findViewById(R.id.last_message);
 
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         Log.d(TAG, "MainActivity onCreate");
 
         mAuth = FirebaseAuth.getInstance();
@@ -187,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     if(mUser != null ){
                         mUser = null;
                     }
+                    goToMain();
+                    // set selected bottomNavigation to main icon
+                    bottomNavigation.setSelectedItemId(R.id.navigation_home);
                     initiateLogin(); // start login activity
                 }
             }
@@ -481,6 +483,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
         navController.navigate(R.id.mainFragment);
+        // change selected bottomNavigation to main
 
                 /*Navigation.findNavController(this, R.id.host_fragment)
                         .navigate(directions);*/
