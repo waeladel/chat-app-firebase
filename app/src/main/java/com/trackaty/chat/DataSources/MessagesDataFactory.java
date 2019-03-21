@@ -7,7 +7,7 @@ import androidx.paging.DataSource;
 
 public class MessagesDataFactory extends DataSource.Factory<String, Message>{
 
-    private String mChatKey;
+    public static String mChatKey;
 
     // receive chatKey on the constructor
     public MessagesDataFactory(String chatKey) {

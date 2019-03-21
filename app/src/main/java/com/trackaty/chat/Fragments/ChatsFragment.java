@@ -17,6 +17,7 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +51,8 @@ public class ChatsFragment extends Fragment {
 
     private Context mActivityContext;
     private Activity activity;
+    //private int itemsSize;
+    private  Handler handler;
 
 
     public static ChatsFragment newInstance() {
@@ -126,11 +129,50 @@ public class ChatsFragment extends Fragment {
                         }
                     }).get(ChatsViewModel.class);
 
+
                     mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {
                         @Override
                         public void onChanged(@Nullable final PagedList<Chat> items) {
-                            System.out.println("mama onChanged");
+
                             if (items != null ){
+                                //Log.d(TAG, "mama onChanged "+ items.size());
+                                /*handler = new Handler();
+
+                                final Runnable r = new Runnable() {
+                                    public void run() {
+                                        //await().until(itemsIsAdded(items.size()));
+                                        Log.d(TAG, "mama messages submitList size" +  items.size());
+                                        //mChatsAdapter.submitList(items);}
+                                        handler.postDelayed(this, 1000);
+                                };
+
+                                handler.postDelayed(r, 1000);*/
+                                /*handler = new Handler();
+                                Thread thread = new Thread() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            while(items.size() == 0) {
+                                                sleep(1000);
+                                                Log.d(TAG, "mama messages submitList size" +  items.size());
+                                                handler.post(this);
+                                            }
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                };
+
+                                thread.start();*/
+
+                                Log.d(TAG, "mama while ends submitList size" +  items.size());
+
+                                //await().atMost(5, SECONDS);
+                                //itemsSize = items.size();
+                                //await().until(itemsIsAdded(items.size()));
+                                //Log.d(TAG, "mama messages submitList size" +  items.size());
+                                //mChatsAdapter.submitList(items);
+
                                 //delay submitList till items size is not 0
                                 new java.util.Timer().schedule(
                                         new java.util.TimerTask() {
@@ -141,7 +183,7 @@ public class ChatsFragment extends Fragment {
                                                 mChatsAdapter.submitList(items);
                                             }
                                         },
-                                        5000
+                                        2000
                                 );
 
                             }

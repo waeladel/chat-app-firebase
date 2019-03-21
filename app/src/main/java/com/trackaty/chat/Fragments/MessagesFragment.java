@@ -303,10 +303,12 @@ public class MessagesFragment extends Fragment {
                 }
             }).get(MessagesViewModel.class);
 
-            mMessagesViewModel.itemPagedList.observe(this, new Observer<PagedList<Message>>() {
+
+            mMessagesViewModel.getMessagesList().observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
                 @Override
                 public void onChanged(@Nullable final PagedList<Message> items) {
                     System.out.println("mama onChanged");
+
                     if (items != null ){
                         // your code here
                         Log.d(TAG, "mama messages submitList size" +  items.size());
