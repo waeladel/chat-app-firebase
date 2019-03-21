@@ -67,7 +67,7 @@ public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
     public void loadAfter(@NonNull LoadParams<String> params, @NonNull LoadCallback<Message> callback) {
         /*List<User> items = usersRepository.getMessages(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
-        //messagesRepository.setLoadAfterCallback(callback);
+        messagesRepository.setLoadAfterCallback(params.key, callback);
         Log.d(TAG, "mama loadAfter params key " + params.key+" LoadSize " + params.requestedLoadSize+ " callback= "+callback);
         messagesRepository.getMessagesAfter(params.key, params.requestedLoadSize, callback);
     }
@@ -77,7 +77,7 @@ public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
     public void loadBefore(@NonNull LoadParams<String> params, @NonNull LoadCallback<Message> callback) {
         /*List<User> items = fetchItemsBefore(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
-        //messagesRepository.setLoadBeforeCallback(callback);
+        messagesRepository.setLoadBeforeCallback(params.key, callback);
         Log.d(TAG, "mama loadBefore params " + params.key+" LoadSize " + params.requestedLoadSize+ " callback= "+callback);
         messagesRepository.getMessagesBefore(params.key, params.requestedLoadSize, callback);
     }

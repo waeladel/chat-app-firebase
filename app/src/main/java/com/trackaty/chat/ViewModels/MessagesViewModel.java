@@ -2,20 +2,12 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+
 import com.trackaty.chat.DataSources.MessagesDataFactory;
 import com.trackaty.chat.DataSources.MessagesListRepository;
 import com.trackaty.chat.DataSources.MessagesRepository;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -34,19 +26,6 @@ public class MessagesViewModel extends ViewModel {
     LiveData<ItemKeyedDataSource<String, Message>> liveDataSource;
     public  LiveData<User> chatUser;
     private MessagesRepository messagesRepository;
-    private MessagesListRepository messagesListRepository;
-    private MutableLiveData<Boolean> isInvalid;
-
-
-    private Query getMessagesQuery;
-    // [START declare_database_ref]
-    private DatabaseReference mDatabaseRef;
-    private DatabaseReference mMessagesRef;
-    private DatabaseReference mUsersRef;
-
-    List<Message> initialMessagesList = new ArrayList<>();
-    private Boolean isFirstLoaded = true;
-
 
 
     public MessagesViewModel(String chatKey) {
@@ -58,8 +37,8 @@ public class MessagesViewModel extends ViewModel {
         Log.d(TAG, "Message MessagesViewModel init");
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(5)//10
-                .setInitialLoadSizeHint(5)//30
+                .setPageSize(20)//10
+                .setInitialLoadSizeHint(10)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();
@@ -88,10 +67,12 @@ public class MessagesViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama MessagesViewModel onCleared:");
+
+        // Remove all Listeners from messagesRepository
         messagesRepository.removeListeners();
 
+        // Remove all Listeners from MessagesListRepository
         MessagesListRepository.removeListeners();
-
         super.onCleared();
     }
 

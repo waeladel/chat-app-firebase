@@ -51,7 +51,109 @@ public class MessagesListRepository {
     private ValueEventListener afterMessagesListener;
     private ValueEventListener beforeMessagesListener;*/
 
+    private ValueEventListener afterMessagesListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // [START_EXCLUDE]
+            Log.d(TAG, "start onDataChange isAfterFirstLoaded = "+ isAfterFirstLoaded);
+            if (!isAfterFirstLoaded){
+                // Remove post value event listener
+                removeListeners();
+                Log.d(TAG, "mama getMessagesAfter Invalidated removeEventListener");
+                //isAfterFirstLoaded =  true;
+                Log.d(TAG, "getMessagesAfter onInvalidated(). isAfterFirstLoaded = "+ isAfterFirstLoaded);
+                invalidatedCallback.onInvalidated();
+                //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
+                //UsersDataSource.invalidate();
+                return;
+            }
 
+            if (dataSnapshot.exists()) {
+                List<Message> messagesList = new ArrayList<>();
+                // loop throw users value
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    if(!getLoadAfterKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
+                        Message message = snapshot.getValue(Message.class);
+                        if (message != null) {
+                            message.setKey(snapshot.getKey());
+                        }
+                        messagesList.add(message);
+                        //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                    }
+                }
+
+                if(messagesList.size() != 0){
+                    //callback.onResult(messagesList);
+                    getLoadAfterCallback().onResult(messagesList);
+                    Log.d(TAG, "mama getMessagesAfter  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+                }
+            } else {
+                // no data
+                Log.w(TAG, "mama getMessagesAfter no users exist");
+            }
+            getListeners();
+            isAfterFirstLoaded =  false;
+            Log.d(TAG, "end isAfterFirstLoaded = "+ isAfterFirstLoaded);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "mama getMessagesAfter loadPost:onCancelled", databaseError.toException());
+        }
+    };
+
+    private ValueEventListener beforeMessagesListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // [START_EXCLUDE]
+            Log.d(TAG, "start onDataChange isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+            if (!isBeforeFirstLoaded){
+                // Remove post value event listener
+                removeListeners();
+                Log.d(TAG, "mama getMessagesBefore Invalidated removeEventListener");
+                //isBeforeFirstLoaded =  true;
+                Log.d(TAG, "getMessagesBefore onInvalidated(). isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+                invalidatedCallback.onInvalidated();
+                //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
+                //UsersDataSource.invalidate();
+                return;
+            }
+
+            if (dataSnapshot.exists()) {
+                List<Message> messagesList = new ArrayList<>();
+                // loop throw users value
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    if(!getLoadBeforeKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
+                        Message message = snapshot.getValue(Message.class);
+                        if (message != null) {
+                            message.setKey(snapshot.getKey());
+                        }
+                        messagesList.add(message);
+                        //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                    }
+                }
+
+                if(messagesList.size() != 0){
+                    //callback.onResult(messagesList);
+                    getLoadBeforeCallback().onResult(messagesList);
+                    Log.d(TAG, "mama getMessagesBefore  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+                }
+            } else {
+                // no data
+                Log.w(TAG, "mama getMessagesBefore no users exist");
+            }
+            getListeners();
+            isBeforeFirstLoaded =  false;
+            Log.d(TAG, "end isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "mama getMessagesBefore:onCancelled", databaseError.toException());
+        }
+    };
 
     //private Query getMessagesQuery;
 
@@ -181,59 +283,8 @@ public class MessagesListRepository {
 
         Log.i(TAG, "wael getMessagesAfter initiated. AfterKey= " +  key);
         isAfterFirstLoaded = true;
-        this.afterKey = key;
+        //this.afterKey = key;
         Query afterMessagesQuery;
-
-        ValueEventListener afterMessagesListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                Log.d(TAG, "start onDataChange isAfterFirstLoaded = "+ isAfterFirstLoaded);
-                if (!isAfterFirstLoaded){
-                    // Remove post value event listener
-                    removeListeners();
-                    Log.d(TAG, "mama getMessagesAfter Invalidated removeEventListener");
-                    //isAfterFirstLoaded =  true;
-                    Log.d(TAG, "getMessagesAfter onInvalidated(). isAfterFirstLoaded = "+ isAfterFirstLoaded);
-                    invalidatedCallback.onInvalidated();
-                    //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
-                    //UsersDataSource.invalidate();
-                    return;
-                }
-
-                if (dataSnapshot.exists()) {
-                    List<Message> messagesList = new ArrayList<>();
-                    // loop throw users value
-                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                        if(!key.equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
-                            Message message = snapshot.getValue(Message.class);
-                            if (message != null) {
-                                message.setKey(snapshot.getKey());
-                            }
-                            messagesList.add(message);
-                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
-                        }
-                    }
-
-                    if(messagesList.size() != 0){
-                        callback.onResult(messagesList);
-                        Log.d(TAG, "mama getMessagesAfter  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
-                    }
-                } else {
-                    // no data
-                    Log.w(TAG, "mama getMessagesAfter no users exist");
-                }
-                getListeners();
-                isAfterFirstLoaded =  false;
-                Log.d(TAG, "end isAfterFirstLoaded = "+ isAfterFirstLoaded);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "mama getMessagesAfter loadPost:onCancelled", databaseError.toException());
-            }
-        };
 
         Log.d(TAG, "mama getMessagesAfter. AfterKey= " + key);
         afterMessagesQuery = mMessagesRef.orderByKey()
@@ -252,64 +303,12 @@ public class MessagesListRepository {
         Log.i(TAG, "wael getMessagesBefore initiated. BeforeKey= " +  key);
 
         isBeforeFirstLoaded = true;
-        this.beforeKey = key;
+        //this.beforeKey = key;
         Query beforeMessagesQuery;
 
         beforeMessagesQuery = mMessagesRef.orderByKey()
                                 .endAt(key)
                                 .limitToLast(size);
-
-        ValueEventListener beforeMessagesListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                Log.d(TAG, "start onDataChange isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
-                if (!isBeforeFirstLoaded){
-                    // Remove post value event listener
-                    removeListeners();
-                    Log.d(TAG, "mama getMessagesBefore Invalidated removeEventListener");
-                    //isBeforeFirstLoaded =  true;
-                    Log.d(TAG, "getMessagesBefore onInvalidated(). isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
-                    invalidatedCallback.onInvalidated();
-                    //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
-                    //UsersDataSource.invalidate();
-                    return;
-                }
-
-                if (dataSnapshot.exists()) {
-                    List<Message> messagesList = new ArrayList<>();
-                    // loop throw users value
-                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                        if(!key.equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
-                            Message message = snapshot.getValue(Message.class);
-                            if (message != null) {
-                                message.setKey(snapshot.getKey());
-                            }
-                            messagesList.add(message);
-                            //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
-                        }
-                    }
-
-                    if(messagesList.size() != 0){
-                        callback.onResult(messagesList);
-                        Log.d(TAG, "mama getMessagesBefore  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
-                    }
-                } else {
-                    // no data
-                    Log.w(TAG, "mama getMessagesBefore no users exist");
-                }
-                getListeners();
-                isBeforeFirstLoaded =  false;
-                Log.d(TAG, "end isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "mama getMessagesBefore:onCancelled", databaseError.toException());
-            }
-        };
-
 
         beforeMessagesQuery.addValueEventListener(beforeMessagesListener);
         mListenersList.add(new FirebaseListeners(beforeMessagesQuery, beforeMessagesListener));
@@ -429,15 +428,25 @@ public class MessagesListRepository {
         return loadAfterCallback;
     }
 
-    public void setLoadAfterCallback(ItemKeyedDataSource.LoadCallback loadAfterCallback) {
+    public void setLoadAfterCallback(String key, ItemKeyedDataSource.LoadCallback loadAfterCallback) {
         this.loadAfterCallback = loadAfterCallback;
+        this.afterKey = key;
     }
 
     public ItemKeyedDataSource.LoadCallback getLoadBeforeCallback() {
         return loadBeforeCallback;
     }
 
-    public void setLoadBeforeCallback(ItemKeyedDataSource.LoadCallback loadBeforeCallback) {
+    public void setLoadBeforeCallback(String key, ItemKeyedDataSource.LoadCallback loadBeforeCallback) {
         this.loadBeforeCallback = loadBeforeCallback;
+        this.beforeKey = key;
+    }
+
+    public String getLoadAfterKey() {
+        return afterKey;
+    }
+
+    public String getLoadBeforeKey() {
+        return beforeKey;
     }
 }
