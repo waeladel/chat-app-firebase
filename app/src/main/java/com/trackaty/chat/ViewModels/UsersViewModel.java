@@ -4,6 +4,8 @@ import android.content.ClipData;
 import android.database.Observable;
 import android.util.Log;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.UsersDataFactory;
 import com.trackaty.chat.DataSources.UsersRepository;
 import com.trackaty.chat.models.User;
@@ -24,10 +26,20 @@ public class UsersViewModel extends ViewModel {
     public final LiveData<PagedList<User>> usersList;
     //LiveData<ItemKeyedDataSource<Long, User>> liveDataSource;
 
+    private DatabaseReference mDatabaseRef;
+    private DatabaseReference mUsersRef;
+
     public UsersViewModel() {
         usersDataSourceFactory = new UsersDataFactory();
         Log.d(TAG, "mama UsersViewModel init");
         //liveDataSource = usersDataSourceFactory.getUserLiveDataSource();
+
+        //Enabling Offline Capabilities//
+        //Offline Capabilities should be for search results not all users//
+
+        /*mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUsersRef = mDatabaseRef.child("users");
+        mUsersRef.keepSynced(true);*/
 
         config = (new PagedList.Config.Builder())
                 .setPageSize(30)//10

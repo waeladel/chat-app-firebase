@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Fragments.ChatsFragmentDirections;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
@@ -165,7 +167,21 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                         }else{
                             holder.mChatTitle.setText(null);
                         }
-                        // [START create_storage_reference]
+
+                        // Avatar
+                        if (null != membersList.get(0).getAvatar()) {
+                            holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                            Picasso.get()
+                                    .load(membersList.get(0).getAvatar())
+                                    .placeholder(R.drawable.ic_user_account_grey_white)
+                                    .error(R.drawable.ic_broken_image)
+                                    .into(holder.mAvatar);
+                        }else{
+                            // end of user avatar
+                            holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                        }
+
+                        /*// [START create_storage_reference]
                         //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
                         mStorageRef.child("images/"+membersList.get(0).getKey()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
@@ -183,7 +199,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                 // Handle any errors
                                 holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
                             }
-                        });
+                        });*/
 
                         break;
                     case 2:// there is 2 member other than current user

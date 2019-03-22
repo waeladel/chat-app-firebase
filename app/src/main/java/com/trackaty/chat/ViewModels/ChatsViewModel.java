@@ -2,6 +2,8 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.ChatsDataFactory;
 import com.trackaty.chat.models.Chat;
 
@@ -18,12 +20,20 @@ public class ChatsViewModel extends ViewModel {
     private PagedList.Config config;
     public final LiveData<PagedList<Chat>> itemPagedList;
 
+    private DatabaseReference mDatabaseRef;
+    private DatabaseReference mUserChatsRef;
+
     public ChatsViewModel(String UserId) {
 
         // pass chatKey to the constructor of MessagesDataFactory
         chatsDataFactory = new ChatsDataFactory(UserId);
 
         Log.d(TAG, "Chat ChatsViewModel init");
+
+        //Enabling Offline Capabilities//
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUserChatsRef = mDatabaseRef.child("userChats").child(UserId);
+        mUserChatsRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
                 .setPageSize(20)//10

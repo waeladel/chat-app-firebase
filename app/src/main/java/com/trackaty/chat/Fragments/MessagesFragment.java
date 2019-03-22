@@ -119,7 +119,6 @@ public class MessagesFragment extends Fragment {
         mChatsRef = mDatabaseRef.child("chats");
         mMessagesRef = mDatabaseRef.child("messages");
 
-
         // prepare the Adapter
         mMessagesArrayList = new ArrayList<>();
         mMessagesAdapter = new MessagesAdapter();
@@ -221,6 +220,8 @@ public class MessagesFragment extends Fragment {
                 String messageText = mMessage.getText().toString().trim();
                 Log.d(TAG, "getJoinedKeys ="+getJoinedKeys(mCurrentUserId , mChatUserId));
                 if(!TextUtils.isEmpty(messageText)){
+                    // clear text before sending the message successfully for offline capabilities
+                    mMessage.setText(null);
                     sendMessage(mChatId, messageText);
                 }
                 /*if(!TextUtils.isEmpty(messageText)){
@@ -418,7 +419,6 @@ public class MessagesFragment extends Fragment {
             @Override
             public void onSuccess(Void aVoid) {
                 // Write was successful!
-                mMessage.setText(null);
                 Log.i(TAG, "send message onSuccess");
                 // ...
             }

@@ -3,6 +3,8 @@ package com.trackaty.chat.ViewModels;
 import android.util.Log;
 
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.MessagesDataFactory;
 import com.trackaty.chat.DataSources.MessagesListRepository;
 import com.trackaty.chat.DataSources.MessagesRepository;
@@ -27,6 +29,9 @@ public class MessagesViewModel extends ViewModel {
     public  LiveData<User> chatUser;
     private MessagesRepository messagesRepository;
 
+    private DatabaseReference mDatabaseRef;
+    private DatabaseReference mUserMessagesRef;
+
 
     public MessagesViewModel(String chatKey) {
 
@@ -35,6 +40,11 @@ public class MessagesViewModel extends ViewModel {
         messagesRepository = new MessagesRepository();
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "Message MessagesViewModel init");
+
+        //Enabling Offline Capabilities//
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUserMessagesRef = mDatabaseRef.child("messages").child(chatKey);
+        mUserMessagesRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
                 .setPageSize(20)//10
