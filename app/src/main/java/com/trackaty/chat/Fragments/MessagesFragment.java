@@ -20,7 +20,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import android.os.CountDownTimer;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +36,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Adapters.MessagesAdapter;
 import com.trackaty.chat.R;
@@ -48,6 +49,8 @@ import com.trackaty.chat.models.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
@@ -76,10 +79,13 @@ public class MessagesFragment extends Fragment {
     private Context mActivityContext;
     private Activity activity;
 
-    private TextView mUserName, mLastSeen;
+    public TextView mUserName, mLastSeen;
     private CircleImageView mUserPhoto;
     private EditText mMessage;
     private ImageButton mSendButton;
+
+    private Timer mTimer;
+    private CountDownTimer mCountDownTimer;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -253,6 +259,15 @@ public class MessagesFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if(mCountDownTimer != null){
+            mCountDownTimer.cancel();
+            Log.d(TAG, "mCountDownTimer canceled");
+        }
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null){
@@ -266,6 +281,7 @@ public class MessagesFragment extends Fragment {
             View actionBarView = inflater.inflate(R.layout.messages_toolbar, null);
             actionbar.setCustomView(actionBarView);
 
+            mTimer = new Timer();
             // custom action bar items to add receiver's avatar and name //
             mUserName = (TextView) actionBarView.findViewById(R.id.user_name);
             mLastSeen = (TextView) actionBarView.findViewById(R.id.last_seen);
@@ -330,10 +346,63 @@ public class MessagesFragment extends Fragment {
                         Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
                         mChatUser = user;
                         // display ChatUser name
-                        mUserName.setText(getFirstWord(mChatUser.getName()));
-                        //ToDo: Display last online not user's name
-                        mLastSeen.setText(getFirstWord(mChatUser.getName()));
+                        if(null != mChatUser.getName()){
+                            mUserName.setText(getFirstWord(mChatUser.getName()));
+                        }
 
+                        // display last online
+                        if(null != mChatUser.getLastOnline()){
+
+                            Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
+
+                            if(mChatUser.getLastOnline() == 0){
+                                //user is active now
+                                Log.d(TAG, "LastOnline() == 0");
+                                mLastSeen.setText(R.string.user_active_now);
+                            }else{
+                                // Display last online
+                                //Calendar c = Calendar.getInstance();
+                                //c.setTimeInMillis(mChatUser.getLastOnline());
+
+
+                                /*mTimer.schedule( new TimerTask() {
+                                    public void run() {
+                                        // do your work
+                                        UpdateTimeAgo(mChatUser.getLastOnline());
+                                        *//*mLastSeen.setText(ago);
+                                        Log.d(TAG, "mTimer = "+ago);*//*
+                                        //new UpdateTimeAgo().execute(mChatUser.getLastOnline());
+                                    }
+                                }, 0, 5 *1000);*/
+
+                                /*mMessagesViewModel.getLastOnlineAgo(mChatUser.getLastOnline()).observe(MessagesFragment.this, new Observer<CharSequence>() {
+                                    @Override
+                                    public void onChanged(CharSequence charSequence) {
+                                        Log.d(TAG, "onChanged Time Ago = "+charSequence);
+                                    }
+                                });*/
+
+                                mCountDownTimer = new CountDownTimer(10*60*1000, 60*1000) {
+                                    @Override
+                                    public void onTick(long millisUntilFinished) {
+
+                                        long now = System.currentTimeMillis();
+                                        Log.d(TAG, "now = "+now + " getLastOnline= "+mChatUser.getLastOnline());
+                                        CharSequence ago =
+                                                DateUtils.getRelativeTimeSpanString(mChatUser.getLastOnline(), now, DateUtils.MINUTE_IN_MILLIS);
+                                                mLastSeen.setText(getString(R.string.user_active_ago, ago));
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+                                        //restart countDownTimer again
+                                        Log.d(TAG, "mCountDownTimer onFinish. We will restart it");
+                                        mCountDownTimer.start();
+                                    }
+                                }.start();
+                            }
+
+                        }
                         // Get user values
                         if (null != mChatUser.getAvatar()) {
                             Picasso.get()
@@ -375,6 +444,17 @@ public class MessagesFragment extends Fragment {
     }
 
 }
+
+    private void UpdateTimeAgo(Long lastOnline) {
+        long now = System.currentTimeMillis();
+        Log.d(TAG, "now = "+now);
+
+        CharSequence ago =
+                DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS);
+
+        mLastSeen.setText(ago);
+
+    }
 
     private void sendMessage(String mChatId, String messageText) {
 
@@ -477,3 +557,5 @@ public class MessagesFragment extends Fragment {
     }*/
 
 }
+
+

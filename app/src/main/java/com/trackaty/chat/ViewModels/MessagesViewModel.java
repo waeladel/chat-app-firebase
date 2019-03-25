@@ -1,5 +1,6 @@
 package com.trackaty.chat.ViewModels;
 
+import android.text.format.DateUtils;
 import android.util.Log;
 
 
@@ -10,6 +11,10 @@ import com.trackaty.chat.DataSources.MessagesListRepository;
 import com.trackaty.chat.DataSources.MessagesRepository;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
+
+import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -31,6 +36,8 @@ public class MessagesViewModel extends ViewModel {
 
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mUserMessagesRef;
+    private Timer mTimer;
+    private  MutableLiveData<CharSequence> agoTime;
 
 
     public MessagesViewModel(String chatKey) {
@@ -38,8 +45,11 @@ public class MessagesViewModel extends ViewModel {
         // pass chatKey to the constructor of MessagesDataFactory
         messagesDataFactory = new MessagesDataFactory(chatKey);
         messagesRepository = new MessagesRepository();
+        agoTime = new MutableLiveData<>();
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "Message MessagesViewModel init");
+
+        mTimer = new Timer();
 
         //Enabling Offline Capabilities//
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -63,6 +73,38 @@ public class MessagesViewModel extends ViewModel {
         Log.d(TAG, "getUser"+ userId);
         chatUser = messagesRepository.getUser(userId);
         return chatUser;
+    }
+
+    public LiveData<CharSequence> getLastOnlineAgo(final Long lastOnline) {
+        Log.d(TAG, "getUser");
+        // Display last online
+        //Calendar activeCalendar = Calendar.getInstance();
+        /*mTimer.schedule( new TimerTask() {
+            public void run() {
+                // do your work
+                long now = System.currentTimeMillis();
+                Log.d(TAG, "mTimer = "+(now - lastOnline));
+                agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
+            }
+        }, 0, 5 *1000);*/
+
+        try {
+            while (true) {
+                long now = System.currentTimeMillis();
+                Log.d(TAG, "mTimer = "+(now - lastOnline));
+                agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
+
+                Thread.sleep(5 * 1000);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+       /* long now = System.currentTimeMillis();
+        Log.d(TAG, "mTimer = "+(now - lastOnline));
+        agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
+*/
+        return agoTime;
     }
 
 

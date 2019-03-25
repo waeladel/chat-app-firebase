@@ -19,6 +19,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
@@ -28,6 +29,7 @@ import com.trackaty.chat.models.User;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -73,6 +75,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mUserRef;
+    //private FirebaseDatabase database ;
+
+    private DatabaseReference myConnectionsRef;
+    private DatabaseReference connection;
+
+    // Stores the timestamp of my last disconnect (the last time I was seen online)
+    private DatabaseReference lastOnlineRef;
+
+    private DatabaseReference connectedRef;//  = database.getReference(".info/connected");
+    //private DatabaseReference connection;
 
     private MainActivityViewModel mMainViewModel;// ViewMode for getting the latest current user id
 
@@ -99,6 +111,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
 
+    };
+
+    // A listener for user's online statues
+    private ValueEventListener onlineListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
+            Log.i(TAG, "onDataChange");
+            if(snapshot.exists()){
+                Log.i(TAG, "snapshot.exists()");
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected) { // if user is connected
+                    Log.i(TAG, "connected");
+                    // Add this device to my connections list
+                    // this value could contain info about the device or a timestamp too
+                    //connection.setValue(Boolean.TRUE);
+                    lastOnlineRef.setValue(0);
+
+                    // When this device disconnects, remove it
+                    //connection.onDisconnect().removeValue();
+
+                    // When I disconnect, update the last time I was seen online
+                    lastOnlineRef.onDisconnect().setValue(ServerValue.TIMESTAMP );
+                }else{
+                    Log.i(TAG, "not connected");
+                }
+            }else{
+                Log.i(TAG, "snapshot don't exist");
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError error) {
+            Log.w(TAG, "Listener was cancelled at .info/connected");
+        }
     };
 
 
@@ -274,6 +320,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onStop() {
         super.onStop();
         Log.d(TAG, "MainActivity onStop");
+
+        // Set time for last time online when activity stops
+        if(null != lastOnlineRef){
+            lastOnlineRef.setValue(ServerValue.TIMESTAMP);
+        }
+
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
@@ -295,6 +347,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onDestroy () {
         super.onDestroy ();
         Log.d(TAG, "MainActivity onDestroy");
+        if(null != onlineListener){
+            // Remove onlineListener
+            connectedRef.removeEventListener(onlineListener);
+            Log.d(TAG, "Remove onlineListener");
+        }
     }
 
     @Override
@@ -385,6 +442,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // Read from the database just once
         Log.d(TAG, "currentUserId Value is: " + currentUserId);
         mUserRef = mDatabaseRef.child("users").child(currentUserId);
+
+        // database references for online
+        myConnectionsRef = mDatabaseRef.child("users").child(currentUserId).child("connections");
+        lastOnlineRef  = mDatabaseRef.child("users").child(currentUserId).child("lastOnline");
+
+        // database reference that holds information about user presence
+        connectedRef  = FirebaseDatabase.getInstance().getReference(".info/connected");
+
 // [START single_value_read]
         //ValueEventListener postListener = new ValueEventListener() {
         //mUserRef.addValueEventListener(postListener);
@@ -401,6 +466,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     if (mUser != null) {
                         Log.d(TAG, "user exist: Name=" + mUser.getName());
                     }
+                    // To store all connections from all devices, Add this device to my connections list
+                    if(connection == null){
+                        connection = myConnectionsRef.push();
+                    }
+                    // add lineListener for online statues
+                    connectedRef.addValueEventListener(onlineListener);
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");

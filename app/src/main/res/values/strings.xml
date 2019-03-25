@@ -135,7 +135,8 @@
     <string name="user_pubg_clipboard_label">PUBG name</string>
     <string name="user_pubg_clipboard_toast">PUBG name has been copied to clipboard</string>
 
-
+    <string name="user_active_now">Active Now</string>
+    <string name="user_active_ago">Active %1$s</string>
 
     <!--<string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
     <string name="user_instagram_helper">Username without: https://instagram.com/</string>
