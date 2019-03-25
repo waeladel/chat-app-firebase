@@ -139,6 +139,22 @@ public class ProfileFragment extends Fragment {
                 }
             });
 
+            mMessageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
+                        Log.i(TAG, "don't send message to current logged in user ");
+                    } else {
+                        Log.d(TAG, "send message to user");
+                        NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(mCurrentUserId,null, mUserId,false);
+                        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+                        //check if we are on Main Fragment not on complete Profile already
+                        Navigation.findNavController(view).navigate(MessageDirection);
+                    }
+
+                }
+            });
+
             mCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
