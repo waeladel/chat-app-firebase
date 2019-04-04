@@ -29,7 +29,6 @@ import com.trackaty.chat.models.User;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -155,10 +154,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        navController = Navigation.findNavController(this, R.id.host_fragment);
+        Log.d(TAG, "MainActivity onCreate");
 
-        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navController = Navigation.findNavController(this, R.id.host_fragment);
 
         // update CurrentUserId for all observer fragments
         mMainViewModel = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
@@ -194,7 +192,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mTextMessage = (TextView) findViewById(R.id.last_message);
 
-        Log.d(TAG, "MainActivity onCreate");
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
 
         mAuth = FirebaseAuth.getInstance();
         isFirstloaded = true; // first time to open the app

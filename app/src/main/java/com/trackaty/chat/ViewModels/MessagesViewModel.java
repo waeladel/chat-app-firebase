@@ -49,8 +49,6 @@ public class MessagesViewModel extends ViewModel {
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "Message MessagesViewModel init");
 
-        mTimer = new Timer();
-
         //Enabling Offline Capabilities//
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUserMessagesRef = mDatabaseRef.child("messages").child(chatKey);
@@ -73,38 +71,6 @@ public class MessagesViewModel extends ViewModel {
         Log.d(TAG, "getUser"+ userId);
         chatUser = messagesRepository.getUser(userId);
         return chatUser;
-    }
-
-    public LiveData<CharSequence> getLastOnlineAgo(final Long lastOnline) {
-        Log.d(TAG, "getUser");
-        // Display last online
-        //Calendar activeCalendar = Calendar.getInstance();
-        /*mTimer.schedule( new TimerTask() {
-            public void run() {
-                // do your work
-                long now = System.currentTimeMillis();
-                Log.d(TAG, "mTimer = "+(now - lastOnline));
-                agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
-            }
-        }, 0, 5 *1000);*/
-
-        try {
-            while (true) {
-                long now = System.currentTimeMillis();
-                Log.d(TAG, "mTimer = "+(now - lastOnline));
-                agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
-
-                Thread.sleep(5 * 1000);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-       /* long now = System.currentTimeMillis();
-        Log.d(TAG, "mTimer = "+(now - lastOnline));
-        agoTime.postValue(DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS));
-*/
-        return agoTime;
     }
 
 

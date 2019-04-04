@@ -224,7 +224,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             //itemView = row;
 
             row = itemView;
-            mMessage = row.findViewById(R.id.last_message);
+            mMessage = row.findViewById(R.id.message_button_text);
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
         }
@@ -245,7 +245,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             //itemView = row;
 
             row = itemView;
-            mMessage = row.findViewById(R.id.last_message);
+            mMessage = row.findViewById(R.id.message_button_text);
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
         }

@@ -98,6 +98,8 @@ public class UsersRepository {
                         List<User> usersList = new ArrayList<>();
                         for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
                             User user = userSnapshot.getValue(User.class);
+                            //Map<String, Object> user = userSnapshot.getValue().
+
                             if (user != null) {
                                 user.setKey(userSnapshot.getKey());
                             }

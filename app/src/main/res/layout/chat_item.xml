@@ -23,7 +23,7 @@
         tools:text="@tools:sample/cities" />
 
     <TextView
-        android:id="@+id/last_message"
+        android:id="@+id/message_button_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -48,7 +48,7 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Overline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/user_image"
-        app:layout_constraintTop_toBottomOf="@+id/last_message"
+        app:layout_constraintTop_toBottomOf="@+id/message_button_text"
         tools:text="@tools:sample/date/hhmm" />
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"

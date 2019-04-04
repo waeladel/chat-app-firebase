@@ -1,50 +1,57 @@
 package com.trackaty.chat.DataSources;
 
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.R;
 import com.trackaty.chat.models.FirebaseListeners;
+import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
-public class UserRepository {
+public class RelationRepository {
 
-    private final static String TAG = UserRepository.class.getSimpleName();
+    private final static String TAG = RelationRepository.class.getSimpleName();
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUsersRef;
-    private Boolean isFirstLoaded = true;
+    private DatabaseReference mRelationRef;
 
-    private MutableLiveData<User> mCurrentUser;
-    private MutableLiveData<User> mUser;
+    private MutableLiveData<Relation> mRelation;
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
     private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
 
-    // a listener for mCurrentUser changes
-    private ValueEventListener currentUserListener = new ValueEventListener() {
+    // a listener for mRelation changes
+    private ValueEventListener mRelationListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             // Get Post object and use the values to update the UI
             if (dataSnapshot.exists()) {
                 // Get user value
-                Log.d(TAG, "getCurrentUser dataSnapshot key: "
-                        + dataSnapshot.getKey()+" Listener = "+currentUserListener);
-                //mCurrentUser = dataSnapshot.getValue(User.class);
-                mCurrentUser.postValue(dataSnapshot.getValue(User.class));
+                Log.d(TAG, "getRelation dataSnapshot key: "
+                        + dataSnapshot.getKey()+" Listener = "+ mRelationListener);
+                //mRelation = dataSnapshot.getValue(User.class);
+                mRelation.postValue(dataSnapshot.getValue(Relation.class));
             } else {
                 // User is null, error out
-                Log.w(TAG, "User is null, no such user");
+                mRelation.postValue(null);
+                Log.w(TAG, "Relation  is null, no relation exist");
             }
         }
         @Override
@@ -55,14 +62,12 @@ public class UserRepository {
         }
     };
 
-    public UserRepository(){
+    public RelationRepository(){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUsersRef = mDatabaseRef.child("users");
+        mRelationRef = mDatabaseRef.child("relations");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
-        isFirstLoaded = true;
-        mCurrentUser = new MutableLiveData<>();
-        mUser = new MutableLiveData<>();
+        mRelation = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -74,44 +79,61 @@ public class UserRepository {
 
     }
 
-    public MutableLiveData<User> getCurrentUser(String userId){
+    // Get relation if any between current user and selected user
+    public MutableLiveData<Relation> getRelation(String currentUserId , String userId){
 
-        DatabaseReference currentUserRef = mUsersRef.child(userId);
-        //final MutableLiveData<User> mCurrentUser = new MutableLiveData<>();
-        Log.d(TAG, "getCurrentUser initiated: " + userId);
+        DatabaseReference currentUserRelationRef = mRelationRef.child(currentUserId).child(userId);
+        //final MutableLiveData<User> mRelation = new MutableLiveData<>();
+        Log.d(TAG, "getCurrentUserRelation initiated: " + currentUserId);
 
-        Log.d(TAG, "getCurrentUser Listeners size= "+ mListenersList.size());
+        Log.d(TAG, "getCurrentUserRelation Listeners size= "+ mListenersList.size());
         if(mListenersList.size()== 0){
             // Need to add a new Listener
-            Log.d(TAG, "getCurrentUser adding new Listener= "+ currentUserListener);
-            //mListenersMap.put(postSnapshot.getRef(), currentUserListener);
-            currentUserRef.addValueEventListener(currentUserListener);
-            mListenersList.add(new FirebaseListeners(currentUserRef, currentUserListener));
+            Log.d(TAG, "getCurrentUserRelation adding new Listener= "+ mRelationListener);
+            //mListenersMap.put(postSnapshot.getRef(), mRelationListener);
+            currentUserRelationRef.addValueEventListener(mRelationListener);
+            mListenersList.add(new FirebaseListeners(currentUserRelationRef, mRelationListener));
         }else{
-            Log.d(TAG, "getCurrentUser Listeners size is not 0= "+ mListenersList.size());
+            Log.d(TAG, "getCurrentUserRelation Listeners size is not 0= "+ mListenersList.size());
             //there is an old Listener, need to check if it's on this ref
             for (int i = 0; i < mListenersList.size(); i++) {
                 //Log.d(TAG, "getCurrentUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
-                if(!mListenersList.get(i).getQueryOrRef().equals(currentUserRef)
-                        && (mListenersList.get(i).getListener().equals(currentUserListener))){
+                if(!mListenersList.get(i).getQueryOrRef().equals(currentUserRelationRef)
+                        && (mListenersList.get(i).getListener().equals(mRelationListener))){
                     // This ref doesn't has a listener. Need to add a new Listener
-                    Log.d(TAG, "getCurrentUser adding new Listener= "+ currentUserListener);
-                    currentUserRef.addValueEventListener(currentUserListener);
-                    mListenersList.add(new FirebaseListeners(currentUserRef, currentUserListener));
+                    Log.d(TAG, "getCurrentUserRelation adding new Listener= "+ mRelationListener);
+                    currentUserRelationRef.addValueEventListener(mRelationListener);
+                    mListenersList.add(new FirebaseListeners(currentUserRelationRef, mRelationListener));
                 }else{
                     //there is old Listener on the ref
-                    Log.d(TAG, "getCurrentUser Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                    Log.d(TAG, "getCurrentUserRelation Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
                 }
             }
         }
         for (int i = 0; i < mListenersList.size(); i++) {
-            Log.d(TAG, "getCurrentUser loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "getCurrentUserRelation loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
-        return mCurrentUser;
+        return mRelation;
     }
 
 
+    // Delete the request
+    public void cancelRequest(String currentUserId, String userId) {
 
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("/relations/" + currentUserId + "/" + userId, null);
+        childUpdates.put("/relations/" + userId + "/" + currentUserId, null);
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "send request onSuccess");
+                // ...
+            }
+        });
+
+    }
 
     public void removeListeners(){
         for (int i = 0; i < mListenersList.size(); i++) {
@@ -130,5 +152,6 @@ public class UserRepository {
         }
         mListenersList.clear();
     }
- }
+
+}
 

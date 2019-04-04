@@ -3,11 +3,15 @@ package com.trackaty.chat.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.database.Exclude;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class Social implements Parcelable {
 
     private String key;
-    private String value;
-    private String isPublic;
+    private SocialObj value ;
     private int order;
     private int section;
 
@@ -15,18 +19,16 @@ public class Social implements Parcelable {
 
     }
 
-    public Social(String key, String value, String isPublic, int order, int section) {
+    public Social(String key, SocialObj value, int order, int section) {
         this.key = key;
         this.value = value;
-        this.isPublic = isPublic;
         this.order = order;
         this.section = section;
     }
 
+
     protected Social(Parcel in) {
         key = in.readString();
-        value = in.readString();
-        isPublic = in.readString();
         order = in.readInt();
         section = in.readInt();
     }
@@ -51,20 +53,12 @@ public class Social implements Parcelable {
         this.key = key;
     }
 
-    public String getValue() {
+    public SocialObj getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(SocialObj value) {
         this.value = value;
-    }
-
-    public String getIsPublic() {
-        return isPublic;
-    }
-
-    public void setIsPublic(String isPublic) {
-        this.isPublic = isPublic;
     }
 
     public int getOrder() {
@@ -91,8 +85,6 @@ public class Social implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(key);
-        dest.writeString(value);
-        dest.writeString(isPublic);
         dest.writeInt(order);
         dest.writeInt(section);
     }

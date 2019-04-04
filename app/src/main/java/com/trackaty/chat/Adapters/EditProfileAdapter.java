@@ -1106,7 +1106,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             if (mProfileDataArrayList.get(i).getSection() == SECTION_WORK
                     && !mProfileDataArrayList.get(i).getKey().equals(SECTION_WORK_HEADLINE)) {
                 Log.d(TAG, "mProfileDataArrayList SECTION_WORK= " + mProfileDataArrayList.get(i).getKey());
-                socialArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
+                contactsArrayList.add(new Profile(mProfileDataArrayList.get(i).getKey()
                         ,mProfileDataArrayList.get(i).getValue(), mProfileDataArrayList.get(i).getSection()));
 
                 mProfileDataArrayList.remove(mProfileDataArrayList.get(i));

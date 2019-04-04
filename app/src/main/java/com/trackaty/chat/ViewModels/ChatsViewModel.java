@@ -49,6 +49,7 @@ public class ChatsViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama ChatsViewModel onCleared:");
+        //Todo : remove all listeners
         super.onCleared();
     }
 }

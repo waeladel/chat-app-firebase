@@ -1,6 +1,7 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,15 +10,28 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.trackaty.chat.Fragments.MoreProfileFragment;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.DateHelper;
+import com.trackaty.chat.ViewModels.MoreProfileViewModel;
 import com.trackaty.chat.models.Profile;
+import com.trackaty.chat.models.Relation;
+import com.trackaty.chat.models.Social;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -31,16 +45,47 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private  static final int SECTION_HABITS = 800;
 
     public ArrayList<Profile> userDataArrayList;
-    public Context context;
+    // Map to hold user selections results
+    private MutableLiveData<Map<String, Boolean>> mRelationsMap = new MutableLiveData<>();;
+
+    public MoreProfileFragment context;
+    private MoreProfileViewModel mMoreProfileViewModel;
+    private MutableLiveData<Relation>  mRelation = new MutableLiveData<>();
+
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    String currentUserId = currentUser != null ? currentUser.getUid() : null;
 
     private ItemClickListener itemClickListener;
 
 
-
-    public ProfileAdapter(Context context, ArrayList<Profile> userDataArrayList , ItemClickListener itemClickListener){
+    public ProfileAdapter(final MoreProfileFragment context, ArrayList<Profile> userDataArrayList, String userID, ItemClickListener itemClickListener){
         this.userDataArrayList = userDataArrayList;
         this.context = context;
         this.itemClickListener = itemClickListener;
+        Log.d(TAG, "ProfileAdapter init relation= ");
+
+        // get relations with selected user if any
+        mMoreProfileViewModel = ViewModelProviders.of(context).get(MoreProfileViewModel.class);
+        // get relations with selected user if any
+        mMoreProfileViewModel.getRelation(currentUserId, userID).observe(context, new Observer<Relation>() {
+            @Override
+            public void onChanged(Relation relation) {
+                Log.i(TAG, "onChanged mProfileViewModel getRelation");
+                if (relation != null){
+                    // Relation exist
+                    mRelation.setValue(relation);
+                    mRelation.observe(context, new Observer<Relation>() {
+                        @Override
+                        public void onChanged(Relation relation) {
+                            mRelationsMap.setValue(relation.getContacts()) ;
+                        }
+                    });
+
+                    //Log.d(TAG, "onChanged relation Status= " + mRelation.getStatus() + " size= " + mRelation.getContacts().size());
+                }
+
+            }
+        });// end of getRelation ViewModel
     }
 
     @NonNull
@@ -58,11 +103,11 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         //Log.i(TAG, "onBindViewHolder called="+ userDataArrayList.get(position));
 
         if (holder instanceof ButtonsViewHolder){
-            ButtonsViewHolder buttonHolder = (ButtonsViewHolder) holder;
+            final ButtonsViewHolder buttonHolder = (ButtonsViewHolder) holder;
 
             buttonHolder.sectionHeader.setText(R.string.user_social_headline);
             Log.d(TAG, "social section="+ userDataArrayList.get(position).getKey());
@@ -142,7 +187,47 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             }
 
-            buttonHolder.itemValue.setText(userDataArrayList.get(position).getValue());
+
+            // check if user's contacts are public or private
+            // If private, check relation between these two users
+            if(userDataArrayList.get(position).getSocial().getPublic()){
+                    //It's a public contact already
+                    Log.d(TAG, "It's a public contact already "+ userDataArrayList.get(position).getKey());
+                    buttonHolder.itemValue.setText(userDataArrayList.get(position).getSocial().getUrl());
+                }else{
+                    //It's a private contact, check if there is a relation between these two
+                    Log.d(TAG, "It's a private contact "+ userDataArrayList.get(position).getKey() );
+                    if(mRelation != null){
+                        // There is a relation established between these two users
+                        Log.d(TAG, "There is a relation established between these two users "+ userDataArrayList.get(position).getKey());
+                        //mRelationsMap.put()
+                        //relation.getContacts().get(userDataArrayList.get(position).getKey()).;
+                        mRelationsMap.observe(context, new Observer<Map<String, Boolean>>() {
+                            @Override
+                            public void onChanged(Map<String, Boolean> stringBooleanMap) {
+                                Boolean relationValue=  stringBooleanMap.get(userDataArrayList.get(position).getKey());
+                                if(null != relationValue && relationValue){
+                                    // This private relation is approved
+                                    Log.d(TAG, "This private relation is approved "+ userDataArrayList.get(position).getKey());
+                                    buttonHolder.itemValue.setText(userDataArrayList.get(position).getSocial().getUrl());
+                                }else {
+                                    Log.d(TAG, "There is no relation or it's not approved, set button to  private contact "+ userDataArrayList.get(position).getKey());
+                                    buttonHolder.itemValue.setText(R.string.user_social_private_button);
+                                    buttonHolder.itemValue.setEnabled(false);
+                                    buttonHolder.itemValue.setClickable(false);
+                                }
+                            }
+                        });
+                    }else{
+                        // There is no relation
+                        Log.i(TAG, "There is no relation, set button to  private contact");
+                        buttonHolder.itemValue.setText(R.string.user_social_private_button);
+                        buttonHolder.itemValue.setEnabled(false);
+                        buttonHolder.itemValue.setClickable(false);
+                    }
+
+            }
+
 
         }else{
             ViewHolder viewHolder = (ViewHolder) holder;

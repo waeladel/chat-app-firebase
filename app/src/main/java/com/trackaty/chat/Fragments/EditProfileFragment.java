@@ -50,6 +50,7 @@ import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
+import com.trackaty.chat.models.SocialObj;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
 import com.yanzhenjie.album.Action;
@@ -63,6 +64,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
@@ -388,9 +391,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                         // check if method is null
                         if (method.invoke(currentUser) != null){
                             value = method.invoke(currentUser).toString();
+                            Log.d(TAG, "DynamicMethod value= " +method.getName()+" = "+ value);
+                            Log.d(TAG, "DynamicMethod ReturnType= " +method.getReturnType().getSimpleName());
                         }else{
                             value = null;
                         }
+
                             Log.d(TAG, "Method=" +method.getName()+" = "+ value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
@@ -448,65 +454,82 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                     || fieldName.equals("wikipedia")
                                     || fieldName.equals("website"))){
                                 //add data for social recycler
+                            /*Map<String, SocialObj> socialMap = new HashMap<>();
+                            SocialObj social = new SocialObj();
+                            social.setPublic(true);
+                            social.setUrl(value);
+
+                            socialMap.put("url",social );
+                            SocialObj socialObj = new SocialObj();
+                            //socialObj.setPublic(true);
+                            //socialObj.setUrl("test test");*/
+
+                            /*Object social;
+                            if (method.invoke(currentUser) != null){
+                                social = method.invoke(currentUser);
+                            }else{
+                                social = null;
+                            }*/
+
                             if(fieldName.equals("phone")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+1 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getPhone(), SECTION_SOCIAL+1 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("facebook")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+2 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getFacebook(), SECTION_SOCIAL+2 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("instagram")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+3 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName,currentUser.getInstagram(), SECTION_SOCIAL+3 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("twitter")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+4 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getTwitter(), SECTION_SOCIAL+4 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("snapchat")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+5 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getSnapchat(), SECTION_SOCIAL+5 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("tumblr")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+6 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName,currentUser.getTumblr(), SECTION_SOCIAL+6 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("pubg")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+7 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getPubg(), SECTION_SOCIAL+7 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("vk")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+8 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getVk(), SECTION_SOCIAL+8 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("askfm")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+9 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getAskfm(), SECTION_SOCIAL+9 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("curiouscat")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+10 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getCuriouscat(), SECTION_SOCIAL+10 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("saraha")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+11 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getSaraha(), SECTION_SOCIAL+11 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("pinterest")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+12 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getPinterest(), SECTION_SOCIAL+12 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("soundcloud")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+13 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getSoundcloud(), SECTION_SOCIAL+13 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("spotify")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+14 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getSpotify(), SECTION_SOCIAL+14 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("anghami")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+15 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getAnghami(), SECTION_SOCIAL+15 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("twitch")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+16 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getTwitch(), SECTION_SOCIAL+16 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("youtube")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+17 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getYoutube(), SECTION_SOCIAL+17 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("linkedIn")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+18 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getLinkedIn(), SECTION_SOCIAL+18 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("wikipedia")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+19 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getWikipedia(), SECTION_SOCIAL+19 ,SECTION_SOCIAL));
                             }
                             if(fieldName.equals("website")){
-                                mSocialArrayList.add(new Social(fieldName, value,"true", SECTION_SOCIAL+20 ,SECTION_SOCIAL));
+                                mSocialArrayList.add(new Social(fieldName, currentUser.getWebsite(), SECTION_SOCIAL+20 ,SECTION_SOCIAL));
                             }
 
                                 if(!mIsSocialAdded){
@@ -884,15 +907,20 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }*/
 
         for (int i = 0; i < mProfileDataArrayList.size(); i++) {
-            Log.d(TAG, "profileSave Key= "+mProfileDataArrayList.get(i).getKey()+" Value= "+ mProfileDataArrayList.get(i).getValue());
+            Log.d(TAG, "ProfileDataArrayList Key= "+mProfileDataArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
             switch (mProfileDataArrayList.get(i).getKey()){
                 case "avatar":
-                    currentUser.setAvatar(mProfileDataArrayList.get(i).getValue());
+                    if(null != mProfileDataArrayList.get(i).getValue()){
+                        currentUser.setAvatar(mProfileDataArrayList.get(i).getValue());
+                    }
                     break;
                 case "coverImage":
-                    currentUser.setCoverImage(mProfileDataArrayList.get(i).getValue());
+                    if(null != mProfileDataArrayList.get(i).getValue()){
+                        currentUser.setCoverImage(mProfileDataArrayList.get(i).getValue());
+                    }
                     break;
                 case "name":
+                    Log.d(TAG, "save profile set name" +mProfileDataArrayList.get(i).getValue());
                     currentUser.setName(mProfileDataArrayList.get(i).getValue());
                     break;
                 case "biography":
@@ -919,7 +947,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }// end of mProfileDataArrayList loop
 
         for (int i = 0; i < mWorkArrayList.size(); i++) {
-            Log.d(TAG, "ProfileDataArrayList getKey= "+mWorkArrayList.get(i).getKey());
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mWorkArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
             switch (mWorkArrayList.get(i).getKey()){
                 case "work":
                     currentUser.setWork(mWorkArrayList.get(i).getValue());
@@ -934,7 +962,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }// end of mWorkArrayList loop
 
         for (int i = 0; i < mAboutArrayList.size(); i++) {
-            Log.d(TAG, "ProfileDataArrayList getKey= "+mAboutArrayList.get(i).getKey());
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mAboutArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
             switch (mAboutArrayList.get(i).getKey()){
                 case "nationality":
                     currentUser.setNationality(mAboutArrayList.get(i).getValue());
@@ -955,7 +983,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }// end of mAboutArrayList loop
 
         for (int i = 0; i < mHabitsArrayList.size(); i++) {
-            Log.d(TAG, "ProfileDataArrayList getKey= "+mHabitsArrayList.get(i).getKey());
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mHabitsArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
             switch (mHabitsArrayList.get(i).getKey()){
                 case "athlete":
                     if(null!= mHabitsArrayList.get((i)).getValue() && mHabitsArrayList.get((i)).getValue().equals("true")){
@@ -1041,7 +1069,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }// end of mHabitsArrayList loop
 
         for (int i = 0; i < mSocialArrayList.size(); i++) {
-            Log.d(TAG, "ProfileDataArrayList getKey= "+mSocialArrayList.get(i).getKey());
+            Log.d(TAG, "ProfileDataArrayList getKey= "+mSocialArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
+
             switch (mSocialArrayList.get(i).getKey()){
                 case "phone":
                     currentUser.setPhone(mSocialArrayList.get(i).getValue());

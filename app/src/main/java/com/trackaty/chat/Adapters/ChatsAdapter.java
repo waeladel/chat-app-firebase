@@ -1,24 +1,17 @@
 package com.trackaty.chat.Adapters;
 
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Fragments.ChatsFragmentDirections;
-import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
@@ -27,7 +20,6 @@ import com.trackaty.chat.models.User;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -276,7 +268,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
             //itemView = row;
 
             row = itemView;
-            mLastMessage = row.findViewById(R.id.last_message);
+            mLastMessage = row.findViewById(R.id.message_button_text);
             mAvatar = row.findViewById(R.id.user_image);
             mLastSentTime = row.findViewById(R.id.last_sent);
             mChatTitle = row.findViewById(R.id.user_name);

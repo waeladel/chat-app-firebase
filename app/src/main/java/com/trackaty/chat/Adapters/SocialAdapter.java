@@ -15,10 +15,12 @@ import android.widget.Spinner;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.trackaty.chat.R;
-import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
+import com.trackaty.chat.models.SocialObj;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,12 +39,12 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
     public ArrayList<Social> socialArrayList;
     public Context context;
-
+    Map<String, SocialObj> socialMap = new HashMap<>();
 
     public SocialAdapter(Context context, ArrayList<Social> socialArrayList){
         this.socialArrayList = socialArrayList;
         this.context = context;
-
+        //socialObj = new SocialObj();
     }
 
     @NonNull
@@ -56,10 +58,24 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         //Log.i(TAG, "onBindViewHolder called="+ habitsArrayList.get(position));
 
+        // set spinner value
+        if (null != socialArrayList.get(position).getValue()) {
+            Log.d(TAG, "onBindViewHolder socialObj url= "+socialArrayList.get(position).getValue().getUrl()+ " socialObj public= "+socialArrayList.get(position).getValue().getPublic());
+            if(socialArrayList.get(position).getValue().getPublic()){
+                // public is true
+                holder.spinnerValue.setSelection(0);
+                Log.d(TAG, "display 0 option on sorting spinner");
+            }else {
+                // public is false
+                holder.spinnerValue.setSelection(1);
+                Log.d(TAG, "display 1 option on sorting spinner");
+            }
+        }
+
         switch (socialArrayList.get(position).getKey()) {
             case "phone":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -72,7 +88,9 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "facebook":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
+                    Log.d(TAG, "socialObj facebook url= "+socialArrayList.get(position).getValue().getUrl()+" public= "+socialArrayList.get(position).getValue().getPublic());
+
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -83,7 +101,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "instagram":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -94,7 +112,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "twitter":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -105,7 +123,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "snapchat":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -116,7 +134,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "tumblr":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -127,7 +145,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "pubg":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -138,7 +156,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "vk":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -149,7 +167,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "askfm":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -160,7 +178,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "curiouscat":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -171,7 +189,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "saraha":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -182,7 +200,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "pinterest":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -193,7 +211,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "soundcloud":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -204,7 +222,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "spotify":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -215,7 +233,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "anghami":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -228,7 +246,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "twitch":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -239,7 +257,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "youtube":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -250,7 +268,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "linkedIn":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -261,7 +279,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "wikipedia":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -272,7 +290,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 break;
             case "website":
                 if (null != socialArrayList.get(position).getValue()) {
-                    holder.itemValue.setText(socialArrayList.get(position).getValue());
+                    holder.itemValue.setText(socialArrayList.get(position).getValue().getUrl());
                 }else{
                     holder.itemValue.setText(null);
                 }
@@ -284,7 +302,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
         }
 
 
-        //Log.d(TAG, "onBindViewHolder get value="+ socialArrayList.get(position).getValue());
+        //Log.d(TAG, "onBindViewHolder get value="+ contactsArrayList.get(position).getValue());
 
         //holder.itemValue.setText(mProfileDataArrayList.indexOf(position));
     }
@@ -304,7 +322,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
         private TextInputEditText itemValue;
         private TextInputLayout inputLayout;
         private Spinner spinnerValue;
-
+        private SocialObj socialObj;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -314,7 +332,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
             itemValue = row.findViewById(R.id.edit_profile_value);
             inputLayout = row.findViewById(R.id.edit_profile_InputLayout);
             spinnerValue = row.findViewById(R.id.social_spinner);
-
+            socialObj = new SocialObj();
+            Log.d(TAG, "Adapter position = "+getAdapterPosition());
             itemValue.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
@@ -327,29 +346,66 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 @Override
                 public void afterTextChanged(Editable editable) {
                     Log.d(TAG, "Editable = "+ editable.toString()+ " position= "+getAdapterPosition()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                    if(TextUtils.isEmpty(editable)){
+                    if(TextUtils.isEmpty(String.valueOf(editable).trim())){
                         socialArrayList.get(getAdapterPosition()).setValue(null);
                     }else{
-                        socialArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                        //contactsArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                        //SocialObj socialObj= new SocialObj();
+                        socialObj.setUrl(editable.toString());
+                        // get selected spinner position
+                        switch (spinnerValue.getSelectedItemPosition()){
+                            case 0:
+                                Log.d(TAG, "afterTextChanged spinner item 0 is selected");
+                                socialObj.setPublic(true);
+                                break;
+                            case 1:
+                                Log.d(TAG, "afterTextChanged spinner item 1 is selected");
+                                socialObj.setPublic(false);
+                                break;
+                        }
+
+                        //socialMap.put("facebook", socialObj);
+                        Log.d(TAG, "afterTextChanged socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
+                        socialArrayList.get(getAdapterPosition()).setValue(socialObj);
                     }
                 }
             });
 
             spinnerValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
                     // your code here for onItemSelected
                     switch (selectedItemPosition){ // display sorting option selected from shared preference
+                        case 0:
+                            //contactsArrayList.get(getAdapterPosition()).setValue(true);
+
+                            /*socialPrivacy.setPublic(true);
+                            socialMap.put("social", socialPrivacy);*/
+                            if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
+                                socialArrayList.get(getAdapterPosition()).setValue(null);
+                            }else{
+                                socialObj.setPublic(true);
+                                socialObj.setUrl(String.valueOf(itemValue.getText()));
+                            }
+
+                            Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
+                            //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
+                            Log.d(TAG, "spinner item 0 is selected= " );
+                            break;
                         case 1:
-                            socialArrayList.get(getAdapterPosition()).setValue("true");
-                            Log.d(TAG, "spinner item 0 is selected= " +socialArrayList.get(getAdapterPosition()).getValue());
-                            break;
-                        case 2:
-                            socialArrayList.get(getAdapterPosition()).setValue("false");
-                            Log.d(TAG, "spinner item 1 is selected= " +socialArrayList.get(getAdapterPosition()).getValue());
-                            break;
-                        default:
-                            socialArrayList.get(getAdapterPosition()).setValue(null);
+                            //contactsArrayList.get(getAdapterPosition()).setPublic(false);
+                            /*socialPrivacy.setPublic(false);
+                            socialMap.put("social", socialPrivacy);*/
+                            if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
+                                socialArrayList.get(getAdapterPosition()).setValue(null);
+                            }else{
+                                socialObj.setPublic(false);
+                                socialObj.setUrl(String.valueOf(itemValue.getText()));
+                            }
+                            Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
+                            //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
+                            Log.d(TAG, "spinner item 1 is selected= " );
                             break;
                     }
 

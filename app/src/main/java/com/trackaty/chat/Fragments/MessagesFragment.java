@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
@@ -118,7 +117,7 @@ public class MessagesFragment extends Fragment {
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
         }
 
-        mMessage = (EditText) fragView.findViewById(R.id.last_message);
+        mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -325,7 +324,6 @@ public class MessagesFragment extends Fragment {
                 @Override
                 public void onChanged(@Nullable final PagedList<Message> items) {
                     System.out.println("mama onChanged");
-
                     if (items != null ){
                         // your code here
                         Log.d(TAG, "mama messages submitList size" +  items.size());

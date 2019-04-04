@@ -13,12 +13,26 @@
 
     <string name="love_button_hint">Love</string>
     <string name="message_button_hint">Message</string>
+    <string name="request_button_hint">Reveal</string>
+    <string name="request_button_cancel_hint">Cancel</string>
+    <string name="request_button_approve_hint">Approve</string>
+    <string name="request_button_unreveal_hint">Unreveal</string>
+    <string name="alert_dialog_edit">Edit revealed contacts</string>
+    <string name="alert_dialog_unreveal">Unreveal my contacts</string>
+    <string name="edit_unreveal_alert_dialog_title">Select Options:</string>
+
+
     <string name="block_button">Block</string>
     <string name="edit_profile_button">Edit Profile</string>
 
     <string name="see_more_about_button">See more about %1$s</string>
     <string name="see_more_button">See more</string>
     <string name="upload_button">Upload</string>
+
+    <string name="send_button">Send</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="user_social_private_button">Private contact</string>
+
 
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -33,6 +47,7 @@
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
     <string name="send_message_error">Sorry, couldn\'t send your message.</string>
+    <string name="send_request_error">Sorry, couldn\'t send your request.</string>
 
 
 
@@ -138,6 +153,13 @@
     <string name="user_active_now">Active Now</string>
     <string name="user_active_ago">Active %1$s</string>
 
+    <!--<string name="user_request_dialog_title">Select contacts you want to see:</string>-->
+    <string name="user_request_dialog_hint">Send a request to see selected contacts:</string>
+    <string name="user_request_dialog_title">Select contacts</string>
+    <string name="user_confirm_dialog_message">This user will not see your private contacts and you can\'t see his. Are you sure you want to unreveal your contacts?</string>
+    <string name="user_confirm_dialog_positive">Yes</string>
+    <string name="user_confirm_dialog_negative">Cancel</string>
+
     <!--<string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
     <string name="user_instagram_helper">Username without: https://instagram.com/</string>
     <string name="user_twitter_helper">Username without: https://twitter.com/ or @ symbol</string>
@@ -173,7 +195,7 @@
 
 
 
-    <!-- Relationship array -->
+    <!-- Relation array -->
     <string name="single">Single</string>
     <string name="searching">Actively searching</string>
     <string name="committed">In a relationship</string>
@@ -186,7 +208,7 @@
     <string name="separated">Separated</string>
     <string name="divorced">Divorced</string>
     <string name="widowed">Widowed</string>
-    <!-- Relationship  array -->
+    <!-- Relation  array -->
 
     <!-- Interested in array -->
     <string name="men">Men</string>
@@ -223,6 +245,7 @@
     <string name="twitter">Twitter</string>
     <string name="snapchat">Snapchat</string>
     <string name="tumblr">Tumblr</string>
+    <string name="pubg">PUBG</string>
     <string name="vk">VK</string>
     <string name="askfm">Ask.fm</string>
     <string name="curiouscat">Curious cat</string>

@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -13,6 +14,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,9 +36,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Adapters.ProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.ViewModels.MoreProfileViewModel;
+import com.trackaty.chat.ViewModels.ProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
+import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 
@@ -42,6 +51,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 
 /**
@@ -58,13 +68,24 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
     private  static final int SECTION_WORK = 700;
     private  static final int SECTION_HABITS = 800;
 
+    // requests and relations status
+    private static final String RELATION_STATUS_SENDER = "sender";
+    private static final String RELATION_STATUS_RECEIVER = "receiver";
+    private static final String RELATION_STATUS_STALKER = "stalker";
+    private static final String RELATION_STATUS_FOLLOWED = "followed";
+    private static final String RELATION_STATUS_NOT_FRIEND = "notFriend";
+
     // [START declare_database_ref]
     /*private DatabaseReference mDatabaseRef;
     private DatabaseReference mUserRef;*/
 
     private RecyclerView mProfileRecycler;
     private ArrayList <Profile> mUserArrayList;
+
     private ProfileAdapter mProfileAdapter;
+
+    private MoreProfileViewModel mMoreProfileViewModel;
+    private Relation mRelation ;
 
     private Context mActivityContext;
     private Activity activity;
@@ -88,16 +109,9 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
         mUserArrayList.add("tata");
         mUserArrayList.add("kaka");*/
 
-        mProfileAdapter  = new ProfileAdapter(mActivityContext,mUserArrayList,this);
-
-        // Initiate the RecyclerView
-        mProfileRecycler  = (RecyclerView) fragView.findViewById(R.id.profile_recycler);
-        mProfileRecycler.setHasFixedSize(true);
-        mProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
-        mProfileRecycler.setAdapter(mProfileAdapter);
 
         if (getArguments() != null) {
-            mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId();
+            mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
             mUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
@@ -111,6 +125,15 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
                 //mUserRef = mDatabaseRef.child("users").child(mUserId);
                 //showUser(mUserId);
             }*/
+
+            mProfileAdapter  = new ProfileAdapter(MoreProfileFragment.this,mUserArrayList,mUserId,this);
+
+            // Initiate the RecyclerView
+            mProfileRecycler  = (RecyclerView) fragView.findViewById(R.id.profile_recycler);
+            mProfileRecycler.setHasFixedSize(true);
+            mProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
+            mProfileRecycler.setAdapter(mProfileAdapter);
+
             showCurrentUser(mUser);
         }
 
@@ -219,64 +242,64 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
 
                                 //add data for social section
                                 if(fieldName.equals("phone")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+1 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getPhone(), SECTION_SOCIAL+1 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("facebook")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+2 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getFacebook(), SECTION_SOCIAL+2 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("instagram")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+3 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName,user.getInstagram(), SECTION_SOCIAL+3 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("twitter")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+4 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getTwitter(), SECTION_SOCIAL+4 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("snapchat")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+5 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getSnapchat(), SECTION_SOCIAL+5 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("tumblr")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+6 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName,user.getTumblr(), SECTION_SOCIAL+6 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("pubg")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+7 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getPubg(), SECTION_SOCIAL+7 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("vk")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+8 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getVk(), SECTION_SOCIAL+8 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("askfm")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+9 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getAskfm(), SECTION_SOCIAL+9 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("curiouscat")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+10 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getCuriouscat(), SECTION_SOCIAL+10 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("saraha")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+11 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getSaraha(), SECTION_SOCIAL+11 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("pinterest")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+12 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getPinterest(), SECTION_SOCIAL+12 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("soundcloud")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+13 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getSoundcloud(), SECTION_SOCIAL+13 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("spotify")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+14 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getSpotify(), SECTION_SOCIAL+14 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("anghami")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+15 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getAnghami(), SECTION_SOCIAL+15 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("twitch")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+16 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getTwitch(), SECTION_SOCIAL+16 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("youtube")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+17 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getYoutube(), SECTION_SOCIAL+17 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("linkedIn")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+18 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getLinkedIn(), SECTION_SOCIAL+18 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("wikipedia")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+19 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getWikipedia(), SECTION_SOCIAL+19 ,SECTION_SOCIAL));
                                 }
                                 if(fieldName.equals("website")){
-                                    mUserArrayList.add(new Profile(fieldName, value, SECTION_SOCIAL+20 ,SECTION_SOCIAL));
+                                    mUserArrayList.add(new Profile(fieldName, user.getWebsite(), SECTION_SOCIAL+20 ,SECTION_SOCIAL));
                                 }
 
                             }
@@ -382,167 +405,167 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
         switch (mUserArrayList.get(position).getKey()){
             case "phone":
                 intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:"+mUserArrayList.get(position).getValue()));
+                intent.setData(Uri.parse("tel:"+mUserArrayList.get(position).getSocial().getUrl()));
                 startActivity(intent);
                 break;
             case "facebook":
-                if (mUserArrayList.get(position).getValue().contains("facebook.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("facebook.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.facebook.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.facebook.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "instagram":
-                if (mUserArrayList.get(position).getValue().contains("instagram.com")&&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("instagram.com")&&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.instagram.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.instagram.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "twitter":
-                if (mUserArrayList.get(position).getValue().contains("twitter.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("twitter.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.twitter.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.twitter.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "snapchat":
-                if (mUserArrayList.get(position).getValue().contains("snapchat.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("snapchat.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://story.snapchat.com/s/"+mUserArrayList.get(position).getValue();
+                    Url = "https://story.snapchat.com/s/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "tumblr":
-                if (mUserArrayList.get(position).getValue().contains("tumblr.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("tumblr.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "http://"+mUserArrayList.get(position).getValue()+".tumblr.com/";
+                    Url = "http://"+mUserArrayList.get(position).getSocial().getUrl()+".tumblr.com/";
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "pubg":
                 ClipboardManager clipboard = (ClipboardManager) mActivityContext.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.user_pubg_clipboard_label), mUserArrayList.get(position).getValue());
+                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.user_pubg_clipboard_label), mUserArrayList.get(position).getSocial().getUrl());
                 clipboard.setPrimaryClip(clip);
 
                 Toast.makeText(mActivityContext,R.string.user_pubg_clipboard_toast,
                         Toast.LENGTH_SHORT).show();
                 break;
             case "vk":
-                if (mUserArrayList.get(position).getValue().contains("vk.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("vk.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.vk.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.vk.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "askfm":
-                if (mUserArrayList.get(position).getValue().contains("ask.fm") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue()) ){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("ask.fm") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl()) ){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.ask.fm/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.ask.fm/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "curiouscat":
-                if (mUserArrayList.get(position).getValue().contains("curiouscat.me") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("curiouscat.me") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.curiouscat.me/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.curiouscat.me/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "saraha":
-                if (mUserArrayList.get(position).getValue().contains("saraha.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("saraha.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://"+mUserArrayList.get(position).getValue()+".sarahah.com/";
+                    Url = "https://"+mUserArrayList.get(position).getSocial().getUrl()+".sarahah.com/";
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "pinterest":
-                if (mUserArrayList.get(position).getValue().contains("pinterest.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("pinterest.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.pinterest.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.pinterest.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "soundcloud":
-                if (mUserArrayList.get(position).getValue().contains("soundcloud.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("soundcloud.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.soundcloud.com/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.soundcloud.com/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "spotify":
-                if (mUserArrayList.get(position).getValue().contains("spotify.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("spotify.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://open.spotify.com/user/"+mUserArrayList.get(position).getValue();
+                    Url = "https://open.spotify.com/user/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "anghami":
-                if (mUserArrayList.get(position).getValue().contains("anghami.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("anghami.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://play.anghami.com/profile/"+mUserArrayList.get(position).getValue();
+                    Url = "https://play.anghami.com/profile/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "twitch":
-                if (mUserArrayList.get(position).getValue().contains("twitch.tv") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("twitch.tv") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.twitch.tv/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.twitch.tv/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "youtube":
-                if (mUserArrayList.get(position).getValue().contains("youtube.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("youtube.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                     startActivity(intent);
                 }
                 break;
             case "linkedIn":
-                if (mUserArrayList.get(position).getValue().contains("linkedin.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("linkedin.com") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                 }else{
-                    Url = "https://www.linkedin.com/in/"+mUserArrayList.get(position).getValue();
+                    Url = "https://www.linkedin.com/in/"+mUserArrayList.get(position).getSocial().getUrl();
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Url));
                 }
                 startActivity(intent);
                 break;
             case "wikipedia":
-                if (mUserArrayList.get(position).getValue().contains("wikipedia.org") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if (mUserArrayList.get(position).getSocial().getUrl().contains("wikipedia.org") &&  URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                     startActivity(intent);
                 }
                 break;
             case "website":
-                if( URLUtil.isValidUrl(mUserArrayList.get(position).getValue())){
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getValue()));
+                if( URLUtil.isValidUrl(mUserArrayList.get(position).getSocial().getUrl())){
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUserArrayList.get(position).getSocial().getUrl()));
                     startActivity(intent);
                 }
                 break;

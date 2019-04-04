@@ -116,9 +116,22 @@
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_baseline_chat_24px"
-            app:layout_constraintEnd_toStartOf="@+id/block_edit_button"
+            app:layout_constraintEnd_toStartOf="@+id/reveal_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/love_button"
+            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/reveal_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_visibility_black_24dp"
+            app:layout_constraintEnd_toStartOf="@+id/block_edit_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/message_button"
             app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -131,7 +144,7 @@
             android:src="@drawable/ic_block_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/message_button"
+            app:layout_constraintStart_toEndOf="@+id/reveal_button"
             app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
 
         <TextView
@@ -145,7 +158,7 @@
             app:layout_constraintTop_toBottomOf="@+id/love_button" />
 
         <TextView
-            android:id="@+id/last_message"
+            android:id="@+id/message_button_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -153,6 +166,16 @@
             app:layout_constraintEnd_toEndOf="@+id/message_button"
             app:layout_constraintStart_toStartOf="@+id/message_button"
             app:layout_constraintTop_toBottomOf="@+id/message_button" />
+
+        <TextView
+            android:id="@+id/reveal_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/request_button_hint"
+            app:layout_constraintEnd_toEndOf="@+id/reveal_button"
+            app:layout_constraintStart_toStartOf="@+id/reveal_button"
+            app:layout_constraintTop_toBottomOf="@+id/reveal_button" />
 
         <TextView
             android:id="@+id/block_edit_text"
@@ -169,7 +192,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="last_message,love_text,block_edit_text"
+            app:constraint_referenced_ids="message_button_text,love_text,block_edit_text"
             tools:layout_editor_absoluteY="731dp" />
 
         <TextView

@@ -3,10 +3,11 @@ package com.trackaty.chat.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Profile implements Parcelable{
+public class Profile implements Parcelable {
 
     private String key;
     private String value;
+    private SocialObj social ;
     private int order;
     private int section;
 
@@ -21,6 +22,14 @@ public class Profile implements Parcelable{
         this.order = order;
         this.section = section;
     }
+
+    public Profile(String key, SocialObj social, int order, int section) {
+        this.key = key;
+        this.social = social;
+        this.order = order;
+        this.section = section;
+    }
+
 
     protected Profile(Parcel in) {
         key = in.readString();
@@ -71,6 +80,14 @@ public class Profile implements Parcelable{
 
     public void setSection(int section) {
         this.section = section;
+    }
+
+    public SocialObj getSocial() {
+        return social;
+    }
+
+    public void setSocial(SocialObj social) {
+        this.social = social;
     }
 
     @Override
