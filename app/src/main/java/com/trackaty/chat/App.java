@@ -35,8 +35,8 @@ public class App extends Application {
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    private FirebaseUser currentUser;
-    //private String currentUserId;
+    private static FirebaseUser currentUser;
+    private static String currentUserId;
 
     private FirebaseDatabase database ;
     private DatabaseReference myConnectionsRef;
@@ -96,6 +96,8 @@ public class App extends Application {
         // [START Firebase Database enable persistence]
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         // [END rtdb_enable_persistence]
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = currentUser != null ? currentUser.getUid() : null;
 
         /*database = FirebaseDatabase.getInstance();
 
@@ -128,6 +130,12 @@ public class App extends Application {
 
     public static Context getContext() {
         return sApplicationContext;
+        //return instance.getApplicationContext();
+    }
+
+    public static String getCurrentUserId() {
+        Log.i(TAG, "Application currentUserId= "+currentUserId);
+        return currentUserId;
         //return instance.getApplicationContext();
     }
 

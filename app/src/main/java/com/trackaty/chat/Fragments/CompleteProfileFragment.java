@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.R;
 
 
@@ -20,6 +22,9 @@ public class CompleteProfileFragment extends Fragment {
 
 
     private TextView textView;
+    private FirebaseUser mFirebaseCurrentUser;
+    private String mCurrentUserId;
+
     //val data: String = CompleteProfileFragmentArgs.fromBundle(arguments).data // data = "Any data"
 
     public CompleteProfileFragment() {
@@ -40,10 +45,16 @@ public class CompleteProfileFragment extends Fragment {
 
         textView = (TextView) fragView.findViewById(R.id.wael);
 
-        String currentUserId = CompleteProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
+
+
+        //String currentUserId = CompleteProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
         String userEmail = CompleteProfileFragmentArgs.fromBundle(getArguments()).getUserEmail();
         String userName = CompleteProfileFragmentArgs.fromBundle(getArguments()).getUserName();
-        textView.setText(currentUserId+userEmail+userName);
+        textView.setText(mCurrentUserId+userEmail+userName);
 
         // Inflate the layout for this fragment
         return fragView;

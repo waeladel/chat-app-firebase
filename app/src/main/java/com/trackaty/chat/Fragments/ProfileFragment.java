@@ -30,6 +30,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
@@ -81,6 +83,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String CONFIRMATION_ALERT_FRAGMENT = "EditFragment";
 
     private String mCurrentUserId, mUserId;
+    private FirebaseUser mFirebaseCurrentUser;
     private User mUser;
     private Button mSeeMoreButton;
     private FloatingActionButton mLovedByButton, mMessageButton, mRevealButton, mBlockEditButton;
@@ -155,8 +158,12 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         // instantiate a new user relations to use it for reveal requests
         mRelations = new Relation();
 
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
         if(getArguments() != null) {
-            mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+            //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
             mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
@@ -269,7 +276,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 public void onClick(View view) {
                     if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
                         Log.i(TAG, "going to edit profile fragment= ");
-                        NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser,mCurrentUserId);
+                        NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
                         NavController navController = Navigation.findNavController(view);
                         navController.navigate(direction);
                     } else {
@@ -287,7 +294,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         Log.i(TAG, "don't send message to current logged in user ");
                     } else {
                         Log.d(TAG, "send message to user");
-                        NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(mCurrentUserId,null, mUserId,false);
+                        NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(null, mUserId,false);
                         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
                         //check if we are on Main Fragment not on complete Profile already
                         Navigation.findNavController(view).navigate(MessageDirection);
@@ -390,7 +397,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             public void onClick(View v) {
                 Log.i(TAG, "SeeMoreButton id clicked= ");
                 if (null != mCurrentUserId && mUserId  != null && mUser != null) {
-                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId, mUserId, mUser);
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile( mUserId, mUser);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
                 }

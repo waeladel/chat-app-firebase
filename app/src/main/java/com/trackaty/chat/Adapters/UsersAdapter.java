@@ -65,7 +65,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         case R.id.user_image: // only avatar is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user avatar clicked= "+view.getId());
-                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUserId, user.getKey(), user);
+                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile( user.getKey(), user);
                             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
                             //check if we are on Main Fragment not on complete Profile already
                             Navigation.findNavController(view).navigate(ProfileDirection);
@@ -76,7 +76,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         default://-1 entire row is clicked
                             //mListener.onTextViewNameClick(view, getAdapterPosition());
                             Log.i(TAG, "user row clicked= "+view.getId());
-                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(currentUserId,null, user.getKey(),false);
+                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(null, user.getKey(),false);
                             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
                             //check if we are on Main Fragment not on complete Profile already
                             Navigation.findNavController(view).navigate(MessageDirection);

@@ -33,9 +33,6 @@
         android:label="fragment_login"
         tools:layout="@layout/fragment_complete_profile" >
         <argument
-            android:name="currentUserId"
-            app:argType="string" />
-        <argument
             android:name="userName"
             app:argType="string"
             app:nullable="true" />
@@ -49,9 +46,6 @@
         android:name="com.trackaty.chat.Fragments.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
-        <argument
-            android:name="currentUserId"
-            app:argType="string" />
         <action
             android:id="@+id/action_profile_to_moreProfile"
             app:destination="@id/moreProfileFragment" />
@@ -78,9 +72,6 @@
         android:label="fragment_more_profile"
         tools:layout="@layout/fragment_more_profile" >
         <argument
-            android:name="currentUserId"
-            app:argType="string" />
-        <argument
             android:name="userId"
             app:argType="string"
             app:nullable="true" />
@@ -96,9 +87,6 @@
         <argument
             android:name="currentUser"
             app:argType="com.trackaty.chat.models.User" />
-        <argument
-            android:name="currentUserId"
-            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/displayImageFragment"
@@ -117,9 +105,6 @@
         android:name="com.trackaty.chat.Fragments.MessagesFragment"
         android:label="messages_fragment"
         tools:layout="@layout/messages_fragment" >
-        <argument
-            android:name="currentUserId"
-            app:argType="string" />
         <action
             android:id="@+id/action_messagesFrag_to_profileFrag"
             app:destination="@id/profileFragment"

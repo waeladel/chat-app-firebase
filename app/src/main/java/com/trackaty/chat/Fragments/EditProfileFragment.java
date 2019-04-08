@@ -33,6 +33,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -117,6 +119,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private User currentUser;
     private String currentUserId;
+    private FirebaseUser mFirebaseCurrentUser;
 
 
     // [START declare_database_ref]
@@ -210,9 +213,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
             restorePreviousState(); // Restore data found in the Bundle
         }else{
+            //Get current logged in user
+            mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+            currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
+
             if(getArguments()!= null){
                 currentUser = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUser();//logged in user
-                currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user id
+                //currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user id
                 Log.d(TAG,  "name= " + currentUser.getName() + "pickups=" + currentUser.getPickupCounter());
                 showCurrentUser(currentUser); // No saved data, get data from remote
             }

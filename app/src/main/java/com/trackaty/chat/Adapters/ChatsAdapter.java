@@ -119,12 +119,12 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                 case R.id.user_image: // only avatar is clicked
                                     Log.i(TAG, "user avatar clicked= "+view.getId());
                                     Log.i(TAG, "user avatar currenUserId= "+currentUserId+ " userId " + membersList.get(0).getKey() );
-                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment(currentUserId, membersList.get(0).getKey(), membersList.get(0));
+                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment( membersList.get(0).getKey(), membersList.get(0));
                                     Navigation.findNavController(view).navigate(ProfileDirection);
                                     break;
                                 default://-1 entire row is clicked
                                     Log.i(TAG, "user row clicked= "+view.getId());
-                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(currentUserId , chat.getKey(), membersList.get(0).getKey(), false);
+                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(chat.getKey(), membersList.get(0).getKey(), false);
                                     Navigation.findNavController(view).navigate(MessageDirection);
                                     break;
                             }
@@ -138,7 +138,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                     break;
                                 default://-1 entire row is clicked
                                     Log.i(TAG, "user row clicked= "+view.getId());
-                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(currentUserId , chat.getKey(), membersList.get(0).getKey(),true);
+                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment( chat.getKey(), membersList.get(0).getKey(),true);
                                     Navigation.findNavController(view).navigate(MessageDirection);
                                     break;
                             }

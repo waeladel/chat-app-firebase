@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
@@ -73,6 +75,7 @@ public class MessagesFragment extends Fragment {
     private MainActivityViewModel mMainViewModel;
     private String mCurrentUserId, mChatUserId, mChatId;
     private User mChatUser, mCurrentUser ;
+    private FirebaseUser mFirebaseCurrentUser;
     private Boolean isGroup;
 
     private Context mActivityContext;
@@ -103,10 +106,16 @@ public class MessagesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
+        //mCurrentUserId = App.getCurrentUserId();
         if(getArguments() != null) {
             //mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
             mChatUserId = MessagesFragmentArgs.fromBundle(getArguments()).getChatUserId();// any user
-            mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
+            //mCurrentUserId = MessagesFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
             isGroup = MessagesFragmentArgs.fromBundle(getArguments()).getIsGroup();
             if(null != MessagesFragmentArgs.fromBundle(getArguments()).getChatId()){
                 mChatId = MessagesFragmentArgs.fromBundle(getArguments()).getChatId();
@@ -114,7 +123,7 @@ public class MessagesFragment extends Fragment {
                 // Chat ID is not passed from MainFragment, we need to create
                 mChatId = getJoinedKeys(mCurrentUserId , mChatUserId);
             }
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
+            Log.d(TAG, "currentUserId mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
         }
 
         mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
@@ -428,7 +437,7 @@ public class MessagesFragment extends Fragment {
                 public void onClick(View view) {
                     //mListener.onTextViewNameClick(view, getAdapterPosition());
                     Log.i(TAG, "user avatar or name clicked");
-                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mCurrentUserId, mChatUser.getKey(), mChatUser);
+                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey(), mChatUser);
 
                     //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 

@@ -31,7 +31,6 @@ import com.trackaty.chat.ViewModels.ChatsViewModel;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 
@@ -46,7 +45,7 @@ public class ChatsFragment extends Fragment {
     private ArrayList<Chat> mChatsArrayList;
     private ChatsAdapter mChatsAdapter;
 
-    private FirebaseUser mCurrentUser;
+    private FirebaseUser mFirebaseCurrentUser;
     private String mCurrentUserId;
 
     private Context mActivityContext;
@@ -106,9 +105,9 @@ public class ChatsFragment extends Fragment {
             actionbar.setHomeButtonEnabled(true);
             actionbar.setDisplayShowCustomEnabled(false);*/
 
-            mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-            if(mCurrentUser != null){
-                mCurrentUserId = mCurrentUser.getUid();
+            mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if(mFirebaseCurrentUser != null){
+                mCurrentUserId = mFirebaseCurrentUser.getUid();
             }
 
             /*mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {

@@ -28,6 +28,8 @@ import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +63,8 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
 
     private final static String TAG = MoreProfileFragment.class.getSimpleName();
     private String mCurrentUserId, mUserId;
+    private FirebaseUser mFirebaseCurrentUser;
+
     private User mUser;
 
     private  static final int SECTION_ABOUT = 500;
@@ -109,9 +113,12 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
         mUserArrayList.add("tata");
         mUserArrayList.add("kaka");*/
 
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
 
         if (getArguments() != null) {
-            mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
+            //mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
             mUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());

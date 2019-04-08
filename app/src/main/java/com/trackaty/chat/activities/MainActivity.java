@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
-                    //completeProfile(currentUserId, currentUserName, currentUserEmail);
+                    //completeProfile(currentUserName, currentUserEmail);
                     //completeProfile(mUser);
                 }
 
@@ -492,9 +492,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // [END single_value_read]
     }
 
-    private void completeProfile(String UserId, String UserName, String UserEmail) {
+    private void completeProfile( String UserName, String UserEmail) {
 
-        NavDirections directions = MainFragmentDirections.actionMainToCompleteProfile(UserId,UserName,UserEmail);
+        NavDirections directions = MainFragmentDirections.actionMainToCompleteProfile(UserName,UserEmail);
 
         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
@@ -510,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(currentUserId != null && !TextUtils.isEmpty(currentUserId) && user != null){
             Log.i(TAG, "UserId not null");
 
-            NavDirections directions = MainFragmentDirections.actionMainToProfile(currentUserId, userId, user);
+            NavDirections directions = MainFragmentDirections.actionMainToProfile(userId, user);
             //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
             //check if we are on Main Fragment not on complete Profile already
