@@ -120,10 +120,30 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
         if (getArguments() != null) {
             //mCurrentUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();
             mUserId = MoreProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
-            mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
+            //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
+        }
 
-            // [display parcelable data]
+        mMoreProfileViewModel = ViewModelProviders.of(this).get(MoreProfileViewModel.class);
+
+        mMoreProfileViewModel.getUser(mUserId).observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if(user != null){
+                    mUser = user;
+                    if(mUserArrayList != null && mUserArrayList.size()>0){
+                        // Clear old Array data
+                        mUserArrayList.clear();
+                        showCurrentUser(mUser);
+                    }else{
+                        showCurrentUser(mUser);
+                    }
+
+                }
+            }
+        });
+
+        // [display parcelable data]
             /*if (null != mCurrentUserId && mCurrentUserId.equals(mUserId)) {
                 // it's logged in user profile
                 showCurrentUser(mUser);
@@ -140,9 +160,6 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             mProfileRecycler.setHasFixedSize(true);
             mProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
             mProfileRecycler.setAdapter(mProfileAdapter);
-
-            showCurrentUser(mUser);
-        }
 
         return fragView;
     }

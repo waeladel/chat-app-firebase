@@ -195,7 +195,7 @@ public class ChatsFragment extends Fragment {
         mMainViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
 
         // update the CurrentUser whenever it changes
-        mMainViewModel.getCurrentUser().observe(this, new Observer<User>() {
+        mMainViewModel.getUser().observe(this, new Observer<User>() {
             @Override
             public void onChanged(User user) {
                 Log.d(TAG, "onChanged user userId name= "+user.getName());

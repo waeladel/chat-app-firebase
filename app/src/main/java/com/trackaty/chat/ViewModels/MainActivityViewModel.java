@@ -42,7 +42,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public MutableLiveData<User> getCurrentUser() {
-        Log.d(TAG, "getCurrentUser"+ currentUserId);
+        Log.d(TAG, "getUser"+ currentUserId);
         currentUser = userRepository.getCurrentUser(currentUserId.getValue());
         return currentUser;
     }

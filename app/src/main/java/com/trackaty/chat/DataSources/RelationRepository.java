@@ -84,7 +84,8 @@ public class RelationRepository {
 
         DatabaseReference currentUserRelationRef = mRelationRef.child(currentUserId).child(userId);
         //final MutableLiveData<User> mRelation = new MutableLiveData<>();
-        Log.d(TAG, "getCurrentUserRelation initiated: " + currentUserId);
+        Log.d(TAG, "getCurrentUserRelation initiated: currentUserId= " + currentUserId+ " userId= "+userId );
+
 
         Log.d(TAG, "getCurrentUserRelation Listeners size= "+ mListenersList.size());
         if(mListenersList.size()== 0){
@@ -97,7 +98,7 @@ public class RelationRepository {
             Log.d(TAG, "getCurrentUserRelation Listeners size is not 0= "+ mListenersList.size());
             //there is an old Listener, need to check if it's on this ref
             for (int i = 0; i < mListenersList.size(); i++) {
-                //Log.d(TAG, "getCurrentUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
                 if(!mListenersList.get(i).getQueryOrRef().equals(currentUserRelationRef)
                         && (mListenersList.get(i).getListener().equals(mRelationListener))){
                     // This ref doesn't has a listener. Need to add a new Listener

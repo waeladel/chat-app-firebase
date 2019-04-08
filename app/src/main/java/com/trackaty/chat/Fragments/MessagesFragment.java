@@ -437,7 +437,7 @@ public class MessagesFragment extends Fragment {
                 public void onClick(View view) {
                     //mListener.onTextViewNameClick(view, getAdapterPosition());
                     Log.i(TAG, "user avatar or name clicked");
-                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey(), mChatUser);
+                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey());
 
                     //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 

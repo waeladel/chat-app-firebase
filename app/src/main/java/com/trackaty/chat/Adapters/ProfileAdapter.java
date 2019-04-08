@@ -50,7 +50,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public MoreProfileFragment context;
     private MoreProfileViewModel mMoreProfileViewModel;
-    private MutableLiveData<Relation>  mRelation = new MutableLiveData<>();
+    private MutableLiveData<Relation>  mRelation; //= new MutableLiveData<>();
 
     FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     String currentUserId = currentUser != null ? currentUser.getUid() : null;
@@ -64,16 +64,22 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.itemClickListener = itemClickListener;
         Log.d(TAG, "ProfileAdapter init relation= ");
 
+
         // get relations with selected user if any
         mMoreProfileViewModel = ViewModelProviders.of(context).get(MoreProfileViewModel.class);
         // get relations with selected user if any
         mMoreProfileViewModel.getRelation(currentUserId, userID).observe(context, new Observer<Relation>() {
             @Override
             public void onChanged(Relation relation) {
-                Log.i(TAG, "onChanged mProfileViewModel getRelation");
                 if (relation != null){
                     // Relation exist
-                    mRelation.setValue(relation);
+                    Log.i(TAG, "onChanged mProfileViewModel relation not null " +relation);
+                    if(mRelation == null){
+                        mRelation = new MutableLiveData<>();
+                        mRelation.setValue(relation);
+                    }else{
+                        mRelation.setValue(relation);
+                    }
                     mRelation.observe(context, new Observer<Relation>() {
                         @Override
                         public void onChanged(Relation relation) {
@@ -194,6 +200,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     //It's a public contact already
                     Log.d(TAG, "It's a public contact already "+ userDataArrayList.get(position).getKey());
                     buttonHolder.itemValue.setText(userDataArrayList.get(position).getSocial().getUrl());
+                    buttonHolder.itemValue.setEnabled(true);
+                    buttonHolder.itemValue.setClickable(true);
                 }else{
                     //It's a private contact, check if there is a relation between these two
                     Log.d(TAG, "It's a private contact "+ userDataArrayList.get(position).getKey() );
@@ -210,6 +218,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                     // This private relation is approved
                                     Log.d(TAG, "This private relation is approved "+ userDataArrayList.get(position).getKey());
                                     buttonHolder.itemValue.setText(userDataArrayList.get(position).getSocial().getUrl());
+                                    buttonHolder.itemValue.setEnabled(true);
+                                    buttonHolder.itemValue.setClickable(true);
                                 }else {
                                     Log.d(TAG, "There is no relation or it's not approved, set button to  private contact "+ userDataArrayList.get(position).getKey());
                                     buttonHolder.itemValue.setText(R.string.user_social_private_button);
@@ -276,14 +286,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     case "male":
                         viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.male)));
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_male);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case "female":
                         viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.female)));
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_female);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"transsexual":
                         viewHolder.itemValue.setText(context.getString(R.string.user_gender_value, context.getString(R.string.transsexual)));
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_transsexual);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     default:
                         viewHolder.itemValue.setText(R.string.not_specified);
@@ -310,50 +323,62 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     case "aries":
                         viewHolder.itemValue.setText(R.string.aries);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case "taurus":
                         viewHolder.itemValue.setText(R.string.taurus);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_taurus_zodiac_symbol_of_bull_head_front);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"gemini":
                         viewHolder.itemValue.setText(R.string.gemini);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_gemini_zodiac_symbol_of_two_twins_faces);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"cancer":
                         viewHolder.itemValue.setText(R.string.cancer);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"leo":
                         viewHolder.itemValue.setText(R.string.leo);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_leo_astrological_sign);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"virgo":
                         viewHolder.itemValue.setText(R.string.virgo);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_virgo_woman_head_shape_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"libra":
                         viewHolder.itemValue.setText(R.string.libra);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_libra_scale_balance_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"scorpio":
                         viewHolder.itemValue.setText(R.string.scorpio);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_scorpio_vertical_animal_shape_of_zodiac_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"sagittarius":
                         viewHolder.itemValue.setText(R.string.sagittarius);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_sagittarius_arch_and_arrow_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"capricorn":
                         viewHolder.itemValue.setText(R.string.capricorn);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_capricorn_goat_animal_shape_of_zodiac_sign);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"aquarius":
                         viewHolder.itemValue.setText(R.string.aquarius);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_aquarius_water_container_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"pisces":
                         viewHolder.itemValue.setText(R.string.pisces);
                         viewHolder.itemIcon.setImageResource(R.drawable.ic_pisces_astrological_sign_symbol);
+                        viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     default:
                         viewHolder.itemValue.setText(R.string.horoscope_not_specified);

@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (id){
             case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
-                goToProfile(currentUserId, mUserId, mUser);
+                goToProfile();
                 break;
             case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 1  INVITE clicked ");
@@ -506,8 +506,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private void goToProfile(String currentUserId,String userId,  User user) {
-        if(currentUserId != null && !TextUtils.isEmpty(currentUserId) && user != null){
+    private void goToProfile() {
+        navController.navigate(R.id.profileFragment);
+        /*if(user != null){
             Log.i(TAG, "UserId not null");
 
             NavDirections directions = MainFragmentDirections.actionMainToProfile(userId, user);
@@ -517,11 +518,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
                 navController.navigate(directions);
 
-                /*Navigation.findNavController(this, R.id.host_fragment)
-                        .navigate(directions);*/
+                *//*Navigation.findNavController(this, R.id.host_fragment)
+                        .navigate(directions);*//*
             }
 
-        }
+        }*/
     }
     // Go to Chats fragment
     private void goToChats() {

@@ -83,8 +83,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String CONFIRMATION_ALERT_FRAGMENT = "EditFragment";
 
     private String mCurrentUserId, mUserId;
-    private FirebaseUser mFirebaseCurrentUser;
     private User mUser;
+    private FirebaseUser mFirebaseCurrentUser;
     private Button mSeeMoreButton;
     private FloatingActionButton mLovedByButton, mMessageButton, mRevealButton, mBlockEditButton;
 
@@ -158,49 +158,53 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         // instantiate a new user relations to use it for reveal requests
         mRelations = new Relation();
 
+        if(getArguments() != null) {
+            //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+            mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
+            //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
+        }
+
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
 
-        if(getArguments() != null) {
-            //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
-            mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
-            mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId + "name= " + mUser.getName() + "pickups=" + mUser.getPickupCounter());
+        mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
+
+        // display user data
+        if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+
+            mProfileViewModel.getUser(mUserId).observe(this, new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    if(user != null){
+                        mUser = user;
+                        showCurrentUser();
+                    }
+                }
+            });
+        }else{
+            // get current logged in user
+            mProfileViewModel.getUser(mCurrentUserId).observe(this, new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    if(user != null){
+                        mUser = user;
+                        showCurrentUser();
+                    }
+                }
+            });
+        }
+
 
             // toggle mBlockEditButton
-            if (null != mCurrentUserId && mCurrentUserId.equals(mUserId)) { // it's logged in user profile
-                Log.d(TAG, "it's logged in user profile= " + mUserId);
-                mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
-                mBlockEditHint.setText(R.string.edit_profile_button);
-
-                mLovedByButton.setEnabled(false);
-                mLovedByButton.setClickable(false);
-                mLovedByButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-
-                mMessageButton.setEnabled(false);
-                mMessageButton.setClickable(false);
-                mMessageButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-
-                mRevealButton.setEnabled(false);
-                mRevealButton.setClickable(false);
-                mRevealButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-                //getResources().getColor(R.color.colorPrimary));
-                mLovedByHint.setEnabled(false);
-                mMessageHint.setEnabled(false);
-                mRevealHint.setEnabled(false);
-            } else {
-                // it's another user
+            if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                 mBlockEditButton.setImageResource(R.drawable.ic_block_24dp);
                 mBlockEditHint.setText(R.string.block_button);
                 //mUserRef = mDatabaseRef.child("users").child(mUserId);
                 //showUser(mUserId);
                 // update the reveal request
                 mRelationStatus = RELATION_STATUS_NOT_FRIEND;
-                mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
                 // get relations with selected user if any
                 mProfileViewModel.getRelation(mCurrentUserId, mUserId).observe(this, new Observer<Relation>() {
                     @Override
@@ -266,22 +270,45 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         }
 
                     }
-                });
+                });// End of mProfileViewModel
+            } else {
+                // it's logged in user profile
+                Log.d(TAG, "it's logged in user profile= " + mUserId);
+                mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
+                mBlockEditHint.setText(R.string.edit_profile_button);
+
+                mLovedByButton.setEnabled(false);
+                mLovedByButton.setClickable(false);
+                mLovedByButton.setBackgroundTintList(ColorStateList.valueOf
+                        (getResources().getColor(R.color.disabled_button)));
+
+                mMessageButton.setEnabled(false);
+                mMessageButton.setClickable(false);
+                mMessageButton.setBackgroundTintList(ColorStateList.valueOf
+                        (getResources().getColor(R.color.disabled_button)));
+
+                mRevealButton.setEnabled(false);
+                mRevealButton.setClickable(false);
+                mRevealButton.setBackgroundTintList(ColorStateList.valueOf
+                        (getResources().getColor(R.color.disabled_button)));
+                //getResources().getColor(R.color.colorPrimary));
+                mLovedByHint.setEnabled(false);
+                mMessageHint.setEnabled(false);
+                mRevealHint.setEnabled(false);
             }
-            // display user data
-            showCurrentUser();
+
 
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
+                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                        Log.d(TAG, "blockUser clicked");
+                        //blockUser();
+                    } else {
                         Log.i(TAG, "going to edit profile fragment= ");
                         NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
                         NavController navController = Navigation.findNavController(view);
                         navController.navigate(direction);
-                    } else {
-                        Log.d(TAG, "blockUser clicked");
-                        //blockUser();
                     }
 
                 }
@@ -290,14 +317,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             mMessageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
-                        Log.i(TAG, "don't send message to current logged in user ");
-                    } else {
+                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                         Log.d(TAG, "send message to user");
                         NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(null, mUserId,false);
                         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
                         //check if we are on Main Fragment not on complete Profile already
                         Navigation.findNavController(view).navigate(MessageDirection);
+                    } else {
+                        Log.i(TAG, "don't send message to current logged in user ");
                     }
 
                 }
@@ -308,9 +335,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             mRevealButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (null != mCurrentUserId && mCurrentUserId.equals(mUserId) && mUser != null) { // it's logged in user profile
-                        Log.i(TAG, "don't send message to current logged in user ");
-                    } else {
+                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                         switch (mRelationStatus){
                             case RELATION_STATUS_SENDER:
                                 // If this selected user sent me the request
@@ -343,23 +368,24 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 // select to un-reveal all contacts, you don't have permission to edit contacts
                                 showConfirmationDialog();
                                 break;
-                                default:
-                                    // Show request dialog
-                                    contactsMap.clear(); // clear all previous selected check boxs
-                                    Log.d(TAG, "send reveal request");
-                                    mPrivateContactsList = getPrivateContacts();
+                            default:
+                                // Show request dialog
+                                contactsMap.clear(); // clear all previous selected check boxs
+                                Log.d(TAG, "send reveal request");
+                                mPrivateContactsList = getPrivateContacts();
 
-                                    for (int i = 0; i < mPrivateContactsList.size(); i++) {
-                                        Log.i(TAG, "mPrivateContactsList sorted " + mPrivateContactsList.get(i).getKey());
-                                    }
+                                for (int i = 0; i < mPrivateContactsList.size(); i++) {
+                                    Log.i(TAG, "mPrivateContactsList sorted " + mPrivateContactsList.get(i).getKey());
+                                }
 
-                                    if(mPrivateContactsList.size()> 0){
-                                        showDialog(mPrivateContactsList);
-                                    }
+                                if(mPrivateContactsList.size()> 0){
+                                    showDialog(mPrivateContactsList);
+                                }
 
-                                    break;
+                                break;
                         }
-
+                    } else {
+                        Log.i(TAG, "don't send message to current logged in user ");
                     }
 
                 }
@@ -369,35 +395,48 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             mCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                  if (mUserId != null) {
+                  if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                         Log.i(TAG, "going to Cover image view");
                         NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, COVER_ORIGINAL_NAME);
                         NavController navController = Navigation.findNavController(view);
                         navController.navigate(direction);
-                    }
+                    }else{
+                      Log.i(TAG, "going to Cover image view");
+                      NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, COVER_ORIGINAL_NAME);
+                      NavController navController = Navigation.findNavController(view);
+                      navController.navigate(direction);
+                  }
                 }
             });
 
             mAvatar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                   if (mUserId != null) {
+                   if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                         Log.i(TAG, "going to Avatar image view");
                         NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, AVATAR_ORIGINAL_NAME);
                         NavController navController = Navigation.findNavController(view);
                         navController.navigate(direction);
-                    }
+                    }else{
+                       Log.i(TAG, "going to Avatar image view");
+                       NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, AVATAR_ORIGINAL_NAME);
+                       NavController navController = Navigation.findNavController(view);
+                       navController.navigate(direction);
+                   }
                 }
             });
 
-        }
 
         mSeeMoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "SeeMoreButton id clicked= ");
-                if (null != mCurrentUserId && mUserId  != null && mUser != null) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
                     NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile( mUserId, mUser);
+                    NavController navController = Navigation.findNavController(v);
+                    navController.navigate(direction);
+                }else{
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId, mUser);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
                 }
@@ -655,50 +694,62 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     case "single":
                         mRelationship.setText(R.string.single);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "searching":
                         mRelationship.setText(R.string.searching);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_search_black_24dp);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "committed":
                         mRelationship.setText(R.string.committed);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_two_hearts);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "engaged":
                         mRelationship.setText(R.string.engaged);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "married":
                         mRelationship.setText(R.string.married);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "civil union":
                         mRelationship.setText(R.string.civil_union);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "domestic partnership":
                         mRelationship.setText(R.string.domestic_partnership);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_two_hearts);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "open relationship":
                         mRelationship.setText(R.string.open_relationship);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_two_hearts);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "open marriage":
                         mRelationship.setText(R.string.open_marriage);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "separated":
                         mRelationship.setText(R.string.separated);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "divorced":
                         mRelationship.setText(R.string.divorced);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "widowed":
                         mRelationship.setText(R.string.widowed);
                         mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     default:
                         mRelationship.setText(R.string.not_specified);
@@ -713,14 +764,17 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     case "men":
                         mInterested.setText(R.string.men);
                         mInterestedIcon.setImageResource(R.drawable.ic_business_man);
+                        mInterestedIcon.setVisibility(View.VISIBLE);
                         break;
                     case "women":
                         mInterested.setText(R.string.women);
                         mInterestedIcon.setImageResource(R.drawable.ic_business_woman);
+                        mInterestedIcon.setVisibility(View.VISIBLE);
                         break;
                     case "both":
                         mInterested.setText(R.string.both_men_women);
                         mInterestedIcon.setImageResource(R.drawable.ic_wc_men_and_women_24dp);
+                        mInterestedIcon.setVisibility(View.VISIBLE);
                         break;
                     default:
                         mInterested.setText(R.string.not_specified);

@@ -3,7 +3,9 @@ package com.trackaty.chat.ViewModels;
 import android.util.Log;
 
 import com.trackaty.chat.DataSources.RelationRepository;
+import com.trackaty.chat.DataSources.UserRepository;
 import com.trackaty.chat.models.Relation;
+import com.trackaty.chat.models.User;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
@@ -15,12 +17,14 @@ public class ProfileViewModel extends ViewModel {
 
 
     private RelationRepository relationRepository;
+    private UserRepository mUserRepository;
 
     public ProfileViewModel() {
 
         // pass chatKey to the constructor of MessagesDataFactory
         Log.d(TAG, "ProfileViewModel init");
         relationRepository = new RelationRepository();
+        mUserRepository = new UserRepository();
 
     }
 
@@ -33,8 +37,13 @@ public class ProfileViewModel extends ViewModel {
         return relationRepository.getRelation(currentUserId, userId);
     }
 
+
     public void cancelRequest(String currentUserId, String userId) {
         relationRepository.cancelRequest(currentUserId, userId);
+    }
+
+    public LiveData<User> getUser(String currentUserId){
+        return mUserRepository.getCurrentUser(currentUserId);
     }
 
     @Override
@@ -43,5 +52,6 @@ public class ProfileViewModel extends ViewModel {
         Log.d(TAG, "mama ProfileViewModel onCleared:");
         // Remove all Listeners from relationRepository
         relationRepository.removeListeners();
+        mUserRepository.removeListeners();
     }
 }

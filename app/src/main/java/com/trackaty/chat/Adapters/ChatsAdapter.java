@@ -119,7 +119,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                 case R.id.user_image: // only avatar is clicked
                                     Log.i(TAG, "user avatar clicked= "+view.getId());
                                     Log.i(TAG, "user avatar currenUserId= "+currentUserId+ " userId " + membersList.get(0).getKey() );
-                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment( membersList.get(0).getKey(), membersList.get(0));
+                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment( membersList.get(0).getKey());
                                     Navigation.findNavController(view).navigate(ProfileDirection);
                                     break;
                                 default://-1 entire row is clicked

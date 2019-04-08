@@ -85,7 +85,7 @@ private ValueEventListener userListener = new ValueEventListener() {
             Log.d(TAG, "getUser Listeners size is not 0= "+ mListenersList.size());
             //there is an old Listener, need to check if it's on this ref
             for (int i = 0; i < mListenersList.size(); i++) {
-                //Log.d(TAG, "getCurrentUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
                 if(!mListenersList.get(i).getQueryOrRef().equals(userRef)
                         && (mListenersList.get(i).getListener().equals(userListener))){
                     // This ref doesn't has a listener. Need to add a new Listener

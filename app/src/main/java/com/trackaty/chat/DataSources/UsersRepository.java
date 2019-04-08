@@ -51,7 +51,7 @@ public class UsersRepository {
             // Get Post object and use the values to update the UI
             if (dataSnapshot.exists()) {
                 // Get user value
-                Log.d(TAG, "getCurrentUser dataSnapshot key: "
+                Log.d(TAG, "getUser dataSnapshot key: "
                         + dataSnapshot.getKey()+" Listener = "+currentUserListener);
                 //currentUser = dataSnapshot.getValue(User.class);
                 currentUser.postValue(dataSnapshot.getValue(User.class));
@@ -376,11 +376,11 @@ public class UsersRepository {
         }
     }*/
 
-    /*public MutableLiveData<User> getCurrentUser(String userId){
+    /*public MutableLiveData<User> getUser(String userId){
 
         DatabaseReference currentUserRef = mUsersRef.child(userId);
         //final MutableLiveData<User> currentUser = new MutableLiveData<>();
-        Log.d(TAG, "getCurrentUser initiated: " + userId);
+        Log.d(TAG, "getUser initiated: " + userId);
 
         //mListenersMap.put(postSnapshot.getRef(), currentUserListener);
         currentUserRef.addValueEventListener(currentUserListener);
@@ -389,7 +389,7 @@ public class UsersRepository {
         for (Map.Entry<DatabaseReference, ValueEventListener> entry : mListenersMap.entrySet()) {
             DatabaseReference ref = entry.getKey();
             ValueEventListener listener = entry.getValue();
-            Log.d(TAG, "Map getCurrentUser. ref= " + ref+ " listener= "+listener);
+            Log.d(TAG, "Map getUser. ref= " + ref+ " listener= "+listener);
             //ref.removeEventListener(listener);
         }
 
