@@ -14,12 +14,15 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
@@ -35,13 +38,17 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
     public  final static int  SMALL_INPUT_MAX_LINES = 1;
 
     public ArrayList<Profile> workArrayList;
-    public Context context;
+    //public Context fragmentContext;
+    public EditProfileFragment fragmentContext;
+    private EditProfileViewModel mEditProfileViewModel;
 
 
-    public WorkAdapter(Context context, ArrayList<Profile> workArrayList){
+    public WorkAdapter(EditProfileFragment fragmentContext, ArrayList<Profile> workArrayList){
         this.workArrayList = workArrayList;
-        this.context = context;
+        this.fragmentContext = fragmentContext; // To use it as observer
 
+        // get EditProfileViewModel to access user object
+        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
     }
 
     @NonNull
@@ -78,11 +85,11 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                 holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_work_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_work_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_work_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_work_helper));
                 break;
             case "college":
                 if (null != workArrayList.get(position).getValue()) {
@@ -106,11 +113,11 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                 holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_college_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_college_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_college_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_college_helper));
                 break;
             case "school":
                 if (null != workArrayList.get(position).getValue()) {
@@ -134,11 +141,11 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                 holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_school_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_school_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_school_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_school_helper));
                 break;
         }
 
@@ -181,10 +188,36 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                 @Override
                 public void afterTextChanged(Editable editable) {
                     Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
-                    if(TextUtils.isEmpty(editable)){
+                    if(TextUtils.isEmpty(String.valueOf(editable).trim())){
                         workArrayList.get(getAdapterPosition()).setValue(null);
+
+                        // set EditProfileViewModel.user values
+                        switch (workArrayList.get(getAdapterPosition()).getKey()){
+                            case "work":
+                                mEditProfileViewModel.getUser().setWork(null);
+                                break;
+                            case "college":
+                                mEditProfileViewModel.getUser().setCollege(null);
+                                break;
+                            case "school":
+                                mEditProfileViewModel.getUser().setSchool(null);
+                                break;
+                        }
                     }else{
                         workArrayList.get(getAdapterPosition()).setValue(editable.toString());
+
+                        // set EditProfileViewModel.user values
+                        switch (workArrayList.get(getAdapterPosition()).getKey()){
+                            case "work":
+                                mEditProfileViewModel.getUser().setWork(String.valueOf(editable).trim());
+                                break;
+                            case "college":
+                                mEditProfileViewModel.getUser().setCollege(String.valueOf(editable).trim());
+                                break;
+                            case "school":
+                                mEditProfileViewModel.getUser().setSchool(String.valueOf(editable).trim());
+                                break;
+                        }
                     }
                 }
             });

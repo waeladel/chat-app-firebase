@@ -8,6 +8,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,8 +27,10 @@ import com.github.aakira.expandablelayout.Utils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.Variables;
@@ -37,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -78,8 +82,11 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public SocialAdapter socialAdapter;
 
     public Context context;
+    public EditProfileFragment fragmentContext;
+
     private ItemClickListener itemClickListener;
 
+    private EditProfileViewModel mEditProfileViewModel;
 
 
     public EditProfileAdapter(Context context
@@ -89,6 +96,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ,ArrayList<Profile> habitsArrayList
             ,ArrayList<Social> socialArrayList
             ,ArrayList<Variables> variablesArrayList
+            , EditProfileFragment fragmentContext
             , ItemClickListener itemClickListener){
 
         this.mProfileDataArrayList = userDataArrayList;
@@ -100,14 +108,16 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
         this.context = context;
+        this.fragmentContext = fragmentContext; // To use it as observer
         this.itemClickListener = itemClickListener;
 
-        aboutAdapter = new AboutAdapter(context, aboutArrayList);
-        workAdapter = new WorkAdapter(context, workArrayList);
-        habitsAdapter = new HabitsAdapter(context, habitsArrayList);
-        socialAdapter = new SocialAdapter (context, socialArrayList);
+        aboutAdapter = new AboutAdapter(fragmentContext, aboutArrayList);
+        workAdapter = new WorkAdapter(fragmentContext, workArrayList);
+        habitsAdapter = new HabitsAdapter(fragmentContext, habitsArrayList);
+        socialAdapter = new SocialAdapter (fragmentContext, socialArrayList);
 
-
+        // get EditProfileViewModel to access user object
+        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
     }
 
     @NonNull
@@ -270,7 +280,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     // Set Helper
                     /*textInputHolder.inputLayout.setHelperTextEnabled(true);
-                    textInputHolder.inputLayout.setHelperText(context.getString(R.string.user_biography_helper));*/
+                    textInputHolder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_biography_helper));*/
                     break;
             }
 
@@ -370,50 +380,62 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         switch (selectedItemPosition){ // display sorting option selected from shared preference
                             case 0:
                                 mProfileDataArrayList.get(position).setValue("single");
+                                mEditProfileViewModel.getUser().setRelationship("single");
                                 Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 1:
                                 mProfileDataArrayList.get(position).setValue("searching");
+                                mEditProfileViewModel.getUser().setRelationship("searching");
                                 Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 2:
                                 mProfileDataArrayList.get(position).setValue("committed");
+                                mEditProfileViewModel.getUser().setRelationship("committed");
                                 Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 3:
                                 mProfileDataArrayList.get(position).setValue("engaged");
+                                mEditProfileViewModel.getUser().setRelationship("engaged");
                                 Log.d(TAG, "spinner item 3 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 4:
                                 mProfileDataArrayList.get(position).setValue("married");
+                                mEditProfileViewModel.getUser().setRelationship("married");
                                 Log.d(TAG, "spinner item 4 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 5:
                                 mProfileDataArrayList.get(position).setValue("civil union");
+                                mEditProfileViewModel.getUser().setRelationship("civil union");
                                 Log.d(TAG, "spinner item 5 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 6:
                                 mProfileDataArrayList.get(position).setValue("domestic partnership");
+                                mEditProfileViewModel.getUser().setRelationship("domestic partnership");
                                 Log.d(TAG, "spinner item 6 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 7:
                                 mProfileDataArrayList.get(position).setValue("open relationship");
+                                mEditProfileViewModel.getUser().setRelationship("open relationship");
                                 Log.d(TAG, "spinner item 7 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 8:
                                 mProfileDataArrayList.get(position).setValue("open marriage");
+                                mEditProfileViewModel.getUser().setRelationship("open marriage");
                                 Log.d(TAG, "spinner item 8 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 9:
                                 mProfileDataArrayList.get(position).setValue("separated");
+                                mEditProfileViewModel.getUser().setRelationship("separated");
                                 Log.d(TAG, "spinner item 9 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 10:
                                 mProfileDataArrayList.get(position).setValue("divorced");
+                                mEditProfileViewModel.getUser().setRelationship("divorced");
                                 Log.d(TAG, "spinner item 10 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                             case 11:
                                 mProfileDataArrayList.get(position).setValue("widowed");
+                                mEditProfileViewModel.getUser().setRelationship("widowed");
                                 Log.d(TAG, "spinner item 11 is selected= " +mProfileDataArrayList.get(position).getValue());
                                 break;
                         }
@@ -463,14 +485,17 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             switch (selectedItemPosition){ // display sorting option selected from shared preference
                                 case 0:
                                     mProfileDataArrayList.get(position).setValue("men");
+                                    mEditProfileViewModel.getUser().setInterestedIn("men");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 1:
                                     mProfileDataArrayList.get(position).setValue("women");
+                                    mEditProfileViewModel.getUser().setInterestedIn("women");
                                     Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 2:
                                     mProfileDataArrayList.get(position).setValue("both");
+                                    mEditProfileViewModel.getUser().setInterestedIn("both");
                                     Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                             }
@@ -520,14 +545,17 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             switch (selectedItemPosition){ // display sorting option selected from shared preference
                                 case 0:
                                     mProfileDataArrayList.get(position).setValue("male");
+                                    mEditProfileViewModel.getUser().setGender("male");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 1:
                                     mProfileDataArrayList.get(position).setValue("female");
+                                    mEditProfileViewModel.getUser().setGender("female");
                                     Log.d(TAG, "spinner item 1 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 2:
                                     mProfileDataArrayList.get(position).setValue("transsexual");
+                                    mEditProfileViewModel.getUser().setGender("transsexual");
                                     Log.d(TAG, "spinner item 2 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                             }
@@ -609,50 +637,62 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             switch (selectedItemPosition){ // display sorting option selected from shared preference
                                 case 0:
                                     mProfileDataArrayList.get(position).setValue("aries");
+                                    mEditProfileViewModel.getUser().setHoroscope("aries");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 1:
                                     mProfileDataArrayList.get(position).setValue("taurus");
+                                    mEditProfileViewModel.getUser().setHoroscope("taurus");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 2:
                                     mProfileDataArrayList.get(position).setValue("gemini");
+                                    mEditProfileViewModel.getUser().setHoroscope("gemini");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 3:
                                     mProfileDataArrayList.get(position).setValue("cancer");
+                                    mEditProfileViewModel.getUser().setHoroscope("cancer");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 4:
                                     mProfileDataArrayList.get(position).setValue("leo");
+                                    mEditProfileViewModel.getUser().setHoroscope("leo");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 5:
                                     mProfileDataArrayList.get(position).setValue("virgo");
+                                    mEditProfileViewModel.getUser().setHoroscope("virgo");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 6:
                                     mProfileDataArrayList.get(position).setValue("libra");
+                                    mEditProfileViewModel.getUser().setHoroscope("libra");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 7:
                                     mProfileDataArrayList.get(position).setValue("scorpio");
+                                    mEditProfileViewModel.getUser().setHoroscope("scorpio");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 8:
                                     mProfileDataArrayList.get(position).setValue("sagittarius");
+                                    mEditProfileViewModel.getUser().setHoroscope("sagittarius");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 9:
                                     mProfileDataArrayList.get(position).setValue("capricorn");
+                                    mEditProfileViewModel.getUser().setHoroscope("capricorn");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 10:
                                     mProfileDataArrayList.get(position).setValue("aquarius");
+                                    mEditProfileViewModel.getUser().setHoroscope("aquarius");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                                 case 11:
                                     mProfileDataArrayList.get(position).setValue("pisces");
+                                    mEditProfileViewModel.getUser().setHoroscope("pisces");
                                     Log.d(TAG, "spinner item 0 is selected= " +mProfileDataArrayList.get(position).getValue());
                                     break;
                             }
@@ -701,7 +741,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         expandableHolder.sectionHeadline.setText(R.string.user_work_school_headline);
                         //expandableHolder.expandableLayout.collapse();
 
-                        //aboutAdapter = new AboutAdapter(context, habitsArrayList);
+                        //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
@@ -728,7 +768,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         expandableHolder.sectionHeadline.setText(R.string.user_habits_hobbies_headline);
                         //expandableHolder.expandableLayout.collapse();
 
-                        //aboutAdapter = new AboutAdapter(context, habitsArrayList);
+                        //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
@@ -754,7 +794,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         expandableHolder.sectionHeadline.setText(R.string.user_social_headline);
                         //expandableHolder.expandableLayout.collapse();
 
-                        //aboutAdapter = new AboutAdapter(context, habitsArrayList);
+                        //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
@@ -809,6 +849,12 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onClick(View view, int position, boolean isLongClick) {
                     Log.i(TAG, "expandToggle id clicked= ");
                     expandableHolder.expandableLayout.toggle();
+                    for (Social social : socialArrayList) {
+                        System.out.println(social);
+                        if(social != null && null != social.getValue()){
+                            Log.d(TAG, "socialArrayList loop= " +social.getKey()+" url= "+social.getValue().getUrl());
+                        }
+                    }
                 }
             });
 
@@ -853,7 +899,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         // birthDate text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("birthDate")){
-            holder.itemValue.setText(context.getString(R.string.user_age_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_age_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_cake_black_24dp);
         }
 
@@ -882,13 +928,13 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         // nationality text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("nationality")){
-            holder.itemValue.setText(context.getString(R.string.user_country_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_country_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_flag_black_24dp);
         }
 
         // hometown text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("hometown")){
-            holder.itemValue.setText(context.getString(R.string.user_hometown_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_hometown_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
         }
 
@@ -952,36 +998,36 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         // lives text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("lives")){
-            holder.itemValue.setText(context.getString(R.string.user_lives_in_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_lives_in_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_home_black_24dp);
         }
 
         // politics text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("politics")){
-            holder.itemValue.setText(context.getString(R.string.user_politics_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_politics_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_voting);
         }
 
         // religion text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("religion")){
-            holder.itemValue.setText(context.getString(R.string.user_religion_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_religion_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_praying_hands);
         }
 
         // work text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("work")){
-            holder.itemValue.setText(context.getString(R.string.user_work_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_work_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_work_black_24dp);
         }
         // college text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("college")){
-            holder.itemValue.setText(context.getString(R.string.user_college_value, mProfileDataArrayList.get(position).getValue()));
+            holder.itemValue.setText(fragmentContext.getString(R.string.user_college_value, mProfileDataArrayList.get(position).getValue()));
             holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
         }
 
     // college text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("school")){
-        holder.itemValue.setText(context.getString(R.string.user_school_value, mProfileDataArrayList.get(position).getValue()));
+        holder.itemValue.setText(fragmentContext.getString(R.string.user_school_value, mProfileDataArrayList.get(position).getValue()));
         holder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
     }
 
@@ -989,9 +1035,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(mProfileDataArrayList.get(position).getKey().equals("smoke")){
             holder.itemIcon.setImageResource(R.drawable.ic_smoking_rooms_black_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_smoke_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_smoke_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_smoke_value, fragmentContext.getString(R.string.no)));
             }
         }
 
@@ -999,9 +1045,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(mProfileDataArrayList.get(position).getKey().equals("shisha")){
             holder.itemIcon.setImageResource(R.drawable.ic_shisha);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_water_pipe_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_water_pipe_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_water_pipe_value, fragmentContext.getString(R.string.no)));
             }
         }
 
@@ -1009,9 +1055,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(mProfileDataArrayList.get(position).getKey().equals("drugs")){
             holder.itemIcon.setImageResource(R.drawable.ic_injection);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_drugs_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_drugs_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_drugs_value, fragmentContext.getString(R.string.no)));
             }
         }
 
@@ -1019,9 +1065,9 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(mProfileDataArrayList.get(position).getKey().equals("drink")){
             holder.itemIcon.setImageResource(R.drawable.ic_drinking_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_drink_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_drink_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_drink_value, fragmentContext.getString(R.string.no)));
             }
         }
 
@@ -1029,45 +1075,45 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(mProfileDataArrayList.get(position).getKey().equals("athlete")){
             holder.itemIcon.setImageResource(R.drawable.ic_fitness_athlete_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_athlete_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_athlete_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_athlete_value, fragmentContext.getString(R.string.no)));
             }
         }
         // gamer text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("gamer")){
             holder.itemIcon.setImageResource(R.drawable.ic_games_black_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_gamer_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_gamer_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_gamer_value, fragmentContext.getString(R.string.no)));
             }
         }
         // travel text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("travel")){
             holder.itemIcon.setImageResource(R.drawable.ic_flight_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_travel_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_travel_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_travel_value, fragmentContext.getString(R.string.no)));
             }
         }
         // cook text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("cook")){
             holder.itemIcon.setImageResource(R.drawable.ic_cook_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_cook_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_cook_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_cook_value, fragmentContext.getString(R.string.no)));
             }
         }
         // read text value and icons
         if(mProfileDataArrayList.get(position).getKey().equals("read")){
             holder.itemIcon.setImageResource(R.drawable.ic_library_book_24dp);
             if(mProfileDataArrayList.get(position).getValue().equals("true")){
-                holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.yes)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_read_value, fragmentContext.getString(R.string.yes)));
             }else{
-                holder.itemValue.setText(context.getString(R.string.user_read_value, context.getString(R.string.no)));
+                holder.itemValue.setText(fragmentContext.getString(R.string.user_read_value, fragmentContext.getString(R.string.no)));
             }
         }*/
 
@@ -1260,8 +1306,32 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
-                    mProfileDataArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition()+ " key= "+mProfileDataArrayList.get(getAdapterPosition()).getKey());
+                    if(TextUtils.isEmpty((String.valueOf(editable).trim()))){
+                        mProfileDataArrayList.get(getAdapterPosition()).setValue(null);
+                        // set EditProfileViewModel.user values
+                        switch (mProfileDataArrayList.get(getAdapterPosition()).getKey()){
+                            case "name":
+                                mEditProfileViewModel.getUser().setName(null);
+                                break;
+                            case "biography":
+                                mEditProfileViewModel.getUser().setBiography(null);
+                                break;
+                        }
+                    }else{
+                        mProfileDataArrayList.get(getAdapterPosition()).setValue(editable.toString());
+
+                        // set EditProfileViewModel.user values
+                        switch (mProfileDataArrayList.get(getAdapterPosition()).getKey()){
+                            case "name":
+                                mEditProfileViewModel.getUser().setName(String.valueOf(editable).trim());
+                                break;
+                            case "biography":
+                                mEditProfileViewModel.getUser().setBiography(String.valueOf(editable).trim());
+                                break;
+                        }
+                    }
+
                 }
             });
 

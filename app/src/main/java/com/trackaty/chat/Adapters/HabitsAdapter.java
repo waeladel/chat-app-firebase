@@ -6,16 +6,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder> {
@@ -23,12 +25,18 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
     private final static String TAG = HabitsAdapter.class.getSimpleName();
 
     public ArrayList<Profile> habitsArrayList;
-    public Context context;
 
 
-    public HabitsAdapter(Context context, ArrayList<Profile> habitsArrayList){
+    //public Context fragmentContext;
+    public EditProfileFragment fragmentContext;
+    private EditProfileViewModel mEditProfileViewModel;
+
+    public HabitsAdapter(EditProfileFragment fragmentContext, ArrayList<Profile> habitsArrayList){
         this.habitsArrayList = habitsArrayList;
-        this.context = context;
+        this.fragmentContext = fragmentContext; // To use it as observer
+
+        // get EditProfileViewModel to access user object
+        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
 
     }
 
@@ -125,13 +133,106 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
                         case 1:
                             habitsArrayList.get(getAdapterPosition()).setValue("true");
                             Log.d(TAG, "spinner item 0 is selected= " +habitsArrayList.get(getAdapterPosition()).getValue());
+
+                            // set EditProfileViewModel.user values
+                            switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                case "athlete":
+                                    mEditProfileViewModel.getUser().setAthlete(true);
+                                    break;
+                                case "smoke":
+                                    mEditProfileViewModel.getUser().setSmoke(true);
+                                    break;
+                                case "travel":
+                                    mEditProfileViewModel.getUser().setTravel(true);
+                                    break;
+                                case "shisha":
+                                    mEditProfileViewModel.getUser().setShisha(true);
+                                    break;
+                                case "cook":
+                                    mEditProfileViewModel.getUser().setCook(true);
+                                    break;
+                                case "drink":
+                                    mEditProfileViewModel.getUser().setDrink(true);
+                                    break;
+                                case "drugs":
+                                    mEditProfileViewModel.getUser().setDrugs(true);
+                                    break;
+                                case "gamer":
+                                    mEditProfileViewModel.getUser().setGamer(true);
+                                    break;
+                                case "read":
+                                    mEditProfileViewModel.getUser().setRead(true);
+                                    break;
+                            }
                             break;
                         case 2:
                             habitsArrayList.get(getAdapterPosition()).setValue("false");
                             Log.d(TAG, "spinner item 1 is selected= " +habitsArrayList.get(getAdapterPosition()).getValue());
+
+                            // set EditProfileViewModel.user values
+                            switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                case "athlete":
+                                    mEditProfileViewModel.getUser().setAthlete(false);
+                                    break;
+                                case "smoke":
+                                    mEditProfileViewModel.getUser().setSmoke(false);
+                                    break;
+                                case "travel":
+                                    mEditProfileViewModel.getUser().setTravel(false);
+                                    break;
+                                case "shisha":
+                                    mEditProfileViewModel.getUser().setShisha(false);
+                                    break;
+                                case "cook":
+                                    mEditProfileViewModel.getUser().setCook(false);
+                                    break;
+                                case "drink":
+                                    mEditProfileViewModel.getUser().setDrink(false);
+                                    break;
+                                case "drugs":
+                                    mEditProfileViewModel.getUser().setDrugs(false);
+                                    break;
+                                case "gamer":
+                                    mEditProfileViewModel.getUser().setGamer(false);
+                                    break;
+                                case "read":
+                                    mEditProfileViewModel.getUser().setRead(false);
+                                    break;
+                            }
                             break;
                         default:
                             habitsArrayList.get(getAdapterPosition()).setValue(null);
+
+                            // set EditProfileViewModel.user values
+                            switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                case "athlete":
+                                    mEditProfileViewModel.getUser().setAthlete(null);
+                                    break;
+                                case "smoke":
+                                    mEditProfileViewModel.getUser().setSmoke(null);
+                                    break;
+                                case "travel":
+                                    mEditProfileViewModel.getUser().setTravel(null);
+                                    break;
+                                case "shisha":
+                                    mEditProfileViewModel.getUser().setShisha(null);
+                                    break;
+                                case "cook":
+                                    mEditProfileViewModel.getUser().setCook(null);
+                                    break;
+                                case "drink":
+                                    mEditProfileViewModel.getUser().setDrink(null);
+                                    break;
+                                case "drugs":
+                                    mEditProfileViewModel.getUser().setDrugs(null);
+                                    break;
+                                case "gamer":
+                                    mEditProfileViewModel.getUser().setGamer(null);
+                                    break;
+                                case "read":
+                                    mEditProfileViewModel.getUser().setRead(null);
+                                    break;
+                            }
                             break;
                     }
 

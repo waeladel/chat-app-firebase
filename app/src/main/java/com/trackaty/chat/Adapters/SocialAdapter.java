@@ -14,7 +14,9 @@ import android.widget.Spinner;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.SocialObj;
 
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
@@ -38,13 +41,18 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
     public  final static int  SMALL_INPUT_MAX_LINES = 1;
 
     public ArrayList<Social> socialArrayList;
-    public Context context;
+    public EditProfileFragment fragmentContext;
+    private EditProfileViewModel mEditProfileViewModel;
+
     Map<String, SocialObj> socialMap = new HashMap<>();
 
-    public SocialAdapter(Context context, ArrayList<Social> socialArrayList){
+    public SocialAdapter(EditProfileFragment fragmentContext, ArrayList<Social> socialArrayList){
         this.socialArrayList = socialArrayList;
-        this.context = context;
+        this.fragmentContext = fragmentContext;
         //socialObj = new SocialObj();
+        // get EditProfileViewModel to access user object
+        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
+
     }
 
     @NonNull
@@ -60,7 +68,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
         // set spinner value
         if (null != socialArrayList.get(position).getValue()) {
-            Log.d(TAG, "onBindViewHolder socialObj url= "+socialArrayList.get(position).getValue().getUrl()+ " socialObj public= "+socialArrayList.get(position).getValue().getPublic());
+            Log.d(TAG, "onBindViewHolder socialObj key ="+socialArrayList.get(position).getKey()+" url= "+socialArrayList.get(position).getValue().getUrl()+ " socialObj public= "+socialArrayList.get(position).getValue().getPublic()+" position= "+position);
             if(socialArrayList.get(position).getValue().getPublic()){
                 // public is true
                 holder.spinnerValue.setSelection(0);
@@ -80,8 +88,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, SMALL_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_phone_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_Phone_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_phone_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_Phone_helper)); // Set Helper
 
                 // phone numbers only
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_PHONE);
@@ -95,8 +103,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_facebook_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_facebook_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_facebook_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_facebook_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "instagram":
@@ -106,8 +114,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_instagram_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_instagram_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_instagram_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_instagram_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "twitter":
@@ -117,8 +125,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_twitter_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_twitter_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_twitter_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_twitter_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "snapchat":
@@ -128,8 +136,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_snapchat_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_snapchat_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_snapchat_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_snapchat_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "tumblr":
@@ -139,8 +147,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_tumblr_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_tumblr_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_tumblr_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_tumblr_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "pubg":
@@ -150,8 +158,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_pubg_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_pubg_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_pubg_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_pubg_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "vk":
@@ -161,8 +169,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_vk_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_vk_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_vk_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_vk_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "askfm":
@@ -172,8 +180,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_askfm_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_askfm_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_askfm_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_askfm_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "curiouscat":
@@ -183,8 +191,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_curiouscat_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_curiouscat_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_curiouscat_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_curiouscat_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "saraha":
@@ -194,8 +202,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_saraha_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_saraha_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_saraha_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_saraha_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "pinterest":
@@ -205,8 +213,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_pinterest_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_pinterest_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_pinterest_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_pinterest_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "soundcloud":
@@ -216,8 +224,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_soundcloud_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_soundcloud_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_soundcloud_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_soundcloud_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "spotify":
@@ -227,8 +235,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_spotify_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_spotify_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_spotify_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_spotify_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "anghami":
@@ -238,8 +246,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_anghami_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_anghami_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_anghami_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_anghami_helper)); // Set Helper
 
                 // numbers only
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -251,8 +259,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_twitch_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_twitch_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_twitch_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_twitch_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                 break;
             case "youtube":
@@ -262,8 +270,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_youtube_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_youtube_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_youtube_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_youtube_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT |InputType.TYPE_TEXT_VARIATION_URI);
                 break;
             case "linkedIn":
@@ -273,8 +281,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_linkedIn_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_linkedIn_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_linkedIn_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_linkedIn_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT);
                 break;
             case "wikipedia":
@@ -284,8 +292,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_wikipedia_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_wikipedia_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_wikipedia_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_wikipedia_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT |InputType.TYPE_TEXT_VARIATION_URI);
                 break;
             case "website":
@@ -295,8 +303,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                     holder.itemValue.setText(null);
                 }
                 setMaxLength(holder.itemValue, BIG_INPUT_MAX_LENGTH);// set Max length
-                holder.inputLayout.setHint(context.getString(R.string.user_website_hint));//Set Hint/label
-                holder.inputLayout.setHelperText(context.getString(R.string.user_website_helper)); // Set Helper
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_website_hint));//Set Hint/label
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_website_helper)); // Set Helper
                 holder.itemValue.setInputType(InputType.TYPE_CLASS_TEXT |InputType.TYPE_TEXT_VARIATION_URI);
                 break;
         }
@@ -347,7 +355,10 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 public void afterTextChanged(Editable editable) {
                     Log.d(TAG, "Editable = "+ editable.toString()+ " position= "+getAdapterPosition()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
                     if(TextUtils.isEmpty(String.valueOf(editable).trim())){
-                        socialArrayList.get(getAdapterPosition()).setValue(null);
+                        //socialArrayList.get(getAdapterPosition()).setValue(null);
+                        // set EditProfileViewModel.user as null
+                        setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
+                        //setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
                     }else{
                         //contactsArrayList.get(getAdapterPosition()).setValue(editable.toString());
                         //SocialObj socialObj= new SocialObj();
@@ -366,7 +377,9 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
                         //socialMap.put("facebook", socialObj);
                         Log.d(TAG, "afterTextChanged socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                        socialArrayList.get(getAdapterPosition()).setValue(socialObj);
+                        //socialArrayList.get(getAdapterPosition()).setValue(socialObj);
+                        // set EditProfileViewModel.user values
+                        setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), socialObj);
                     }
                 }
             });
@@ -384,6 +397,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                             socialMap.put("social", socialPrivacy);*/
                             if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
                                 socialArrayList.get(getAdapterPosition()).setValue(null);
+                                setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
                             }else{
                                 socialObj.setPublic(true);
                                 socialObj.setUrl(String.valueOf(itemValue.getText()));
@@ -417,6 +431,133 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 }
 
             });
+        }
+
+    }
+
+    private void setUserSocial(String key, SocialObj socialObj) {
+
+        switch (key){
+            case "phone":
+                mEditProfileViewModel.getUser().setPhone(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "facebook":
+                mEditProfileViewModel.getUser().setFacebook(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "instagram":
+                mEditProfileViewModel.getUser().setInstagram(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "twitter":
+                mEditProfileViewModel.getUser().setTwitter(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "snapchat":
+                mEditProfileViewModel.getUser().setSnapchat(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "tumblr":
+                mEditProfileViewModel.getUser().setTumblr(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "pubg":
+                mEditProfileViewModel.getUser().setPubg(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "vk":
+                mEditProfileViewModel.getUser().setVk(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "askfm":
+                mEditProfileViewModel.getUser().setAskfm(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "curiouscat":
+                mEditProfileViewModel.getUser().setCuriouscat(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "saraha":
+                mEditProfileViewModel.getUser().setSaraha(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "pinterest":
+                mEditProfileViewModel.getUser().setPinterest(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "soundcloud":
+                mEditProfileViewModel.getUser().setSoundcloud(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "spotify":
+                mEditProfileViewModel.getUser().setSpotify(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "anghami":
+                mEditProfileViewModel.getUser().setAnghami(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "twitch":
+                mEditProfileViewModel.getUser().setTwitch(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "youtube":
+                mEditProfileViewModel.getUser().setYoutube(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "linkedIn":
+                mEditProfileViewModel.getUser().setLinkedIn(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "wikipedia":
+                mEditProfileViewModel.getUser().setWikipedia(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
+            case "website":
+                mEditProfileViewModel.getUser().setWebsite(socialObj);
+                if(socialObj != null){
+                    Log.d(TAG, "setUserSocial key= "+ key+ " socialObj url= "+socialObj.getUrl()+" privacy= "+socialObj.getPublic());
+                }
+                break;
         }
 
     }

@@ -261,7 +261,7 @@ public class MessagesFragment extends Fragment {
         super.onAttach(context);
         mActivityContext = context;
 
-        if (context instanceof Activity){// check if context is an activity
+        if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
         }
     }

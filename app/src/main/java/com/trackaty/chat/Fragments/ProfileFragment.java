@@ -432,11 +432,11 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             public void onClick(View v) {
                 Log.i(TAG, "SeeMoreButton id clicked= ");
                 if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile( mUserId, mUser);
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile( mUserId);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
                 }else{
-                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId, mUser);
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
                 }
@@ -794,7 +794,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         super.onAttach(context);
         mActivityContext = context;
 
-        if (context instanceof Activity){// check if context is an activity
+        if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
         }
     }

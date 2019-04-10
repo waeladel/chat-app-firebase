@@ -1,8 +1,6 @@
 package com.trackaty.chat.Adapters;
 
-import android.content.Context;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -13,12 +11,15 @@ import android.view.ViewGroup;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
@@ -35,12 +36,19 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
 
 
     public ArrayList<Profile> aboutArrayList;
-    public Context context;
+    //public Context fragmentContext;
+    public EditProfileFragment fragmentContext;
+    private EditProfileViewModel mEditProfileViewModel;
 
 
-    public AboutAdapter(Context context, ArrayList<Profile> aboutArrayList){
+
+    public AboutAdapter(EditProfileFragment fragmentContext, ArrayList<Profile> aboutArrayList){
         this.aboutArrayList = aboutArrayList;
-        this.context = context;
+        //this.fragmentContext = fragmentContext;
+        this.fragmentContext = fragmentContext; // To use it as observer
+
+        // get EditProfileViewModel to access user object
+        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
 
     }
 
@@ -78,11 +86,11 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 holder.inputLayout.setCounterMaxLength(SMALL_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_nationality_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_nationality_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_nationality_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_nationality_helper));
                 break;
             case "lives":
                 if(null != aboutArrayList.get(position).getValue()){
@@ -106,11 +114,11 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 holder.inputLayout.setCounterMaxLength(SMALL_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_lives_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_lives_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_lives_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_lives_helper));
                 break;
             case "hometown":
                 if(null != aboutArrayList.get(position).getValue()){
@@ -134,11 +142,11 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 holder.inputLayout.setCounterMaxLength(SMALL_INPUT_MAX_LENGTH);
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_hometown_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_hometown_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_hometown_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_hometown_helper));
                 break;
             case "religion":
                 if(null != aboutArrayList.get(position).getValue()){
@@ -162,11 +170,11 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH );
 
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_religion_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_religion_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_religion_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_religion_helper));
                 break;
             case "politics":
                 if(null != aboutArrayList.get(position).getValue()){
@@ -189,11 +197,11 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 holder.inputLayout.setCounterEnabled(true);
                 holder.inputLayout.setCounterMaxLength(BIG_INPUT_MAX_LENGTH );
                 //Set Hint/label
-                holder.inputLayout.setHint(context.getString(R.string.user_politics_headline));
+                holder.inputLayout.setHint(fragmentContext.getString(R.string.user_politics_headline));
 
                 // Set Helper
                 holder.inputLayout.setHelperTextEnabled(true);
-                holder.inputLayout.setHelperText(context.getString(R.string.user_politics_helper));
+                holder.inputLayout.setHelperText(fragmentContext.getString(R.string.user_politics_helper));
                 break;
         }
 
@@ -238,10 +246,48 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                 @Override
                 public void afterTextChanged(Editable editable) {
                     Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
-                    if(TextUtils.isEmpty(editable)){
+                    if(TextUtils.isEmpty(editable.toString().trim())){
                         aboutArrayList.get(getAdapterPosition()).setValue(null);
+
+                        // set EditProfileViewModel.user values
+                        switch (aboutArrayList.get(getAdapterPosition()).getKey()){
+                            case "nationality":
+                                mEditProfileViewModel.getUser().setNationality(null);
+                                break;
+                            case "hometown":
+                                mEditProfileViewModel.getUser().setHometown(null);
+                                break;
+                            case "lives":
+                                mEditProfileViewModel.getUser().setLives(null);
+                                break;
+                            case "politics":
+                                mEditProfileViewModel.getUser().setPolitics(null);
+                                break;
+                            case "religion":
+                                mEditProfileViewModel.getUser().setReligion(null);
+                                break;
+                        }
                     }else{
                         aboutArrayList.get(getAdapterPosition()).setValue(editable.toString());
+
+                        // set EditProfileViewModel.user values
+                        switch (aboutArrayList.get(getAdapterPosition()).getKey()){
+                            case "nationality":
+                                mEditProfileViewModel.getUser().setNationality(String.valueOf(editable).trim());
+                                break;
+                            case "hometown":
+                                mEditProfileViewModel.getUser().setHometown(String.valueOf(editable).trim());
+                                break;
+                            case "lives":
+                                mEditProfileViewModel.getUser().setLives(String.valueOf(editable).trim());
+                                break;
+                            case "politics":
+                                mEditProfileViewModel.getUser().setPolitics(String.valueOf(editable).trim());
+                                break;
+                            case "religion":
+                                mEditProfileViewModel.getUser().setReligion(String.valueOf(editable).trim());
+                                break;
+                        }
                     }
                 }
             });

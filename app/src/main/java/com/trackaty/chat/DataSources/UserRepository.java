@@ -7,12 +7,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.Interface.FirebaseCallback;
 import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 public class UserRepository {
@@ -26,7 +28,7 @@ public class UserRepository {
 
     private MutableLiveData<User> mCurrentUser;
     private MutableLiveData<User> mUser;
-
+    private MutableLiveData<User> mSingleValueUser;
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
     private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
@@ -63,6 +65,7 @@ public class UserRepository {
         isFirstLoaded = true;
         mCurrentUser = new MutableLiveData<>();
         mUser = new MutableLiveData<>();
+        mSingleValueUser = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -108,6 +111,36 @@ public class UserRepository {
             Log.d(TAG, "getUser loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
         return mCurrentUser;
+    }
+
+    public void getUserOnce(String userId, final FirebaseCallback callback){
+
+        DatabaseReference UserRef = mUsersRef.child(userId);
+        //final MutableLiveData<User> mCurrentUser = new MutableLiveData<>();
+        Log.d(TAG, "getUser initiated: " + userId);
+
+        UserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Get user value
+                    Log.d(TAG, "getUserOnce dataSnapshot key: "
+                            + dataSnapshot.getKey()+" Listener = "+currentUserListener);
+                    //mSingleValueUser = dataSnapshot.getValue(User.class);
+                    //mSingleValueUser.postValue(dataSnapshot.getValue(User.class));
+                    User user = dataSnapshot.getValue(User.class);
+                    callback.onCallback(user);
+                } else {
+                    // User is null, error out
+                    Log.w(TAG, "getUserOnce User is null, no such user");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUserOnce User onCancelled" +databaseError);
+            }
+        });
     }
 
 

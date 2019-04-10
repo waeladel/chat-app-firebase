@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import top.zibin.luban.Luban;
@@ -45,14 +47,15 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
+import com.trackaty.chat.Interface.FirebaseCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
-import com.trackaty.chat.models.SocialObj;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
 import com.yanzhenjie.album.Action;
@@ -66,8 +69,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
@@ -97,7 +98,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     public  final static String SECTION_HABITS_HEADLINE  = "habits";
     public  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
 
-
     private static final String PROFILE_LIST_STATE = "list_state";
     private static final String ABOUT_LIST_STATE = "about_list_state";
     private static final String WORK_LIST_STATE = "work_list_state";
@@ -112,12 +112,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     public  final static String IMAGE_HOLDER_POSITION = "position";
 
-
     public static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
     public static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
 
 
-    private User currentUser;
+    //private User currentUser;
     private String currentUserId;
     private FirebaseUser mFirebaseCurrentUser;
 
@@ -135,7 +134,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private ArrayList<Variables> mVariablesArrayList = new ArrayList<>();
 
 
-
     private EditProfileAdapter mEditProfileAdapter;
 
     private Parcelable savedRecyclerLayoutState;
@@ -143,6 +141,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private Context activityContext;
     private Activity activity;
+
+    private EditProfileViewModel mEditProfileViewModel;
 
 
     private static Boolean mIsSocialAdded ;
@@ -198,7 +198,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mImagesRef = mStorageRef.child("images");
 
-        if (savedInstanceState != null) {
+        /*if (savedInstanceState != null) {
             currentUserId = savedInstanceState.getString("currentUserId");
             Log.d(TAG, "isSavedInstance ="+currentUserId);
 
@@ -214,16 +214,88 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             restorePreviousState(); // Restore data found in the Bundle
         }else{
             //Get current logged in user
-            mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+            mFirebaseCurrentUser = FirebaseAuth.getInstance().getUser();
             currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
 
             if(getArguments()!= null){
-                currentUser = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUser();//logged in user
+                currentUser = EditProfileFragmentArgs.fromBundle(getArguments()).getUser();//logged in user
                 //currentUserId = EditProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user id
                 Log.d(TAG,  "name= " + currentUser.getName() + "pickups=" + currentUser.getPickupCounter());
                 showCurrentUser(currentUser); // No saved data, get data from remote
             }
+        }*/
+        // [initialize the adapter]
+        mEditProfileAdapter = new EditProfileAdapter(activityContext
+                , mProfileDataArrayList
+                , mAboutArrayList
+                , mWorkArrayList
+                , mHabitsArrayList
+                , mSocialArrayList
+                , mVariablesArrayList
+                ,EditProfileFragment.this
+                , this);
+
+        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
+        mEditProfileRecycler.setAdapter(mEditProfileAdapter);
+
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
+
+        mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
+
+        /*currentUser = mEditProfileViewModel.getUserOnce(currentUserId);
+        showCurrentUser(currentUser);*/
+
+        // Get EditProfileViewModel.User from database if it's null
+        if(mEditProfileViewModel.getUser() == null){
+            mEditProfileViewModel.getUserOnce(currentUserId, new FirebaseCallback() {
+                @Override
+                public void onCallback(User user) {
+                    if(user != null){
+                        Log.d(TAG,  "FirebaseCallback onCallback. name= " + user.getName());
+                        mEditProfileViewModel.setUser(user);
+                        //currentUser = mEditProfileViewModel.getUser();
+                        showCurrentUser(mEditProfileViewModel.getUser());
+                    }
+                }
+            });
+        }else{
+            Log.d(TAG,  "FEditProfileViewModel.getUser is not null. no need to get user from database "+mEditProfileViewModel.getUser().getName());
+            //currentUser = mEditProfileViewModel.getUser();
+            showCurrentUser(mEditProfileViewModel.getUser());
+            restoreLayoutManagerPosition();
         }
+
+       /* .observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if(user != null){
+                    currentUser = user;
+                    Log.d(TAG,  "mEditProfileViewModel getUser name= " + currentUser.getName() + "pickups=" + currentUser.getPickupCounter());
+                    if(mProfileDataArrayList != null && mProfileDataArrayList.size()>0
+                            && mAboutArrayList != null && mAboutArrayList.size()>0
+                            && mWorkArrayList != null && mWorkArrayList.size()>0
+                            && mHabitsArrayList != null && mHabitsArrayList.size()>0
+                            && mSocialArrayList != null && mSocialArrayList.size()>0
+                            && mVariablesArrayList != null && mVariablesArrayList.size()>0){
+                        // Clear old Array data
+                        Log.i(TAG,  "Clear old Array data");
+                        mProfileDataArrayList.clear();
+                        mAboutArrayList.clear();
+                        mWorkArrayList.clear();
+                        mHabitsArrayList.clear();
+                        mSocialArrayList.clear();
+                        mVariablesArrayList.clear();
+                        showCurrentUser(currentUser);
+                    }else{
+                        showCurrentUser(currentUser);
+                    }
+
+                }
+            }
+        });*/
 
         // [START database reference]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -233,13 +305,12 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     }
 
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         activityContext = context;
 
-        if (context instanceof Activity){// check if context is an activity
+        if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
         }
 
@@ -291,7 +362,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     }
 
     // Fires when a configuration change occurs and fragment needs to save state
-    @Override
+    /*@Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString ("currentUserId", currentUserId);
@@ -303,7 +374,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         outState.putParcelableArrayList(VARIABLES_LIST_STATE, mVariablesArrayList);
 
         outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mEditProfileRecycler.getLayoutManager().onSaveInstanceState());
-    }
+    }*/
 
     private void restorePreviousState() {
         mEditProfileAdapter = new EditProfileAdapter(activityContext
@@ -313,6 +384,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 , mHabitsArrayList
                 , mSocialArrayList
                 , mVariablesArrayList
+                ,EditProfileFragment.this
                 , this);
 
         Log.d(TAG, "mWorkArrayList college 0="+mWorkArrayList.get(0).getValue());
@@ -361,24 +433,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             mVariablesArrayList.add(new Variables(false));
                         }
 
-                        // [initialize the adapter]
-                        mEditProfileAdapter = new EditProfileAdapter(activityContext
-                                , mProfileDataArrayList
-                                , mAboutArrayList
-                                , mWorkArrayList
-                                , mHabitsArrayList
-                                , mSocialArrayList
-                                , mVariablesArrayList
-                                , this);
-
-                        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
-                        mEditProfileRecycler.setAdapter(mEditProfileAdapter);
-
                         //mEditProfileAdapter.notifyDataSetChanged();
                         //mAboutProfileAdapter.notifyDataSetChanged();
                             /*String userName = dataSnapshot.child("name").getValue().toString();
                             String currentUser = dataSnapshot.getKey();*/
                         Log.d(TAG, "user exist: Name=" + currentUser.getName());
+
+                        //restoreLayoutManagerPosition();
+                        mEditProfileAdapter.notifyDataSetChanged();
                     }
 
                 }
@@ -807,7 +869,17 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-                        mProfileDataArrayList.set(position,new Profile(type, downloadUri.toString(),SECTION_IMAGE, SECTION_IMAGE));
+                        mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_IMAGE, SECTION_IMAGE));
+
+                        // set EditProfileViewModel.user values
+                        switch (type){
+                            case "avatar":
+                                mEditProfileViewModel.getUser().setAvatar(String.valueOf(downloadUri));
+                                break;
+                            case "coverImage":
+                                mEditProfileViewModel.getUser().setCoverImage(String.valueOf(downloadUri));
+                                break;
+                        }
                         //mVariablesArrayList.get(position).setValue(false);
                         mVariablesArrayList.set(position, new Variables(false));
                         mEditProfileAdapter.notifyItemChanged(position);
@@ -913,7 +985,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             currentUser.setCreated(ServerValue.TIMESTAMP);
         }*/
 
-        for (int i = 0; i < mProfileDataArrayList.size(); i++) {
+        /*for (int i = 0; i < mProfileDataArrayList.size(); i++) {
             Log.d(TAG, "ProfileDataArrayList Key= "+mProfileDataArrayList.get(i).getKey()+ " ProfileDataArrayList Value= "+ mSocialArrayList.get(i).getValue());
             switch (mProfileDataArrayList.get(i).getKey()){
                 case "avatar":
@@ -1140,9 +1212,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                     currentUser.setWebsite(mSocialArrayList.get(i).getValue());
                     break;
             }
-        }// end of mSocialArrayList loop
+        }// end of mSocialArrayList loop*/
 
-        mUserRef.setValue(currentUser).addOnSuccessListener(new OnSuccessListener<Void>() {
+        // no need to loop through array lists, get values from mEditProfileViewModel.user
+        mUserRef.setValue(mEditProfileViewModel.getUser()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 // Write was successful!
@@ -1177,8 +1250,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             case "birthDate":
                 //mEditProfileAdapter.notifyDataSetChanged();
                 DatePickerFragment datePicker;
-                if(null != currentUser.getBirthDate()){
-                     datePicker = DatePickerFragment.newInstance(currentUser.getBirthDate());
+                if(null != mEditProfileViewModel.getUser().getBirthDate()){
+                     datePicker = DatePickerFragment.newInstance(mEditProfileViewModel.getUser().getBirthDate());
                 }else{
                      datePicker = new DatePickerFragment();
                 }
@@ -1207,6 +1280,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 if(mProfileDataArrayList.get(i).getKey().equals("birthDate")){
                     mProfileDataArrayList.set(i, new Profile("birthDate",String.valueOf(birthInMillis),SECTION_TEXT, SECTION_TEXT ));
                     mEditProfileAdapter.notifyItemChanged(i);
+
+                    // set EditProfileViewModel.user values
+                    if(birthInMillis != null){
+                        mEditProfileViewModel.getUser().setBirthDate(birthInMillis);
+                    }
                 }
                 Log.i(TAG, "mProfileDataArrayList sorted" + mProfileDataArrayList.get(i).getKey());
             }

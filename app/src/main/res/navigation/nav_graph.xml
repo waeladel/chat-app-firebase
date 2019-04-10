@@ -72,9 +72,6 @@
             android:name="userId"
             app:argType="string"
             app:nullable="true" />
-        <argument
-            android:name="user"
-            app:argType="com.trackaty.chat.models.User" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
