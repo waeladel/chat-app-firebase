@@ -3,7 +3,6 @@ package com.trackaty.chat.DataSources;
 import android.util.Log;
 
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.Message;
 
 import androidx.annotation.NonNull;
 import androidx.paging.ItemKeyedDataSource;
@@ -11,13 +10,14 @@ import androidx.paging.ItemKeyedDataSource;
 public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
 
     private final static String TAG = ChatsDataSource.class.getSimpleName();
-    private String mUserKey;
+    private String mChatKey;
     private ChatsRepository chatsRepository;
 
     // get chatKey on the constructor
-    public ChatsDataSource(String userKey){
-        chatsRepository = new ChatsRepository(userKey);
-        this.mUserKey = userKey;
+    public ChatsDataSource(String chatKey){
+        //chatsRepository = new ChatsRepository(chatKey);
+        this.mChatKey = chatKey;
+        Log.d(TAG, "mama ChatsDataSource initiated ");
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
             invalidate();
             Log.d(TAG, "mama invalidate ");
@@ -28,8 +28,9 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
     @Override
     public void addInvalidatedCallback(@NonNull InvalidatedCallback onInvalidatedCallback) {
         //super.addInvalidatedCallback(onInvalidatedCallback);
-        Log.d(TAG, "mama Callback Invalidated ");
-        chatsRepository.ChatsChanged(onInvalidatedCallback);
+        Log.d(TAG, "mama Callback ChatsDataSource addInvalidatedCallback ");
+        chatsRepository = new ChatsRepository(mChatKey, onInvalidatedCallback);
+        //chatsRepository.ChatsChanged(onInvalidatedCallback);
         //invalidate();
     }
 
@@ -61,9 +62,11 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
     public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Chat> callback) {
         /*List<User> items = usersRepository.getMessages(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
+        chatsRepository.setLoadBeforeCallback(params.key , callback);
         Log.d(TAG, "mama loadAfter params key " + params.key+" LoadSize " + params.requestedLoadSize);
         // using getChatsBefore instead of getChatsAfter because the order is reversed
-        chatsRepository.getChatsBefore(params.key -1, params.requestedLoadSize, callback);
+        //chatsRepository.getChatsBefore(params.key -1, params.requestedLoadSize, callback);
+        chatsRepository.getChatsBefore(params.key , params.requestedLoadSize, callback);
     }
 
     // load previous page
@@ -71,9 +74,11 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
     public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Chat> callback) {
         /*List<User> items = fetchItemsBefore(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
+        chatsRepository.setLoadAfterCallback(params.key , callback);
         Log.d(TAG, "mama loadBefore params " + params.key+" LoadSize " + params.requestedLoadSize);
         // using getChatsAfter instead of getChatsBefore because the order is reversed
-        chatsRepository.getChatsAfter(params.key +1, params.requestedLoadSize, callback);
+        //chatsRepository.getChatsAfter(params.key +1, params.requestedLoadSize, callback);
+        chatsRepository.getChatsAfter(params.key , params.requestedLoadSize, callback);
     }
 
     @NonNull

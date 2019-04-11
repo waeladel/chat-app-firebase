@@ -36,8 +36,8 @@ public class ChatsViewModel extends ViewModel {
         mUserChatsRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(20)//10
-                .setInitialLoadSizeHint(20)//30
+                .setPageSize(2)//10
+                .setInitialLoadSizeHint(2)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();

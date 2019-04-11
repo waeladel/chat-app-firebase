@@ -10,13 +10,13 @@ import androidx.paging.ItemKeyedDataSource;
 public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
 
     private final static String TAG = MessagesDataSource.class.getSimpleName();
-    private String mChatKey;
+    private String mMessageKey;
     private MessagesListRepository messagesRepository;
 
     // get chatKey on the constructor
-    public MessagesDataSource(String chatKey){
+    public MessagesDataSource(String messageKey){
         //messagesRepository = new MessagesListRepository(chatKey);
-        this.mChatKey = chatKey;
+        this.mMessageKey = messageKey;
         Log.d(TAG, "mama MessagesDataSource initiated ");
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
             invalidate();
@@ -28,12 +28,12 @@ public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
     @Override
     public void addInvalidatedCallback(@NonNull InvalidatedCallback onInvalidatedCallback) {
         //super.addInvalidatedCallback(onInvalidatedCallback);
-        Log.d(TAG, "mama Callback MessagesListRepository addInvalidatedCallback ");
+        Log.d(TAG, "mama Callback MessagesDataSource addInvalidatedCallback ");
 
         // initiate messagesRepository here to pass  onInvalidatedCallback
         //messagesRepository = MessagesListRepository.getInstance();
-        //messagesRepository = MessagesListRepository.init(mChatKey, onInvalidatedCallback);
-        messagesRepository = new MessagesListRepository(mChatKey, onInvalidatedCallback);
+        //messagesRepository = MessagesListRepository.init(mMessageKey, onInvalidatedCallback);
+        messagesRepository = new MessagesListRepository(mMessageKey, onInvalidatedCallback);
         //messagesRepository.MessagesChanged(onInvalidatedCallback);
         //invalidate();
     }

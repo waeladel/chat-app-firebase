@@ -134,6 +134,10 @@ public class ChatsFragment extends Fragment {
                         public void onChanged(@Nullable final PagedList<Chat> items) {
 
                             if (items != null ){
+                                // your code here
+                                Log.d(TAG, "mama messages submitList size" +  items.size());
+                                mChatsAdapter.submitList(items);
+
                                 //Log.d(TAG, "mama onChanged "+ items.size());
                                 /*handler = new Handler();
 
@@ -173,7 +177,7 @@ public class ChatsFragment extends Fragment {
                                 //mChatsAdapter.submitList(items);
 
                                 //delay submitList till items size is not 0
-                                new java.util.Timer().schedule(
+                                /*new java.util.Timer().schedule(
                                         new java.util.TimerTask() {
                                             @Override
                                             public void run() {
@@ -183,7 +187,7 @@ public class ChatsFragment extends Fragment {
                                             }
                                         },
                                         2000
-                                );
+                                );*/
 
                             }
                         }
