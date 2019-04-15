@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -210,18 +212,17 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
     }
 
-
     // CALLBACK to calculate the difference between the old item and the new item
     public static final DiffUtil.ItemCallback<Chat> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Chat>() {
                 // User details may have changed if reloaded from the database,
                 // but ID is fixed.
-
                 // if the two items are the same
                 @Override
                 public boolean areItemsTheSame(Chat oldChat, Chat newChat) {
-                    /*Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + (oldUser.getCreatedLong() == newUser.getCreatedLong()));
-                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());*/
+
+                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + newChat);
+                    //Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());
                     return oldChat.getKey().equals(newChat.getKey());
                     //return oldChat.getLastSentLong() == (newChat.getLastSentLong());
                     //return true;
@@ -230,6 +231,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                 // if the content of two items is the same
                 @Override
                 public boolean areContentsTheSame(Chat oldChat, Chat newChat) {
+                    Log.d(TAG, " DIFF_CALLBACK areContentsTheSame " + newChat);
                    /* Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame object " + (oldUser.equals(newUser)));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame Names() " + (oldUser.getName().equals(newUser.getName())));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame old name: " + oldUser.getName() + " new name: "+newUser.getName());

@@ -2,13 +2,10 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.trackaty.chat.DataSources.RelationRepository;
 import com.trackaty.chat.DataSources.UserRepository;
-import com.trackaty.chat.Interface.FirebaseCallback;
-import com.trackaty.chat.models.Relation;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.User;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 public class EditProfileViewModel extends ViewModel {
@@ -44,7 +41,7 @@ public class EditProfileViewModel extends ViewModel {
         return mUserRepository.getCurrentUser(userId);
     }*/
 
-    public void getUserOnce(String userId, FirebaseCallback callback) {
+    public void getUserOnce(String userId, FirebaseUserCallback callback) {
         if(user == null){
             mUserRepository.getUserOnce(userId, callback);
         }

@@ -4,6 +4,6 @@ import android.view.View;
 
 import com.trackaty.chat.models.User;
 
-public interface FirebaseCallback {
+public interface FirebaseUserCallback {
     void onCallback(User user);
 }

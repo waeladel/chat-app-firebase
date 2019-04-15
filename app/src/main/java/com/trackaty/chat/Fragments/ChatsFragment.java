@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.Adapters.ChatsAdapter;
+import com.trackaty.chat.Interface.FirebaseChatsCallback;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.ChatsViewModel;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
@@ -33,8 +34,10 @@ import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
-public class ChatsFragment extends Fragment {
+public class ChatsFragment extends Fragment{
 
     private final static String TAG = ChatsFragment.class.getSimpleName();
 
@@ -53,6 +56,9 @@ public class ChatsFragment extends Fragment {
     //private int itemsSize;
     private  Handler handler;
 
+    private  FirebaseChatsCallback firebaseCallback;
+    private static volatile Boolean isDataReady;
+    private volatile PagedList<Chat> chats;
 
     public static ChatsFragment newInstance() {
         return new ChatsFragment();
@@ -76,6 +82,37 @@ public class ChatsFragment extends Fragment {
 
         //observe when a change happen to usersList live data
         mChatsRecycler.setAdapter(mChatsAdapter);
+        //isDataReady = new MutableLiveData<>();
+        isDataReady = false;
+
+        // using firebaseCallback interface to know when the data is fetched
+        firebaseCallback = new FirebaseChatsCallback() {
+            @Override
+            public Boolean onCallback(final List<Chat> chatsList) {
+                isDataReady = true;
+                //await().until(isDataREady());
+                Log.d(TAG, "chats dataIsReady FirebaseChatsCallback() chatsList size" +  chatsList.size()+" chats Paglist= "+chats.size());
+
+                // despite the data is ready, it needs 5 millisecond delay to prepare the pageList
+                new java.util.Timer().schedule(
+                                        new java.util.TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                // your code here
+                                                Log.d(TAG, "mama Timer size" +  chats.size());
+                                                mChatsAdapter.submitList(chats);
+                                            }
+                                        },
+                                        5
+                                );
+
+
+                //mChatsAdapter.submitList(chats);
+
+                return true;
+            }
+
+        };
 
         return fragView;
     }
@@ -119,12 +156,12 @@ public class ChatsFragment extends Fragment {
              });*/
 
                     //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-
+                    //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
                     mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
                         @NonNull
                         @Override
                         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                            return (T)new ChatsViewModel (mCurrentUserId);
+                            return (T)new ChatsViewModel (mCurrentUserId, firebaseCallback);
                         }
                     }).get(ChatsViewModel.class);
 
@@ -135,8 +172,60 @@ public class ChatsFragment extends Fragment {
 
                             if (items != null ){
                                 // your code here
-                                Log.d(TAG, "mama messages submitList size" +  items.size());
-                                mChatsAdapter.submitList(items);
+                                Log.d(TAG, "chats onChanged submitList size" +  items.size());
+
+                                /*if(items.size() == 0){
+                                    isDataReady = false;
+                                    //await().until(dataIsReady());
+                                }*/
+
+                                /*firebaseCallback = new FirebaseChatsCallback() {
+                                    @Override
+                                    public Boolean onCallback(final List<Chat> chatsList) {
+                                        isDataReady = true;
+                                        Log.d(TAG, "chats dataIsReady FirebaseChatsCallback() chatsList size" +  chatsList.size()+" isDataReady= "+isDataReady);
+                                        mChatsAdapter.submitList(items);
+                                        return true;
+                                    }
+
+                                };
+                                 mChatsViewModel.setCallback(firebaseCallback);*/
+                                //await().until(dataIsReady(firebaseCallback));
+
+                                chats = items;
+                                //mChatsAdapter.submitList(items);
+
+
+
+
+                                /*new java.util.Timer().schedule(
+                                        new java.util.TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                // your code here
+                                                Log.d(TAG, "mama submitList size" +  items.size());
+                                                mChatsAdapter.submitList(items);
+
+                                            }
+                                        },
+                                        1000
+                                );*/
+
+                                /*if(mChatsViewModel.getCallback() == null){
+                                    mChatsAdapter.submitList(items);
+                                    //mChatsViewModel.setCallback(firebaseCallback);
+                                    Log.d(TAG, "chats Callback is null, lets submit items anyway" +  items.size());
+                                }*/
+
+
+                                /*handler = new Handler();
+                                Runnable r = new Runnable() {
+                                    public void run() {
+                                        Log.d(TAG, "chats onChanged submitList size" +  items.size());
+                                        mChatsAdapter.submitList(items);
+                                    }
+                                };
+                                handler.post(r);*/
 
                                 //Log.d(TAG, "mama onChanged "+ items.size());
                                 /*handler = new Handler();
@@ -147,9 +236,9 @@ public class ChatsFragment extends Fragment {
                                         Log.d(TAG, "mama messages submitList size" +  items.size());
                                         //mChatsAdapter.submitList(items);}
                                         handler.postDelayed(this, 1000);
-                                };
-
-                                handler.postDelayed(r, 1000);*/
+                                    }
+                                };*/
+                                //handler.postDelayed(r, 3000);
                                 /*handler = new Handler();
                                 Thread thread = new Thread() {
                                     @Override
@@ -168,7 +257,7 @@ public class ChatsFragment extends Fragment {
 
                                 thread.start();*/
 
-                                Log.d(TAG, "mama while ends submitList size" +  items.size());
+                                //Log.d(TAG, "mama while ends submitList size" +  items.size());
 
                                 //await().atMost(5, SECONDS);
                                 //itemsSize = items.size();
@@ -193,6 +282,28 @@ public class ChatsFragment extends Fragment {
                         }
                     });
 
+            /*isDataReady.observe(ChatsFragment.this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                    if(aBoolean){
+                        //getItems();
+                        //mChatsAdapter.submitList(items);
+                        Log.d(TAG, "chats isDataReady is true " +  isDataReady);//+ " items = "+items);
+                    }
+                }
+            });*/
+
+            /*mChatsViewModel.callbackPagedList.observe(this, new Observer<PagedList<Chat>>() {
+                @Override
+                public void onChanged(PagedList<Chat> items) {
+                    if (items != null ) {
+                        // your code here
+                        Log.d(TAG, "chats callbackPagedList onChanged item size" + items.size());
+                        mChatsAdapter.submitList(items);
+                    }
+                }
+            });*/
+
         }
 
         /*// update the CurrentUserId whenever it changes due to log out
@@ -207,5 +318,32 @@ public class ChatsFragment extends Fragment {
         });*/
 
     }
+    private Callable<Boolean> isDataREady() {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return chats.size() != 0; // The condition supplier part
+            }
+        };
+    }
+
+
+
+    /*private Callable<Boolean> dataIsReady(FirebaseChatsCallback callback) {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                Log.d(TAG, "chats dataIsReady" +" isDataReady= "+ ChatsFragment.isDataReady);
+                firebaseCallback = new FirebaseChatsCallback() {
+                    @Override
+                    public Boolean onCallback(final List<Chat> chatsList) {
+                        isDataReady = true;
+                        Log.d(TAG, "chats dataIsReady FirebaseChatsCallback() chatsList size" +  chatsList.size()+" isDataReady= "+isDataReady);
+                        return true;
+                    }
+
+                };
+                return isDataReady; // The condition that must be fulfilled
+            }
+        };
+    }*/
 
 }

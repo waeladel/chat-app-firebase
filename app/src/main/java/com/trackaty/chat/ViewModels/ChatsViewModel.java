@@ -5,9 +5,15 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.ChatsDataFactory;
+import com.trackaty.chat.DataSources.ChatsRepository;
+import com.trackaty.chat.Interface.FirebaseChatsCallback;
 import com.trackaty.chat.models.Chat;
 
+import java.util.List;
+
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
@@ -18,15 +24,19 @@ public class ChatsViewModel extends ViewModel {
 
     private ChatsDataFactory chatsDataFactory;
     private PagedList.Config config;
-    public final LiveData<PagedList<Chat>> itemPagedList;
+    public  LiveData<PagedList<Chat>> itemPagedList;
+    //public MutableLiveData<PagedList<Chat>> callbackPagedList;
 
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mUserChatsRef;
 
-    public ChatsViewModel(String UserId) {
+    private FirebaseChatsCallback firebaseCallback;
 
-        // pass chatKey to the constructor of MessagesDataFactory
-        chatsDataFactory = new ChatsDataFactory(UserId);
+    public ChatsViewModel(String UserId, FirebaseChatsCallback firebaseCallback) {
+
+        //callbackPagedList = new MutableLiveData<>();
+        // pass UserId and  firebaseCallback to the constructor of ChatsDataFactory
+        chatsDataFactory = new ChatsDataFactory(UserId,firebaseCallback);
 
         Log.d(TAG, "Chat ChatsViewModel init");
 
@@ -36,20 +46,38 @@ public class ChatsViewModel extends ViewModel {
         mUserChatsRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(2)//10
-                .setInitialLoadSizeHint(2)//30
+                .setPageSize(20)//10
+                .setInitialLoadSizeHint(20)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();
 
-        itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
 
+        //callbackPagedList.setValue(itemPagedList.getValue());
+        itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
     }
+
+
+
+    public LiveData<PagedList<Chat>> getItemPagedList(){
+        return itemPagedList ;
+    }
+
+    /*public void setCallback(FirebaseChatsCallback firebaseCallback){
+        this.firebaseCallback = firebaseCallback;
+        chatsDataFactory.setCallback(firebaseCallback);
+    }
+
+    public FirebaseChatsCallback getCallback(){
+        return firebaseCallback ;
+    }*/
 
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama ChatsViewModel onCleared:");
-        //Todo : remove all listeners
+        ChatsRepository.removeListeners();
         super.onCleared();
     }
+
+
 }

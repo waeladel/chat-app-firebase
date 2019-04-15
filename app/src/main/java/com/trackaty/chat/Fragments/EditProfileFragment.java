@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +46,7 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
-import com.trackaty.chat.Interface.FirebaseCallback;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.SortSocial;
@@ -250,11 +249,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
         // Get EditProfileViewModel.User from database if it's null
         if(mEditProfileViewModel.getUser() == null){
-            mEditProfileViewModel.getUserOnce(currentUserId, new FirebaseCallback() {
+            mEditProfileViewModel.getUserOnce(currentUserId, new FirebaseUserCallback() {
                 @Override
                 public void onCallback(User user) {
                     if(user != null){
-                        Log.d(TAG,  "FirebaseCallback onCallback. name= " + user.getName());
+                        Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName());
                         mEditProfileViewModel.setUser(user);
                         //currentUser = mEditProfileViewModel.getUser();
                         showCurrentUser(mEditProfileViewModel.getUser());

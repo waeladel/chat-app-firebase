@@ -66,5 +66,6 @@ dependencies {
     //implementation 'android.arch.lifecycle:extensions:1.1.1' //Adding Lifecycle
     //implementation "android.arch.lifecycle:viewmodel:1.1.1" //Adding ViewModel
     //annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+    //implementation 'org.awaitility:awaitility:3.1.6'
 
 }

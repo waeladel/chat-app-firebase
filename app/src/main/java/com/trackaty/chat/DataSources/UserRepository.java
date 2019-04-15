@@ -7,7 +7,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.Interface.FirebaseCallback;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.User;
 
@@ -113,7 +113,7 @@ public class UserRepository {
         return mCurrentUser;
     }
 
-    public void getUserOnce(String userId, final FirebaseCallback callback){
+    public void getUserOnce(String userId, final FirebaseUserCallback callback){
 
         DatabaseReference UserRef = mUsersRef.child(userId);
         //final MutableLiveData<User> mCurrentUser = new MutableLiveData<>();

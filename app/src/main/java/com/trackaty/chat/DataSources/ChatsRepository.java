@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.Interface.FirebaseChatsCallback;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.FirebaseListeners;
 
@@ -38,6 +39,7 @@ public class ChatsRepository {
     private ItemKeyedDataSource.LoadInitialCallback loadInitialCallback;
     private ItemKeyedDataSource.LoadCallback loadAfterCallback;
     private ItemKeyedDataSource.LoadCallback loadBeforeCallback;
+    private FirebaseChatsCallback firebaseCallback;
 
     private static volatile Boolean isInitialFirstLoaded;// = true;
     private static volatile Boolean isAfterFirstLoaded;// = true;
@@ -155,7 +157,7 @@ public class ChatsRepository {
     };
 
 
-    public ChatsRepository(String userKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
+    public ChatsRepository(String userKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback, FirebaseChatsCallback firebaseCallback){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // use received chatKey to create a database ref
         mChatsRef = mDatabaseRef.child("userChats").child(userKey);
@@ -163,6 +165,7 @@ public class ChatsRepository {
         Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded= " + isFirstLoaded);
         // call back to invalidate data
         this.invalidatedCallback = onInvalidatedCallback;
+        this.firebaseCallback = firebaseCallback;
 
         isInitialFirstLoaded =  true;
         isAfterFirstLoaded = true;
@@ -178,7 +181,7 @@ public class ChatsRepository {
 
     // get initial data
     public void getChats(Long initialKey, final int size,
-                            @NonNull final ItemKeyedDataSource.LoadInitialCallback<Chat> callback){
+                         @NonNull final ItemKeyedDataSource.LoadInitialCallback<Chat> callback){
 
         this.initialKey = initialKey;
         Query chatsQuery;
@@ -218,6 +221,9 @@ public class ChatsRepository {
                         if (chatsList.size() != 0) {
                             Collections.reverse(chatsList);
                             callback.onResult(chatsList);
+                            if(firebaseCallback != null){
+                                firebaseCallback.onCallback(chatsList);
+                            }
                             Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " lastkey= " + chatsList.get(chatsList.size() - 1).getKey());
                         }
 
