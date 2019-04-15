@@ -1,20 +1,16 @@
 package com.trackaty.chat.DataSources;
 
-import com.trackaty.chat.Interface.FirebaseChatsCallback;
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.Message;
 
 import androidx.paging.DataSource;
 
 public class ChatsDataFactory extends DataSource.Factory<Long, Chat>{
 
     private String mUserKey;
-    private FirebaseChatsCallback firebaseCallback;
 
     // receive chatKey on the constructor
-    public ChatsDataFactory(String userKey, FirebaseChatsCallback firebaseCallback) {
+    public ChatsDataFactory(String userKey) {
         this.mUserKey = userKey;
-        this.firebaseCallback = firebaseCallback;
     }
 
     /*public void setCallback(FirebaseChatsCallback firebaseCallback) {
@@ -26,7 +22,7 @@ public class ChatsDataFactory extends DataSource.Factory<Long, Chat>{
     @Override
     public DataSource<Long, Chat> create() {
         // pass firebase Callback to ChatsDataSource
-        return new ChatsDataSource(mUserKey, firebaseCallback);
+        return new ChatsDataSource(mUserKey);
     }
 
 }

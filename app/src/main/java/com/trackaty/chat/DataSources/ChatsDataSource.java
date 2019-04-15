@@ -2,7 +2,6 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
-import com.trackaty.chat.Interface.FirebaseChatsCallback;
 import com.trackaty.chat.models.Chat;
 
 import androidx.annotation.NonNull;
@@ -13,13 +12,11 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
     private final static String TAG = ChatsDataSource.class.getSimpleName();
     private String mChatKey;
     private ChatsRepository chatsRepository;
-    private FirebaseChatsCallback firebaseCallback;
 
     // get chatKey on the constructor
-    public ChatsDataSource(String chatKey, FirebaseChatsCallback callback){
+    public ChatsDataSource(String chatKey){
         //chatsRepository = new ChatsRepository(chatKey);
         this.mChatKey = chatKey;
-        this.firebaseCallback = callback;
         Log.d(TAG, "mama ChatsDataSource initiated ");
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
             invalidate();
@@ -33,7 +30,7 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
         //super.addInvalidatedCallback(onInvalidatedCallback);
         Log.d(TAG, "mama Callback ChatsDataSource addInvalidatedCallback ");
         // pass firebase Callback to ChatsRepository
-        chatsRepository = new ChatsRepository(mChatKey, onInvalidatedCallback, firebaseCallback);
+        chatsRepository = new ChatsRepository(mChatKey, onInvalidatedCallback);
         //chatsRepository.ChatsChanged(onInvalidatedCallback);
         //invalidate();
     }
