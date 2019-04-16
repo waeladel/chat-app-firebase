@@ -173,7 +173,14 @@ public class MessagesListRepository {
 
         if(mListenersList == null){
             mListenersList = new ArrayList<>();
-            Log.d(TAG, "mama MessagesRepository init. mListenersList size= " + mListenersList.size());
+            Log.d(TAG, "mListenersList is null. new ArrayList is created= " + mListenersList.size());
+        }else{
+            Log.d(TAG, "mListenersList is not null. Size= " + mListenersList.size());
+            if(mListenersList.size() >0){
+                Log.d(TAG, "mListenersList is not null and not empty. Size= " + mListenersList.size()+" Remove previous listeners");
+                removeListeners();
+                //mListenersList = new ArrayList<>();
+            }
         }
     }
 

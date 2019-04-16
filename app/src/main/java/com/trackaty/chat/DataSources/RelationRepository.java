@@ -35,7 +35,7 @@ public class RelationRepository {
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
-    private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
 
     // a listener for mRelation changes
     private ValueEventListener mRelationListener = new ValueEventListener() {
@@ -71,12 +71,23 @@ public class RelationRepository {
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
-        }*/
+        }
         if(mListenersList != null){
             Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + mListenersList.size());
         }
-        mListenersList = new ArrayList<>();
+        mListenersList = new ArrayList<>();*/
 
+        if(mListenersList == null){
+            mListenersList = new ArrayList<>();
+            Log.d(TAG, "mListenersList is null. new ArrayList is created= " + mListenersList.size());
+        }else{
+            Log.d(TAG, "mListenersList is not null. Size= " + mListenersList.size());
+            if(mListenersList.size() >0){
+                Log.d(TAG, "mListenersList is not null and not empty. Size= " + mListenersList.size()+" Remove previous listeners");
+                removeListeners();
+                //mListenersList = new ArrayList<>();
+            }
+        }
     }
 
     // Get relation if any between current user and selected user
@@ -138,8 +149,8 @@ public class RelationRepository {
 
     public void removeListeners(){
         for (int i = 0; i < mListenersList.size(); i++) {
-            Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
-            Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
             Log.d(TAG, "remove Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
 
             if(null != mListenersList.get(i).getListener()){

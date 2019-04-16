@@ -536,7 +536,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }*/
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.chatsFragment);
-        navController.navigate(R.id.chatsFragment);
+        if (R.id.chatsFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.chatsFragment);
+        }
                 /*Navigation.findNavController(this, R.id.host_fragment)
                         .navigate(directions);*/
 
@@ -554,7 +556,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }*/
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
-        navController.navigate(R.id.mainFragment);
+        if (R.id.mainFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.mainFragment);
+        }
+
         // change selected bottomNavigation to main
 
                 /*Navigation.findNavController(this, R.id.host_fragment)

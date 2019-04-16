@@ -63,6 +63,7 @@ public class UsersViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama UsersViewModel onCleared:");
+        //ToDo remove listeners
         super.onCleared();
     }
 }

@@ -31,7 +31,8 @@ public class UserRepository {
     private MutableLiveData<User> mSingleValueUser;
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
-    private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    // Change mListenersList to static so that it's the same for all instance
+    private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
 
     // a listener for mCurrentUser changes
     private ValueEventListener currentUserListener = new ValueEventListener() {
@@ -69,11 +70,23 @@ public class UserRepository {
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
-        }*/
+        }
         if(mListenersList != null){
             Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + mListenersList.size());
         }
-        mListenersList = new ArrayList<>();
+        mListenersList = new ArrayList<>();*/
+        if(mListenersList == null){
+            mListenersList = new ArrayList<>();
+            Log.d(TAG, "mListenersList is null. new ArrayList is created= " + mListenersList.size());
+        }else{
+            Log.d(TAG, "mListenersList is not null. Size= " + mListenersList.size());
+            if(mListenersList.size() >0){
+                Log.d(TAG, "mListenersList is not null and not empty. Size= " + mListenersList.size()+" Remove previous listeners");
+                // No need to remove old Listeners, we are gonna reuse them
+                removeListeners();
+                //mListenersList = new ArrayList<>();
+            }
+        }
 
     }
 
@@ -98,7 +111,7 @@ public class UserRepository {
                 if(!mListenersList.get(i).getQueryOrRef().equals(currentUserRef)
                         && (mListenersList.get(i).getListener().equals(currentUserListener))){
                     // This ref doesn't has a listener. Need to add a new Listener
-                    Log.d(TAG, "getUser adding new Listener= "+ currentUserListener);
+                    Log.d(TAG, "This ref doesn't has a listener. getUser adding new Listener= "+ currentUserListener);
                     currentUserRef.addValueEventListener(currentUserListener);
                     mListenersList.add(new FirebaseListeners(currentUserRef, currentUserListener));
                 }else{
@@ -148,8 +161,8 @@ public class UserRepository {
 
     public void removeListeners(){
         for (int i = 0; i < mListenersList.size(); i++) {
-            Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
-            Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
             Log.d(TAG, "remove Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
 
             if(null != mListenersList.get(i).getListener()){

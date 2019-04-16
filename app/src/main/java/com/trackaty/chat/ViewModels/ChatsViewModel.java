@@ -26,18 +26,18 @@ public class ChatsViewModel extends ViewModel {
     private DatabaseReference mUserChatsRef;
 
 
-    public ChatsViewModel(String UserId) {
+    public ChatsViewModel() {
 
         //callbackPagedList = new MutableLiveData<>();
         // pass UserId and  firebaseCallback to the constructor of ChatsDataFactory
-        chatsDataFactory = new ChatsDataFactory(UserId);
+
+        chatsDataFactory = new ChatsDataFactory();
 
         Log.d(TAG, "Chat ChatsViewModel init");
 
         //Enabling Offline Capabilities//
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUserChatsRef = mDatabaseRef.child("userChats").child(UserId);
-        mUserChatsRef.keepSynced(true);
+
 
         config = (new PagedList.Config.Builder())
                 .setPageSize(20)//10
@@ -49,6 +49,11 @@ public class ChatsViewModel extends ViewModel {
         itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
     }
 
+    public void setUserId(String UserId){
+        chatsDataFactory.setUserKey(UserId);
+        mUserChatsRef = mDatabaseRef.child("userChats").child(UserId);
+        mUserChatsRef.keepSynced(true);
+    }
 
 
     public LiveData<PagedList<Chat>> getItemPagedList(){
@@ -62,6 +67,5 @@ public class ChatsViewModel extends ViewModel {
         ChatsRepository.removeListeners();
         super.onCleared();
     }
-
 
 }

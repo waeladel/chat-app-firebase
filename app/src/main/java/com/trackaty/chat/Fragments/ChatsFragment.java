@@ -91,8 +91,13 @@ public class ChatsFragment extends Fragment{
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(TAG, "chats onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         super.onActivityCreated(savedInstanceState);
         if(((MainActivity)getActivity())!= null) {
             ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
@@ -118,15 +123,16 @@ public class ChatsFragment extends Fragment{
                 }
              });*/
 
-                    //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+                    mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+                    mChatsViewModel.setUserId(mCurrentUserId);
                     //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
-                    mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+                    /*mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
                         @NonNull
                         @Override
                         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
                             return (T)new ChatsViewModel (mCurrentUserId);
                         }
-                    }).get(ChatsViewModel.class);
+                    }).get(ChatsViewModel.class);*/
 
 
                     mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {

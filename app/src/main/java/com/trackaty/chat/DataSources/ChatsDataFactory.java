@@ -9,14 +9,18 @@ public class ChatsDataFactory extends DataSource.Factory<Long, Chat>{
     private String mUserKey;
 
     // receive chatKey on the constructor
-    public ChatsDataFactory(String userKey) {
-        this.mUserKey = userKey;
+    public ChatsDataFactory() {
+
     }
 
     /*public void setCallback(FirebaseChatsCallback firebaseCallback) {
         this.firebaseCallback = firebaseCallback;
         //this.firebaseCallback = firebaseCallback;
     }*/
+
+    public void setUserKey(String userKey) {
+        this.mUserKey = userKey;
+    }
 
 
     @Override

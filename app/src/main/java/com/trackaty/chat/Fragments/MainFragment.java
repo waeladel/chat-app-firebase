@@ -163,7 +163,7 @@ public class MainFragment extends Fragment {
 
                                 }
                             },
-                            5000
+                            500
                     );
 
                 }

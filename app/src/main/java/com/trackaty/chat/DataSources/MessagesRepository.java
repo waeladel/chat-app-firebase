@@ -65,7 +65,7 @@ private ValueEventListener userListener = new ValueEventListener() {
         mUser = new MutableLiveData<>();
         if(mListenersList == null){
             mListenersList = new ArrayList<>();
-            Log.d(TAG, "mama MessagesRepository init. mListenersList size= " + mListenersList.size());
+            Log.d(TAG, "mListenersList is null. new ArrayList is created= " + mListenersList.size());
         }
     }
 
@@ -112,8 +112,8 @@ private ValueEventListener userListener = new ValueEventListener() {
     // remove all listeners when the ViewModel is cleared
     public void removeListeners(){
         for (int i = 0; i < mListenersList.size(); i++) {
-            Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
-            Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "remove Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
             Log.d(TAG, "remove Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
 
             if(null != mListenersList.get(i).getListener()){
