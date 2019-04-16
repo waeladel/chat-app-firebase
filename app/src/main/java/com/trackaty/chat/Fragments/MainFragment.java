@@ -151,18 +151,35 @@ public class MainFragment extends Fragment {
                 System.out.println("mama onChanged");
                 if (items != null ){
                     // Create new Thread to loop until items.size() is greater than 0
+
+                    //delay submitList till items size is not 0
+                   /* new java.util.Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    // your code here
+                                    Log.d(TAG, "mama submitList size" +  items.size());
+                                    mUsersAdapter.submitList(items);
+
+                                }
+                            },
+                            1000
+                    );*/
+                    //mUsersAdapter.submitList(items);
                     Thread thread = new Thread() {
+                        int sleepCounter = 0;
                         @Override
                         public void run() {
                             try {
                                 while(items.size()==0) {
                                     //Keep looping as long as items size is 0
-                                    sleep(20);
-                                    Log.d(TAG, "sleep 1000. size= "+items.size());
+                                    sleep(5);
+                                    Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
                                     //handler.post(this);
                                 }
                                 //Now items size is greater than 0, let's submit the List
                                 Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                //mUsersAdapter.submitList(null);
                                 mUsersAdapter.submitList(items);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();

@@ -4,9 +4,9 @@ import com.trackaty.chat.models.User;
 
 import androidx.paging.DataSource;
 
-public class UsersDataFactory extends DataSource.Factory<Long, User>{
+public class UsersDataFactory extends DataSource.Factory<String, User>{
     @Override
-    public DataSource<Long, User> create() {
+    public DataSource<String, User> create() {
         return new UsersDataSource();
     }
 }

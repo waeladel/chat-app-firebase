@@ -9,12 +9,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -34,6 +34,21 @@ public class UsersRepository {
     private Boolean isFirstLoaded = true;
     public ValueEventListener usersChangesListener;
 
+    private String initialKey;
+    private String afterKey;
+    private String beforeKey;
+
+    private static volatile Boolean isInitialFirstLoaded;// = true;
+    private static volatile Boolean isAfterFirstLoaded;// = true;
+    private static volatile Boolean isBeforeFirstLoaded;// = true;
+
+    private DataSource.InvalidatedCallback invalidatedCallback;
+    private ItemKeyedDataSource.LoadInitialCallback loadInitialCallback;
+    private ItemKeyedDataSource.LoadCallback loadAfterCallback;
+    private ItemKeyedDataSource.LoadCallback loadBeforeCallback;
+
+    private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+
     //initialize the FirebaseAuth instance
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -45,327 +60,265 @@ public class UsersRepository {
     //private ValueEventListener currentUserListener;
     private HashMap<DatabaseReference, ValueEventListener> mListenersMap;
     // a listener for currentUser changes
-    private ValueEventListener currentUserListener = new ValueEventListener() {
+
+    private ValueEventListener afterListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            // Get Post object and use the values to update the UI
-            if (dataSnapshot.exists()) {
-                // Get user value
-                Log.d(TAG, "getUser dataSnapshot key: "
-                        + dataSnapshot.getKey()+" Listener = "+currentUserListener);
-                //currentUser = dataSnapshot.getValue(User.class);
-                currentUser.postValue(dataSnapshot.getValue(User.class));
-            } else {
-                // User is null, error out
-                Log.w(TAG, "User is null, no such user");
+            // [START_EXCLUDE]
+            Log.d(TAG, "start onDataChange isAfterFirstLoaded = "+ isAfterFirstLoaded);
+            if (!isAfterFirstLoaded){
+                // Remove post value event listener
+                removeListeners();
+                Log.d(TAG, "mama getUsersAfter Invalidated removeEventListener");
+                //isAfterFirstLoaded =  true;
+                Log.d(TAG, "getUsersAfter onInvalidated(). isAfterFirstLoaded = "+ isAfterFirstLoaded);
+                invalidatedCallback.onInvalidated();
+                //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
+                //UsersDataSource.invalidate();
+                return;
             }
+
+            if (dataSnapshot.exists()) {
+                List<User> UsersList = new ArrayList<>();
+                // loop throw users value
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    Log.d(TAG, "getUsersAfter dataSnapshot loop= " +  snapshot.getKey());
+                    if(!getLoadAfterKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
+                        User user = snapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setKey(snapshot.getKey());
+                            Log.d(TAG, "getUsersAfter UsersList loop= " +  user.getKey());
+                        }
+                        UsersList.add(user);
+                        //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                    }
+                }
+
+                if(UsersList.size() != 0){
+                    //callback.onResult(messagesList);
+                    getLoadAfterCallback().onResult(UsersList);
+                    Log.d(TAG, "mama getUsersAfter  List.size= " +  UsersList.size()+ " lastkey= "+UsersList.get(UsersList.size()-1).getKey());
+                }
+            } else {
+                // no data
+                Log.w(TAG, "mama getUsersAfter no users exist");
+            }
+            getListeners();
+            isAfterFirstLoaded =  false;
+            Log.d(TAG, "getUsersAfter: end isAfterFirstLoaded = "+ isAfterFirstLoaded);
         }
+
         @Override
         public void onCancelled(DatabaseError databaseError) {
             // Getting Post failed, log a message
-            Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+            Log.w(TAG, "mama getUsersAfter loadPost:onCancelled", databaseError.toException());
+        }
+    };
 
+    private ValueEventListener beforeListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // [START_EXCLUDE]
+            Log.d(TAG, "start onDataChange isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+            if (!isBeforeFirstLoaded){
+                // Remove post value event listener
+                removeListeners();
+                Log.d(TAG, "mama getUsersBefore Invalidated removeEventListener");
+                //isBeforeFirstLoaded =  true;
+                Log.d(TAG, "getUsersBefore onInvalidated(). isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+                invalidatedCallback.onInvalidated();
+                //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
+                //UsersDataSource.invalidate();
+                return;
+            }
+
+            if (dataSnapshot.exists()) {
+                List<User> usersList = new ArrayList<>();
+                // loop throw users value
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    Log.d(TAG, "getUsersBefore dataSnapshot loop= " +  snapshot.getKey());
+                    if(!getLoadBeforeKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
+                        User user = snapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setKey(snapshot.getKey());
+                            Log.d(TAG, "getUsersBefore usersList loop= " +  user.getKey());
+                        }
+                        usersList.add(user);
+                        //Log.d(TAG, "mama getUsersBefore = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
+                    }
+                }
+
+                if(usersList.size() != 0){
+                    //callback.onResult(messagesList);
+                    getLoadBeforeCallback().onResult(usersList);
+                    Log.d(TAG, "mama getUsersBefore  List.size= " +  usersList.size()+ " lastkey= "+usersList.get(0).getKey());
+                }
+            } else {
+                // no data
+                Log.w(TAG, "mama getUsersBefore no users exist");
+            }
+            getListeners();
+            isBeforeFirstLoaded =  false;
+            Log.d(TAG, "getUsersBefore: end isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "mama getUsersBefore:onCancelled", databaseError.toException());
         }
     };
 
 
-    public UsersRepository(){
+
+    public UsersRepository(@NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUsersRef = mDatabaseRef.child("users");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         isFirstLoaded = true;
         currentUser = new MutableLiveData<>();
-        mListenersMap =  new HashMap<>();
-        Log.d(TAG, "mama UsersRepository init. isFirstLoaded= " + isFirstLoaded);
 
+        this.invalidatedCallback = onInvalidatedCallback;
+
+        isInitialFirstLoaded =  true;
+        isAfterFirstLoaded = true;
+        isBeforeFirstLoaded = true;
+
+        Log.d(TAG, "mama UsersRepository init. isInitialFirstLoaded= " + isInitialFirstLoaded+ " after= "+isAfterFirstLoaded + " before= "+isBeforeFirstLoaded);
+
+        if(mListenersList == null){
+            mListenersList = new ArrayList<>();
+            Log.d(TAG, "mListenersList is null. new ArrayList is created= " + mListenersList.size());
+        }else{
+            Log.d(TAG, "mListenersList is not null. Size= " + mListenersList.size());
+            if(mListenersList.size() >0){
+                Log.d(TAG, "mListenersList is not null and not empty. Size= " + mListenersList.size()+" Remove previous listeners");
+                removeListeners();
+                //mListenersList = new ArrayList<>();
+            }
+        }
     }
 
 
     // get initial data
-    public void getUsers(Long initialKey, final int size,
+    public void getUsers(String initialKey, final int size,
                          @NonNull final ItemKeyedDataSource.LoadInitialCallback<User> callback){
-        //DatabaseReference usersRef = mDatabaseRef.child("users");
-        if(initialKey == null){// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
-                    .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    // [START_EXCLUDE]
-                    if (dataSnapshot.exists()) {
-                        // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            //Map<String, Object> user = userSnapshot.getValue().
 
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
-                            }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
+        Log.i(TAG, "getUsers initiated. initialKey= " +  initialKey);
+        this.initialKey = initialKey;
+        Query usersQuery;
+        isInitialFirstLoaded = true;
+
+        ValueEventListener initialUsersListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // [START_EXCLUDE]
+                Log.d(TAG, "start onDataChange. isInitialFirstLoaded = "+ isInitialFirstLoaded);
+
+                if (!isInitialFirstLoaded){
+                    // Remove post value event listener
+                    removeListeners();
+                    Log.d(TAG, "mama usersChanged Invalidated removeEventListener");
+                    //isInitialFirstLoaded =  true;
+                    Log.d(TAG, "onInvalidated(). isInitialFirstLoaded = "+ isInitialFirstLoaded);
+                    invalidatedCallback.onInvalidated();
+                    //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
+                    //UsersDataSource.invalidate();
+                    return;
+                }
+
+                if (dataSnapshot.exists()) {
+                    List<User> usersList = new ArrayList<>();
+                    // loop throw users value
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        Log.d(TAG, "getUsers dataSnapshot loop= " +  snapshot.getKey());
+                        User user = snapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setKey(snapshot.getKey());
+                            Log.d(TAG, "getUsers usersList loop= " +  user.getKey());
                         }
-
-                        if(usersList.size() == 0){
-                            return;
-                        }
-
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
-
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
-
-                            //initial load
-                        /*((ItemKeyedDataSource.LoadInitialCallback)callback)
-                                .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
-                    /*else{
-                        //next pages load
-                        //callback.onResult(usersList);
-                        //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
-                    }*/
-                    } else {
-                        Log.w(TAG, "mama getMessages no users exist");
+                        usersList.add(user);
+                        //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
 
+                    if(usersList.size() != 0){
+                        callback.onResult(usersList);
+                        Log.d(TAG, "mama getUsersLists  List.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getKey());
+                    }
+                } else {
+                    // no data
+                    Log.w(TAG, "mama getUsers no users exist");
                 }
+                getListeners();
+                isInitialFirstLoaded =  false;
+                Log.d(TAG, "getUsers. End isInitialFirstLoaded = "+ isInitialFirstLoaded);
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Getting Post failed, log a message
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                }
-            });
-        }else{// not the first load. Key is the last seen key
-            Log.d(TAG, "mama getMessages initialKey= " +  initialKey);
-            mUsersRef.orderByChild("created")
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "mama loadPost:onCancelled", databaseError.toException());
+            }
+        };
+
+        if (initialKey == null) {// if it's loaded for the first time. Key is null
+            Log.d(TAG, "mama getUsers initialKey= " + initialKey);
+            usersQuery = mUsersRef.orderByKey()//limitToLast to start from the last (page size) items
+                    .limitToFirst(size);
+
+        } else {// not the first load. Key is the last seen key
+            Log.d(TAG, "mama getUsers initialKey= " + initialKey);
+
+            usersQuery = mUsersRef.orderByKey()
                     .startAt(initialKey)
-                    .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    // [START_EXCLUDE]
-                    if (dataSnapshot.exists()) {
-                        // loop throw users value
-                        List<User> usersList = new ArrayList<>();
-                        for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                            User user = userSnapshot.getValue(User.class);
-                            if (user != null) {
-                                user.setKey(userSnapshot.getKey());
-                            }
-                            usersList.add(user);
-                            Log.d(TAG, "mama getMessages dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
-                        }
-
-                        if(usersList.size() == 0){
-                            return;
-                        }
-
-                        Log.d(TAG, "mama getMessages usersList.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
-
-                        if(callback instanceof ItemKeyedDataSource.LoadInitialCallback){
-
-                            //initial load
-                        /*((ItemKeyedDataSource.LoadInitialCallback)callback)
-                                .onResult(usersList, 0, 14);*/
-                            callback.onResult(usersList);
-                        }
-                    /*else{
-                        //next pages load
-                        //callback.onResult(usersList);
-                        //Log.d(TAG, "mama load next" +  usersList.get(0).getName());
-                    }*/
-                    } else {
-                        Log.w(TAG, "mama getMessages no users exist");
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Getting Post failed, log a message
-                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                }
-            });
+                    .limitToFirst(size);
         }
 
-         //mUsersRef.addValueEventListener(usersListener);
+        usersQuery.addValueEventListener(initialUsersListener);
+        mListenersList.add(new FirebaseListeners(usersQuery, initialUsersListener));
 
     }
 
     // to get next data
-    public void getUsersAfter(final Long key, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
-        /*if(key == entireUsersList.get(entireUsersList.size()-1).getCreatedLong()){
-            Log.d(TAG, "mama getUsersAfter init. afterKey= " +  key+ "entireUsersList= "+entireUsersList.get(entireUsersList.size()-1).getCreatedLong());
-            return;
-        }*/
+    public void getUsersAfter(final String key, final int size,
+                              @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
 
         Log.d(TAG, "mama getUsersAfter. AfterKey= " + key);
-        mUsersRef.orderByChild("created")
+        isAfterFirstLoaded = true;
+        //this.afterKey = key;
+        Query afterQuery;
+
+        afterQuery = mUsersRef.orderByKey()
                 .startAt(key)
-                .limitToFirst(size).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                if (dataSnapshot.exists()) {
-                    // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
-                        }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersAfter dataSnapshot. getSnapshotKey= " +  userSnapshot.getKey());
-                    }
+                .limitToFirst(size);
 
-                    if(usersList.size() == 0){
-                        return;
-                    }
+        afterQuery.addValueEventListener(afterListener);
+        mListenersList.add(new FirebaseListeners(afterQuery, afterListener));
 
-                    Log.d(TAG, "mama getUsersAfter usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
-
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial After
-                        callback.onResult(usersList);
-                        /*((ItemKeyedDataSource.LoadCallback)callback)
-                                .onResult(usersList);*/
-                    }
-
-                } else {
-                    Log.w(TAG, "mama getUsersAfter no users exist");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-            }
-        });
-        //mUsersRef.addValueEventListener(usersListener);
     }
 
     // to get previous data
-    public void getUsersBefore(final Long key, final int size,
-                              @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
+    public void getUsersBefore(final String key, final int size,
+                               @NonNull final ItemKeyedDataSource.LoadCallback<User> callback){
         Log.d(TAG, "mama getUsersBefore. BeforeKey= " +  key);
 
-        /*if(key == entireUsersList.get(0).getCreatedLong()){
-            return;
-        }*/
-        mUsersRef.orderByChild("created")
+        isBeforeFirstLoaded = true;
+        //this.beforeKey = key;
+        Query beforeQuery;
+
+        beforeQuery = mUsersRef.orderByKey()
                 .endAt(key)
-                .limitToLast(size).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // [START_EXCLUDE]
-                if (dataSnapshot.exists()) {
-                    // loop throw users value
-                    List<User> usersList = new ArrayList<>();
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        User user = userSnapshot.getValue(User.class);
-                        if (user != null) {
-                            user.setKey(userSnapshot.getKey());
-                        }
-                        usersList.add(user);
-                        Log.d(TAG, "mama getUsersBefore dataSnapshot. getSnapshotKeys= " +  userSnapshot.getKey());
-                    }
+                .limitToLast(size);
 
-                    if(usersList.size() == 0){
-                        return;
-                    }
-
-                    Log.d(TAG, "mama getUsersBefore usersList.size= " +  usersList.size()+ "lastkey= "+usersList.get(usersList.size()-1).getCreatedLong());
-
-
-                    if(callback instanceof ItemKeyedDataSource.LoadCallback){
-
-                        //initial before
-                        callback.onResult(usersList);
-                        /*((ItemKeyedDataSource.LoadCallback)callback)
-                                .onResult(usersList);*/
-                    }
-                    //initial load
-                       /* ((ItemKeyedDataSource.LoadCallback)callback)
-                                .onResult(usersList, 0, usersList.size());*/
-                } else {
-                    Log.w(TAG, "mama getUsersBefore no users exist");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-            }
-        });
-        //mUsersRef.addValueEventListener(usersListener);
-
+        beforeQuery.addValueEventListener(beforeListener);
+        mListenersList.add(new FirebaseListeners(beforeQuery, beforeListener));
 
     }
 
     /*public PublishSubject getUsersChangeSubject() {
         return userAdapterInvalidation;
     }*/
-
-    // to invalidate the data whenever a change happen
-    public void usersChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
-
-        final Query query = mUsersRef.orderByChild("created");
-
-        usersChangesListener  = new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!isFirstLoaded){
-                    isFirstLoaded = true;
-                    Log.d(TAG, "mama entireUsersList Invalidated:");
-                    // Remove post value event listener
-                    if (usersChangesListener != null) {
-                        query.removeEventListener(usersChangesListener);
-                        Log.d(TAG, "mama usersChanged Invalidated removeEventListener");
-                    }
-                    ((ItemKeyedDataSource.InvalidatedCallback)InvalidatedCallback).onInvalidated();
-                    //UsersDataSource.InvalidatedCallback.class.getMethod("loadInitial", "LoadInitialParams");
-                    //UsersDataSource.invalidate();
-                }
-
-                isFirstLoaded =  false;
-                /*if(entireUsersList.size() > 0){
-                    entireUsersList.clear();
-                    ((ItemKeyedDataSource.InvalidatedCallback)onInvalidatedCallback).onInvalidated();
-                    Log.d(TAG, "mama entireUsersList Invalidated:");
-                    return;
-                }
-
-                if (dataSnapshot.exists()) {
-                    // loop throw users value
-                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()){
-                        entireUsersList.add(userSnapshot.getValue(User.class));
-                    }
-
-                    Log.d(TAG, "mama entireUsersList size= "+entireUsersList.size()+"dataSnapshot count= "+dataSnapshot.getChildrenCount());
-
-                } else {
-                    Log.w(TAG, "mama usersChanged no users exist");
-                }*/
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // ...
-            }
-        };
-        query.addValueEventListener(usersChangesListener);
-        //mUsersRef.addValueEventListener(eventListener);
-    }
 
     /*public Single<List<User>> getAnimals(int count){
         return RxFirebaseDatabase.data(mUsersRef.orderByKey().limitToFirst(count)).ma
@@ -396,5 +349,71 @@ public class UsersRepository {
         return currentUser;
     }*/
 
- }
+    //removeListeners is static so it can be triggered when ViewModel is onCleared
+    public static void removeListeners(){
+
+        for (int i = 0; i < mListenersList.size(); i++) {
+            //Log.d(TAG, "removed Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "removed Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "removed Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+
+            if(null != mListenersList.get(i).getListener()){
+                mListenersList.get(i).getQueryOrRef().removeEventListener(mListenersList.get(i).getListener());
+            }
+            /*if(null != mListenersList.get(i).getReference()){
+                mListenersList.get(i).getReference().removeEventListener(mListenersList.get(i).getListener());
+            }else if(null != mListenersList.get(i).getQuery()){
+                mListenersList.get(i).getQuery().removeEventListener(mListenersList.get(i).getListener());
+            }*/
+        }
+        mListenersList.clear();
+    }
+
+    public void getListeners(){
+
+        for (int i = 0; i < mListenersList.size(); i++) {
+            //Log.d(TAG, "Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+            //Log.d(TAG, "Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+            Log.d(TAG, "Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
+    }
+
+    public ItemKeyedDataSource.LoadInitialCallback getLoadInitialCallback() {
+        return loadInitialCallback;
+    }
+
+    public void setLoadInitialCallback(ItemKeyedDataSource.LoadInitialCallback loadInitialCallback) {
+        this.loadInitialCallback = loadInitialCallback;
+    }
+
+    public ItemKeyedDataSource.LoadCallback getLoadAfterCallback() {
+        return loadAfterCallback;
+    }
+
+    public void setLoadAfterCallback(String key, ItemKeyedDataSource.LoadCallback loadAfterCallback) {
+        this.loadAfterCallback = loadAfterCallback;
+        this.afterKey = key;
+    }
+
+    public ItemKeyedDataSource.LoadCallback getLoadBeforeCallback() {
+        return loadBeforeCallback;
+    }
+
+    public void setLoadBeforeCallback(String key, ItemKeyedDataSource.LoadCallback loadBeforeCallback) {
+        this.loadBeforeCallback = loadBeforeCallback;
+        this.beforeKey = key;
+    }
+
+    public String getLoadAfterKey() {
+        return afterKey;
+    }
+
+    public String getLoadBeforeKey() {
+        return beforeKey;
+    }
+
+}
+
+
+
 

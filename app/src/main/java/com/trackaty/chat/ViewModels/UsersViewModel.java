@@ -42,8 +42,8 @@ public class UsersViewModel extends ViewModel {
         mUsersRef.keepSynced(true);*/
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(30)//10
-                .setInitialLoadSizeHint(30)//30
+                .setPageSize(10)//10
+                .setInitialLoadSizeHint(10)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();
