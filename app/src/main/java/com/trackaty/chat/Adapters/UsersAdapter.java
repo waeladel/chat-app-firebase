@@ -304,6 +304,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                     /*Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + (oldUser.getCreatedLong() == newUser.getCreatedLong()));
                     Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());*/
                     return oldUser.getCreatedLong() == newUser.getCreatedLong();
+                    //return oldUser.getKey().equals(newUser.getKey()) ;
                     //return true;
                 }
 

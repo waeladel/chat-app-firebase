@@ -276,7 +276,8 @@ public class MessagesListRepository {
         } else {// not the first load. Key is the last seen key
             Log.d(TAG, "mama getMessages initialKey= " + initialKey);
             messagesQuery = mMessagesRef.orderByKey()
-                    .startAt(initialKey)
+                    // Don't start at initialKey because we need to always display the latest message
+                    //.startAt(initialKey)
                     .limitToLast(size);
         }
 

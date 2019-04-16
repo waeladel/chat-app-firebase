@@ -56,7 +56,7 @@ public class MessagesViewModel extends ViewModel {
 
         config = (new PagedList.Config.Builder())
                 .setPageSize(20)//10
-                .setInitialLoadSizeHint(10)//30
+                .setInitialLoadSizeHint(20)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();

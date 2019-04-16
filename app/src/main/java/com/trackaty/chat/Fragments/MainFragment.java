@@ -150,22 +150,26 @@ public class MainFragment extends Fragment {
             public void onChanged(@Nullable final PagedList<User> items) {
                 System.out.println("mama onChanged");
                 if (items != null ){
-                /*Log.d(TAG, "mama submitList size" +  items.size());
-                mUsersAdapter.submitList(items);*/
-                    //delay submitList till items size is not 0
-                    new java.util.Timer().schedule(
-                            new java.util.TimerTask() {
-                                @Override
-                                public void run() {
-                                    // your code here
-                                    Log.d(TAG, "mama submitList size" +  items.size());
-                                    mUsersAdapter.submitList(items);
-
+                    // Create new Thread to loop until items.size() is greater than 0
+                    Thread thread = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                while(items.size()==0) {
+                                    //Keep looping as long as items size is 0
+                                    sleep(20);
+                                    Log.d(TAG, "sleep 1000. size= "+items.size());
+                                    //handler.post(this);
                                 }
-                            },
-                            500
-                    );
-
+                                //Now items size is greater than 0, let's submit the List
+                                Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                mUsersAdapter.submitList(items);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    thread.start();
                 }
             }
         });

@@ -140,6 +140,9 @@ public class MessagesFragment extends Fragment {
         // Initiate the RecyclerView
         mMessagesRecycler = (RecyclerView) fragView.findViewById(R.id.messages_recycler);
         mMessagesRecycler.setHasFixedSize(true);
+        /* setStackFromEnd is usefuall to start stacking recycler from it's last
+        LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
+        mLinearLayoutManager.setStackFromEnd(true);*/
         mMessagesRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
 
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
@@ -335,12 +338,35 @@ public class MessagesFragment extends Fragment {
                     System.out.println("mama onChanged");
                     if (items != null ){
                         // your code here
-                        Log.d(TAG, "mama messages submitList size" +  items.size());
-                        mMessagesAdapter.submitList(items);
-                        // Scroll to last item
-                        if(items.size()>0){// stop scroll to bottom if there are no items
-                            mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                        }
+                        // Create new Thread to loop until items.size() is greater than 0
+                        Thread thread = new Thread() {
+                            int sleepCounter = 0;
+                            @Override
+                            public void run() {
+                                try {
+                                    while(items.size()==0) {
+                                        //Keep looping as long as items size is 0
+                                        sleep(20);
+                                        Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                        //handler.post(this);
+                                    }
+                                    //Now items size is greater than 0, let's submit the List
+                                    Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                    mMessagesAdapter.submitList(items);
+
+                                    // Scroll to last item
+                                    if(items.size()>0){// stop scroll to bottom if there are no items
+                                        //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                        Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                    }
+
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        };
+                        thread.start();
                     }
                 }
             });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
