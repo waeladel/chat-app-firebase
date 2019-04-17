@@ -165,28 +165,38 @@ public class MainFragment extends Fragment {
                             },
                             1000
                     );*/
-                    //mUsersAdapter.submitList(items);
-                    Thread thread = new Thread() {
+                    // Create new Thread to loop until items.size() is greater than 0
+                    new Thread(new Runnable() {
                         int sleepCounter = 0;
                         @Override
                         public void run() {
                             try {
                                 while(items.size()==0) {
                                     //Keep looping as long as items size is 0
-                                    sleep(5);
+                                    Thread.sleep(20);
                                     Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                    if(sleepCounter == 1000){
+                                        break;
+                                    }
                                     //handler.post(this);
                                 }
                                 //Now items size is greater than 0, let's submit the List
                                 Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                //mUsersAdapter.submitList(null);
-                                mUsersAdapter.submitList(items);
+                                if(items.size() == 0 && sleepCounter == 1000){
+                                    // If we submit List after loop is finish with 0 results
+                                    // we may erase another results submitted via newer thread
+                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
+                                }else{
+                                    Log.d(TAG, "submitList");
+                                    mUsersAdapter.submitList(items);
+                                }
+
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
+
                         }
-                    };
-                    thread.start();
+                    }).start();
                 }
             }
         });

@@ -142,9 +142,39 @@ public class ChatsFragment extends Fragment{
                             if (items != null ){
                                 // your code here
                                 Log.d(TAG, "chats onChanged submitList size" +  items.size());
-
                                 // Create new Thread to loop until items.size() is greater than 0
-                                Thread thread = new Thread() {
+                                new Thread(new Runnable() {
+                                    int sleepCounter = 0;
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            while(items.size()==0) {
+                                                //Keep looping as long as items size is 0
+                                                Thread.sleep(20);
+                                                Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                                if(sleepCounter == 1000){
+                                                    break;
+                                                }
+                                                //handler.post(this);
+                                            }
+                                            //Now items size is greater than 0, let's submit the List
+                                            Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                            if(items.size() == 0 && sleepCounter == 1000){
+                                                // If we submit List after loop is finish with 0 results
+                                                // we may erase another results submitted via newer thread
+                                                Log.d(TAG, "Loop finished with 0 items. Don't submitList");
+                                            }else{
+                                                Log.d(TAG, "submitList");
+                                                mChatsAdapter.submitList(items);
+                                            }
+
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                }).start();
+                                /*Thread thread = new Thread() {
                                     @Override
                                     public void run() {
                                         try {
@@ -162,7 +192,7 @@ public class ChatsFragment extends Fragment{
                                         }
                                     }
                                 };
-                                thread.start();
+                                thread.start();*/
                             }
                         }
                     });
