@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -88,6 +89,8 @@ public class MessagesFragment extends Fragment {
 
     private Timer mTimer;
     private CountDownTimer mCountDownTimer;
+    private Boolean isListEnded;// = false;
+
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -133,6 +136,8 @@ public class MessagesFragment extends Fragment {
         mChatsRef = mDatabaseRef.child("chats");
         mMessagesRef = mDatabaseRef.child("messages");
 
+        //isListEnded = true;
+
         // prepare the Adapter
         mMessagesArrayList = new ArrayList<>();
         mMessagesAdapter = new MessagesAdapter();
@@ -143,12 +148,56 @@ public class MessagesFragment extends Fragment {
         /* setStackFromEnd is usefuall to start stacking recycler from it's last
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mLinearLayoutManager.setStackFromEnd(true);*/
-        mMessagesRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
+        final LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
+        mMessagesRecycler.setLayoutManager(mLinearLayoutManager);
 
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
 
         //observe when a change happen to usersList live data
         mMessagesRecycler.setAdapter(mMessagesAdapter);
+
+        /*// Push up content when clicking in edit text
+        activity.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);*/
+
+        // Listen for scroll events
+        mMessagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                //Log.d(TAG, "onScrollStateChanged newState= "+newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
+                int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
+                //int totalItemCount = mLinearLayoutManager.getItemCount();
+                int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
+                int pastVisibleItems = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+                //int pastVisibleItems = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition();
+                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+pastVisibleItems);
+
+                // The position of last displayed item = total items, witch means we are at the bottom
+                if(pastVisibleItems >= (totalItemCount-1) ){
+                    // End of the list is here.
+                    Log.i(TAG, "End of list");
+                    isListEnded = true;
+                }else{
+                    isListEnded = false;
+                }
+
+                /*if(pastVisibleItems+visibleItemCount >= (totalItemCount-1)){
+                    // End of the list is here.
+                    Log.i(TAG, "End of list");
+                    isListEnded = true;
+                }else{
+                    isListEnded = false;
+                }*/
+
+            }
+        });
 
 
        /* /// a query to get all chats for current user then find if it has the key of the receiver//////
@@ -266,6 +315,9 @@ public class MessagesFragment extends Fragment {
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
+            // Push up content when clicking in edit text
+            activity.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
     }
 
@@ -291,6 +343,7 @@ public class MessagesFragment extends Fragment {
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View actionBarView = inflater.inflate(R.layout.messages_toolbar, null);
             actionbar.setCustomView(actionBarView);
+
 
             mTimer = new Timer();
             // custom action bar items to add receiver's avatar and name //
@@ -355,11 +408,17 @@ public class MessagesFragment extends Fragment {
                                     mMessagesAdapter.submitList(items);
 
                                     // Scroll to last item
-                                    if(items.size()>0){// stop scroll to bottom if there are no items
+                                    Log.d(TAG, "isListEnded = "+isListEnded);
+
+                                    // Only scroll to bottom if user is not reading messages above
+                                    if(null == isListEnded || isListEnded){
+                                        if(items.size()>0){// stop scroll to bottom if there are no items
                                         //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
                                         Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
                                         mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                        }
                                     }
+
 
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
