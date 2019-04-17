@@ -32,7 +32,7 @@ public class UserRepository {
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
     // Change mListenersList to static so that it's the same for all instance
-    private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    private  List<FirebaseListeners> mListenersList;// = new ArrayList<>();
 
     // a listener for mCurrentUser changes
     private ValueEventListener currentUserListener = new ValueEventListener() {
