@@ -640,6 +640,7 @@ public class MessagesFragment extends Fragment {
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "send message onSuccess");
+                isListEnded = true; // To scroll to bottom when user send new message
                 // ...
             }
         })
