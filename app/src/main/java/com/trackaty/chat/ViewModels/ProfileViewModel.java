@@ -42,6 +42,29 @@ public class ProfileViewModel extends ViewModel {
         relationRepository.cancelRequest(currentUserId, userId);
     }
 
+    // update love and favourites Favorite
+    public void sendLove(String currentUserId, String userId) {
+        relationRepository.sendLove(currentUserId, userId);
+    }
+
+    // cancel love and favourites
+    public void cancelLove(String currentUserId, String userId) {
+        relationRepository.cancelLove(currentUserId, userId);
+    }
+
+
+
+    // get love counts
+    public LiveData<Long> getLoveCount(String userId) {
+        return relationRepository.getLoveCount(userId);
+
+    }
+
+    // get love counts
+    public LiveData<Boolean> getLoveStatues(String currentUserId, String userId) {
+        return relationRepository.getLoveStatues(currentUserId, userId);
+    }
+
     public LiveData<User> getUser(String currentUserId){
         return mUserRepository.getCurrentUser(currentUserId);
     }

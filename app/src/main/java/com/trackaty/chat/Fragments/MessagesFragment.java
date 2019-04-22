@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -86,11 +87,14 @@ public class MessagesFragment extends Fragment {
     private CircleImageView mUserPhoto;
     private EditText mMessage;
     private ImageButton mSendButton;
+    private FloatingActionButton mScrollFab;
+
 
     private Timer mTimer;
     private CountDownTimer mCountDownTimer;
     private Boolean isListEnded;// = false;
 
+    private int bottomVisibleItemCount;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -131,6 +135,7 @@ public class MessagesFragment extends Fragment {
 
         mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
+        mScrollFab = (FloatingActionButton) fragView.findViewById(R.id.scroll_fab);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mChatsRef = mDatabaseRef.child("chats");
@@ -175,17 +180,32 @@ public class MessagesFragment extends Fragment {
                 int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
                 //int totalItemCount = mLinearLayoutManager.getItemCount();
                 int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
-                int pastVisibleItems = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+                int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+                int lastVisibleItem = mLinearLayoutManager.findLastVisibleItemPosition(); // the position of last displayed item
+
+                //int firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition(); // the position of last displayed item
+
                 //int pastVisibleItems = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition();
-                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+pastVisibleItems);
+                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastCompletelyVisibleItem);
 
                 // The position of last displayed item = total items, witch means we are at the bottom
-                if(pastVisibleItems >= (totalItemCount-1) ){
+                if(lastCompletelyVisibleItem >= (totalItemCount-1)){
                     // End of the list is here.
-                    Log.i(TAG, "End of list");
+                    Log.i(TAG, "List reached the End");
                     isListEnded = true;
+                    bottomVisibleItemCount = mMessagesRecycler.getChildCount();
                 }else{
                     isListEnded = false;
+                }
+
+                // The position of first displayed item = total items - visible count
+                // witch means user starts scrolling up ant the first visible item is now on the bottom
+                if(lastVisibleItem <= ((totalItemCount-1) - bottomVisibleItemCount)){
+                    // End of the list is here.
+                    Log.i(TAG, "First page scrolled up");
+                    mScrollFab.setVisibility(View.VISIBLE);
+                }else{
+                    mScrollFab.setVisibility(View.INVISIBLE);
                 }
 
                 /*if(pastVisibleItems+visibleItemCount >= (totalItemCount-1)){
@@ -302,6 +322,30 @@ public class MessagesFragment extends Fragment {
                     }
 
                 }*/
+            }
+        });
+
+        mScrollFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "mScrollFab is clicked");
+                // Scroll to bottom
+
+                if (mMessagesAdapter.getItemCount() > 0) {// stop scroll to bottom if there are no items
+                    //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                    Log.d(TAG, "adapter getItemCount= " + mMessagesAdapter.getItemCount());
+                    int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
+                    int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+
+                    if((lastCompletelyVisibleItem + 20) < totalItemCount){
+                        Log.d(TAG, "it's a long distance. scrollToPosition");
+                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount() - 1);
+                    }else{
+                        Log.d(TAG, "it's a short distance. smoothScrollToPosition");
+                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount() - 1);
+                    }
+                }
+
             }
         });
 

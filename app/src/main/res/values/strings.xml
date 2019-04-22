@@ -11,7 +11,8 @@
     <string name="menu_invite">Invite Friends</string>
     <string name="menu_save">Save</string>
 
-    <string name="love_button_hint">Love</string>
+    <string name="love_button_hint_love">Love</string>
+    <string name="love_button_hint_unlove">Unlove</string>
     <string name="message_button_hint">Message</string>
     <string name="request_button_hint">Reveal</string>
     <string name="request_button_cancel_hint">Cancel</string>

@@ -30,12 +30,17 @@ public class RelationRepository {
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mRelationRef;
+    private DatabaseReference mLikesRef;
 
     private MutableLiveData<Relation> mRelation;
+    private MutableLiveData<Long> mlikesResult;
+    private MutableLiveData<Boolean> isLiked;
+
+
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
-    private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    private List<FirebaseListeners> mListenersList;// = new ArrayList<>();
 
     // a listener for mRelation changes
     private ValueEventListener mRelationListener = new ValueEventListener() {
@@ -62,12 +67,66 @@ public class RelationRepository {
         }
     };
 
+    // a listener for mRelation changes
+    private ValueEventListener mLikesCounterListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // Get user value
+                Log.d(TAG, "getLikesCount dataSnapshot key: "
+                        + dataSnapshot.getKey()+" Listener = "+ mLikesCounterListener+ " count= "+dataSnapshot.getChildrenCount());
+                //mRelation = dataSnapshot.getValue(User.class);
+                mlikesResult.postValue(dataSnapshot.getChildrenCount());
+            } else {
+                // User is null, error out
+                mlikesResult.postValue(0L);
+                Log.w(TAG, "getLikesCount  is null, no data exist");
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "getLikesCount:onCancelled", databaseError.toException());
+
+        }
+    };
+
+    // a listener for mRelation changes
+    private ValueEventListener mIsLikedListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // Get user value
+                Log.d(TAG, "isLiked dataSnapshot key: "
+                        + dataSnapshot.getKey()+" Listener = "+ mLikesCounterListener+ " count= "+dataSnapshot.getChildrenCount());
+                //mRelation = dataSnapshot.getValue(User.class);
+                isLiked.postValue(true);
+            } else {
+                // User is null, error out
+                isLiked.postValue(false);
+                Log.w(TAG, "isLiked is null, no data exist");
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "isLiked :onCancelled", databaseError.toException());
+
+        }
+    };
+
+
     public RelationRepository(){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mRelationRef = mDatabaseRef.child("relations");
+        mLikesRef = mDatabaseRef.child("likes");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         mRelation = new MutableLiveData<>();
+        mlikesResult  = new MutableLiveData<>();
+        isLiked = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -116,9 +175,15 @@ public class RelationRepository {
                     Log.d(TAG, "getCurrentUserRelation adding new Listener= "+ mRelationListener);
                     currentUserRelationRef.addValueEventListener(mRelationListener);
                     mListenersList.add(new FirebaseListeners(currentUserRelationRef, mRelationListener));
-                }else{
+                }else if(mListenersList.get(i).getQueryOrRef().equals(currentUserRelationRef)
+                        && (mListenersList.get(i).getListener().equals(mRelationListener))){
                     //there is old Listener on the ref
                     Log.d(TAG, "getCurrentUserRelation Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                }else{
+                    //CounterListener is never used
+                    Log.d(TAG, "Listener is never created");
+                    currentUserRelationRef.addValueEventListener(mRelationListener);
+                    mListenersList.add(new FirebaseListeners(currentUserRelationRef, mRelationListener));
                 }
             }
         }
@@ -145,6 +210,143 @@ public class RelationRepository {
             }
         });
 
+    }
+
+    // Get relation if any between current user and selected user
+    public MutableLiveData<Long> getLoveCount(String userId){
+
+        DatabaseReference userLikesRef = mLikesRef.child(userId);
+        //final MutableLiveData<User> mRelation = new MutableLiveData<>();
+        Log.d(TAG, "getLoveCount initiated: userId= "+userId );
+        Log.d(TAG, "getLoveCount userLikesRef= "+userLikesRef +" mLikesListener= "+mLikesCounterListener);
+
+        Log.d(TAG, "getLoveCount Listeners size= "+ mListenersList.size());
+        if(mListenersList.size()== 0){
+            // Need to add a new Listener
+            Log.d(TAG, "getLoveCount adding new Listener= "+ mLikesCounterListener);
+            //mListenersMap.put(postSnapshot.getRef(), mLikesCounterListener);
+            userLikesRef.addValueEventListener(mLikesCounterListener);
+            mListenersList.add(new FirebaseListeners(userLikesRef, mLikesCounterListener));
+        }else{
+            Log.d(TAG, "postSnapshot Listeners size is not 0= "+ mListenersList.size());
+            //there is an old Listener, need to check if it's on this ref
+            for (int i = 0; i < mListenersList.size(); i++) {
+                //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                if(mListenersList.get(i).getListener().equals(mLikesCounterListener) &&
+                        !mListenersList.get(i).getQueryOrRef().equals(userLikesRef)){
+                    // We used this listener before, but on another Ref
+                    Log.d(TAG, "We used this listener before, is it on the same ref?");
+                        Log.d(TAG, "getLoveCount adding new Listener= "+ mLikesCounterListener);
+                        userLikesRef.addValueEventListener(mLikesCounterListener);
+                        mListenersList.add(new FirebaseListeners(userLikesRef, mLikesCounterListener));
+                    }else if((mListenersList.get(i).getListener().equals(mLikesCounterListener) &&
+                        mListenersList.get(i).getQueryOrRef().equals(userLikesRef))){
+                        //there is old Listener on the ref
+                        Log.d(TAG, "getLoveCount Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                    }else{
+                    //CounterListener is never used
+                    Log.d(TAG, "Listener is never created");
+                    userLikesRef.addValueEventListener(mLikesCounterListener);
+                    mListenersList.add(new FirebaseListeners(userLikesRef, mLikesCounterListener));
+                }
+            }
+        }
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
+        return mlikesResult;
+    }
+
+    // Get relation if any between current user and selected user
+    public MutableLiveData<Boolean> getLoveStatues(String currentUserId, String userId){
+
+        DatabaseReference userLikesRef = mLikesRef.child(userId).child(currentUserId);
+        //final MutableLiveData<User> mRelation = new MutableLiveData<>();
+        Log.d(TAG, "getLoveStatus initiated: userId= "+userId );
+        Log.d(TAG, "getLoveStatus Listeners size= "+ mListenersList.size());
+        if(mListenersList.size()== 0){
+            // Need to add a new Listener
+            Log.d(TAG, "getLoveStatus adding new Listener= "+ mIsLikedListener);
+            //mListenersMap.put(postSnapshot.getRef(), mIsLikedListener);
+            userLikesRef.addValueEventListener(mIsLikedListener);
+            mListenersList.add(new FirebaseListeners(userLikesRef, mIsLikedListener));
+        }else{
+            Log.d(TAG, "getLoveStatus Listeners size is not 0= "+ mListenersList.size());
+            //there is an old Listener, need to check if it's on this ref
+            for (int i = 0; i < mListenersList.size(); i++) {
+                //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                if(mListenersList.get(i).getListener().equals(mIsLikedListener) &&
+                        !mListenersList.get(i).getQueryOrRef().equals(userLikesRef)){
+                    // We used this listener before, but on another Ref
+                    Log.d(TAG, "We used this listener before, is it on the same ref?");
+                    Log.d(TAG, "getLoveStatus adding new Listener= "+ mIsLikedListener);
+                    userLikesRef.addValueEventListener(mIsLikedListener);
+                    mListenersList.add(new FirebaseListeners(userLikesRef, mIsLikedListener));
+                }else if((mListenersList.get(i).getListener().equals(mIsLikedListener) &&
+                        mListenersList.get(i).getQueryOrRef().equals(userLikesRef))){
+                    //there is old Listener on the ref
+                    Log.d(TAG, "getLoveStatus Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                }else{
+                    //CounterListener is never used
+                    Log.d(TAG, "Listener is never created");
+                    userLikesRef.addValueEventListener(mIsLikedListener);
+                    mListenersList.add(new FirebaseListeners(userLikesRef, mIsLikedListener));
+                }
+            }
+        }
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
+        return isLiked;
+    }
+
+    // update love and favourites Favorite
+    public void sendLove(String currentUserId, String userId) {
+
+        /*User user = new User();
+        user.setName("wal");
+        // Create chat map
+        Map<String, Object> userValues = user.toMap();*/
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        //favorites is to display current user favorites
+        childUpdates.put("/favorites/" + currentUserId + "/" + userId, true);
+        //likes is to display who send likes to this particular user
+        childUpdates.put("/likes/" + userId + "/" + currentUserId, true);
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "send love onSuccess");
+                // ...
+            }
+        });
+
+    }
+
+    // update love and favourites Favorite
+    public void cancelLove(String currentUserId, String userId) {
+
+        /*User user = new User();
+        user.setName("wal");
+        // Create chat map
+        Map<String, Object> userValues = user.toMap();*/
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        //favorites is to display current user favorites
+        childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
+        //likes is to display who send likes to this particular user
+        childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "unlove onSuccess");
+                // ...
+            }
+        });
     }
 
     public void removeListeners(){

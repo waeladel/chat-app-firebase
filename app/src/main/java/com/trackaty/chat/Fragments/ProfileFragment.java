@@ -86,7 +86,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private User mUser;
     private FirebaseUser mFirebaseCurrentUser;
     private Button mSeeMoreButton;
-    private FloatingActionButton mLovedByButton, mMessageButton, mRevealButton, mBlockEditButton;
+    private FloatingActionButton mLoveButton, mMessageButton, mRevealButton, mBlockEditButton;
 
     private FragmentManager fragmentManager;// = getFragmentManager();
     private RevealFragment requestFragment;
@@ -114,6 +114,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     // Create contacts Hash list, to hold user selections when sending a request
     Map<String, Boolean> contactsMap = new HashMap<>();
 
+    private Boolean isLovedStatues ;
+
     private ProfileViewModel mProfileViewModel;
 
 
@@ -135,7 +137,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
         mSeeMoreButton = (Button) fragView.findViewById(R.id.see_more_button);
         mBlockEditButton = (FloatingActionButton) fragView.findViewById(R.id.block_edit_button);
-        mLovedByButton = (FloatingActionButton) fragView.findViewById(R.id.love_button);
+        mLoveButton = (FloatingActionButton) fragView.findViewById(R.id.love_button);
         mMessageButton = (FloatingActionButton) fragView.findViewById(R.id.message_button);
         mRevealButton = (FloatingActionButton) fragView.findViewById(R.id.reveal_button);
         mLovedByHint = (TextView) fragView.findViewById(R.id.love_text);
@@ -277,9 +279,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
                 mBlockEditHint.setText(R.string.edit_profile_button);
 
-                mLovedByButton.setEnabled(false);
-                mLovedByButton.setClickable(false);
-                mLovedByButton.setBackgroundTintList(ColorStateList.valueOf
+                mLoveButton.setEnabled(false);
+                mLoveButton.setClickable(false);
+                mLoveButton.setBackgroundTintList(ColorStateList.valueOf
                         (getResources().getColor(R.color.disabled_button)));
 
                 mMessageButton.setEnabled(false);
@@ -297,6 +299,40 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 mRevealHint.setEnabled(false);
             }
 
+            // get loves counts
+        mProfileViewModel.getLoveCount(mUserId).observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                Log.d(TAG, "onChanged love counts= "+aLong);
+                if (aLong != null){
+                    Log.d(TAG, "onChanged love counts= "+aLong);
+                    mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                }
+
+            }
+        });
+
+        // get loves Statues
+        mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if (aBoolean != null){
+                    Log.d(TAG, "onChanged love counts= "+aBoolean);
+                    if(aBoolean){
+                        // Statues = Liked
+                        isLovedStatues= true;
+                        mLovedByHint.setText(R.string.love_button_hint_unlove);
+                        mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                    }else{
+                        // Statues = Disliked
+                        isLovedStatues = false;
+                        mLovedByHint.setText(R.string.love_button_hint_love);
+                        mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                    }
+                }
+            }
+        });
+
 
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -313,6 +349,22 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                 }
             });
+
+        mLoveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(TAG, "LoveButton is clicked");
+                if(isLovedStatues){
+                    //Current user loved this user before, lit's unlove
+                    mProfileViewModel.cancelLove(mCurrentUserId, mUserId);
+                }else{
+
+                    //Current user didn't loved this user before, lit's love him
+                    mProfileViewModel.sendLove(mCurrentUserId, mUserId);
+                }
+
+            }
+        });
 
             mMessageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -683,8 +735,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             if (null != mUser.getBiography()) {
                 mUserBio.setText(mUser.getBiography());
             }
-
-            mLovedByValue.setText(getString(R.string.user_loved_by, mUser.getLoveCounter()));
+            //mLovedByValue.setText(getString(R.string.user_loved_by, mUser.getLoveCounter()));
             mPickUpValue.setText(getString(R.string.user_pickedup_by, mUser.getPickupCounter()));
 
             //mRelationship.setText(getString(R.string.user_relationship_value, user.getRelationship()));
