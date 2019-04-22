@@ -299,6 +299,20 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 mRevealHint.setEnabled(false);
             }
 
+        // get Pick Up counts
+        mProfileViewModel.getPickUpCount(mUserId).observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                if (aLong != null){
+                    Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                    //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
+                    mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                }
+
+            }
+        });
+
             // get loves counts
         mProfileViewModel.getLoveCount(mUserId).observe(this, new Observer<Long>() {
             @Override
@@ -736,7 +750,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 mUserBio.setText(mUser.getBiography());
             }
             //mLovedByValue.setText(getString(R.string.user_loved_by, mUser.getLoveCounter()));
-            mPickUpValue.setText(getString(R.string.user_pickedup_by, mUser.getPickupCounter()));
+            //mPickUpValue.setText(getString(R.string.user_pickedup_by, mUser.getPickupCounter()));
 
             //mRelationship.setText(getString(R.string.user_relationship_value, user.getRelationship()));
 

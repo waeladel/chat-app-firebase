@@ -61,6 +61,11 @@ public class ProfileViewModel extends ViewModel {
     }
 
     // get love counts
+    public LiveData<Long> getPickUpCount(String userId) {
+        return relationRepository.getPickUpCount(userId);
+    }
+
+    // get love counts
     public LiveData<Boolean> getLoveStatues(String currentUserId, String userId) {
         return relationRepository.getLoveStatues(currentUserId, userId);
     }

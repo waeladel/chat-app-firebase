@@ -31,9 +31,11 @@ public class RelationRepository {
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mRelationRef;
     private DatabaseReference mLikesRef;
+    private DatabaseReference mUserChatsRef;
 
     private MutableLiveData<Relation> mRelation;
     private MutableLiveData<Long> mlikesResult;
+    private MutableLiveData<Long> mPickUpCount;
     private MutableLiveData<Boolean> isLiked;
 
 
@@ -92,6 +94,32 @@ public class RelationRepository {
         }
     };
 
+
+    // a listener for Pick up counter
+    private ValueEventListener mPickUpCounterListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // Get user value
+                Log.d(TAG, "mPickUpCount dataSnapshot key: "
+                        + dataSnapshot.getKey()+" Listener = "+ mPickUpCounterListener+ " count= "+dataSnapshot.getChildrenCount());
+                //mRelation = dataSnapshot.getValue(User.class);
+                mPickUpCount.postValue(dataSnapshot.getChildrenCount());
+            } else {
+                // User is null, error out
+                mPickUpCount.postValue(0L);
+                Log.w(TAG, "mPickUpCount  is null, no data exist");
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "mPickUpCount :onCancelled", databaseError.toException());
+
+        }
+    };
+
     // a listener for mRelation changes
     private ValueEventListener mIsLikedListener = new ValueEventListener() {
         @Override
@@ -122,10 +150,12 @@ public class RelationRepository {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mRelationRef = mDatabaseRef.child("relations");
         mLikesRef = mDatabaseRef.child("likes");
+        mUserChatsRef = mDatabaseRef.child("userChats");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         mRelation = new MutableLiveData<>();
         mlikesResult  = new MutableLiveData<>();
+        mPickUpCount = new MutableLiveData<>();
         isLiked = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
@@ -298,6 +328,51 @@ public class RelationRepository {
             Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
         return isLiked;
+    }
+
+    // Get pick-up count if any between current user and selected user
+    public MutableLiveData<Long> getPickUpCount(String userId){
+
+        DatabaseReference userChatsRef = mUserChatsRef.child(userId);
+        //final MutableLiveData<User> mRelation = new MutableLiveData<>();
+        Log.d(TAG, "getPickUpCount initiated: userId= "+userId );
+        Log.d(TAG, "getPickUpCount userChatsRef= "+userChatsRef +" mLikesListener= "+mPickUpCounterListener);
+
+        Log.d(TAG, "getLoveCount Listeners size= "+ mListenersList.size());
+        if(mListenersList.size()== 0){
+            // Need to add a new Listener
+            Log.d(TAG, "getPickUpCount adding new Listener= "+ mPickUpCounterListener);
+            //mListenersMap.put(postSnapshot.getRef(), mPickUpCounterListener);
+            userChatsRef.addValueEventListener(mPickUpCounterListener);
+            mListenersList.add(new FirebaseListeners(userChatsRef, mPickUpCounterListener));
+        }else{
+            Log.d(TAG, "postSnapshot Listeners size is not 0= "+ mListenersList.size());
+            //there is an old Listener, need to check if it's on this ref
+            for (int i = 0; i < mListenersList.size(); i++) {
+                //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                if(mListenersList.get(i).getListener().equals(mPickUpCounterListener) &&
+                        !mListenersList.get(i).getQueryOrRef().equals(userChatsRef)){
+                    // We used this listener before, but on another Ref
+                    Log.d(TAG, "We used this listener before, is it on the same ref?");
+                    Log.d(TAG, "getPickUpCount adding new Listener= "+ mPickUpCounterListener);
+                    userChatsRef.addValueEventListener(mPickUpCounterListener);
+                    mListenersList.add(new FirebaseListeners(userChatsRef, mPickUpCounterListener));
+                }else if((mListenersList.get(i).getListener().equals(mPickUpCounterListener) &&
+                        mListenersList.get(i).getQueryOrRef().equals(userChatsRef))){
+                    //there is old Listener on the ref
+                    Log.d(TAG, "getLoveCount Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                }else{
+                    //CounterListener is never used
+                    Log.d(TAG, "Listener is never created");
+                    userChatsRef.addValueEventListener(mPickUpCounterListener);
+                    mListenersList.add(new FirebaseListeners(userChatsRef, mPickUpCounterListener));
+                }
+            }
+        }
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
+        return mPickUpCount;
     }
 
     // update love and favourites Favorite
