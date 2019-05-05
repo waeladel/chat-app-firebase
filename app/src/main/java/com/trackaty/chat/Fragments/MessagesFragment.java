@@ -562,6 +562,7 @@ public class MessagesFragment extends Fragment {
                     public void onChanged(User user) {
                         Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
                         mChatUser = user;
+                        mChatUser.setKey(mChatUserId);
                         // display ChatUser name
                         if(null != mChatUser.getName()){
                             mUserName.setText(getFirstWord(mChatUser.getName()));
@@ -667,7 +668,7 @@ public class MessagesFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     //mListener.onTextViewNameClick(view, getAdapterPosition());
-                    Log.i(TAG, "user avatar or name clicked");
+                    Log.i(TAG, "user avatar or name clicked. mChatUser getKey()= "+mChatUser.getKey());
                     NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey());
 
                     //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
@@ -682,8 +683,6 @@ public class MessagesFragment extends Fragment {
     }
 
 }
-
-
 
     // A countdown timer to update last online time every minute
     private void UpdateTimeAgo(final Long lastOnline) {

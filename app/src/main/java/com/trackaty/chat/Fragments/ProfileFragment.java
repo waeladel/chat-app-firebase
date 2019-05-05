@@ -300,52 +300,108 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             }
 
         // get Pick Up counts
-        mProfileViewModel.getPickUpCount(mUserId).observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(Long aLong) {
-                Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                if (aLong != null){
+        if (null != mUserId && !mUserId.equals(mCurrentUserId)) {
+            // it's not logged in user. It's another user
+            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
+            mProfileViewModel.getPickUpCount(mUserId).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
                     Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                    //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
-                    mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
-                }
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
+                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                    }
 
-            }
-        });
+                }
+            });
 
             // get loves counts
-        mProfileViewModel.getLoveCount(mUserId).observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(Long aLong) {
-                Log.d(TAG, "onChanged love counts= "+aLong);
-                if (aLong != null){
+            mProfileViewModel.getLoveCount(mUserId).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
                     Log.d(TAG, "onChanged love counts= "+aLong);
-                    mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged love counts= "+aLong);
+                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                    }
+
                 }
+            });
 
-            }
-        });
-
-        // get loves Statues
-        mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                if (aBoolean != null){
-                    Log.d(TAG, "onChanged love counts= "+aBoolean);
-                    if(aBoolean){
-                        // Statues = Liked
-                        isLovedStatues= true;
-                        mLovedByHint.setText(R.string.love_button_hint_unlove);
-                        mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
-                    }else{
-                        // Statues = Disliked
-                        isLovedStatues = false;
-                        mLovedByHint.setText(R.string.love_button_hint_love);
-                        mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+            // get loves Statues
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                    if (aBoolean != null){
+                        Log.d(TAG, "onChanged love counts= "+aBoolean);
+                        if(aBoolean){
+                            // Statues = Liked
+                            isLovedStatues= true;
+                            mLovedByHint.setText(R.string.love_button_hint_unlove);
+                            mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                        }else{
+                            // Statues = Disliked
+                            isLovedStatues = false;
+                            mLovedByHint.setText(R.string.love_button_hint_love);
+                            mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                        }
                     }
                 }
-            }
-        });
+            });
+
+
+        }else{
+            // get current logged in user
+            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
+            mProfileViewModel.getPickUpCount(mCurrentUserId).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
+                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                    }
+
+                }
+            });
+
+            // get loves counts
+            mProfileViewModel.getLoveCount(mCurrentUserId).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged love counts= "+aLong);
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged love counts= "+aLong);
+                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                    }
+
+                }
+            });
+
+            // get loves Statues
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mCurrentUserId).observe(this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                    if (aBoolean != null){
+                        Log.d(TAG, "onChanged love counts= "+aBoolean);
+                        if(aBoolean){
+                            // Statues = Liked
+                            isLovedStatues= true;
+                            mLovedByHint.setText(R.string.love_button_hint_unlove);
+                            mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                        }else{
+                            // Statues = Disliked
+                            isLovedStatues = false;
+                            mLovedByHint.setText(R.string.love_button_hint_love);
+                            mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                        }
+                    }
+                }
+            });
+
+        }
 
 
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
