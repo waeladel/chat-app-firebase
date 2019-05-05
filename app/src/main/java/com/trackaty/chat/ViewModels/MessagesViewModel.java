@@ -9,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.MessagesDataFactory;
 import com.trackaty.chat.DataSources.MessagesListRepository;
 import com.trackaty.chat.DataSources.MessagesRepository;
+import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
@@ -32,6 +33,7 @@ public class MessagesViewModel extends ViewModel {
     public  MutableLiveData<PagedList<Message>> items;
     LiveData<ItemKeyedDataSource<String, Message>> liveDataSource;
     public  LiveData<User> chatUser;
+    public  LiveData<Chat> chat;
     private MessagesRepository messagesRepository;
 
     private DatabaseReference mDatabaseRef;
@@ -40,7 +42,7 @@ public class MessagesViewModel extends ViewModel {
     private  MutableLiveData<CharSequence> agoTime;
 
 
-    public MessagesViewModel(String chatKey) {
+    public MessagesViewModel(String chatKey, String chatUserId) {
 
         // pass chatKey to the constructor of MessagesDataFactory
         messagesDataFactory = new MessagesDataFactory(chatKey);
@@ -64,21 +66,35 @@ public class MessagesViewModel extends ViewModel {
         itemPagedList = new LivePagedListBuilder<>(messagesDataFactory, config).build();
         /*itemPagedList = (new LivePagedListBuilder(messagesDataFactory,config))
                 .build();*/
+        chat = messagesRepository.getChat(chatKey);
+        chatUser = messagesRepository.getUser(chatUserId);
 
     }
+
 
     public LiveData<User> getChatUser(String userId) {
         Log.d(TAG, "getUser"+ userId);
-        chatUser = messagesRepository.getUser(userId);
-        return chatUser;
+        return chatUser ;
+        //chatUser = messagesRepository.getUser(userId);
+        //return messagesRepository.getUser(userId);
+    }
+
+    /*public LiveData<String> getSenderId(String chatId) {
+        Log.d(TAG, "getSenderId chatId"+ chatId);
+        return  messagesRepository.getSenderId(chatId);
+    }*/
+
+    public LiveData<Chat> getChat(String chatId) {
+        Log.d(TAG, "chatId"+ chatId);
+        return chat;
+        //return  messagesRepository.getChat(chatId);
     }
 
 
-
-    public LiveData<PagedList<Message>> getMessagesList() {
+    /*public LiveData<PagedList<Message>> getMessagesList() {
         Log.d(TAG, "getMessagesList initiated");
         return itemPagedList;
-    }
+    }*/
 
 
 

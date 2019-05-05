@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".Fragments.MessagesFragment">
 
     <TextView
@@ -15,22 +15,11 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:text="@string/user_request_dialog_hint"
+        android:text="@string/activate_chat_dialog_title"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/contacts_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/layout_dialog_buttons"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_title">
-
-    </androidx.recyclerview.widget.RecyclerView>
 
     <!-- A horizontal line between the chatbox and RecyclerView -->
 
@@ -77,27 +66,55 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>-->
 
-    <LinearLayout
-        android:id="@+id/layout_dialog_buttons"
-        android:layout_width="0dp"
+    <Spinner
+        android:id="@+id/activation_spinner"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="?android:attr/buttonBarStyle"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:entries="@array/activation_time"
+        android:spinnerMode="dropdown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dialog_title" />
+
+    <TextView
+        android:id="@+id/dialog_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/activate_chat_dialog_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activation_spinner" />
+
+    <LinearLayout
+        android:id="@+id/layout_dialog_buttons"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:background="#ffffff"
         android:minHeight="48dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_message">
 
         <Button
             android:id="@+id/cancel_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:layout_weight="1"
@@ -105,13 +122,13 @@
 
         <Button
             android:id="@+id/send_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_marginStart="@dimen/fab_margin"
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_weight="1"
-            android:text="@string/send_button" />
+            android:text="@string/save_button" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

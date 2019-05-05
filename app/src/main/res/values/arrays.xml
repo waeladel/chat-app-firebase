@@ -73,4 +73,25 @@
         <item>@string/social_private</item>
     </string-array>
 
+    <string-array name="activation_time">
+        <item>@string/activate_chat_minutes_5</item>
+        <item>@string/activate_chat_minutes_10</item>
+        <item>@string/activate_chat_minutes_15</item>
+        <!--<item>@string/activate_chat_minutes_20</item>
+        <item>@string/activate_chat_minutes_25</item>-->
+        <item>@string/activate_chat_minutes_30</item>
+        <!--<item>@string/activate_chat_minutes_35</item>
+        <item>@string/activate_chat_minutes_40</item>-->
+        <item>@string/activate_chat_minutes_45</item>
+        <!--<item>@string/activate_chat_minutes_50</item>
+        <item>@string/activate_chat_minutes_55</item>-->
+        <item>@string/activate_chat_hours_1</item>
+        <item>@string/activate_chat_hours_2</item>
+        <item>@string/activate_chat_hours_3</item>
+        <!--<item>@string/activate_chat_hours_4</item>
+        <item>@string/activate_chat_hours_5</item>
+        <item>@string/activate_chat_hours_6</item>-->
+        <item>@string/activate_chat_forever</item>
+    </string-array>
+
 </resources>

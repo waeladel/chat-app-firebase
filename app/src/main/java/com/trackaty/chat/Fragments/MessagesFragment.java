@@ -1,6 +1,7 @@
 package com.trackaty.chat.Fragments;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -52,8 +53,9 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
@@ -71,7 +73,10 @@ public class MessagesFragment extends Fragment {
     private ArrayList<Message> mMessagesArrayList;
     private MessagesAdapter mMessagesAdapter;
 
+    private FragmentManager fragmentManager;// = getFragmentManager();
 
+    private  static final String CHAT_INACTIVE_FRAGMENT = "InactiveFragment";
+    private  static final String ACTIVATE_CHAT_FRAGMENT = "ActivateFragment";
 
     private MessagesViewModel mMessagesViewModel;
     private MainActivityViewModel mMainViewModel;
@@ -79,20 +84,25 @@ public class MessagesFragment extends Fragment {
     private User mChatUser, mCurrentUser ;
     private FirebaseUser mFirebaseCurrentUser;
     private Boolean isGroup;
+    private Boolean isSender;
 
     private Context mActivityContext;
     private Activity activity;
 
-    public TextView mUserName, mLastSeen;
+    public TextView mUserName, mLastSeen , mRemainingTimeText;
     private CircleImageView mUserPhoto;
     private EditText mMessage;
     private ImageButton mSendButton;
     private FloatingActionButton mScrollFab;
 
 
-    private Timer mTimer;
-    private CountDownTimer mCountDownTimer;
+    //private Timer mTimer;
+    private static CountDownTimer mAgoTimer, mRemainingTimer;
     private Boolean isListEnded;// = false;
+    private long mTimeLiftInMillis;
+    private Long mActiveEndTime, mLastOnlineEndTime;
+
+    private Chat mChat;
 
     private int bottomVisibleItemCount;
 
@@ -136,6 +146,7 @@ public class MessagesFragment extends Fragment {
         mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
         mScrollFab = (FloatingActionButton) fragView.findViewById(R.id.scroll_fab);
+        mRemainingTimeText = (TextView) fragView.findViewById(R.id.remaining_time);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mChatsRef = mDatabaseRef.child("chats");
@@ -161,9 +172,11 @@ public class MessagesFragment extends Fragment {
         //observe when a change happen to usersList live data
         mMessagesRecycler.setAdapter(mMessagesAdapter);
 
-        /*// Push up content when clicking in edit text
+        // Push up content when clicking in edit text
         activity.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);*/
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        /*activity.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
 
         // Listen for scroll events
         mMessagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -307,8 +320,9 @@ public class MessagesFragment extends Fragment {
                 Log.d(TAG, "getJoinedKeys ="+getJoinedKeys(mCurrentUserId , mChatUserId));
                 if(!TextUtils.isEmpty(messageText)){
                     // clear text before sending the message successfully for offline capabilities
-                    mMessage.setText(null);
-                    sendMessage(mChatId, messageText);
+                    //mMessage.setText(null);
+                    //sendMessage(mChatId, messageText);
+                    sendActivateMessage(messageText);
                 }
                 /*if(!TextUtils.isEmpty(messageText)){
                     if(mChatId != null){
@@ -352,6 +366,7 @@ public class MessagesFragment extends Fragment {
         return fragView;
     }
 
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -359,19 +374,37 @@ public class MessagesFragment extends Fragment {
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
-            // Push up content when clicking in edit text
+            /*// Push up content when clicking in edit text
             activity.getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);*/
+        }
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+        long now = System.currentTimeMillis();
+        // Re-start Active countdown timer on fragment start
+        if(mActiveEndTime != null){
+            mTimeLiftInMillis = mActiveEndTime - now;
+            ShowRemainingTime(mChat);
+        }
+
+        // Re-start Last online countdown timer on fragment start
+        if(mLastOnlineEndTime != null){
+            UpdateTimeAgo(mLastOnlineEndTime);
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(mCountDownTimer != null){
-            mCountDownTimer.cancel();
-            Log.d(TAG, "mCountDownTimer canceled");
-        }
+        Log.d(TAG, "onStop");
+        // Cancel all countdown timers on fragment stop
+        CancelLastOnlineTimer();
+        CancelActiveTimer();
     }
 
     @Override
@@ -389,7 +422,7 @@ public class MessagesFragment extends Fragment {
             actionbar.setCustomView(actionBarView);
 
 
-            mTimer = new Timer();
+            //mTimer = new Timer();
             // custom action bar items to add receiver's avatar and name //
             mUserName = (TextView) actionBarView.findViewById(R.id.user_name);
             mLastSeen = (TextView) actionBarView.findViewById(R.id.last_seen);
@@ -419,17 +452,17 @@ public class MessagesFragment extends Fragment {
             //mMessagesViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
 
             // start init  mMessagesViewModel here after mCurrentUserId is received//
-            // extend mMessagesViewModel to pass Chat Key value //
+            // extend mMessagesViewModel to pass Chat Key value and chat user key //
             mMessagesViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
                 @NonNull
                 @Override
                 public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                    return (T)new MessagesViewModel (mChatId);
+                    return (T)new MessagesViewModel (mChatId, mChatUserId);
                 }
             }).get(MessagesViewModel.class);
 
 
-            mMessagesViewModel.getMessagesList().observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
+            mMessagesViewModel.itemPagedList.observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
                 @Override
                 public void onChanged(@Nullable final PagedList<Message> items) {
                     System.out.println("mama onChanged");
@@ -538,6 +571,7 @@ public class MessagesFragment extends Fragment {
                         if(null != mChatUser.getLastOnline()){
 
                             Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
+                            mLastOnlineEndTime = mChatUser.getLastOnline();
 
                             if(mChatUser.getLastOnline() == 0){
                                 //user is active now
@@ -566,24 +600,9 @@ public class MessagesFragment extends Fragment {
                                     }
                                 });*/
 
-                                mCountDownTimer = new CountDownTimer(10*60*1000, 60*1000) {
-                                    @Override
-                                    public void onTick(long millisUntilFinished) {
+                                // Update Last online Time every minute
+                                UpdateTimeAgo(mLastOnlineEndTime);
 
-                                        long now = System.currentTimeMillis();
-                                        Log.d(TAG, "now = "+now + " getLastOnline= "+mChatUser.getLastOnline());
-                                        CharSequence ago =
-                                                DateUtils.getRelativeTimeSpanString(mChatUser.getLastOnline(), now, DateUtils.MINUTE_IN_MILLIS);
-                                                mLastSeen.setText(getString(R.string.user_active_ago, ago));
-                                    }
-
-                                    @Override
-                                    public void onFinish() {
-                                        //restart countDownTimer again
-                                        Log.d(TAG, "mCountDownTimer onFinish. We will restart it");
-                                        mCountDownTimer.start();
-                                    }
-                                }.start();
                             }
 
                         }
@@ -608,6 +627,41 @@ public class MessagesFragment extends Fragment {
                 }
             });
 
+            /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(String senderId) {
+                    Log.d(TAG, "onChanged senderId = "+ senderId);
+                    if(senderId != null){
+                        if(senderId.equals(mCurrentUserId)){
+                            Log.d(TAG, "CurrentUser is the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = true;
+                        }else{
+                            Log.d(TAG, "CurrentUser isn't the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = false;
+                        }
+                    }else{
+                        Log.d(TAG, "sender is null. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                        isSender = null;
+                    }
+                }
+            });*/
+
+            mMessagesViewModel.getChat(mChatId).observe(this, new Observer<Chat>() {
+                @Override
+                public void onChanged(Chat chat) {
+                    if (chat != null){
+                        Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                        mChat = chat;
+                        if(null != mChat.getActive()){
+                            // End timestamp is needed to restart the countdown on fragment start
+                            mActiveEndTime = mChat.getActive();
+                        }
+                        // Display the time left till deactivate the conversation
+                        ShowRemainingTime(mChat);
+                    }
+                }
+            });
+
             // Open user profile with custom actionBar is clicked //
             actionBarView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -629,20 +683,271 @@ public class MessagesFragment extends Fragment {
 
 }
 
-    private void UpdateTimeAgo(Long lastOnline) {
+
+
+    // A countdown timer to update last online time every minute
+    private void UpdateTimeAgo(final Long lastOnline) {
         long now = System.currentTimeMillis();
         Log.d(TAG, "now = "+now);
 
-        CharSequence ago =
-                DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS);
+        if (mAgoTimer != null) {
+            CancelLastOnlineTimer();
+        }
 
-        mLastSeen.setText(ago);
+        mAgoTimer = new CountDownTimer(10*60*1000, 60*1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
 
+                long now = System.currentTimeMillis();
+                Log.d(TAG, "mAgoTimer onTick: now = "+now + " getLastOnline= "+mChatUser.getLastOnline());
+                CharSequence ago =
+                        DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS);
+                Activity activity = getActivity();
+                if(activity != null && isAdded()){
+                    mLastSeen.setText(getString(R.string.user_active_ago, ago));
+                }
+
+            }
+
+            @Override
+            public void onFinish() {
+                //restart countDownTimer again
+                Log.d(TAG, "mAgoTimer onFinish. We will restart it");
+                mAgoTimer.start();
+            }
+        }.start();
+
+    }
+
+    // Display the time left till deactivate the conversation
+    private void ShowRemainingTime(Chat chat) {
+        long now = System.currentTimeMillis();
+
+        if(chat == null){
+            Log.d(TAG, "RemainingTime: It's the first message, don't show timer");
+            mRemainingTimeText.setVisibility(View.GONE);
+        }else{
+            // it's not the first message
+            Log.d(TAG, "RemainingTime: it's not the first message");
+            if(null != chat.getActive()) {
+                // Active is set
+                Log.d(TAG, "RemainingTime: Active is set");
+                if (chat.getActive() == 0) {
+                    // This chat is active forever
+                    Log.d(TAG, "RemainingTime: This chat is active forever, don't show timer");
+                    mRemainingTimeText.setVisibility(View.GONE);
+                } else {
+                    // Chat is not active forever, check if it's still active
+                    Log.d(TAG, "RemainingTime. Chat is not active forever, check if it's still active");
+                    if (chat.getActive() < now) {
+                        // Show to sender: this chat room is not active dialog
+                        CancelActiveTimer();
+                        mRemainingTimeText.setVisibility(View.VISIBLE);
+                        mRemainingTimeText.setText(R.string.message_active_default_timer);
+                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                        Log.d(TAG, "RemainingTime: this chat room is not active");
+
+                    } else {
+                        // Chat is not active forever but it's still active so far
+                        Log.d(TAG, "RemainingTime: Chat is not active forever but it's still active so far");
+                        mRemainingTimeText.setVisibility(View.VISIBLE);
+                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.my_app_color_on_primary));
+                        mTimeLiftInMillis = chat.getActive() - now;
+                        Log.d(TAG, "RemainingTime: not active forever but still active. mTimeLiftInMillis= "+mTimeLiftInMillis);
+
+                        StartActiveTimer();
+
+                    }
+
+                }// end of chat.getActive()==0
+
+            }// end of null != chat.getActive()
+
+        }// end of chat == null && isSender == null
+    }
+
+    // Cancel active countdown timer
+    private void CancelActiveTimer() {
+        if(mRemainingTimer != null){
+            // cancel timer
+            mRemainingTimer.cancel();
+            Log.d(TAG, "mRemainingTimer canceled");
+        }
+    }
+
+    // Cancel last online countdown timer
+    private void CancelLastOnlineTimer() {
+        if(mAgoTimer != null){
+            mAgoTimer.cancel();
+            Log.d(TAG, "mAgoTimer canceled");
+        }
+    }
+
+
+    private void StartActiveTimer() {
+
+        // check if it's a negative number
+        if(mTimeLiftInMillis > 0){
+            Log.i(TAG, "StartActiveTimer: time left is  bigger than 0, let's start timer");
+            // Cancel any previous timer
+            if (mRemainingTimer != null) {
+                CancelActiveTimer();
+            }
+            mRemainingTimer = new CountDownTimer(mTimeLiftInMillis, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    mTimeLiftInMillis = millisUntilFinished;
+                    Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
+                    // Update timer text
+                    UpdateActiveTimeText();
+                }
+
+                @Override
+                public void onFinish() {
+                    Log.d(TAG, "mRemainingTimer onFinish.");
+                    mRemainingTimeText.setVisibility(View.VISIBLE);
+                    mRemainingTimeText.setText(R.string.message_active_default_timer);
+                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                }
+            }.start();
+
+        }else{
+            // Timer is finished, should display 0
+            Log.i(TAG, "StartActiveTimer: timer is finished, should display 0");
+            mRemainingTimeText.setVisibility(View.VISIBLE);
+            mRemainingTimeText.setText(R.string.message_active_default_timer);
+            mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+        }
+    }
+
+    private void UpdateActiveTimeText() {
+
+        //long days = TimeUnit.MILLISECONDS.toDays(mTimeLiftInMillis);
+        long hours = TimeUnit.MILLISECONDS.toHours(mTimeLiftInMillis) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(mTimeLiftInMillis));
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(mTimeLiftInMillis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(mTimeLiftInMillis));
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(mTimeLiftInMillis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mTimeLiftInMillis));
+        //long milliseconds = diff - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(diff));
+
+        // formatted timer text
+        String formattedTimeLeft = String.format(Locale.getDefault(),"%02d:%02d:%02d", hours, minutes,seconds );
+        Log.d(TAG, "UpdateActiveTimeText: hms= "+ formattedTimeLeft);
+        mRemainingTimeText.setText(formattedTimeLeft);
+    }
+
+    // Check if activate message should be displayed before sending the message or not
+    private void sendActivateMessage(String messageText) {
+
+        long now = System.currentTimeMillis();
+
+        if(mChat == null){
+            Log.d(TAG, "sendMessage: It's the first message, send it");
+            sendMessage(mChatId, messageText);
+        }else{
+            // it's not the first message
+            Log.d(TAG, "sendMessage: it's not the first message");
+            if(null != mChat.getActive()) {
+                // Active is set
+                Log.d(TAG, "sendMessage: Active is set");
+                if (mChat.getActive() == 0) {
+                    // This chat is active forever
+                    Log.d(TAG, "sendMessage: This chat is active forever, send message");
+                    sendMessage(mChatId, messageText);
+                } else {
+                    // Chat is not active forever, check if it's still active
+                    Log.d(TAG, "sendMessage. Chat is not active forever, check if it's still active");
+                    if (mCurrentUserId.equals(mChat.getSender()) && mChat.getActive() < now) {
+                        // Show to sender: this chat room is not active dialog
+                        showChatInactiveDialog();
+                        Log.d(TAG, "sendMessage: Show to sender: this chat room is not active dialog");
+
+                    } else if (!mCurrentUserId.equals(mChat.getSender()) && mChat.getActive() < now) {
+                        // Show to receiver: select active time dialog
+                        showChatActivateDialog(mChatId);
+                        Log.d(TAG, "sendMessage: Show to receiver: select active time dialog");
+                    } else {
+                        // Chat is not active forever but it's still active so far
+                        Log.d(TAG, "sendMessage: Chat is not active forever but it's still active so far");
+                        sendMessage(mChatId, messageText);
+                    }
+
+                }// end of mChat.getActive()==0
+
+            }else{// end of null != mChat.getActive()
+                // Active is never set, we must set it if current user is receiver
+                Log.d(TAG, "sendMessage: Active is never set, we must set it if current user is receiver");
+                if (null != mChat.getSender() && !mCurrentUserId.equals(mChat.getSender())) {
+                    // Show to receiver: select active time dialog
+                    showChatActivateDialog(mChatId);
+                    Log.d(TAG, "sendMessage: select active time dialog");
+                }else if(null != mChat.getSender() && mCurrentUserId.equals(mChat.getSender())){
+                    // Active is never set, but this user is the sender, so keep sending messages
+                    Log.d(TAG, "sendMessage: Active is never set, but this user is the sender, so keep sending messages");
+                    sendMessage(mChatId, messageText);
+                }else{
+                    // Active is never set, and isSender is null for a strange reason, send message anyway
+                    Log.d(TAG, "sendMessage: Active is never set, and isSender is null for a strange reason, send message anyway");
+                    sendMessage(mChatId, messageText);
+                }
+            }
+
+        }// end of mChat == null && isSender == null
+
+        /*if(mChat == null && isSender == null){
+            Log.d(TAG, "sendMessage: It's the first message, send it message");
+            sendMessage(mChatId, messageText);
+        }else{
+            // it's not the first message
+            Log.d(TAG, "sendMessage: it's not the first message");
+            if(null != mChat.getActive()) {
+                // Active is set
+                Log.d(TAG, "sendMessage: Active is set");
+                if (mChat.getActive() == 0) {
+                    // This chat is active forever
+                    Log.d(TAG, "sendMessage: This chat is active forever, send message");
+                    //sendMessage(mChatId, messageText);
+                } else {
+                    // Chat is not active forever, check if it's still active
+                    Log.d(TAG, "sendMessage. Chat is not active forever, check if it's still active");
+                    if (isSender && mChat.getActive() < now) {
+                        // Show to sender: this chat room is not active dialog
+                        Log.d(TAG, "sendMessage: Show to sender: this chat room is not active dialog");
+
+                    } else if (!isSender && mChat.getActive() < now) {
+                        // Show to receiver: select active time dialog
+                        Log.d(TAG, "sendMessage: Show to receiver: select active time dialog");
+                    } else {
+                        // Chat is not active forever but it's still active so far
+                        Log.d(TAG, "sendMessage: Chat is not active forever but it's still active so far");
+                        //sendMessage(mChatId, messageText);
+                    }
+
+                }// end of mChat.getActive()==0
+
+            }else{// end of null != mChat.getActive()
+                // Active is never set, we must set it if current user is receiver
+                Log.d(TAG, "sendMessage: Active is never set, we must set it if current user is receiver");
+                if (null != isSender && !isSender) {
+                    // Show to receiver: select active time dialog
+                    Log.d(TAG, "sendMessage: select active time dialog");;
+                }else if(null != isSender && isSender){
+                    // Active is never set, but this user is the sender, so keep sending messages
+                    Log.d(TAG, "sendMessage: Active is never set, but this user is the sender, so keep sending messages");
+                    //sendMessage(mChatId, messageText);
+                }else{
+                    // Active is never set, and isSender is null for a strange reason, send message anyway
+                    Log.d(TAG, "sendMessage: Active is never set, and isSender is null for a strange reason, send message anyway");
+                    //sendMessage(mChatId, messageText);
+                }
+            }
+
+        }// end of mChat == null && isSender == null*/
     }
 
     private void sendMessage(String mChatId, String messageText) {
 
-        String  messageKey = mMessagesRef.push().getKey();
+        mMessage.setText(null);// Remove text from EditText
+
+        String messageKey = mMessagesRef.push().getKey();
         Message message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false);
         Map<String, Object> messageValues = message.toMap();
 
@@ -660,8 +965,23 @@ public class MessagesFragment extends Fragment {
         members.put(mChatUserId, mChatUser);
 
         // Create chat map
-        Chat chat = new Chat(messageText, members);
-        Map<String, Object> chatValues = chat.toMap();
+        Map<String, Object> chatValues;
+        if(mChat != null){
+            // get the existing chat and post again after changing last message
+            Log.d(TAG, "sendMessage: chat exist, get the existing chat and post again ");
+            mChat.setLastMessage(messageText);
+            if(null == mChat.getSender()){
+                mChat.setSender(mCurrentUserId);
+            }
+            chatValues = mChat.toMap();
+        }else{
+            // Create new chat from scratch
+            Log.d(TAG, "sendMessage: chat is null, create new chat from scratch");
+            Chat chat = new Chat(messageText, mCurrentUserId, members);
+            chatValues = chat.toMap();
+        }
+
+
         /*Map<String, Object> chatValues = new HashMap<>();
         chatValues.put("lastMessage", messageText);
         chatValues.put("lastSent", ServerValue.TIMESTAMP);
@@ -740,6 +1060,26 @@ public class MessagesFragment extends Fragment {
                     }
                 });
     }*/
+
+    //Show inactive alert dialog
+    private void showChatInactiveDialog() {
+        ChatInactiveAlertFragment chatInactiveFragment = ChatInactiveAlertFragment.newInstance();
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            chatInactiveFragment.show(fragmentManager, CHAT_INACTIVE_FRAGMENT);
+            Log.i(TAG, "edit/chatInactiveFragment show clicked ");
+        }
+    }
+
+    //Show a dialog to select whether to edit or un-reveal
+    private void showChatActivateDialog(String mChatId) {
+        ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId);
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            chatActivateFragment.show(fragmentManager, ACTIVATE_CHAT_FRAGMENT);
+            Log.i(TAG, "edit/chatActivateFragment show clicked ");
+        }
+    }
 
 }
 

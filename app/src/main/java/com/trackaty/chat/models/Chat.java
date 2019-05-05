@@ -12,7 +12,9 @@ public class Chat {
 
     private String key;
     private String lastMessage;
+    private String sender;
     private Object lastSent ;
+    private Long active;
     //private List<String> members = new ArrayList<>();
     private Map<String, User> members = new HashMap<>();
 
@@ -21,10 +23,11 @@ public class Chat {
 
     }
 
-    public Chat( String lastMessage, Map<String, User> members) {
+    public Chat( String lastMessage, String sender, Map<String, User> members) {
         this.lastMessage = lastMessage;
         //this.members = members;
         this.members = members;
+        this.sender = sender;
     }
 
     // [START post_to_map]
@@ -34,6 +37,8 @@ public class Chat {
         result.put("lastMessage", lastMessage);
         //result.put("members", members);
         result.put("members", members);
+        result.put("active", active);
+        result.put("sender", sender);
         result.put("lastSent", ServerValue.TIMESTAMP);
 
         return result;
@@ -70,7 +75,23 @@ public class Chat {
         this.lastSent = lastSent;
     }
 
-   /* public List<String> getMembers() {
+    public Long getActive() {
+        return active;
+    }
+
+    public void setActive(Long active) {
+        this.active = active;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    /* public List<String> getMembers() {
         return members;
     }
 
