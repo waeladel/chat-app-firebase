@@ -16,17 +16,19 @@ public class Message {
     private String senderName;
     private String senderAvatar;
     private Boolean seen;
+    private Boolean revealed; // To know if a message was revealed before or not
     private Object created ;
 
     public Message() {
     }
 
-    public Message(String message, String senderId, String senderName,String senderAvatar, Boolean seen) {
+    public Message(String message, String senderId, String senderName,String senderAvatar, Boolean seen ,Boolean revealed) {
         this.message = message;
         this.senderId = senderId;
         this.senderName = senderName;
         this.senderAvatar = senderAvatar;
         this.seen = seen;
+        this.revealed = revealed;
         //this.created = created;
     }
 
@@ -39,6 +41,7 @@ public class Message {
         result.put("senderName", senderName);
         result.put("senderAvatar", senderAvatar);
         result.put("seen", seen);
+        result.put("revealed", revealed);
         result.put("created", ServerValue.TIMESTAMP);
 
         return result;
@@ -96,6 +99,14 @@ public class Message {
 
     public void setSenderAvatar(String senderAvatar) {
         this.senderAvatar = senderAvatar;
+    }
+
+    public Boolean getRevealed() {
+        return revealed;
+    }
+
+    public void setRevealed(Boolean revealed) {
+        this.revealed = revealed;
     }
 
     // [END post_to_map]

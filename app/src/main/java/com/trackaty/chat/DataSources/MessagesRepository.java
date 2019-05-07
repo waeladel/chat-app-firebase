@@ -14,7 +14,9 @@ import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -244,6 +246,35 @@ public class MessagesRepository {
         return mChat;
     }
 
+    // To reveal all messages after forever is selected
+    public void revealMessages(String chatId) {
+        final DatabaseReference messagesRef = mMessagesRef.child(chatId);
+        //final MutableLiveData<User> mCurrentUser = new MutableLiveData<>();
+        Log.d(TAG, "revealMessages initiated: " + chatId);
+        messagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()) {
+                    //Map <String, Boolean> updateMap = new HashMap<>();
+                    Map<String, Object> updateMap = new HashMap<>();
+
+                    // loop throw all messages to update revealed
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        updateMap.put(snapshot.getKey()+"/revealed", true);
+                    }
+
+                    messagesRef.updateChildren(updateMap);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 
     // remove all listeners when the ViewModel is cleared
     public void removeListeners(){
@@ -263,5 +294,6 @@ public class MessagesRepository {
         }
         mListenersList.clear();
     }
+
 
 }

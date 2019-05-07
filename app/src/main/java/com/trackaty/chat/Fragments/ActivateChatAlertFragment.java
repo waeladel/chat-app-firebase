@@ -33,13 +33,13 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ActivateChatAlertFragment extends DialogFragment {
+public class ActivateChatAlertFragment extends DialogFragment implements ItemClickListener{
     private final static String TAG = ActivateChatAlertFragment.class.getSimpleName();
     DatePickerDialog.OnDateSetListener ondateSet;
 
     private Button mSendButton, mCancelButton;
     private Spinner mSpinner;
-    private long selectedTime;
+    private long selectedTime, activeTimeValue;
 
     private final static String ARGS_KEY_CHAT_ID = "chatId";
 
@@ -49,6 +49,7 @@ public class ActivateChatAlertFragment extends DialogFragment {
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mChatsRef;
 
+    private static ItemClickListener itemClickListen;
 
     public ActivateChatAlertFragment() {
         // Empty constructor is required for DialogFragment
@@ -56,13 +57,15 @@ public class ActivateChatAlertFragment extends DialogFragment {
         // Use `newInstance` instead as shown below
     }
 
-    public static ActivateChatAlertFragment newInstance(String chatId) {
+    public static ActivateChatAlertFragment newInstance(String chatId, ItemClickListener itemClickListener) {
 
         ActivateChatAlertFragment fragment = new ActivateChatAlertFragment();
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         args.putString(ARGS_KEY_CHAT_ID , chatId);
         fragment.setArguments(args);
+
+        itemClickListen = itemClickListener;
         return fragment;
     }
 
@@ -191,7 +194,14 @@ public class ActivateChatAlertFragment extends DialogFragment {
                 long now = System.currentTimeMillis();
                 Log.d(TAG, "selectedTime= " + selectedTime + " now= "+now +" result= " +(selectedTime+ now));
                 //mChatsRef.keepSynced(false);
-                mChatsRef.child("active").setValue(selectedTime+ now).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                // If forever is selected, activeTimeValue should be 0
+                if(selectedTime != 0L){
+                    activeTimeValue = selectedTime+ now;
+                }else{
+                    activeTimeValue = selectedTime;
+                }
+                mChatsRef.child("active").setValue(activeTimeValue).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.i(TAG, "onComplete: active onComplete");
@@ -205,6 +215,11 @@ public class ActivateChatAlertFragment extends DialogFragment {
                         }
                     }
                 });
+
+                // Click listener to inform fragment that active forever is selected
+                if(itemClickListen != null && selectedTime == 0L){
+                    itemClickListen.onClick(view, 0, false);
+                }
 
                 // Dismiss dialog even if not Success, active is updated offline.
                 dismiss();
@@ -246,4 +261,8 @@ public class ActivateChatAlertFragment extends DialogFragment {
         getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
     }
 
+    @Override
+    public void onClick(View view, int position, boolean isLongClick) {
+
+    }
 }

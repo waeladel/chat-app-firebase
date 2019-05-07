@@ -43,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Adapters.MessagesAdapter;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.ViewModels.MessagesViewModel;
@@ -60,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
 
-public class MessagesFragment extends Fragment {
+public class MessagesFragment extends Fragment implements ItemClickListener {
 
     private final static String TAG = MessagesFragment.class.getSimpleName();
 
@@ -72,6 +73,7 @@ public class MessagesFragment extends Fragment {
     private RecyclerView mMessagesRecycler;
     private ArrayList<Message> mMessagesArrayList;
     private MessagesAdapter mMessagesAdapter;
+    private  LinearLayoutManager mLinearLayoutManager;
 
     private FragmentManager fragmentManager;// = getFragmentManager();
 
@@ -105,6 +107,8 @@ public class MessagesFragment extends Fragment {
     private Chat mChat;
 
     private int bottomVisibleItemCount;
+
+    private PagedList<Message> mItems;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -156,7 +160,7 @@ public class MessagesFragment extends Fragment {
 
         // prepare the Adapter
         mMessagesArrayList = new ArrayList<>();
-        mMessagesAdapter = new MessagesAdapter();
+        mMessagesAdapter = new MessagesAdapter(mChatId); // Pass chat id because it's needed to update message revelation
 
         // Initiate the RecyclerView
         mMessagesRecycler = (RecyclerView) fragView.findViewById(R.id.messages_recycler);
@@ -164,7 +168,7 @@ public class MessagesFragment extends Fragment {
         /* setStackFromEnd is usefuall to start stacking recycler from it's last
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mLinearLayoutManager.setStackFromEnd(true);*/
-        final LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
+        mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mMessagesRecycler.setLayoutManager(mLinearLayoutManager);
 
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
@@ -492,6 +496,7 @@ public class MessagesFragment extends Fragment {
                                     }else{
                                         Log.d(TAG, "submitList");
                                         mMessagesAdapter.submitList(items);
+                                        mItems = items;
                                     }
 
                                     // Scroll to last item
@@ -656,6 +661,8 @@ public class MessagesFragment extends Fragment {
                         if(null != mChat.getActive()){
                             // End timestamp is needed to restart the countdown on fragment start
                             mActiveEndTime = mChat.getActive();
+                            // pass chat to MessagesAdapter to get active end time
+                            mMessagesAdapter.setChat(mChat);
                         }
                         // Display the time left till deactivate the conversation
                         ShowRemainingTime(mChat);
@@ -760,7 +767,14 @@ public class MessagesFragment extends Fragment {
 
                 }// end of chat.getActive()==0
 
-            }// end of null != chat.getActive()
+            }else{// end of null != chat.getActive()
+                // It's not the first messages but Active is never set. Hide timer and cancel it
+                CancelActiveTimer();
+                mRemainingTimeText.setText(R.string.message_active_default_timer);
+                mRemainingTimeText.setVisibility(View.GONE);
+
+            }
+
 
         }// end of chat == null && isSender == null
     }
@@ -947,7 +961,21 @@ public class MessagesFragment extends Fragment {
         mMessage.setText(null);// Remove text from EditText
 
         String messageKey = mMessagesRef.push().getKey();
-        Message message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false);
+
+        Message message;
+        if(mChat != null){
+            if(null != mChat.getActive() && mChat.getActive() == 0) {
+                // message revealed should be true
+                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, true);
+            }else{
+                // message revealed should be false
+                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, false);
+            }
+        }else{
+            // message revealed should be false
+            message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, false);
+        }
+
         Map<String, Object> messageValues = message.toMap();
 
         /*// Create members array list, it's better to loop throw  selected members
@@ -1072,7 +1100,7 @@ public class MessagesFragment extends Fragment {
 
     //Show a dialog to select whether to edit or un-reveal
     private void showChatActivateDialog(String mChatId) {
-        ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId);
+        ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId, this);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             chatActivateFragment.show(fragmentManager, ACTIVATE_CHAT_FRAGMENT);
@@ -1080,6 +1108,23 @@ public class MessagesFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onClick(View view, int position, boolean isLongClick) {
+        Log.i(TAG, "onClick forever is selected. view= " + view + " position= " + position);
+        // Reveal all messages
+        mMessagesViewModel.revealMessages(mChatId);
+        //Log.i(TAG, "mItems LastKey= " + mItems.getLastKey());
+        //mMessagesAdapter.notifyAll();
+        //mMessagesRecycler.getRecycledViewPool().clear();
+        //mMessagesAdapter.submitList(mItems);
+        //mMessagesRecycler.invalidate();
+        //mMessagesRecycler.setAdapter(null);
+        //mMessagesRecycler.setLayoutManager(null);
+        //mMessagesRecycler.setAdapter(mMessagesAdapter);
+        //mMessagesRecycler.setLayoutManager(mLinearLayoutManager);
+        //mMessagesAdapter.notifyDataSetChanged();
+        //mMessagesAdapter.notifyDataSetChanged();
+    }
 }
 
 

@@ -1,25 +1,31 @@
 package com.trackaty.chat.Adapters;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.cooltechworks.views.ScratchTextView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
+import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,11 +44,32 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
     private StorageReference mStorageRef;
 
-    public MessagesAdapter() {
+    // [START declare_database_ref]
+    private DatabaseReference mDatabaseRef;
+    private DatabaseReference mMessagesRef;
+
+    private String chatKey;
+    private Chat chat;
+
+    public MessagesAdapter(String chatKey) {
         super(DIFF_CALLBACK);
         // [START create_storage_reference]
         mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        // use received chatKey to create a database ref
+        mMessagesRef = mDatabaseRef.child("messages");
+        this.chatKey = chatKey;
     }
+
+    public Chat getChat() {
+        return chat;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
+
 
     @NonNull
     @Override
@@ -86,8 +113,10 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 // user name text value
                 if (null != message.getMessage()) {
                     ReceivedHolder.mMessage.setText(message.getMessage()+ message.getKey());
+                    ReceivedHolder.mScratch.setText(message.getMessage()+ message.getKey());
                 }else{
                     ReceivedHolder.mMessage.setText(null);
+                    ReceivedHolder.mScratch.setText(null);
                 }
 
                 if (null != message.getSenderId()) {
@@ -123,6 +152,24 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 }else{
                     ReceivedHolder.mSentTime.setText(null);
                 }
+
+                // check if this conversation is active forever
+                if(null != chat && chat.getActive() == 0){
+                    // Show message
+                    ReceivedHolder.mScratch.setVisibility(View.GONE);
+
+                }else{
+                    // check if message is revealed previously or not
+                    if (null != message.getRevealed() && message.getRevealed()) {
+                        // Show message
+                        ReceivedHolder.mScratch.setVisibility(View.GONE);
+                        Log.d(TAG, "reveal message "+ message.getKey());
+                    }else{
+                        // Hide message
+                        ReceivedHolder.mScratch.setVisibility(View.VISIBLE);
+                    }
+                }
+
             }
         }
 
@@ -180,6 +227,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     // Incorrectly returning false here will result in too many animations.
                     //TODO override equals method on User object
                     return oldMessage.getMessage().equals(newMessage.getMessage());
+                    //return oldMessage.getRevealed()== newMessage.getRevealed();
                     //return false;
                 }
             };
@@ -200,7 +248,13 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
     }
 
-   /* @Override
+    @Nullable
+    @Override
+    protected Message getItem(int position) {
+        return super.getItem(position);
+    }
+
+    /* @Override
     public void submitList(PagedList<Message> pagedList) {
         super.submitList(pagedList);
     }
@@ -216,6 +270,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
         View row;
         private TextView mMessage, mSentTime;
+        private ScratchTextView mScratch;
         private CircleImageView mAvatar;
 
 
@@ -225,11 +280,43 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
             row = itemView;
             mMessage = row.findViewById(R.id.message_button_text);
+            mScratch = row.findViewById(R.id.message_scratch_view); // Scratch view above text view
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
+
+            //mScratch.setStrokeWidth(5);
+
+            // A listener for reveal change to update message revealed boolean
+            mScratch.setRevealListener(new ScratchTextView.IRevealListener() {
+                @Override
+                public void onRevealed(ScratchTextView tv) {
+                    //on reveal
+                    Log.d(TAG, "percent onRevealed "+tv);
+                }
+
+
+                @Override
+                public void onRevealPercentChangedListener(ScratchTextView stv, float percent) {
+                    // on text percent reveal
+                    Log.d(TAG, "percent = "+percent);
+
+                    if(percent > 0.90){
+                        Log.i(TAG, "reveal ScratchTextView. color= " +mScratch.getColor());
+                        //stv.reveal();
+                        //mScratch.reveal();
+                        // Reveal the message
+                        mScratch.setVisibility(View.GONE);
+                        if(getAdapterPosition() != RecyclerView.NO_POSITION){
+                            Message message = getItem(getAdapterPosition());
+                            Log.d(TAG, "revealed message = "+message.getMessage()+ " key ="+ message.getKey());
+                            // update message reveal to true
+                            mMessagesRef.child(chatKey).child(message.getKey()).child("revealed").setValue(true);
+                        }
+                    }
+                }
+            });// End of RevealListener
+
         }
-
-
     }
 
     /// ViewHolder for SentMessages list /////

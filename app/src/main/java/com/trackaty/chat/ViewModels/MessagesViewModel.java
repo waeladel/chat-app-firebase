@@ -96,6 +96,13 @@ public class MessagesViewModel extends ViewModel {
         return itemPagedList;
     }*/
 
+    // To make all messages revealed
+    public void revealMessages(String chatId) {
+        Log.d(TAG, "chatId"+ chatId);
+        messagesRepository.revealMessages(chatId);
+
+    }
+
 
 
     @Override
