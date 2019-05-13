@@ -1,6 +1,5 @@
 package com.trackaty.chat.ViewModels;
 
-import android.text.format.DateUtils;
 import android.util.Log;
 
 
@@ -13,9 +12,7 @@ import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
-import java.util.Calendar;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -57,10 +54,11 @@ public class MessagesViewModel extends ViewModel {
         mUserMessagesRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(20)//10
-                .setInitialLoadSizeHint(20)//30
+                .setPageSize(10)//10  20
+                .setInitialLoadSizeHint(10)//30  20
                 //.setPrefetchDistance(10)//10
-                .setEnablePlaceholders(false)
+                //.setEnablePlaceholders(false)
+                .setEnablePlaceholders(true)
                 .build();
 
         itemPagedList = new LivePagedListBuilder<>(messagesDataFactory, config).build();
@@ -96,13 +94,18 @@ public class MessagesViewModel extends ViewModel {
         return itemPagedList;
     }*/
 
-    // To make all messages revealed
+    // To make all messages revealed when "reveal forever" is selected
     public void revealMessages(String chatId) {
         Log.d(TAG, "chatId"+ chatId);
         messagesRepository.revealMessages(chatId);
 
     }
 
+    // Set scroll direction and last visible item which is used to get initialkey's position
+    public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
+        //MessagesListRepository.setScrollDirection(scrollDirection);
+        MessagesListRepository.setScrollDirection(scrollDirection, lastVisibleItem);
+    }
 
 
     @Override

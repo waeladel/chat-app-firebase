@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -54,6 +55,7 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +89,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private FirebaseUser mFirebaseCurrentUser;
     private Boolean isGroup;
     private Boolean isSender;
+    private Boolean isHitBottom;// = false;
 
     private Context mActivityContext;
     private Activity activity;
@@ -100,15 +103,22 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     //private Timer mTimer;
     private static CountDownTimer mAgoTimer, mRemainingTimer;
-    private Boolean isListEnded;// = false;
+    //private Boolean isHitBottom ;// = false;
     private long mTimeLiftInMillis;
     private Long mActiveEndTime, mLastOnlineEndTime;
 
     private Chat mChat;
 
     private int bottomVisibleItemCount;
+    private int scrollDirectionY;
 
     private PagedList<Message> mItems;
+
+    private static final int REACHED_THE_TOP = 2;
+    private static final int SCROLLING_UP = 1;
+    private static final int SCROLLING_DOWN = -1;
+    private static final int REACHED_THE_BOTTOM = -2;
+    private int mScrollDirection;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -156,7 +166,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         mChatsRef = mDatabaseRef.child("chats");
         mMessagesRef = mDatabaseRef.child("messages");
 
-        //isListEnded = true;
+        //isHitBottom = true;
 
         // prepare the Adapter
         mMessagesArrayList = new ArrayList<>();
@@ -187,13 +197,21 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                //Log.d(TAG, "onScrollStateChanged newState= "+newState);
+                Log.d(TAG, "onScrollStateChanged newState= "+newState);
+                // set scrolling direction. it's needed for the initialkey
+                /*if(scrollDirectionY != 0){
+                    mMessagesViewModel.setScrollDirection(scrollDirectionY);
+                }*/
             }
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                //Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
+                Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
+                // set scrolling direction. it's needed for the initialkey
+                //scrollDirectionY = dy;
+                //mMessagesViewModel.setScrollDirection(dy);
+
                 int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
                 //int totalItemCount = mLinearLayoutManager.getItemCount();
                 int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
@@ -205,15 +223,41 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 //int pastVisibleItems = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition();
                 Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastCompletelyVisibleItem);
 
+                if(lastCompletelyVisibleItem >= (totalItemCount-1)){
+                    // The position of last displayed item = total items, witch means we are at the bottom
+                    mScrollDirection = REACHED_THE_BOTTOM;
+                    Log.i(TAG, "List reached the bottom");
+                }else if(lastCompletelyVisibleItem <= visibleItemCount){
+                    // The position of last displayed item is less than visibleItemCount, witch means we are at the top
+                    mScrollDirection = REACHED_THE_TOP;
+                    Log.i(TAG, "List reached the top");
+                }else{
+                    if(dy < 0 ){
+                        // dy is negative number,  scrolling up
+                        Log.i(TAG, "List scrolling up");
+                        mScrollDirection = SCROLLING_UP;
+                    }else{
+                        // dy is positive number,  scrolling down
+                        Log.i(TAG, "List scrolling down");
+                        mScrollDirection = SCROLLING_DOWN;
+                    }
+                }
+
+                //mMessagesViewModel.setScrollDirection(mScrollDirection);
+                // Set scrolling direction and and last visible item which is needed to know
+                // the initial key position weather it's above or below
+                mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);
+
                 // The position of last displayed item = total items, witch means we are at the bottom
                 if(lastCompletelyVisibleItem >= (totalItemCount-1)){
                     // End of the list is here.
-                    Log.i(TAG, "List reached the End");
-                    isListEnded = true;
+                    Log.i(TAG, "List reached the End. isHitBottom="+isHitBottom);
+                    isHitBottom = true;
                     bottomVisibleItemCount = mMessagesRecycler.getChildCount();
                 }else{
-                    isListEnded = false;
+                    isHitBottom = false;
                 }
+                Log.i(TAG, "isHitBottom = "+isHitBottom);
 
                 // The position of first displayed item = total items - visible count
                 // witch means user starts scrolling up ant the first visible item is now on the bottom
@@ -228,9 +272,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 /*if(pastVisibleItems+visibleItemCount >= (totalItemCount-1)){
                     // End of the list is here.
                     Log.i(TAG, "End of list");
-                    isListEnded = true;
+                    isHitBottom = true;
                 }else{
-                    isListEnded = false;
+                    isHitBottom = false;
                 }*/
 
             }
@@ -409,7 +453,34 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         // Cancel all countdown timers on fragment stop
         CancelLastOnlineTimer();
         CancelActiveTimer();
+
+        // Update all revealed messages on fragment's stop
+        if(mMessagesAdapter != null){
+            // Get revealed list from the adapter
+            List<Message> revealedList = mMessagesAdapter.getRevealedList();
+
+            // Create a map for all messages need to be updated
+            Map<String, Object> updateMap = new HashMap<>();
+
+            for (int i = 0; i < revealedList.size(); i++) {
+                Log.d(TAG, "revealedList message= "+revealedList.get(i).getMessage() + " key= "+revealedList.get(i).getKey());
+                updateMap.put(revealedList.get(i).getKey()+"/revealed", true);
+            }
+            mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // onSuccess clear the list to start all over
+                    mMessagesAdapter.clearRevealedList();
+                }
+            });
+        }
     }
+
+    /*@Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+    }*/
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -495,20 +566,29 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                         Log.d(TAG, "Loop finished with 0 items. Don't submitList");
                                     }else{
                                         Log.d(TAG, "submitList");
-                                        mMessagesAdapter.submitList(items);
-                                        mItems = items;
-                                    }
-
-                                    // Scroll to last item
-                                    Log.d(TAG, "isListEnded = "+isListEnded);
-
-                                    // Only scroll to bottom if user is not reading messages above
-                                    if(null == isListEnded || isListEnded){
-                                        if(items.size()>0 && mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                            //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                            Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                            mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                        // Scroll to last item
+                                        // Only scroll to bottom if user is not reading messages above
+                                        Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
+                                        if( null == isHitBottom || isHitBottom){
+                                            mMessagesAdapter.submitList(items);
+                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                                Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                                mMessagesRecycler.postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }else{
+                                            // Submit the List without scroll to bottom
+                                            mMessagesAdapter.submitList(items);
                                         }
+
+                                        mItems = items;
                                     }
 
                                 } catch (InterruptedException e) {
@@ -537,10 +617,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                     mMessagesAdapter.submitList(items);
 
                                     // Scroll to last item
-                                    Log.d(TAG, "isListEnded = "+isListEnded);
+                                    Log.d(TAG, "isHitBottom = "+isHitBottom);
 
                                     // Only scroll to bottom if user is not reading messages above
-                                    if(null == isListEnded || isListEnded){
+                                    if(null == isHitBottom || isHitBottom){
                                         if(items.size()>0){// stop scroll to bottom if there are no items
                                         //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
                                         Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
@@ -960,7 +1040,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         mMessage.setText(null);// Remove text from EditText
 
-        String messageKey = mMessagesRef.push().getKey();
+        String messageKey = mMessagesRef.child(mChatId).push().getKey();
 
         Message message;
         if(mChat != null){
@@ -1026,12 +1106,19 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         childUpdates.put("/userChats/" + mCurrentUserId + "/" + mChatId, chatValues);
         childUpdates.put("/userChats/" + mChatUserId + "/" + mChatId, chatValues);
 
+        //mScrollDirection = REACHED_THE_BOTTOM;
+        //mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);
+        isHitBottom = true;
+
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "send message onSuccess");
-                isListEnded = true; // To scroll to bottom when user send new message
+                // To scroll to bottom when user send new message
+                /*mScrollDirection = REACHED_THE_BOTTOM;
+                mMessagesViewModel.setScrollDirection(mScrollDirection);
+                isHitBottom = true;*/
                 // ...
             }
         })
@@ -1111,7 +1198,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.i(TAG, "onClick forever is selected. view= " + view + " position= " + position);
-        // Reveal all messages
+        // Reveal all messages when "active forever" is selected
         mMessagesViewModel.revealMessages(mChatId);
         //Log.i(TAG, "mItems LastKey= " + mItems.getLastKey());
         //mMessagesAdapter.notifyAll();
@@ -1125,6 +1212,46 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         //mMessagesAdapter.notifyDataSetChanged();
         //mMessagesAdapter.notifyDataSetChanged();
     }
+
+    /*private class CountDownTask extends AsyncTask<Void, Integer, Void> {
+
+        // A callback method executed on UI thread on starting the task
+        @Override
+        protected void onPreExecute() {
+            // Getting reference to the TextView tv_counter of the layout activity_main
+            mLastSeen.setText("wello");
+
+        }
+
+        // A callback method executed on non UI thread, invoked after
+        // onPreExecute method if exists
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            for(int i=100000000;i>=0;i--){
+                try {
+                    Thread.sleep(1000);
+                    publishProgress(i); // Invokes onProgressUpdate()
+                } catch (InterruptedException e) {
+                }
+            }
+            return null;
+        }
+
+        // A callback method executed on UI thread, invoked by the publishProgress()
+        // from doInBackground() method
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            // Getting reference to the TextView tv_counter of the layout activity_main
+            mLastSeen.setText( Integer.toString(values[0].intValue()));
+        }
+
+        // A callback method executed on UI thread, invoked after the completion of the task
+        @Override
+        protected void onPostExecute(Void result) {
+            // Getting reference to the TextView tv_counter of the layout activity_main
+        }
+    }*/
 }
 
 

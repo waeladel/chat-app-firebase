@@ -17,6 +17,7 @@ public class Message {
     private String senderAvatar;
     private Boolean seen;
     private Boolean revealed; // To know if a message was revealed before or not
+    private int percent; // reveal percent for recycler view. not used on the database
     private Object created ;
 
     public Message() {
@@ -107,6 +108,16 @@ public class Message {
 
     public void setRevealed(Boolean revealed) {
         this.revealed = revealed;
+    }
+
+    @Exclude
+    public int getPercent() {
+        return percent;
+    }
+
+    @Exclude
+    public void setPercent(int percent) {
+        this.percent = percent;
     }
 
     // [END post_to_map]

@@ -15,23 +15,38 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/chat_user_message_background"
         android:padding="@dimen/button_padding"
-        app:layout_constraintWidth_max="wrap"
-        app:layout_constraintWidth_percent="0.70"
         app:layout_constraintStart_toEndOf="@+id/user_image"
         app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintWidth_max="wrap"
+        app:layout_constraintWidth_percent="0.70">
 
 
         <TextView
             android:id="@+id/message_button_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             tools:text="@tools:sample/first_names" />
 
-        <com.cooltechworks.views.ScratchTextView
+        <!--<com.cooltechworks.views.ScratchTextView
             android:id="@+id/message_scratch_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:visibility="visible" />-->
+
+        <!-- scratch view -->
+        <com.clock.scratch.ScratchView
+            android:id="@+id/scratch_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:eraseSize="60"
+            app:watermark="@drawable/googleg_disabled_color_18" />
+
+        <!-- scratch view -->
+        <TextView
+            android:id="@+id/reset_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/design_default_color_primary_dark" />
 
     </FrameLayout>
 

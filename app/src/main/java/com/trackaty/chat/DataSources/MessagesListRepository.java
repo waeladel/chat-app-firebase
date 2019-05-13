@@ -13,6 +13,7 @@ import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,7 @@ public class MessagesListRepository {
 
     private ValueEventListener MessagesChangesListener;
     private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
+    private static List<Message> totalItemsList;// = new ArrayList<>();
     private MutableLiveData<User> mUser;
 
     private DataSource.InvalidatedCallback invalidatedCallback;
@@ -50,6 +52,13 @@ public class MessagesListRepository {
     /*private ValueEventListener initialChatsListener;
     private ValueEventListener afterMessagesListener;
     private ValueEventListener beforeMessagesListener;*/
+
+    private static final int REACHED_THE_TOP = 2;
+    private static final int SCROLLING_UP = 1;
+    private static final int SCROLLING_DOWN = -1;
+    private static final int REACHED_THE_BOTTOM = -2;
+    private static int mScrollDirection;
+    private static int mLastVisibleItem;
 
     private ValueEventListener afterMessagesListener = new ValueEventListener() {
         @Override
@@ -78,10 +87,13 @@ public class MessagesListRepository {
                             message.setKey(snapshot.getKey());
                         }
                         messagesList.add(message);
+                        // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                        totalItemsList.add(message);
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
                 }
-
+                // Get TotalItems logs
+                printTotalItems();
                 if(messagesList.size() != 0){
                     //callback.onResult(messagesList);
                     getLoadAfterCallback().onResult(messagesList);
@@ -91,7 +103,7 @@ public class MessagesListRepository {
                 // no data
                 Log.w(TAG, "mama getMessagesAfter no users exist");
             }
-            getListeners();
+            printListeners();
             isAfterFirstLoaded =  false;
             Log.d(TAG, "end isAfterFirstLoaded = "+ isAfterFirstLoaded);
         }
@@ -138,12 +150,22 @@ public class MessagesListRepository {
                     //callback.onResult(messagesList);
                     getLoadBeforeCallback().onResult(messagesList);
                     Log.d(TAG, "mama getMessagesBefore  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+
+                    // Create a reversed list to add messages to the beginning of totalItemsList
+                    List<Message> reversedList = new ArrayList<>(messagesList);
+                    Collections.reverse(reversedList);
+                    for (int i = 0; i < reversedList.size(); i++) {
+                        // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                        totalItemsList.add(0, reversedList.get(i));
+                    }
+                    // Get TotalItems logs
+                    printTotalItems();
                 }
             } else {
                 // no data
                 Log.w(TAG, "mama getMessagesBefore no users exist");
             }
-            getListeners();
+            printListeners();
             isBeforeFirstLoaded =  false;
             Log.d(TAG, "end isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
         }
@@ -182,6 +204,26 @@ public class MessagesListRepository {
                 //mListenersList = new ArrayList<>();
             }
         }
+
+        if(totalItemsList == null){
+            totalItemsList = new ArrayList<>();
+            Log.d(TAG, "totalItemsList is null. new ArrayList is created= " + totalItemsList.size());
+        }else{
+            Log.d(TAG, "totalItemsList is not null. Size= " + totalItemsList.size());
+            if(totalItemsList.size() >0){
+                Log.d(TAG, "totalItemsList is not null and not empty. Size= " + totalItemsList.size());
+                // Clear the list of total items to start all over
+                //totalItemsList.clear();
+            }
+        }
+
+    }
+
+    // Set the scrolling direction and get the last visible item
+    public static void setScrollDirection(int scrollDirection, int lastVisibleItem) {
+        Log.d(TAG, "mScrollDirection = " + scrollDirection+ " lastVisibleItem= "+ lastVisibleItem);
+        mScrollDirection = scrollDirection;
+        mLastVisibleItem = lastVisibleItem;
     }
 
     /*public static MessagesListRepository getInstance() {
@@ -237,7 +279,7 @@ public class MessagesListRepository {
                 }
 
                 if (dataSnapshot.exists()) {
-                    List<Message> messagesList = new ArrayList<>();
+                    final List<Message> messagesList = new ArrayList<>();
                     // loop throw users value
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                         Message message = snapshot.getValue(Message.class);
@@ -245,18 +287,62 @@ public class MessagesListRepository {
                             message.setKey(snapshot.getKey());
                         }
                         messagesList.add(message);
+                        // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                        totalItemsList.add(message);
+
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
-
+                    printTotalItems();
                     if(messagesList.size() != 0){
+                        /*if(null != getInitialKey()){
+                            mMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int totalCount = (int) dataSnapshot.getChildrenCount();
+                                    int i = 0;
+                                    for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                        if(null != getInitialKey() && getInitialKey().equals(snapshot.getKey())){
+                                            Log.d(TAG, "mama getMessages InitialKey posetion= "+ (i-1)+ " totalCount= "+totalCount);
+                                            callback.onResult(messagesList, (i-1), totalCount);
+                                            break;
+                                        }else{
+                                            i++;
+                                        }
+
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }else{
+
+                            mMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int totalCount = (int) dataSnapshot.getChildrenCount();
+                                    int posetion = (totalCount - 1)-size;
+                                    Log.d(TAG, "mama getMessages null InitialKey posetion= "+ posetion+"totalCount= "+totalCount);
+                                    callback.onResult(messagesList, posetion, totalCount);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }*/
+
                         callback.onResult(messagesList);
-                        Log.d(TAG, "mama getMessages  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+                        Log.d(TAG, "mama getMessages  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey() + " getInitialKey= "+ getInitialKey() );
                     }
                 } else {
                     // no data
                     Log.w(TAG, "mama getMessages no users exist");
                 }
-                getListeners();
+                printListeners();
                 isInitialFirstLoaded =  false;
                 Log.d(TAG, "end isInitialFirstLoaded = "+ isInitialFirstLoaded);
             }
@@ -275,14 +361,53 @@ public class MessagesListRepository {
 
         } else {// not the first load. Key is the last seen key
             Log.d(TAG, "mama getMessages initialKey= " + initialKey);
-            messagesQuery = mMessagesRef.orderByKey()
-                    // Don't start at initialKey because we need to always display the latest message
-                    //.startAt(initialKey)
-                    .limitToLast(size);
+            switch (mScrollDirection){
+                case REACHED_THE_BOTTOM:
+                    Log.d(TAG, "messages query = REACHED_THE_BOTTOM");
+                    messagesQuery = mMessagesRef.orderByKey()
+                            .limitToLast(size);
+                    break;
+                case REACHED_THE_TOP:
+                    Log.d(TAG, "messages query = REACHED_THE_TOP");
+                    messagesQuery = mMessagesRef.orderByKey()
+                            .limitToFirst(size);
+                    break;
+                /*case SCROLLING_UP:
+                    messagesQuery = mMessagesRef.orderByKey()
+                            .startAt(initialKey)
+                            .limitToFirst(size);
+                    break;
+                case SCROLLING_DOWN:
+                    messagesQuery = mMessagesRef.orderByKey()
+                            .endAt(initialKey)
+                            .limitToLast(size);
+                    break;*/
+                default:
+                    if(getInitialKeyPosition() >= mLastVisibleItem){
+                        // InitialKey is in the bottom, must load data from bottom to top
+                        Log.d(TAG, "messages query = Load data from bottom to top");
+                        messagesQuery = mMessagesRef.orderByKey()
+                                .endAt(initialKey)
+                                .limitToLast(size);
+
+                    }else{
+                        // InitialKey is in the top, must load data from top to bottom
+                        Log.d(TAG, "messages query = Load data from top to bottom");
+                        messagesQuery = mMessagesRef.orderByKey()
+                                .startAt(initialKey)
+                                .limitToFirst(size);
+                    }
+                    break;
+            }
         }
+
+        getInitialKeyPosition();
+        // Clear the list of total items to start all over
+        totalItemsList.clear();
 
         messagesQuery.addValueEventListener(initialMessagesListener);
         mListenersList.add(new FirebaseListeners(messagesQuery, initialMessagesListener));
+
     }
 
     // to get next data
@@ -415,13 +540,36 @@ public class MessagesListRepository {
         mListenersList.clear();
     }
 
-    public void getListeners(){
+    public void printListeners(){
 
         for (int i = 0; i < mListenersList.size(); i++) {
             //Log.d(TAG, "Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
             //Log.d(TAG, "Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
             Log.d(TAG, "Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
+    }
+
+    public void printTotalItems(){
+
+        Log.d(TAG, "Getting totalItemsList... ");
+        for (int i = 0; i < totalItemsList.size(); i++) {
+            Log.d(TAG, "totalItemsList : key= "+ totalItemsList.get(i).getKey()+ " message= "+ totalItemsList.get(i).getMessage()+ " size= "+totalItemsList.size());
+        }
+    }
+
+    public int getInitialKeyPosition(){
+
+        Log.d(TAG, "Getting get InitialKeyPosition... ");
+        int Position = 0;
+        for (int i = 0; i < totalItemsList.size(); i++) {
+            if(totalItemsList.get(i).getKey().equals(getInitialKey())){
+                Log.d(TAG, "InitialKeyPosition: key= "+ getInitialKey()+" Position= " +Position);
+                return Position;
+            }else{
+                Position++;
+            }
+        }
+        return Position;
     }
 
     public ItemKeyedDataSource.LoadInitialCallback getLoadInitialCallback() {
@@ -457,4 +605,11 @@ public class MessagesListRepository {
     public String getLoadBeforeKey() {
         return beforeKey;
     }
+
+    public String getInitialKey() {
+        return initialKey;
+    }
+
+
+
 }

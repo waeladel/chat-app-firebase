@@ -20,6 +20,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
     /*compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -67,7 +71,9 @@ dependencies {
     //implementation "android.arch.lifecycle:viewmodel:1.1.1" //Adding ViewModel
     //annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
     //implementation 'org.awaitility:awaitility:3.1.6'
-    implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView
+
+    //implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView
+    implementation 'com.clock.scratch:Scratch:1.0.0'// A better ScratchView
 
 
 }
