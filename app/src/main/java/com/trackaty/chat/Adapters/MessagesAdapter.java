@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clock.scratch.ScratchView;
@@ -28,9 +29,14 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,8 +62,14 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     private String chatKey; // the chat key
     private Chat chat; // the chat object
 
-    // An array list for all revealed messages to be updated when fragment stops
+    // An array list for all revealed messages to update the database when fragment stops
     private static List<Message> totalRevealedList;// = new ArrayList<>();
+
+    // An array list for all sent messages to update the database when fragment stops
+    private static List<Message> totalSentList;// = new ArrayList<>();
+    //private PagedList<Message> itemsList;
+
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public MessagesAdapter(String chatKey) {
         super(DIFF_CALLBACK);
@@ -80,6 +92,20 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             }
 
         }
+
+        // Only create the static list if it's null
+        if(totalSentList == null){
+            totalSentList = new ArrayList<>();
+            Log.d(TAG, "totalSentList is null. new ArrayList is created= " + totalSentList.size());
+        }else{
+            Log.d(TAG, "totalSentList is not null. size=  "+ totalSentList.size());
+            if(totalSentList.size() >0){
+                // Clear the list to start all over
+                totalSentList.clear();
+                Log.d(TAG, "totalSentList is cleared. size=  "+ totalSentList.size());
+            }
+        }
+
     }
 
     // chat object to know active end time
@@ -99,6 +125,78 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     // clear revealed messages list after updating the database
     public void clearRevealedList(){
         totalRevealedList.clear();
+    }
+
+    public List<Message> getSentList(){
+        return totalSentList;
+    }
+
+    public void addToSentList(Message message){
+        Log.d(TAG, "addToSentList ... message is sent= "+message.getSent());
+         totalSentList.add(message);
+
+         /*if(null != getCurrentList()){
+             for (Message submittedMessageItem : getCurrentList()) {
+                 Log.d(TAG, "addToSentList.  message= "+submittedMessageItem.getMessage() + " key= "+submittedMessageItem.getKey() +" isSent= "+ submittedMessageItem.getSent());
+             }
+         }
+            itemsList = getCurrentList();
+            for (Message sentMessageItem : totalSentList) {
+            int Position = getItemPosition(sentMessageItem.getKey(), itemsList);
+            if (Position != -2){
+                itemsList.snapshot().get(Position).setSent(true);
+            }*/
+            //Log.d(TAG, "submitList. Position= "+ Position +" message= "+sentMessageItem.getMessage() + " key= "+sentMessageItem.getKey());
+             //notifyItemRangeChanged(itemsList.size()-5, 10);
+            //submitList(itemsList);
+            //itemsList.snapshot().get(position).setSent(true);
+            //notifyItemInserted(position);
+
+        // Delay notifyItemChanged for 5 seconds until DIFF_CALLBACK is finished
+        executor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                // Set message to sent and get it's position
+                if(null != getCurrentList()){
+                    int position = getItemPosition(message.getKey(), getCurrentList());
+                    notifyItemChanged(position);
+                    Log.d(TAG, "addToSentList. notifyItemChanged position = "+position);
+                }
+            }
+        }, 2, TimeUnit.SECONDS);
+
+            //submitList(itemsList);
+            //notifyDataSetChanged();
+    }
+
+    // clear sent messages list after updating the database
+    public void clearSentList(){
+        totalSentList.clear();
+    }
+
+    // Get the position of the new sent message to notify the adapter
+    public int getItemPosition(String key, PagedList<Message> itemsList ){
+
+        int Position = 0;
+
+        if(itemsList != null){
+            Log.d(TAG, "Getting getItemPosition. itemsList size= "+itemsList.size());
+            List<Message> messages = itemsList.snapshot();
+            // Loop throw all messages array list to get the position of new sent message
+            for (Message messageItem : messages) {
+                if(messageItem.getKey().equals(key)){
+                    Log.d(TAG, "getItemPosition: key= "+ key+ " message= "+ messageItem.getMessage()+" Position= " +Position);
+                    messageItem.setSent(true); // sent message to sent because it's was sent successfully
+                    return Position;
+                }else{
+                    Position++;
+                }
+            }
+            Log.d(TAG, "getItemPosition. messageItem not found ");
+            return -2;
+        }
+        Log.d(TAG, "getItemPosition. itemsList is null= ");
+        return -2;
     }
 
 
@@ -263,6 +361,13 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 }else{
                     SentHolder.mSentTime.setText(null);
                 }
+
+                // update sent icon according to message's sent boolean
+                if(null != message.getSent() && message.getSent()){
+                    SentHolder.mSentIcon.setImageResource(R.drawable.ic_sent_message_thick);
+                }else{
+                    SentHolder.mSentIcon.setImageResource(R.drawable.ic_sending_message_thick);
+                }
             }
         }
 
@@ -276,11 +381,31 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 // but ID is fixed.
 
                 // if the two items are the same
+
                 @Override
                 public boolean areItemsTheSame(Message oldMessage, Message newMessage) {
                     /*Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + (oldUser.getCreatedLong() == newUser.getCreatedLong()));
                     Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());*/
-                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldMessage.getKey() +" name: "+ oldMessage.getMessage()+" new: "+ newMessage.getKey()+ " name: "+ newMessage.getMessage()+" areItemsTheSame: " +oldMessage.getKey().equals(newMessage.getKey()));
+                    //Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldMessage.getKey() +" name: "+ oldMessage.getMessage()+" new: "+ newMessage.getKey()+ " name: "+ newMessage.getMessage()+" areItemsTheSame: " +oldMessage.getKey().equals(newMessage.getKey()));
+
+                    // If updated database has item that is not sent but it exist on the totalSentList
+                    /*for (int i = 0; i < totalSentList.size(); i++) {
+                        if(newMessage.getKey().equals(totalSentList.get(i).getKey()) ){
+                            // set the new message to sent because the user sent it successfully and was added to totalSentList
+                            // but we didn't update the database yet
+                            newMessage.setSent(true);
+                            Log.d(TAG, " DIFF_CALLBACK areItemsTheSame. set send to true. old name: " +oldMessage.getMessage()+" value: " + oldMessage.getSent() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getSent()+" areItemsTheSame: " +oldMessage.getKey().equals(newMessage.getKey()));
+                        }
+
+                        if(oldMessage.getKey().equals(totalSentList.get(i).getKey()) ){
+                            // set the new message to sent because the user sent it successfully and was added to totalSentList
+                            // but we didn't update the database yet
+                            oldMessage.setSent(true);
+                            Log.d(TAG, " DIFF_CALLBACK areItemsTheSame. set send to true. old name: " +oldMessage.getMessage()+" value: " + oldMessage.getSent() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getSent()+" areItemsTheSame: " +oldMessage.getKey().equals(newMessage.getKey()));
+
+                        }
+                    }*/
+
                     return oldMessage.getKey().equals(newMessage.getKey());
                     //return true;
                 }
@@ -306,10 +431,25 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                             newMessage.setRevealed(true);
                         }
                     }
-                    Log.d(TAG, " DIFF_CALLBACK areContentsTheSame old name: " +oldMessage.getMessage()+" value: " + oldMessage.getRevealed() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getRevealed()+ " areContentsTheSame= "+(oldMessage.getRevealed() == newMessage.getRevealed()));
-                    return oldMessage.getRevealed()== newMessage.getRevealed();
+                    /*Log.d(TAG, " DIFF_CALLBACK areContentsTheSame old name: " +oldMessage.getMessage()+" value: " + oldMessage.getRevealed() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getRevealed()+ " areContentsTheSame= "+(oldMessage.getRevealed() == newMessage.getRevealed()));
+                    return oldMessage.getRevealed()== newMessage.getRevealed();*/
+
+                    // If updated database has item that is not sent but it exist on the totalSentList
+                    for (int i = 0; i < totalSentList.size(); i++) {
+                        if(newMessage.getKey().equals(totalSentList.get(i).getKey())){
+                            // set the new message to sent because the user sent it successfully and was added to totalSentList
+                            // but we didn't update the database yet
+                            Log.d(TAG, " DIFF_CALLBACK areContentsTheSame. set send to true. old name: " +oldMessage.getMessage()+" value: " + oldMessage.getSent() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getSent()+ " areContentsTheSame= "+(oldMessage.getSent() == newMessage.getSent()));
+                            newMessage.setSent(true);
+                        }
+                    }
+
+                    //Log.d(TAG, " DIFF_CALLBACK areContentsTheSame old name: " +oldMessage.getMessage()+" value: " + oldMessage.getSent() + " new name: "+ newMessage.getMessage()+" value: " +newMessage.getSent()+ " areContentsTheSame= "+(oldMessage.getSent() == newMessage.getSent()));
+                    return oldMessage.getSent()== newMessage.getSent();
                     //return false;
                 }
+
+
             };
 
     // Determines the appropriate ViewType according to the sender of the message.
@@ -334,16 +474,49 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         return super.getItem(position);
     }
 
-    /* @Override
+    /*@Override
     public void submitList(PagedList<Message> pagedList) {
+         Log.d(TAG, "submitList"+ pagedList.size());
+         *//*for (Message sentMessageItem : totalSentList) {
+            int Position = getItemPosition(sentMessageItem.getKey(), pagedList);
+            if (Position != -2){
+                pagedList.snapshot().get(Position).setSent(true);
+            }
+            //Log.d(TAG, "submitList. Position= "+ Position +" message= "+sentMessageItem.getMessage() + " key= "+sentMessageItem.getKey());
+        }*//*
+
+         for (Message submittedMessageItem : pagedList) {
+             Log.d(TAG, "submittedMessageItem.  message= "+submittedMessageItem.getMessage() + " key= "+submittedMessageItem.getKey() +" isSent= "+ submittedMessageItem.getSent());
+
+         }
+
         super.submitList(pagedList);
     }
 
     @Override
     public void onCurrentListChanged(@Nullable PagedList<Message> currentList) {
+
+        Log.d(TAG, "onCurrentListChanged. list size= "+ currentList.size());
+        *//*for (Message submittedMessageItem : currentList) {
+            Log.d(TAG, "onCurrentListChanged.  message= "+submittedMessageItem.getMessage() + " key= "+submittedMessageItem.getKey() +" isSent= "+ submittedMessageItem.getSent());
+
+        }*//*
+        *//*for (Message sentMessageItem : totalSentList) {
+            int Position = getItemPosition(sentMessageItem.getKey(), currentList);
+            if (Position != -2){
+                notifyItemChanged(Position);
+            }
+            Log.d(TAG, "notifyItemChanged. Position= "+ Position +" message= "+sentMessageItem.getMessage() + " key= "+sentMessageItem.getKey());
+        }
+*//*
         super.onCurrentListChanged(currentList);
     }*/
 
+    @Nullable
+    @Override
+    public PagedList<Message> getCurrentList() {
+        return super.getCurrentList();
+    }
 
     /// ViewHolder for ReceivedMessages list /////
     public class ReceivedMessageHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
@@ -538,6 +711,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         View row;
         private TextView mMessage, mSentTime;
         private CircleImageView mAvatar;
+        private ImageView mSentIcon;
 
 
         public SentMessageHolder(View itemView) {
@@ -548,6 +722,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             mMessage = row.findViewById(R.id.message_button_text);
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
+            mSentIcon = row.findViewById(R.id.sending_icon);
         }
 
     }

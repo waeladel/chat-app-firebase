@@ -15,7 +15,7 @@ public class Message {
     private String senderId;
     private String senderName;
     private String senderAvatar;
-    private Boolean seen;
+    private Boolean sent;
     private Boolean revealed; // To know if a message was revealed before or not
     private int percent; // reveal percent for recycler view. not used on the database
     private Object created ;
@@ -23,12 +23,12 @@ public class Message {
     public Message() {
     }
 
-    public Message(String message, String senderId, String senderName,String senderAvatar, Boolean seen ,Boolean revealed) {
+    public Message(String message, String senderId, String senderName,String senderAvatar, Boolean sent ,Boolean revealed) {
         this.message = message;
         this.senderId = senderId;
         this.senderName = senderName;
         this.senderAvatar = senderAvatar;
-        this.seen = seen;
+        this.sent = sent;
         this.revealed = revealed;
         //this.created = created;
     }
@@ -41,7 +41,7 @@ public class Message {
         result.put("senderId", senderId);
         result.put("senderName", senderName);
         result.put("senderAvatar", senderAvatar);
-        result.put("seen", seen);
+        result.put("sent", sent);
         result.put("revealed", revealed);
         result.put("created", ServerValue.TIMESTAMP);
 
@@ -118,6 +118,14 @@ public class Message {
     @Exclude
     public void setPercent(int percent) {
         this.percent = percent;
+    }
+
+    public Boolean getSent() {
+        return sent;
+    }
+
+    public void setSent(Boolean sent) {
+        this.sent = sent;
     }
 
     // [END post_to_map]

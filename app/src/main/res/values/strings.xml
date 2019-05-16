@@ -201,6 +201,7 @@
     <string name="original_profile_image_description">Profile Image</string>
     <string name="loading_animation">Loading animation</string>
     <string name="send_text_icon">Send message</string>
+    <string name="message_sent_icon">Message sent icon</string>
 
 
 

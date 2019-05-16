@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -474,6 +473,28 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 }
             });
         }
+
+        // Update all sent messages on fragment's stop
+        if(mMessagesAdapter != null){
+            // Get revealed list from the adapter
+            List<Message> sentList = mMessagesAdapter.getSentList();
+
+            // Create a map for all messages need to be updated
+            Map<String, Object> updateMap = new HashMap<>();
+
+            for (int i = 0; i < sentList.size(); i++) {
+                Log.d(TAG, "sentList message= "+sentList.get(i).getMessage() + " key= "+sentList.get(i).getKey());
+                updateMap.put(sentList.get(i).getKey()+"/sent", true);
+            }
+            mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // onSuccess clear the list to start all over
+                    mMessagesAdapter.clearSentList();
+                }
+            });
+        }
+
     }
 
     /*@Override
@@ -569,8 +590,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                         // Scroll to last item
                                         // Only scroll to bottom if user is not reading messages above
                                         Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
+                                        mMessagesAdapter.submitList(items);
                                         if( null == isHitBottom || isHitBottom){
-                                            mMessagesAdapter.submitList(items);
                                             if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
                                                 //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
                                                 Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
@@ -583,10 +604,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                                     }
                                                 }, 500);
                                             }
-                                        }else{
+                                        }/*else{
                                             // Submit the List without scroll to bottom
-                                            mMessagesAdapter.submitList(items);
-                                        }
+                                            //mMessagesAdapter.submitList(items);
+                                        }*/
 
                                         mItems = items;
                                     }
@@ -1115,6 +1136,27 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "send message onSuccess");
+                // Add message to sent array list
+                message.setKey(messageKey);
+                message.setSent(true);
+                // Add successfully sent message to adapter sent array list
+                // It's used to notify the adapter to update item position
+                mMessagesAdapter.addToSentList(message);
+
+
+                /*for (int i = 0; i < mItems.size(); i++) {
+                    if (mItems.get(i) != null && mItems.get(i).getKey().equals(messageKey)) {
+                        Log.d(TAG, "onSuccess. mItems. message= " + mItems.get(i).getMessage() + " key= " + mItems.get(i).getKey());
+                        if (mItems.get(i) != null) {
+                            mItems.get(i).setSent(true);
+                        }
+
+                    }
+                }
+
+                mMessagesAdapter.submitList(mItems);*/
+                //mMessagesAdapter.submitList(mItems);
+                //mMessagesAdapter.notifyDataSetChanged();
                 // To scroll to bottom when user send new message
                 /*mScrollDirection = REACHED_THE_BOTTOM;
                 mMessagesViewModel.setScrollDirection(mScrollDirection);
