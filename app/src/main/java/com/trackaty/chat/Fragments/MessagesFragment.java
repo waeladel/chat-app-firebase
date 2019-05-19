@@ -119,6 +119,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private static final int REACHED_THE_BOTTOM = -2;
     private int mScrollDirection;
 
+    private static final String IS_HII_BOTTOM = "Hit_Bottom";
+
+
     public MessagesFragment() {
         // Required empty public constructor
     }
@@ -506,6 +509,13 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         Log.d(TAG, "onPause");
     }*/
 
+    // Fires when a configuration change occurs and fragment needs to save state
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean (IS_HII_BOTTOM, isHitBottom);
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -594,6 +604,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                         // Only scroll to bottom if user is not reading messages above
                                         Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
                                         mMessagesAdapter.submitList(items);
+
+                                        // Check if we have isHitBottom saved when change configuration occur or not
+                                        if(savedInstanceState != null){
+                                            isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
+                                        }
+
                                         if( null == isHitBottom || isHitBottom){
                                             if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
                                                 //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
@@ -607,10 +623,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                                     }
                                                 }, 500);
                                             }
-                                        }/*else{
-                                            // Submit the List without scroll to bottom
-                                            //mMessagesAdapter.submitList(items);
-                                        }*/
+                                        }
+
 
                                         mItems = items;
                                     }
