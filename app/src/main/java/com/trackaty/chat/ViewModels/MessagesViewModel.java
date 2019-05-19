@@ -57,8 +57,8 @@ public class MessagesViewModel extends ViewModel {
                 .setPageSize(10)//10  20
                 .setInitialLoadSizeHint(10)//30  20
                 //.setPrefetchDistance(10)//10
-                //.setEnablePlaceholders(false)
-                .setEnablePlaceholders(true)
+                .setEnablePlaceholders(false)
+                //.setEnablePlaceholders(true)
                 .build();
 
         itemPagedList = new LivePagedListBuilder<>(messagesDataFactory, config).build();

@@ -231,15 +231,20 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                 // if the content of two items is the same
                 @Override
                 public boolean areContentsTheSame(Chat oldChat, Chat newChat) {
-                    Log.d(TAG, " DIFF_CALLBACK areContentsTheSame " + newChat);
+
                    /* Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame object " + (oldUser.equals(newUser)));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame Names() " + (oldUser.getName().equals(newUser.getName())));
                     Log.d(TAG, "  DIFF_CALLBACK areContentsTheSame old name: " + oldUser.getName() + " new name: "+newUser.getName());
 */
                     // NOTE: if you use equals, your object must properly override Object#equals()
                     // Incorrectly returning false here will result in too many animations.
-                    //TODO override equals method on User object
-                    return oldChat.getLastMessage().equals(newChat.getLastMessage());
+                    /*Log.d(TAG, " messages query DIFF_CALLBACK areContentsTheSame old name: " + oldChat.getLastMessage() + " new name: "+newChat.getLastMessage()+ " value= "+(oldChat.getLastMessage().equals(newChat.getLastMessage())
+                            && (oldChat.getLastSentLong() == newChat.getLastSentLong())));*/
+
+                    // compare old and new chat's sent time and last messages
+                    return (oldChat.getLastMessage().equals(newChat.getLastMessage())
+                            && (oldChat.getLastSentLong() == newChat.getLastSentLong()));
+                    //return oldChat.getLastMessage().equals(newChat.getLastMessage());
                     //return false;
                 }
             };

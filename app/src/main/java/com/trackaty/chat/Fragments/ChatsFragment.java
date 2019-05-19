@@ -52,6 +52,14 @@ public class ChatsFragment extends Fragment{
 
     private Context mActivityContext;
     private Activity activity;
+    private  LinearLayoutManager mLinearLayoutManager;
+
+    private static final int REACHED_THE_TOP = 2;
+    private static final int SCROLLING_UP = 1;
+    private static final int SCROLLING_DOWN = -1;
+    private static final int REACHED_THE_BOTTOM = -2;
+    private static int mScrollDirection;
+    private static int mLastVisibleItem;
 
     public static ChatsFragment newInstance() {
         return new ChatsFragment();
@@ -69,14 +77,70 @@ public class ChatsFragment extends Fragment{
         // Initiate the RecyclerView
         mChatsRecycler = (RecyclerView) fragView.findViewById(R.id.chats_recycler);
         mChatsRecycler.setHasFixedSize(true);
-        mChatsRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
+        mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
+        mChatsRecycler.setLayoutManager(mLinearLayoutManager);
 
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
 
         //observe when a change happen to usersList live data
         mChatsRecycler.setAdapter(mChatsAdapter);
 
+        mChatsRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                Log.d(TAG, "onScrollStateChanged newState= "+newState);
+            }
 
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
+
+                //int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+                //int firstCompletelyVisibleItem = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition(); // the position of first displayed item
+                int lastVisibleItem = mLinearLayoutManager.findLastVisibleItemPosition(); // the position of last displayed item
+                int firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition(); // the position of first displayed item
+                int totalItemCount = mChatsAdapter.getItemCount(); // total items count from the adapter
+                int visibleItemCount = mChatsRecycler.getChildCount(); // items are shown on screen right now
+
+                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastVisibleItem +" firstVisibleItem "+firstVisibleItem);
+
+                //if(lastCompletelyVisibleItem >= (totalItemCount-1)){
+                /*if(lastVisibleItem >= (totalItemCount-1)){
+                    // The position of last displayed item = total items, witch means we are at the bottom
+                    mScrollDirection = REACHED_THE_BOTTOM;
+                    Log.i(TAG, "List reached the bottom");
+                    // Set scrolling direction and and last visible item which is needed to know
+                    // the initial key position weather it's above or below
+                    mChatsViewModel.setScrollDirection(mScrollDirection, lastVisibleItem);
+
+                }*/if(firstVisibleItem <= 4){
+                    // The position of last displayed item is less than visibleItemCount, witch means we are at the top
+                    mScrollDirection = REACHED_THE_TOP;
+                    Log.i(TAG, "List reached the top");
+                    // Set scrolling direction and and last visible item which is needed to know
+                    // the initial key position weather it's above or below
+                    mChatsViewModel.setScrollDirection(mScrollDirection, firstVisibleItem);
+                }else{
+                    if(dy < 0 ){
+                        // dy is negative number,  scrolling up
+                        Log.i(TAG, "List scrolling up");
+                        mScrollDirection = SCROLLING_UP;
+                        // Set scrolling direction and and last visible item which is needed to know
+                        // the initial key position weather it's above or below
+                        mChatsViewModel.setScrollDirection(mScrollDirection, firstVisibleItem);
+                    }else{
+                        // dy is positive number,  scrolling down
+                        Log.i(TAG, "List scrolling down");
+                        mScrollDirection = SCROLLING_DOWN;
+                        // Set scrolling direction and and last visible item which is needed to know
+                        // the initial key position weather it's above or below
+                        mChatsViewModel.setScrollDirection(mScrollDirection, lastVisibleItem);
+                    }
+                }
+            }
+        });
         return fragView;
     }
 
@@ -123,8 +187,17 @@ public class ChatsFragment extends Fragment{
                 }
              });*/
 
-                    mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-                    mChatsViewModel.setUserId(mCurrentUserId);
+                    //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+                    mChatsViewModel = ViewModelProviders.of(this,  new ViewModelProvider.Factory() {
+                        @NonNull
+                        @Override
+                        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                            return (T)new ChatsViewModel (mCurrentUserId);
+                        }
+                    }).get(ChatsViewModel.class);
+
+
+            // mChatsViewModel.setUserId(mCurrentUserId);
                     //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
                     /*mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
                         @NonNull

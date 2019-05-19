@@ -33,6 +33,7 @@ public class ChatsRepository {
 
     private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
     private MutableLiveData<Chat> mChat;
+    private static List<Chat> totalItemsList;// = new ArrayList<>();
 
     private DataSource.InvalidatedCallback invalidatedCallback;
     private ItemKeyedDataSource.LoadInitialCallback loadInitialCallback;
@@ -47,6 +48,13 @@ public class ChatsRepository {
     private Long initialKey;
     private Long afterKey;
     private Long beforeKey;
+
+    private static final int REACHED_THE_TOP = 2;
+    private static final int SCROLLING_UP = 1;
+    private static final int SCROLLING_DOWN = -1;
+    private static final int REACHED_THE_BOTTOM = -2;
+    private static int mScrollDirection;
+    private static int mVisibleItem;
 
     // A listener for chat changes
     private ValueEventListener afterListener = new ValueEventListener() {
@@ -84,12 +92,26 @@ public class ChatsRepository {
                     Log.d(TAG, "mama getAfter  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
                     Collections.reverse(chatsList);
                     getLoadAfterCallback().onResult(chatsList);
+
+                    // Create a reversed list to add messages to the beginning of totalItemsList
+                    List<Chat> reversedList = new ArrayList<>(chatsList);
+                    Collections.reverse(reversedList);
+                    for (int i = 0; i < reversedList.size(); i++) {
+                        // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                        totalItemsList.add(0, reversedList.get(i));
+                    }
+                    //totalItemsList.addAll( 0, reversedList);
+                    // Get TotalItems logs
+                    printTotalItems("After");
+                    /*for (int i = 0; i < reversedList.size(); i++) {
+                        Log.d(TAG, "After totalItemsList : key= "+ chatsList.get(i).getKey()+ " message= "+ chatsList.get(i).getLastMessage()+ " size= "+chatsList.size());
+                    }*/
                 }
             } else {
                 // no data
                 Log.w(TAG, "mama getAfter no users exist");
             }
-            getListeners();
+            printListeners();
             isAfterFirstLoaded =  false;
             Log.d(TAG, "end isAfterFirstLoaded = "+ isAfterFirstLoaded);
         }
@@ -137,12 +159,19 @@ public class ChatsRepository {
                     Log.d(TAG, "mama getBefore  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
                     Collections.reverse(chatsList);
                     getLoadBeforeCallback().onResult(chatsList);
+                    totalItemsList.addAll(chatsList); // add items to totalItems ArrayList to be used to get the initial key position
+
+                    /*for (int i = 0; i < chatsList.size(); i++) {
+                        Log.d(TAG, "before totalItemsList : key= "+ chatsList.get(i).getKey()+ " message= "+ chatsList.get(i).getLastMessage()+ " size= "+chatsList.size());
+                    }*/
+                    // Get TotalItems logs
+                    printTotalItems("Before");
                 }
             } else {
                 // no data
                 Log.w(TAG, "mama getBefore no users exist");
             }
-            getListeners();
+            printListeners();
             isBeforeFirstLoaded =  false;
             Log.d(TAG, "end isBeforeFirstLoaded = "+ isBeforeFirstLoaded);
         }
@@ -181,6 +210,27 @@ public class ChatsRepository {
                 //mListenersList = new ArrayList<>();
             }
         }
+
+        if(totalItemsList == null){
+            totalItemsList = new ArrayList<>();
+            Log.d(TAG, "totalItemsList is null. new ArrayList is created= " + totalItemsList.size());
+        }else{
+            Log.d(TAG, "totalItemsList is not null. Size= " + totalItemsList.size());
+            if(totalItemsList.size() >0){
+                Log.d(TAG, "totalItemsList is not null and not empty. Size= " + totalItemsList.size());
+                // Clear the list of total items to start all over
+                //totalItemsList.clear();
+            }
+        }
+
+    }
+
+    // Set the scrolling direction and get the last/first visible item
+    public void setScrollDirection(int scrollDirection, int visibleItem) {
+        mScrollDirection = scrollDirection;
+        mVisibleItem = visibleItem;
+        Log.d(TAG, "mScrollDirection = " + mScrollDirection+ " VisibleItem= "+ mVisibleItem);
+
     }
 
     // get initial data
@@ -220,11 +270,16 @@ public class ChatsRepository {
 
                             chatsList.add(chat);
                             Log.d(TAG, "mama getChats = " + chat.getLastMessage() + " getSnapshotKey= " + snapshot.getKey());
+
                         }
 
                         if (chatsList.size() != 0) {
                             Collections.reverse(chatsList);
                             callback.onResult(chatsList);
+
+                            // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                            totalItemsList.addAll(chatsList);
+                            printTotalItems("Initial");
                             Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " lastkey= " + chatsList.get(chatsList.size() - 1).getKey());
                         }
 
@@ -239,7 +294,7 @@ public class ChatsRepository {
                             isInitialKey = false; // Make isInitialKey boolean false so that we don't loop forever
                             Query chatsQuery = mChatsRef
                                     .orderByChild("lastSent")//limitToLast to start from the last (page size) items
-                                    .limitToFirst(size);
+                                    .limitToLast(size);
 
                             Log.d(TAG, "isInitialKey. initialChatsListener is added to Query without InitialKey "+ isInitialKey);
                             chatsQuery.addValueEventListener(initialChatsListener);
@@ -247,7 +302,7 @@ public class ChatsRepository {
                         }
                     }
 
-                    getListeners();
+                    printListeners();
                     isInitialFirstLoaded =  false;
                     Log.d(TAG, "end isInitialFirstLoaded = "+ isInitialFirstLoaded);
                 }
@@ -263,16 +318,87 @@ public class ChatsRepository {
             isInitialKey = false;
             chatsQuery = mChatsRef
                     .orderByChild("lastSent")//limitToLast to start from the last (page size) items
-                    .limitToFirst(size);
+                    .limitToLast(size);
+
 
         } else {// not the first load. Key is the last seen key
             Log.d(TAG, "mama getChatss initialKey= " + initialKey);
             isInitialKey = true;
-            chatsQuery = mChatsRef
-                    .orderByChild("lastSent")
-                    .startAt(initialKey)
-                    .limitToFirst(size);
+            switch (mScrollDirection){
+                // No need to detected reaching to bottom
+                /*case REACHED_THE_BOTTOM:
+                    Log.d(TAG, "messages query = REACHED_THE_BOTTOM. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            .limitToFirst(size);
+                    break;*/
+                case REACHED_THE_TOP:
+                    Log.d(TAG, "messages query = REACHED_THE_TOP. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            .limitToLast(size);
+                    break;
+                case SCROLLING_UP:
+                    /*Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            .endAt(initialKey)
+                            .limitToLast(size);*/
+
+                    // list is reversed, smaller Keys are on bottom
+                    // InitialKey is in the top, must load data from top to bottom
+                    // list is reversed, load data above InitialKey
+                    Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" first VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")
+                            .endAt(getItem(mVisibleItem).getLastSentLong())//Using first visible item key instead of initial key
+                            .limitToLast(size);
+                    break;
+                case SCROLLING_DOWN:
+                    /*Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            .startAt(initialKey)
+                            .limitToFirst(size);*/
+                    // InitialKey is in the bottom, must load data from bottom to top
+                    // list is reversed, load data below InitialKey
+                    Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +"  last VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")
+                            .startAt(getItem(mVisibleItem).getLastSentLong())//Using last visible item key instead of initial key
+                            .limitToFirst(size);
+                    break;
+                default:
+                   /*// list is reversed, greater Keys are on top
+                    if(getInitialKeyPosition() >= mVisibleItem){
+                        // InitialKey is in the bottom, must load data from bottom to top
+                        // list is reversed, load data below InitialKey
+                        Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
+                        chatsQuery = mChatsRef
+                                .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                                .startAt(initialKey)
+                                .limitToFirst(size);
+
+                    }else{
+                        // list is reversed, smaller Keys are on bottom
+                        // InitialKey is in the top, must load data from top to bottom
+                        // list is reversed, load data above InitialKey
+                        Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
+                        chatsQuery = mChatsRef
+                                .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                                .endAt(initialKey)
+                                .limitToLast(size);
+                    }
+                    break;*/
+                    Log.d(TAG, "messages query = default. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
+                    chatsQuery = mChatsRef
+                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            .limitToLast(size);
+            }
         }
+        // Clear the list of total items to start all over
+        totalItemsList.clear();
+        Log.d(TAG, "messages query = totalItemsList is cleared");
 
         chatsQuery.addValueEventListener(initialChatsListener);
         mListenersList.add(new FirebaseListeners(chatsQuery, initialChatsListener));
@@ -412,13 +538,41 @@ public class ChatsRepository {
         mListenersList.clear();
     }
 
-    public void getListeners(){
+    public void printListeners(){
 
         for (int i = 0; i < mListenersList.size(); i++) {
             //Log.d(TAG, "Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
             //Log.d(TAG, "Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
             Log.d(TAG, "Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
+    }
+
+    public void printTotalItems(String type){
+        Log.d(TAG, "Getting totalItemsList... Type"+ type );
+        for (int i = 0; i < totalItemsList.size(); i++) {
+            Log.d(TAG, "totalItemsList : key= "+ totalItemsList.get(i).getKey()+ " message= "+ totalItemsList.get(i).getLastMessage()+ " size= "+totalItemsList.size());
+        }
+    }
+
+    // get the position of initial key
+    public int getInitialKeyPosition(){
+        Log.d(TAG, "Getting get InitialKeyPosition... getInitialKey()= "+getInitialKey()+ " totalItemsList size= "+totalItemsList.size());
+        int Position = 0;
+        for (int i = 0; i < totalItemsList.size(); i++) {
+            if(totalItemsList.get(i).getLastSentLong() == getInitialKey()){
+                Log.d(TAG, "messages query InitialKeyPosition: key= "+ getInitialKey()+ " message= "+totalItemsList.get(i).getLastMessage() +" Position= " +Position);
+                return Position;
+            }else{
+                Position++;
+            }
+        }
+        return Position;
+    }
+
+    // get item and item's key from adapter position
+    public Chat getItem(int position){
+        Log.d(TAG, "Getting getItem... getInitialKey()= "+getInitialKey()+ " item message= "+ totalItemsList.get(position).getLastMessage());
+        return totalItemsList.get(position);
     }
 
     public ItemKeyedDataSource.LoadInitialCallback getLoadInitialCallback() {
@@ -453,6 +607,10 @@ public class ChatsRepository {
 
     public Long getLoadBeforeKey() {
         return beforeKey;
+    }
+
+    public Long getInitialKey() {
+        return initialKey;
     }
 
 }

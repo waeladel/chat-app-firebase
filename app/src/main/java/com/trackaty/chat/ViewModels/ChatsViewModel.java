@@ -26,22 +26,24 @@ public class ChatsViewModel extends ViewModel {
     private DatabaseReference mUserChatsRef;
 
 
-    public ChatsViewModel() {
+    public ChatsViewModel(String currentUserId) {
 
         //callbackPagedList = new MutableLiveData<>();
         // pass UserId and  firebaseCallback to the constructor of ChatsDataFactory
 
-        chatsDataFactory = new ChatsDataFactory();
+        chatsDataFactory = new ChatsDataFactory(currentUserId);
 
         Log.d(TAG, "Chat ChatsViewModel init");
 
         //Enabling Offline Capabilities//
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-
+        // keepSync UserChatsRef to work offline
+        mUserChatsRef = mDatabaseRef.child("userChats").child(currentUserId);
+        mUserChatsRef.keepSynced(true);
 
         config = (new PagedList.Config.Builder())
-                .setPageSize(20)//10
-                .setInitialLoadSizeHint(20)//30
+                .setPageSize(10)//10
+                .setInitialLoadSizeHint(10)//30
                 //.setPrefetchDistance(10)//10
                 .setEnablePlaceholders(false)
                 .build();
@@ -49,15 +51,22 @@ public class ChatsViewModel extends ViewModel {
         itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
     }
 
-    public void setUserId(String UserId){
-        chatsDataFactory.setUserKey(UserId);
+    /*public void setUserId(String UserId){
+        //chatsDataFactory.setUserKey(UserId);
+        chatsDataFactory = new ChatsDataFactory(UserId);
         mUserChatsRef = mDatabaseRef.child("userChats").child(UserId);
         mUserChatsRef.keepSynced(true);
-    }
+    }*/
 
 
     public LiveData<PagedList<Chat>> getItemPagedList(){
         return itemPagedList ;
+    }
+
+    // Set scroll direction and last visible item which is used to get initialkey's position
+    public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
+        //MessagesListRepository.setScrollDirection(scrollDirection);
+        chatsDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);
     }
 
 

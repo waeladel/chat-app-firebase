@@ -212,6 +212,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 //mMessagesViewModel.setScrollDirection(dy);
 
                 int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
+                int firstCompletelyVisibleItem = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition(); // the position of first displayed item
                 //int totalItemCount = mLinearLayoutManager.getItemCount();
                 int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
                 int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
@@ -223,10 +224,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastCompletelyVisibleItem);
 
                 if(lastCompletelyVisibleItem >= (totalItemCount-1)){
+                //if(lastCompletelyVisibleItem >= (totalItemCount-5)){
                     // The position of last displayed item = total items, witch means we are at the bottom
                     mScrollDirection = REACHED_THE_BOTTOM;
                     Log.i(TAG, "List reached the bottom");
-                }else if(lastCompletelyVisibleItem <= visibleItemCount){
+                //}else if(lastCompletelyVisibleItem <= visibleItemCount){
+                }else if(firstCompletelyVisibleItem <= 4){
                     // The position of last displayed item is less than visibleItemCount, witch means we are at the top
                     mScrollDirection = REACHED_THE_TOP;
                     Log.i(TAG, "List reached the top");

@@ -22,6 +22,11 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
             invalidate();
             Log.d(TAG, "mama invalidate ");
         }*/
+
+    }
+    // Pass scrolling direction and last/first visible item to the repository
+    public void setScrollDirection(int scrollDirection, int lastVisibleItem){
+        chatsRepository.setScrollDirection(scrollDirection, lastVisibleItem);
     }
 
     // a callback to invalidate the data whenever a change happen
