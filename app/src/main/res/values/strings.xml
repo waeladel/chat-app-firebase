@@ -203,6 +203,10 @@
     <string name="send_text_icon">Send message</string>
     <string name="message_sent_icon">Message sent icon</string>
 
+    <!--Notifications-->
+    <string name="notification_like_title">New like</string>
+    <string name="notification_like_message">%1$s likes you</string>
+    <!--Notifications-->
 
 
 

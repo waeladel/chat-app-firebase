@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.trackaty.chat.DataSources.RelationRepository;
 import com.trackaty.chat.DataSources.UserRepository;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
 
@@ -43,8 +44,8 @@ public class ProfileViewModel extends ViewModel {
     }
 
     // update love and favourites Favorite
-    public void sendLove(String currentUserId, String userId) {
-        relationRepository.sendLove(currentUserId, userId);
+    public void sendLove(String currentUserId, String name, String avatar, String userId) {
+        relationRepository.sendLove(currentUserId, name, avatar, userId);
     }
 
     // cancel love and favourites
@@ -72,6 +73,10 @@ public class ProfileViewModel extends ViewModel {
 
     public LiveData<User> getUser(String currentUserId){
         return mUserRepository.getCurrentUser(currentUserId);
+    }
+
+    public void getUserOnce(String userId, FirebaseUserCallback callback) {
+        mUserRepository.getUserOnce(userId, callback);
     }
 
     @Override

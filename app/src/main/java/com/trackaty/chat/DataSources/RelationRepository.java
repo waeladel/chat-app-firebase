@@ -12,6 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.FirebaseListeners;
+import com.trackaty.chat.models.Notification;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
 
@@ -23,6 +24,8 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import static com.trackaty.chat.App.getContext;
+
 public class RelationRepository {
 
     private final static String TAG = RelationRepository.class.getSimpleName();
@@ -32,6 +35,7 @@ public class RelationRepository {
     private DatabaseReference mRelationRef;
     private DatabaseReference mLikesRef;
     private DatabaseReference mUserChatsRef;
+    private DatabaseReference mNotificationsRef;
 
     private MutableLiveData<Relation> mRelation;
     private MutableLiveData<Long> mlikesResult;
@@ -151,6 +155,7 @@ public class RelationRepository {
         mRelationRef = mDatabaseRef.child("relations");
         mLikesRef = mDatabaseRef.child("likes");
         mUserChatsRef = mDatabaseRef.child("userChats");
+        mNotificationsRef = mDatabaseRef.child("notifications");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         mRelation = new MutableLiveData<>();
@@ -376,7 +381,7 @@ public class RelationRepository {
     }
 
     // update love and favourites Favorite
-    public void sendLove(String currentUserId, String userId) {
+    public void sendLove(String currentUserId, String name , String avatar, String userId) {
 
         /*User user = new User();
         user.setName("wal");
@@ -388,6 +393,12 @@ public class RelationRepository {
         childUpdates.put("/favorites/" + currentUserId + "/" + userId, true);
         //likes is to display who send likes to this particular user
         childUpdates.put("/likes/" + userId + "/" + currentUserId, true);
+
+        // Update notifications
+        String notificationKey = mNotificationsRef.child(userId).push().getKey();
+        Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+        Map<String, Object> notificationValues = notification.toMap();
+        childUpdates.put("/notifications/" + userId + "/" +notificationKey, notificationValues);
 
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -413,6 +424,9 @@ public class RelationRepository {
         childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
         //likes is to display who send likes to this particular user
         childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
+
+        // Cancel notification
+        //childUpdates.put("/notifications/" + userId, null);
 
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

@@ -35,6 +35,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.SortSocial;
@@ -83,7 +84,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String CONFIRMATION_ALERT_FRAGMENT = "EditFragment";
 
     private String mCurrentUserId, mUserId;
-    private User mUser;
+    private User mUser, mCurrentUser;
     private FirebaseUser mFirebaseCurrentUser;
     private Button mSeeMoreButton;
     private FloatingActionButton mLoveButton, mMessageButton, mRevealButton, mBlockEditButton;
@@ -197,6 +198,17 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }
             });
         }
+
+        // Get current user once
+        mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+            @Override
+            public void onCallback(User user) {
+                if(user != null){
+                    Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName());
+                    mCurrentUser = user;
+                }
+            }
+        });
 
 
             // toggle mBlockEditButton
@@ -430,7 +442,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }else{
 
                     //Current user didn't loved this user before, lit's love him
-                    mProfileViewModel.sendLove(mCurrentUserId, mUserId);
+                    mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
                 }
 
             }
