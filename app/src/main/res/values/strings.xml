@@ -205,7 +205,8 @@
 
     <!--Notifications-->
     <string name="notification_like_title">New like</string>
-    <string name="notification_like_message">%1$s likes you</string>
+    <!--<string name="notification_like_message">%1$s likes you</string>-->
+    <string name="notification_like_message">likes you</string>
     <!--Notifications-->
 
 

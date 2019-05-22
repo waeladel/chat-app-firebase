@@ -200,7 +200,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         }
 
         // Get current user once
-        mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+        /*mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
             @Override
             public void onCallback(User user) {
                 if(user != null){
@@ -208,7 +208,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     mCurrentUser = user;
                 }
             }
-        });
+        });*/
 
 
             // toggle mBlockEditButton
@@ -442,7 +442,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }else{
 
                     //Current user didn't loved this user before, lit's love him
-                    mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
+                    mProfileViewModel.sendLove(mCurrentUserId, mUserId);
+                    //mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
                 }
 
             }

@@ -381,8 +381,8 @@ public class RelationRepository {
     }
 
     // update love and favourites Favorite
-    public void sendLove(String currentUserId, String name , String avatar, String userId) {
-
+    //public void sendLove(String currentUserId, String name , String avatar, String userId) {
+    public void sendLove(String currentUserId, String userId) {
         /*User user = new User();
         user.setName("wal");
         // Create chat map
@@ -396,7 +396,8 @@ public class RelationRepository {
 
         // Update notifications
         String notificationKey = mNotificationsRef.child(userId).push().getKey();
-        Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+        //Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+        Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message), "like", currentUserId);
         Map<String, Object> notificationValues = notification.toMap();
         childUpdates.put("/notifications/" + userId + "/" +notificationKey, notificationValues);
 

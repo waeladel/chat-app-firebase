@@ -15,21 +15,29 @@ public class Notification {
     private String message;
     private String type;
     private String senderId;
-    private String senderName;
-    private String senderAvatar;
+    //private String senderName;
+    //private String senderAvatar;
     private boolean seen;
     private Object created ;
 
     public Notification() {
     }
 
-    public Notification(String title, String message, String type, String senderId, String senderName, String senderAvatar) {
+    /*public Notification(String title, String message, String type, String senderId, String senderName, String senderAvatar) {
         this.title = title;
         this.message = message;
         this.type = type;
         this.senderId = senderId;
         this.senderName = senderName;
         this.senderAvatar = senderAvatar;
+        //this.created = created;
+    }*/
+
+    public Notification(String title, String message, String type, String senderId) {
+        this.title = title;
+        this.message = message;
+        this.type = type;
+        this.senderId = senderId;
         //this.created = created;
     }
 
@@ -41,8 +49,8 @@ public class Notification {
         result.put("message", message);
         result.put("type", type);
         result.put("senderId", senderId);
-        result.put("senderName", senderName);
-        result.put("senderAvatar", senderAvatar);
+        /*result.put("senderName", senderName);
+        result.put("senderAvatar", senderAvatar);*/
         result.put("seen", seen);
         result.put("created", ServerValue.TIMESTAMP);
 
@@ -103,7 +111,7 @@ public class Notification {
         this.created = created;
     }
 
-    public String getSenderName() {
+    /*public String getSenderName() {
         return senderName;
     }
 
@@ -117,7 +125,7 @@ public class Notification {
 
     public void setSenderAvatar(String senderAvatar) {
         this.senderAvatar = senderAvatar;
-    }
+    }*/
 
     public boolean isSeen() {
         return seen;

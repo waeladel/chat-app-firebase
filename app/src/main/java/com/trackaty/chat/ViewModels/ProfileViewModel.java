@@ -44,9 +44,14 @@ public class ProfileViewModel extends ViewModel {
     }
 
     // update love and favourites Favorite
-    public void sendLove(String currentUserId, String name, String avatar, String userId) {
-        relationRepository.sendLove(currentUserId, name, avatar, userId);
+    //public void sendLove(String currentUserId, String name, String avatar, String userId) {
+    public void sendLove(String currentUserId, String userId) {
+        relationRepository.sendLove(currentUserId, userId);
     }
+
+    /*public void sendLove(String currentUserId, String name, String avatar, String userId) {
+        relationRepository.sendLove(currentUserId, name, avatar, userId);
+    }*/
 
     // cancel love and favourites
     public void cancelLove(String currentUserId, String userId) {
@@ -75,9 +80,9 @@ public class ProfileViewModel extends ViewModel {
         return mUserRepository.getCurrentUser(currentUserId);
     }
 
-    public void getUserOnce(String userId, FirebaseUserCallback callback) {
+    /*public void getUserOnce(String userId, FirebaseUserCallback callback) {
         mUserRepository.getUserOnce(userId, callback);
-    }
+    }*/
 
     @Override
     protected void onCleared() {
