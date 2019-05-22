@@ -21,6 +21,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
@@ -472,6 +474,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                     // add lineListener for online statues
                     connectedRef.addValueEventListener(onlineListener);
+
+                    // Set user's notification tokens
+                    FirebaseInstanceId.getInstance().getInstanceId()
+                            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        Log.w(TAG, "getInstanceId failed", task.getException());
+                                        return;
+                                    }
+
+                                    if(null != task.getResult()){
+                                        // Get new Instance ID token
+                                        String token = task.getResult().getToken();
+                                        //mTokensRef.child(mUserId).child(token).setValue(true);
+                                        mUserRef.child("tokens").child(token).setValue(true);
+                                    }
+                                }
+                            });
+                    // End of set user's notification tokens
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
