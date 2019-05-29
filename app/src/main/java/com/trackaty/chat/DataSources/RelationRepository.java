@@ -1,30 +1,23 @@
 package com.trackaty.chat.DataSources;
 
 import android.util.Log;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.R;
 import com.trackaty.chat.models.FirebaseListeners;
-import com.trackaty.chat.models.Notification;
+import com.trackaty.chat.models.DatabaseNotification;
 import com.trackaty.chat.models.Relation;
-import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
-
-import static com.trackaty.chat.App.getContext;
 
 public class RelationRepository {
 
@@ -42,7 +35,12 @@ public class RelationRepository {
     private MutableLiveData<Long> mPickUpCount;
     private MutableLiveData<Boolean> isLiked;
 
-
+    // DatabaseNotification's types
+    private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
+    private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RevealSent";
+    private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RevealApproved";
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
@@ -395,9 +393,10 @@ public class RelationRepository {
         childUpdates.put("/likes/" + userId + "/" + currentUserId, true);
 
         // Update notifications
-        String notificationKey = mNotificationsRef.child(userId).push().getKey();
-        //Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
-        Notification notification = new Notification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message), "like", currentUserId);
+        //String notificationKey = mNotificationsRef.child(userId).push().getKey();
+        String notificationKey = currentUserId+ NOTIFICATION_TYPE_LIKE;
+        //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+        DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId);
         Map<String, Object> notificationValues = notification.toMap();
         childUpdates.put("/notifications/" + userId + "/" +notificationKey, notificationValues);
 

@@ -29,7 +29,7 @@ public class MessagesViewModel extends ViewModel {
     public LiveData<PagedList<Message>> itemPagedList;
     public  MutableLiveData<PagedList<Message>> items;
     LiveData<ItemKeyedDataSource<String, Message>> liveDataSource;
-    public  LiveData<User> chatUser;
+    public  LiveData<User> chatUser, currentUser;
     public  LiveData<Chat> chat;
     private MessagesRepository messagesRepository;
 
@@ -39,7 +39,7 @@ public class MessagesViewModel extends ViewModel {
     private  MutableLiveData<CharSequence> agoTime;
 
 
-    public MessagesViewModel(String chatKey, String chatUserId) {
+    public MessagesViewModel(String chatKey, String chatUserId, String currentUserId) {
 
         // pass chatKey to the constructor of MessagesDataFactory
         messagesDataFactory = new MessagesDataFactory(chatKey);
@@ -66,6 +66,7 @@ public class MessagesViewModel extends ViewModel {
                 .build();*/
         chat = messagesRepository.getChat(chatKey);
         chatUser = messagesRepository.getUser(chatUserId);
+        currentUser = messagesRepository.getCurrentUser(currentUserId);
 
     }
 
@@ -73,6 +74,13 @@ public class MessagesViewModel extends ViewModel {
     public LiveData<User> getChatUser(String userId) {
         Log.d(TAG, "getUser"+ userId);
         return chatUser ;
+        //chatUser = messagesRepository.getUser(userId);
+        //return messagesRepository.getUser(userId);
+    }
+
+    public LiveData<User> getCurrentUser(String userId) {
+        Log.d(TAG, "getCurrentUser: "+ userId);
+        return currentUser ;
         //chatUser = messagesRepository.getUser(userId);
         //return messagesRepository.getUser(userId);
     }

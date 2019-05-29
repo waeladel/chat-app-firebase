@@ -205,8 +205,31 @@
 
     <!--Notifications-->
     <string name="notification_like_title">New like</string>
+    <string name="notification_pick_up_title">New pick-up line</string>
+    <string name="notification_message_title">New message</string>
+    <string name="notification_request_sent_title">New reveal request</string>
+    <string name="notification_request_approved_title">Request approved</string>
+
+
     <!--<string name="notification_like_message">%1$s likes you</string>-->
-    <string name="notification_like_message">likes you</string>
+    <string name="notification_like_body">%1$s likes you.</string>
+    <string name="notification_pick_up_body">%1$s started a new conversation with you.</string>
+    <string name="notification_message_body">%1$s send you a new message.</string>
+    <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
+    <string name="notification_request_approved_body">%1$s approved your reveal request.</string>
+
+
+    <!--<string name="notification_like_channel_description">Receive likes from your stalkers</string>-->
+    <string name="likes_notification_channel_name">Likes</string>
+    <string name="pickups_notification_channel_name">Pick-up lines</string>
+    <string name="messages_notification_channel_name">Messages</string>
+    <string name="reveal_notification_channel_name">Reveal requests</string>
+
+    <string name="likes_notification_channel_description">Get notifications about likes from nearby people.</string>
+    <string name="pickups_notification_channel_description">Get notifications about pick-up lines from nearby people.</string>
+    <string name="messages_notification_channel_description">Get notifications when you have a new message.</string>
+    <string name="reveal_notification_channel_description">Get notifications when people send you requests to reveal your private contacts.</string>
+
     <!--Notifications-->
 
 

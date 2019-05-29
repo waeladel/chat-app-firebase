@@ -49,6 +49,7 @@ import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.ViewModels.MessagesViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.DatabaseNotification;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
 
@@ -70,6 +71,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mChatsRef;
     private DatabaseReference mMessagesRef;
+    private DatabaseReference mNotificationsRef;
+
 
     private RecyclerView mMessagesRecycler;
     private ArrayList<Message> mMessagesArrayList;
@@ -119,6 +122,13 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private static final int REACHED_THE_BOTTOM = -2;
     private int mScrollDirection;
 
+    // DatabaseNotification's types
+    private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
+    private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
+    private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
+
     private static final String IS_HII_BOTTOM = "Hit_Bottom";
 
 
@@ -156,7 +166,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 // Chat ID is not passed from MainFragment, we need to create
                 mChatId = getJoinedKeys(mCurrentUserId , mChatUserId);
             }
-            Log.d(TAG, "currentUserId mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
+            Log.d(TAG, "currentUserId = " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
         }
 
         mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
@@ -167,6 +177,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mChatsRef = mDatabaseRef.child("chats");
         mMessagesRef = mDatabaseRef.child("messages");
+        mNotificationsRef = mDatabaseRef.child("notifications");
 
         //isHitBottom = true;
 
@@ -540,7 +551,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             // get Current User Id and object from main ViewModel
 
             // update the CurrentUserId whenever it changes due to log out
-            mMainViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
             /*mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {
                 @Override
                 public void onChanged(final String userId) {
@@ -566,7 +576,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 @NonNull
                 @Override
                 public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                    return (T)new MessagesViewModel (mChatId, mChatUserId);
+                    return (T)new MessagesViewModel (mChatId, mChatUserId, mCurrentUserId);
                 }
             }).get(MessagesViewModel.class);
 
@@ -743,13 +753,18 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 });
             }
 
-            mMainViewModel.getCurrentUser().observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(User user) {
-                    Log.d(TAG, "onChanged CurrentUser userId name= "+user.getName());
-                    mCurrentUser = user;
-                }
-            });
+
+                mMessagesViewModel.getCurrentUser(mCurrentUserId).observe(this, new Observer<User>() {
+                    @Override
+                    public void onChanged(User user) {
+                        Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= " + user.getName());
+                        mCurrentUser = user;
+                        if(null == mCurrentUser.getKey()){
+                            mCurrentUser.setKey(mCurrentUserId);
+                        }
+                    }
+                });
+
 
             /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
                 @Override
@@ -1109,6 +1124,11 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         members.put(mCurrentUserId, mCurrentUser);
         members.put(mChatUserId, mChatUser);
 
+        // Update notifications
+        String notificationKey;
+        DatabaseNotification databaseNotification;
+        Map<String, Object> notificationValues;
+
         // Create chat map
         Map<String, Object> chatValues;
         if(mChat != null){
@@ -1119,11 +1139,26 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 mChat.setSender(mCurrentUserId);
             }
             chatValues = mChat.toMap();
+
+            // Update MESSAGE notifications
+            //notificationKey = mNotificationsRef.child(mChatUserId).push().getKey();
+            notificationKey = mCurrentUserId + NOTIFICATION_TYPE_MESSAGE;
+            //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_MESSAGE, mCurrentUserId, mChatId);
+            notificationValues = databaseNotification.toMap();
         }else{
             // Create new chat from scratch
             Log.d(TAG, "sendMessage: chat is null, create new chat from scratch");
             Chat chat = new Chat(messageText, mCurrentUserId, members);
             chatValues = chat.toMap();
+
+            // Update PICK_UP notifications
+            //notificationKey = mNotificationsRef.child(mChatUserId).push().getKey();
+            notificationKey = mCurrentUserId + NOTIFICATION_TYPE_PICK_UP;
+            //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
+            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_PICK_UP, mCurrentUserId, mChatId);
+            notificationValues = databaseNotification.toMap();
+
         }
 
 
@@ -1143,6 +1178,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         // only if Lookup is needed
         childUpdates.put("/userChats/" + mCurrentUserId + "/" + mChatId, chatValues);
         childUpdates.put("/userChats/" + mChatUserId + "/" + mChatId, chatValues);
+
+        childUpdates.put("/notifications/" + mChatUserId + "/" +notificationKey, notificationValues);
 
         //mScrollDirection = REACHED_THE_BOTTOM;
         //mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);

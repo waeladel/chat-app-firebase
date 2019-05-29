@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     //private DatabaseReference connection;
 
     private MainActivityViewModel mMainViewModel;// ViewMode for getting the latest current user id
+    private Intent intent;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -242,8 +243,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         };
 
+        //navController = Navigation.findNavController(this, R.id.host_fragment);
+        Log.d(TAG, "onCreat handleDeepLink. notification intent = "+intent);
+        navController.handleDeepLink(intent);
+
     }//End of onCreate
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        this.intent = intent;
+        Log.d(TAG, "onNewIntent. notification intent = "+intent);
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            Log.d(TAG, "onNewIntent. notification intent = "+intent);
+        }
+
+        navController.handleDeepLink(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -349,10 +366,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onDestroy () {
         super.onDestroy ();
         Log.d(TAG, "MainActivity onDestroy");
-        if(null != onlineListener){
+        if(null != onlineListener && null != connectedRef){
             // Remove onlineListener
             connectedRef.removeEventListener(onlineListener);
-            Log.d(TAG, "Remove onlineListener");
+            Log.d(TAG, "Remove connectedRef onlineListener");
         }
     }
 

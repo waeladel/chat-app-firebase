@@ -2,7 +2,10 @@ package com.trackaty.chat;
 
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -19,6 +22,7 @@ import com.squareup.picasso.Picasso;
 import com.trackaty.chat.models.User;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationManagerCompat;
 
 /**
  * Created on 25/03/2017.
@@ -48,6 +52,15 @@ public class App extends Application {
     private DatabaseReference connectedRef;//  = database.getReference(".info/connected");
     //private DatabaseReference connection;
 
+    /*private static final String PICK_UPS_CHANNEL_NAME = "Pick-up lines";
+    private static final String MESSAGES_CHANNEL_NAME = "Messages";
+    private static final String LIKES_CHANNEL_NAME = "Likes";
+    private static final String REQUESTS_CHANNEL_NAME = "Reveal requests";*/
+
+    public static final String PICK_UPS_CHANNEL_ID = "Pickup_id";
+    public static final String MESSAGES_CHANNEL_ID = "Messages_id";
+    public static final String LIKES_CHANNEL_ID = "Likes_id";
+    public static final String REQUESTS_CHANNEL_ID = "Reveal_id";
 
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
@@ -99,6 +112,7 @@ public class App extends Application {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = currentUser != null ? currentUser.getUid() : null;
 
+        createNotificationsChannels();
         /*database = FirebaseDatabase.getInstance();
 
         //initialize the AuthStateListener method
@@ -126,6 +140,47 @@ public class App extends Application {
         built.setLoggingEnabled(true);
         Picasso.setSingletonInstance(built);*/
         // [END Picasso enable persistence]
+    }
+
+    private void createNotificationsChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel, but only on API 26+ because
+            // the NotificationChannel class is new and not in the support library
+
+            NotificationChannel LikesChannel = new NotificationChannel(
+                    LIKES_CHANNEL_ID,
+                    getString(R.string.likes_notification_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            LikesChannel.setDescription(getString(R.string.likes_notification_channel_description));
+
+            NotificationChannel PickupsChannel = new NotificationChannel(
+                    PICK_UPS_CHANNEL_ID,
+                    getString(R.string.pickups_notification_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            PickupsChannel.setDescription(getString(R.string.pickups_notification_channel_description));
+
+            NotificationChannel MessagesChannel = new NotificationChannel(
+                    MESSAGES_CHANNEL_ID,
+                    getString(R.string.messages_notification_channel_name),
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            MessagesChannel.setDescription(getString(R.string.messages_notification_channel_description));
+
+            NotificationChannel RevealChannel = new NotificationChannel(
+                    REQUESTS_CHANNEL_ID,
+                    getString(R.string.reveal_notification_channel_name),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            RevealChannel.setDescription(getString(R.string.reveal_notification_channel_description));
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(LikesChannel);
+            manager.createNotificationChannel(PickupsChannel);
+            manager.createNotificationChannel(MessagesChannel);
+            manager.createNotificationChannel(RevealChannel);
+        }
     }
 
     public static Context getContext() {

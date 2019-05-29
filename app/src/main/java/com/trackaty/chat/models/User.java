@@ -72,6 +72,8 @@ public class User implements Parcelable{
     public SocialObj wikipedia ;
     public SocialObj website ;
 
+    public Map<String, Boolean> tokens = new HashMap<>();
+
     // startedAt: firebase.database.ServerValue.TIMESTAMP
     //private Date joined;// anotation to put server timestamp
 
@@ -614,6 +616,14 @@ public class User implements Parcelable{
 
     public void setWebsite(SocialObj website) {
         this.website = website;
+    }
+
+    public Map<String, Boolean> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(Map<String, Boolean> tokens) {
+        this.tokens = tokens;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -25,6 +27,8 @@ import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
@@ -251,6 +256,8 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 if (null != message.getSenderId()) {
                     // [START create_storage_reference]
                     //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                    //mStorageRef.child("images/"+message.getSenderId()+"/"+ AVATAR_THUMBNAIL_NAME).getFile()
+
                     mStorageRef.child("images/"+message.getSenderId()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {

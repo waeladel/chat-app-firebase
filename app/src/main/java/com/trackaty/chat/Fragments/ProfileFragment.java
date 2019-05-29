@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -41,6 +42,7 @@ import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.ViewModels.ProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
+import com.trackaty.chat.models.DatabaseNotification;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.SocialObj;
@@ -82,6 +84,13 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String REQUEST_FRAGMENT = "RequestFragment";
     private  static final String EDIT_UNREVEAL_FRAGMENT = "EditFragment";
     private  static final String CONFIRMATION_ALERT_FRAGMENT = "EditFragment";
+
+    // DatabaseNotification's types
+    private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
+    private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
+    private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
 
     private String mCurrentUserId, mUserId;
     private User mUser, mCurrentUser;
@@ -209,6 +218,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }
             }
         });*/
+        Log.i(TAG, "onChanged mProfileViewModel getRelation"+ mMessageButton.getBackgroundTintList());
 
 
             // toggle mBlockEditButton
@@ -232,6 +242,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                     //Approve request
                                     mRelationStatus = RELATION_STATUS_SENDER;
                                     mRevealHint.setText(R.string.request_button_approve_hint);
+                                    mRevealButton.setEnabled(true);
+                                    mRevealButton.setClickable(true);
+                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                    mRevealHint.setEnabled(true);
                                     mRelationsMap = relation.getContacts();
                                     mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                     break;
@@ -240,13 +254,21 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                     //Cancel request
                                     mRelationStatus = RELATION_STATUS_RECEIVER;
                                     mRevealHint.setText(R.string.request_button_cancel_hint);
+                                    mRevealButton.setEnabled(true);
+                                    mRevealButton.setClickable(true);
+                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
                                     mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                    mRevealHint.setEnabled(true);
                                     break;
                                 case RELATION_STATUS_STALKER:
                                     // If this selected i (currentUser) approved his request
                                     //Edit/ Un-reveal
                                     mRelationStatus = RELATION_STATUS_STALKER;
                                     mRevealHint.setText(R.string.request_button_unreveal_hint);
+                                    mRevealButton.setEnabled(true);
+                                    mRevealButton.setClickable(true);
+                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                    mRevealHint.setEnabled(true);
                                     mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
                                     mRelationsMap = relation.getContacts();
                                     mOriginalRelationsMap = new HashMap<>(mRelationsMap);
@@ -256,6 +278,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                     //Un reveal
                                     mRelationStatus = RELATION_STATUS_FOLLOWED;
                                     mRevealHint.setText(R.string.request_button_unreveal_hint);
+                                    mRevealButton.setEnabled(true);
+                                    mRevealButton.setClickable(true);
+                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                    mRevealHint.setEnabled(true);
+                                    mRevealHint.setEnabled(true);
                                     mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
                                     mRelationsMap = relation.getContacts();
                                     mOriginalRelationsMap = new HashMap<>(mRelationsMap);
@@ -1140,6 +1166,12 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         Relation stalker;
         Relation followed;
         Map<String, Object> childUpdates = new HashMap<>();
+
+        // Update notifications
+        String notificationKey;
+        DatabaseNotification databaseNotification;
+        Map<String, Object> notificationValues;
+
         switch (mRelationStatus){
             case RELATION_STATUS_SENDER:
                 //Approving request
@@ -1151,6 +1183,13 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                 childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId, stalkerValues);
                 childUpdates.put("/relations/" + mUserId + "/" + mCurrentUserId, followedValues);
+
+                // Update request notification
+                notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_APPROVED;
+                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_APPROVED, mCurrentUserId);
+                notificationValues = databaseNotification.toMap();
+                childUpdates.put("/notifications/" + mUserId + "/" +notificationKey, notificationValues);
+
                 break;
             case RELATION_STATUS_RECEIVER:
                 //Canceling request
@@ -1182,7 +1221,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 childUpdates.put("/relations/" + mUserId + "/" + mCurrentUserId, stalkerValues);
                 break;
             default:
-                // Showing request dialog
+                // Showing request dialog to send new request
                 sender = new Relation(RELATION_STATUS_SENDER , contactsMap);
                 senderValues = sender.toMap();
 
@@ -1193,6 +1232,12 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 //childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId + "/status/", "receiver");
                 childUpdates.put("/relations/" + mUserId + "/" + mCurrentUserId, senderValues);
                 //childUpdates.put("/relations/" + mUserId + "/" + mCurrentUserId + "/status/", "sender");
+
+                // Update request notification
+                notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_SENT;
+                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_SENT, mCurrentUserId);
+                notificationValues = databaseNotification.toMap();
+                childUpdates.put("/notifications/" + mUserId + "/" +notificationKey, notificationValues);
 
                 break;
         }

@@ -8,22 +8,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 @IgnoreExtraProperties
-public class Notification {
+public class DatabaseNotification {
 
     private String key;
-    private String title;
-    private String message;
+    //private String title;
+    //private String message;
     private String type;
     private String senderId;
+    private String chatId;
     //private String senderName;
     //private String senderAvatar;
     private boolean seen;
     private Object created ;
 
-    public Notification() {
+    public DatabaseNotification() {
     }
 
-    /*public Notification(String title, String message, String type, String senderId, String senderName, String senderAvatar) {
+    /*public DatabaseNotification(String title, String message, String type, String senderId, String senderName, String senderAvatar) {
         this.title = title;
         this.message = message;
         this.type = type;
@@ -33,26 +34,36 @@ public class Notification {
         //this.created = created;
     }*/
 
-    public Notification(String title, String message, String type, String senderId) {
-        this.title = title;
-        this.message = message;
+    public DatabaseNotification(String type, String senderId) {
+        //this.title = title;
+        //this.message = message;
         this.type = type;
         this.senderId = senderId;
-        //this.created = created;
+        this.created = ServerValue.TIMESTAMP;
+    }
+
+    public DatabaseNotification(String type, String senderId, String chatId) {
+        //this.title = title;
+        //this.message = message;
+        this.type = type;
+        this.senderId = senderId;
+        this.chatId = chatId;
+        this.created = ServerValue.TIMESTAMP;
     }
 
     // [START post_to_map]
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("title", title);
-        result.put("message", message);
+        //result.put("title", title);
+        //result.put("message", message);
         result.put("type", type);
         result.put("senderId", senderId);
+        result.put("chatId", chatId);
         /*result.put("senderName", senderName);
         result.put("senderAvatar", senderAvatar);*/
         result.put("seen", seen);
-        result.put("created", ServerValue.TIMESTAMP);
+        result.put("created", created);
 
         return result;
     }
@@ -65,7 +76,7 @@ public class Notification {
         this.key = key;
     }
 
-    public String getTitle() {
+    /*public String getTitle() {
         return title;
     }
 
@@ -79,7 +90,7 @@ public class Notification {
 
     public void setMessage(String message) {
         this.message = message;
-    }
+    }*/
 
     public String getType() {
         return type;
@@ -126,6 +137,14 @@ public class Notification {
     public void setSenderAvatar(String senderAvatar) {
         this.senderAvatar = senderAvatar;
     }*/
+
+    public String getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(String chatId) {
+        this.chatId = chatId;
+    }
 
     public boolean isSeen() {
         return seen;
