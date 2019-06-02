@@ -31,6 +31,7 @@ public class MessagesViewModel extends ViewModel {
     LiveData<ItemKeyedDataSource<String, Message>> liveDataSource;
     public  LiveData<User> chatUser, currentUser;
     public  LiveData<Chat> chat;
+    private String chatId;
     private MessagesRepository messagesRepository;
 
     private DatabaseReference mDatabaseRef;
@@ -47,6 +48,8 @@ public class MessagesViewModel extends ViewModel {
         agoTime = new MutableLiveData<>();
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "Message MessagesViewModel init");
+
+        this.chatId = chatKey;
 
         //Enabling Offline Capabilities//
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -116,6 +119,11 @@ public class MessagesViewModel extends ViewModel {
     }
 
 
+    /*// Update all seen messages by currentUser
+    public void updateSeenMessages(String chatId) {
+        MessagesListRepository.updateSeenMessages(chatId);
+    }*/
+
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama MessagesViewModel onCleared:");
@@ -125,6 +133,10 @@ public class MessagesViewModel extends ViewModel {
 
         // Remove all Listeners from MessagesListRepository
         MessagesListRepository.removeListeners();
+
+        /*// Update all seen messages by currentUser before onCleared
+        updateSeenMessages(chatId);*/
+
         super.onCleared();
     }
 

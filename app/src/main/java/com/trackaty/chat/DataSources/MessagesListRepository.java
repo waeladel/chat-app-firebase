@@ -1,7 +1,11 @@
 package com.trackaty.chat.DataSources;
 
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,7 +18,9 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -31,6 +37,10 @@ public class MessagesListRepository {
     private DatabaseReference mMessagesRef;
     private DatabaseReference mUsersRef;
 
+    //private User currentUser;
+    private String currentUserId;
+    private FirebaseUser mFirebaseCurrentUser;
+
     private static volatile Boolean isInitialFirstLoaded;// = true;
     private static volatile Boolean isAfterFirstLoaded;// = true;
     private static volatile Boolean isBeforeFirstLoaded;// = true;
@@ -38,10 +48,13 @@ public class MessagesListRepository {
     private String initialKey;
     private String afterKey;
     private String beforeKey;
+    private String chatKey;
 
     private ValueEventListener MessagesChangesListener;
     private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
     private static List<Message> totalItemsList;// = new ArrayList<>();
+    //private static List<Message> seenItemsList;// = new ArrayList<>() for seen messages by current user;
+
     private MutableLiveData<User> mUser;
 
     private DataSource.InvalidatedCallback invalidatedCallback;
@@ -59,6 +72,12 @@ public class MessagesListRepository {
     private static final int REACHED_THE_BOTTOM = -2;
     private static int mScrollDirection;
     private static int mLastVisibleItem;
+
+    private static final String Message_STATUS_SENDING = "Sending";
+    private static final String Message_STATUS_SENT = "Sent";
+    private static final String Message_STATUS_DELIVERED = "Delivered";
+    private static final String Message_STATUS_SEEN = "Seen";
+    private static final String Message_STATUS_REVEALED = "Revealed";
 
     private ValueEventListener afterMessagesListener = new ValueEventListener() {
         @Override
@@ -79,21 +98,43 @@ public class MessagesListRepository {
 
             if (dataSnapshot.exists()) {
                 List<Message> messagesList = new ArrayList<>();
+
+                // Create a map for all seen messages need to be updated
+                Map<String, Object> updateMap = new HashMap<>();
+
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     if(!getLoadAfterKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
+
+                            // Add only seen messages by current user to seenItemsList
+                            // If current user is not the sender, the other user is seeing this message
+                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                                //seenItemsList.add(message);
+                                if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
+                                    Log.d(TAG, "getMessagesAfter. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
+                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    message.setStatus(Message_STATUS_SEEN);
+                                }
+                            }
                         }
                         messagesList.add(message);
                         // Add messages to totalItemsList ArrayList to be used to get the initial key position
                         totalItemsList.add(message);
+
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
                 }
+                // Update seen messages
+                if(updateMap.size() > 0){
+                    mMessagesRef.updateChildren(updateMap);
+                    return;
+                }
                 // Get TotalItems logs
                 printTotalItems();
+                //printSeenItems();
                 if(messagesList.size() != 0){
                     //callback.onResult(messagesList);
                     getLoadAfterCallback().onResult(messagesList);
@@ -134,16 +175,37 @@ public class MessagesListRepository {
 
             if (dataSnapshot.exists()) {
                 List<Message> messagesList = new ArrayList<>();
+
+                // Create a map for all seen messages need to be updated
+                Map<String, Object> updateMap = new HashMap<>();
+
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     if(!getLoadBeforeKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
+
+                            // Add only seen messages by current user to seenItemsList
+                            // If current user is not the sender, the other user is seeing this message
+                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                                //seenItemsList.add(message);
+                                if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
+                                    Log.d(TAG, "getMessagesBefore. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
+                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    message.setStatus(Message_STATUS_SEEN);
+                                }
+                            }
                         }
                         messagesList.add(message);
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
+                }
+
+                // Update seen messages
+                if(updateMap.size() > 0){
+                    mMessagesRef.updateChildren(updateMap);
+                    return;
                 }
 
                 if(messagesList.size() != 0){
@@ -157,9 +219,16 @@ public class MessagesListRepository {
                     for (int i = 0; i < reversedList.size(); i++) {
                         // Add messages to totalItemsList ArrayList to be used to get the initial key position
                         totalItemsList.add(0, reversedList.get(i));
+
+                        /*// Add only seen messages by current user to seenItemsList
+                        // If current user is not the sender, the other user is seeing this message
+                        if(null!= reversedList.get(i).getSenderId() && !reversedList.get(i).getSenderId().equals(currentUserId)){
+                            seenItemsList.add(0, reversedList.get(i));
+                        }*/
                     }
                     // Get TotalItems logs
                     printTotalItems();
+                    //printSeenItems();
                 }
             } else {
                 // no data
@@ -184,8 +253,14 @@ public class MessagesListRepository {
         // use received chatKey to create a database ref
         mMessagesRef = mDatabaseRef.child("messages").child(chatKey);
         mUsersRef = mDatabaseRef.child("users");
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
+
         // call back to invalidate data
         this.invalidatedCallback = onInvalidatedCallback;
+        this.chatKey = chatKey;
 
         isInitialFirstLoaded =  true;
         isAfterFirstLoaded = true;
@@ -216,6 +291,19 @@ public class MessagesListRepository {
                 //totalItemsList.clear();
             }
         }
+
+        /*if(seenItemsList == null){
+            seenItemsList = new ArrayList<>();
+            Log.d(TAG, "seenItemsList is null. new ArrayList is created= " + seenItemsList.size());
+        }else{
+            Log.d(TAG, "seenItemsList is not null. Size= " + seenItemsList.size());
+            if(seenItemsList.size() >0){
+                Log.d(TAG, "seenItemsList is not null and not empty. Size= " + seenItemsList.size());
+                // Update seen messages on the database to clear seenItemsList and start over
+                updateSeenMessages(chatKey);
+            }
+        }*/
+
 
     }
 
@@ -280,11 +368,31 @@ public class MessagesListRepository {
 
                 if (dataSnapshot.exists()) {
                     final List<Message> messagesList = new ArrayList<>();
+
+                    // Create a map for all seen messages need to be updated
+                    Map<String, Object> updateMap = new HashMap<>();
                     // loop throw users value
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
+
+                            /*// Add only seen messages by current user to seenItemsList
+                            // If current user is not the sender, the other user is seeing this message
+                            if(null != message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                                seenItemsList.add(message);
+                            }*/
+
+                            // Add only seen messages by current user to seenItemsList
+                            // If current user is not the sender, the other user is seeing this message
+                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                                //seenItemsList.add(message);
+                                if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
+                                    Log.d(TAG, "initiated. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
+                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    message.setStatus(Message_STATUS_SEEN);
+                                }
+                            }
                         }
                         messagesList.add(message);
                         // Add messages to totalItemsList ArrayList to be used to get the initial key position
@@ -292,7 +400,16 @@ public class MessagesListRepository {
 
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
+
+                    // Update seen messages
+                    if(updateMap.size() > 0){
+                        mMessagesRef.updateChildren(updateMap);
+                        return;
+                    }
+
                     printTotalItems();
+                    //printSeenItems();
+
                     if(messagesList.size() != 0){
                         /*if(null != getInitialKey()){
                             mMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -540,6 +657,26 @@ public class MessagesListRepository {
         mListenersList.clear();
     }
 
+    /*public static void updateSeenMessages(String chatId){
+
+        // Create a map for all messages need to be updated
+        Map<String, Object> updateMap = new HashMap<>();
+        for (int i = 0; i < seenItemsList.size(); i++) {
+            Log.d(TAG, "updateSeenMessages seenItemsList size= "+ seenItemsList.size());
+            updateMap.put(seenItemsList.get(i).getKey()+"/seen", true);
+        }
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference messagesRef =  databaseRef.child("messages").child(chatId);
+
+        messagesRef.updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // onSuccess clear the list to start all over
+                seenItemsList.clear();
+            }
+        });
+    }*/
+
     public void printListeners(){
 
         for (int i = 0; i < mListenersList.size(); i++) {
@@ -556,6 +693,13 @@ public class MessagesListRepository {
             Log.d(TAG, "totalItemsList : key= "+ totalItemsList.get(i).getKey()+ " message= "+ totalItemsList.get(i).getMessage()+ " size= "+totalItemsList.size());
         }
     }
+
+    /*public void printSeenItems(){
+        Log.d(TAG, "Getting seenItemsList... ");
+        for (int i = 0; i < seenItemsList.size(); i++) {
+            Log.d(TAG, "seenItemsList : key= "+ seenItemsList.get(i).getKey()+ " message= "+ seenItemsList.get(i).getMessage()+ " senderId = "+seenItemsList.get(i).getSenderId() + " size= "+seenItemsList.size());
+        }
+    }*/
 
     public int getInitialKeyPosition(){
 

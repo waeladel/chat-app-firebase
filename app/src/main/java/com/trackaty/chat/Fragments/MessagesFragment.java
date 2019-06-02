@@ -129,6 +129,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
 
+    private static final String Message_STATUS_SENDING = "Sending";
+    private static final String Message_STATUS_SENT = "Sent";
+    private static final String Message_STATUS_DELIVERED = "Delivered";
+    private static final String Message_STATUS_SEEN = "Seen";
+    private static final String Message_STATUS_REVEALED = "Revealed";
+
     private static final String IS_HII_BOTTOM = "Hit_Bottom";
 
 
@@ -427,6 +433,25 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             }
         });
 
+        /*// just a test to compare two objects
+        Message message1 = new Message();
+
+        message1.setRevealed(true);
+        message1.setMessage("wello");
+        message1.setStatus("seen");
+
+        Message message2 = new Message();
+        message2.setRevealed(true);
+        message2.setMessage("wello");
+        message2.setStatus("seen");
+
+
+        if(message1.equals(message2)){
+            Log.d(TAG, "messages are the same");
+        }else{
+            Log.d(TAG, "messages are the deffrent");
+        }*/
+
         return fragView;
     }
 
@@ -470,47 +495,44 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         CancelLastOnlineTimer();
         CancelActiveTimer();
 
+        // Create a map for all messages need to be updated
+        Map<String, Object> updateMap = new HashMap<>();
+
         // Update all revealed messages on fragment's stop
         if(mMessagesAdapter != null){
             // Get revealed list from the adapter
             List<Message> revealedList = mMessagesAdapter.getRevealedList();
 
-            // Create a map for all messages need to be updated
-            Map<String, Object> updateMap = new HashMap<>();
-
             for (int i = 0; i < revealedList.size(); i++) {
                 Log.d(TAG, "revealedList message= "+revealedList.get(i).getMessage() + " key= "+revealedList.get(i).getKey());
                 updateMap.put(revealedList.get(i).getKey()+"/revealed", true);
             }
-            mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    // onSuccess clear the list to start all over
-                    mMessagesAdapter.clearRevealedList();
-                }
-            });
         }
 
-        // Update all sent messages on fragment's stop
+        // Update all messages status on fragment's stop
         if(mMessagesAdapter != null){
             // Get revealed list from the adapter
-            List<Message> sentList = mMessagesAdapter.getSentList();
+            List<Message> statusList = mMessagesAdapter.getStatusList();
+            //mMessagesAdapter.getCurrentList();
 
-            // Create a map for all messages need to be updated
-            Map<String, Object> updateMap = new HashMap<>();
-
-            for (int i = 0; i < sentList.size(); i++) {
-                Log.d(TAG, "sentList message= "+sentList.get(i).getMessage() + " key= "+sentList.get(i).getKey());
-                updateMap.put(sentList.get(i).getKey()+"/sent", true);
+            for (int i = 0; i < statusList.size(); i++) {
+                Log.d(TAG, "statusList message= "+statusList.get(i).getMessage() + " key= "+statusList.get(i).getKey() + " status= "+statusList.get(i).getStatus());
+                updateMap.put(statusList.get(i).getKey()+"/status", statusList.get(i).getStatus());
             }
-            mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    // onSuccess clear the list to start all over
-                    mMessagesAdapter.clearSentList();
-                }
-            });
+
         }
+
+        mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // onSuccess clear the list to start all over
+                mMessagesAdapter.clearStatusList();
+                mMessagesAdapter.clearRevealedList();
+            }
+        });
+
+        /*// Update all seen messages by currentUser
+        mMessagesViewModel.updateSeenMessages(mChatId);*/
 
     }
 
@@ -613,12 +635,15 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                         // Scroll to last item
                                         // Only scroll to bottom if user is not reading messages above
                                         Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
-                                        mMessagesAdapter.submitList(items);
 
                                         // Check if we have isHitBottom saved when change configuration occur or not
                                         if(savedInstanceState != null){
                                             isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
                                         }
+
+                                        Log.d(TAG, "isHitBottom= "+isHitBottom +" adapter getItemCount= "+ mMessagesAdapter.getItemCount());
+
+                                        mMessagesAdapter.submitList(items);
 
                                         if( null == isHitBottom || isHitBottom){
                                             if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
@@ -1099,14 +1124,14 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         if(mChat != null){
             if(null != mChat.getActive() && mChat.getActive() == 0) {
                 // message revealed should be true
-                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, true);
+                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(),Message_STATUS_SENDING,true);
             }else{
                 // message revealed should be false
-                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, false);
+                message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), Message_STATUS_SENDING,false);
             }
         }else{
             // message revealed should be false
-            message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), false, false);
+            message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), Message_STATUS_SENDING, false);
         }
 
         Map<String, Object> messageValues = message.toMap();
@@ -1192,11 +1217,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 Log.i(TAG, "send message onSuccess");
                 // Add message to sent array list
                 message.setKey(messageKey);
-                message.setSent(true);
+                message.setStatus(Message_STATUS_SENT);
                 // Add successfully sent message to adapter sent array list
                 // It's used to notify the adapter to update item position
-                mMessagesAdapter.addToSentList(message);
-
+                mMessagesAdapter.addSentToStatusList(message);
 
                 /*for (int i = 0; i < mItems.size(); i++) {
                     if (mItems.get(i) != null && mItems.get(i).getKey().equals(messageKey)) {
