@@ -8,6 +8,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.DataSources.MessagesDataFactory;
 import com.trackaty.chat.DataSources.MessagesListRepository;
 import com.trackaty.chat.DataSources.MessagesRepository;
+import com.trackaty.chat.Interface.FirebaseMessageCallback;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
@@ -45,6 +46,7 @@ public class MessagesViewModel extends ViewModel {
         // pass chatKey to the constructor of MessagesDataFactory
         messagesDataFactory = new MessagesDataFactory(chatKey);
         messagesRepository = new MessagesRepository();
+
         agoTime = new MutableLiveData<>();
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "Message MessagesViewModel init");
@@ -93,6 +95,12 @@ public class MessagesViewModel extends ViewModel {
         return  messagesRepository.getSenderId(chatId);
     }*/
 
+    // When last database message is not loaded, Invalidate messagesDataSource to scroll down
+    public void invalidateData() {
+        // invalidate messagesDataSource
+        messagesDataFactory.invalidateData();
+    }
+
     public LiveData<Chat> getChat(String chatId) {
         Log.d(TAG, "chatId"+ chatId);
         return chat;
@@ -123,6 +131,10 @@ public class MessagesViewModel extends ViewModel {
     public void updateSeenMessages(String chatId) {
         MessagesListRepository.updateSeenMessages(chatId);
     }*/
+
+    public void getLastMessageOnce(String chatId, FirebaseMessageCallback  callback) {
+        messagesRepository.getLastMessageOnce(chatId, callback);
+    }
 
     @Override
     protected void onCleared() {

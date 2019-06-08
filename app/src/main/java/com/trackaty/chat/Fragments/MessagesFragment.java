@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -43,6 +44,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Adapters.MessagesAdapter;
+import com.trackaty.chat.Interface.FirebaseMessageCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
@@ -137,6 +139,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     private static final String IS_HII_BOTTOM = "Hit_Bottom";
 
+    private String LastMessageKey;
+
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -211,6 +215,24 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         /*activity.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
 
+        // Listen for Edit text Touch event, to scroll down when focused
+        mMessage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch(action) {
+                case (MotionEvent.ACTION_UP) :
+                    Log.d(TAG,"onTouch: Action was UP");
+                    scrollToBottom();
+                    v.performClick();
+                    return false;
+                }
+                return false;
+            }
+        });
+
+
+
         // Listen for scroll events
         mMessagesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -231,7 +253,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 //scrollDirectionY = dy;
                 //mMessagesViewModel.setScrollDirection(dy);
 
-                int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
+                //int visibleItemCount = mMessagesRecycler.getChildCount(); // items are shown on screen right now
                 int firstCompletelyVisibleItem = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition(); // the position of first displayed item
                 //int totalItemCount = mLinearLayoutManager.getItemCount();
                 int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
@@ -241,7 +263,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 //int firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition(); // the position of last displayed item
 
                 //int pastVisibleItems = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition();
-                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastCompletelyVisibleItem);
+                Log.d(TAG, " totalItemCount= "+totalItemCount+" lastVisibleItem "+lastCompletelyVisibleItem);
 
                 if(lastCompletelyVisibleItem >= (totalItemCount-1)){
                 //if(lastCompletelyVisibleItem >= (totalItemCount-5)){
@@ -282,14 +304,49 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 Log.i(TAG, "isHitBottom = "+isHitBottom);
 
                 // The position of first displayed item = total items - visible count
-                // witch means user starts scrolling up ant the first visible item is now on the bottom
-                if(lastVisibleItem <= ((totalItemCount-1) - bottomVisibleItemCount)){
-                    // End of the list is here.
-                    Log.i(TAG, "First page scrolled up");
+                // witch means user starts scrolling up and the first visible item is now on the bottom
+                Log.d(TAG, "last displayed item  lastVisibleItem = " + lastVisibleItem + " totalItemCount= "+  totalItemCount+ " bottomVisibleItemCou= "+bottomVisibleItemCount);
+                if((lastVisibleItem <= ((totalItemCount-1) - bottomVisibleItemCount) && (bottomVisibleItemCount > 0))){ // check if bottomVisibleItemCount is greater than 0 to hide fab on start
                     mScrollFab.setVisibility(View.VISIBLE);
                 }else{
                     mScrollFab.setVisibility(View.INVISIBLE);
+                    // End of the list is here.
+                    Log.i(TAG, "End of the list is here");
                 }
+
+
+                /*// hide/ show mScrollFab according to the real last message
+                if(null != mMessagesAdapter.getCurrentList()) {
+
+                    Message LastDisplayedMessage = mMessagesAdapter.getCurrentList().get(mMessagesAdapter.getItemCount() - 1);
+                    Log.d(TAG, "last displayed item  LastDisplayedMessage = " + LastDisplayedMessage.getMessage());
+                    if(!TextUtils.equals(LastMessageKey, LastDisplayedMessage.getKey())){
+                        mScrollFab.setVisibility(View.VISIBLE);
+                    }else{
+                        // The position of last displayed item = total items - bottom visible count
+                        // witch means user starts scrolling up ant the first visible item is now on the bottom
+                        if(lastVisibleItem <= ((totalItemCount-1) - bottomVisibleItemCount) && bottomVisibleItemCount > 0){
+                            // End of the list is here.
+                            Log.i(TAG, "last displayed item less than (total items - bottom visible count). lastVisibleItem= "+lastVisibleItem+ " totalItemCount= "+totalItemCount+ " bottomVisibleItemCount= "+bottomVisibleItemCount );
+                            mScrollFab.setVisibility(View.VISIBLE);
+                        }else{
+                            Log.i(TAG, "last displayed item greater than (total items - bottom visible count). lastVisibleItem= "+lastVisibleItem+ " totalItemCount= "+totalItemCount+ " bottomVisibleItemCount= "+bottomVisibleItemCount );
+                            mScrollFab.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }else{
+                    // The position of last displayed item = total items - bottom visible count
+                    // witch means user starts scrolling up ant the first visible item is now on the bottom
+                    if(lastVisibleItem <= ((totalItemCount-1) - bottomVisibleItemCount) && bottomVisibleItemCount > 0){
+                        // End of the list is here.
+                        Log.i(TAG, "last displayed item less than (total items - bottom visible count). lastVisibleItem= "+lastVisibleItem+ " totalItemCount= "+totalItemCount+ " bottomVisibleItemCount= "+bottomVisibleItemCount );
+                        mScrollFab.setVisibility(View.VISIBLE);
+                    }else{
+                        Log.i(TAG, "last displayed item greater than (total items - bottom visible count). lastVisibleItem= "+lastVisibleItem+ " totalItemCount= "+totalItemCount+ " bottomVisibleItemCount= "+bottomVisibleItemCount );
+                        mScrollFab.setVisibility(View.INVISIBLE);
+                    }
+                }*/
+
 
                 /*if(pastVisibleItems+visibleItemCount >= (totalItemCount-1)){
                     // End of the list is here.
@@ -414,22 +471,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onClick(View v) {
                 Log.d(TAG, "mScrollFab is clicked");
                 // Scroll to bottom
-
-                if (mMessagesAdapter.getItemCount() > 0) {// stop scroll to bottom if there are no items
-                    //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                    Log.d(TAG, "adapter getItemCount= " + mMessagesAdapter.getItemCount());
-                    int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
-                    int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
-
-                    if((lastCompletelyVisibleItem + 20) < totalItemCount){
-                        Log.d(TAG, "it's a long distance. scrollToPosition");
-                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount() - 1);
-                    }else{
-                        Log.d(TAG, "it's a short distance. smoothScrollToPosition");
-                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount() - 1);
-                    }
-                }
-
+                scrollToBottom();
             }
         });
 
@@ -645,6 +687,43 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
                                         mMessagesAdapter.submitList(items);
 
+                                        /*mMessagesViewModel.getLastMessageOnce(mChatId, new FirebaseMessageCallback() {
+                                            @Override
+                                            public void onCallback(Message message) {
+                                                if(message != null){
+                                                    LastMessageKey = message.getKey();
+                                                }
+                                            }
+                                        });*/
+
+                                        /*if( null == isHitBottom){
+                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                                mMessagesRecycler.postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }else if(isHitBottom){
+                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                                mMessagesRecycler.postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }*/
+
                                         if( null == isHitBottom || isHitBottom){
                                             if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
                                                 //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
@@ -659,7 +738,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                                 }, 500);
                                             }
                                         }
-
 
                                         mItems = items;
                                     }
@@ -1252,6 +1330,59 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     }
                 });
 
+        //mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
+    }
+
+    // Scroll to bottom function
+    private void scrollToBottom() {
+        // Get the last Message of this chat room
+        mMessagesViewModel.getLastMessageOnce(mChatId, new FirebaseMessageCallback() {
+            @Override
+            public void onCallback(Message message) {
+                Log.d(TAG, "getLastMessageOnce  onCallback = "+ message.getMessage() + " Current List= "+mMessagesAdapter.getCurrentList());
+                if(null != mMessagesAdapter.getCurrentList()){
+                    // This is the last displayed message on the adapter
+                    //Message LastDisplayedMessage =  mMessagesAdapter.getCurrentList().get(mMessagesAdapter.getItemCount()-1);
+                    Message LastDisplayedMessage =  mMessagesAdapter.getItem(mMessagesAdapter.getItemCount()-1);
+
+                    int totalItemCount = mMessagesAdapter.getItemCount(); // total items count from the adapter
+                    int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+
+                    // This is the key of last displayed message
+                    LastMessageKey = message.getKey();
+
+                    // Check if the key of database last message is equal to the adapter last message
+                    if(TextUtils.equals(message.getKey(), LastDisplayedMessage.getKey())){
+                        Log.d(TAG, "getLastMessageOnce  LastDisplayedMessage = "+ LastDisplayedMessage.getMessage() + " Last Message= "+ message.getMessage());
+                        // Just scroll down
+                        if (totalItemCount > 0) {// stop scroll to bottom if there are no items
+                            //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                            Log.d(TAG, "adapter getItemCount= " + mMessagesAdapter.getItemCount());
+
+                            if((lastCompletelyVisibleItem + 20) < totalItemCount){
+                                Log.d(TAG, "it's a long distance. scrollToPosition");
+                                mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount() - 1);
+                            }else{
+                                Log.d(TAG, "it's a short distance. smoothScrollToPosition");
+                                mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount() - 1);
+                            }
+                        }
+
+                    }else{
+                        // Invalidate to reload latest data with null initial key instead of scrolling down
+                        mScrollDirection = REACHED_THE_BOTTOM;
+                        isHitBottom = true;
+
+                        mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);
+                        Log.d(TAG, "invalidating the dataSource...");
+                        //mItems.getDataSource().invalidate();
+                        //mMessagesAdapter.getCurrentList().getDataSource().invalidate();
+                        mMessagesViewModel.invalidateData();
+
+                    }
+                }
+            }
+        });
     }
 
    /* /////// Not needed method. It was used to create new chat room if not exist ///////

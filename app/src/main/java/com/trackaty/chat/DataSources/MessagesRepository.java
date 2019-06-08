@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.Interface.FirebaseMessageCallback;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.Message;
@@ -348,6 +349,49 @@ public class MessagesRepository {
         });
 
     }
+
+    // get the last message
+    public void getLastMessageOnce(String chatId, final FirebaseMessageCallback callback){
+
+        final DatabaseReference messageRef = mMessagesRef.child(chatId);
+        Query LastMessageQuery;
+        Log.d(TAG, "getLastMessageOnce initiated: chatId= " + chatId);
+
+        LastMessageQuery = messageRef.orderByKey().limitToLast(1);
+
+        LastMessageQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Get user value
+                    Log.d(TAG, "getLastMessageOnce dataSnapshot key: "
+                            + dataSnapshot.getKey());
+
+                    // loop throw messages value
+                    for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                        Message message = snapshot.getValue(Message.class);
+                        if (message != null) {
+                            message.setKey(snapshot.getKey());
+                            Log.d(TAG, "getLastMessageOnce message key: "
+                                    + message.getKey());
+                            callback.onCallback(message);
+                            return;
+                        }
+                    }
+
+                } else {
+                    // User is null, error out
+                    Log.w(TAG, "getUserOnce User is null, no such user");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUserOnce User onCancelled" +databaseError);
+            }
+        });
+    }
+
 
     // remove all listeners when the ViewModel is cleared
     public void removeListeners(){

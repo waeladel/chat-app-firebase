@@ -754,6 +754,13 @@ public class MessagesListRepository {
         return initialKey;
     }
 
+    /*public void setInitialKey(String initialKey) {
+        this.initialKey = initialKey;
+    }*/
 
+    // When last database message is not loaded, Invalidate messagesDataSource to scroll down
+    public void invalidateData() {
+        invalidatedCallback.onInvalidated();
+    }
 
 }

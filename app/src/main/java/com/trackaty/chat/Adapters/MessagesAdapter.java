@@ -502,9 +502,12 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
     @Nullable
     @Override
-    protected Message getItem(int position) {
+    public Message getItem(int position) {
         return super.getItem(position);
     }
+    /*protected Message getItem(int position) {
+        return super.getItem(position);
+    }*/
 
     /*@Override
     public void submitList(PagedList<Message> pagedList) {

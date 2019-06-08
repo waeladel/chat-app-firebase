@@ -44,6 +44,13 @@ public class MessagesDataSource extends ItemKeyedDataSource<String, Message> {
         super.invalidate();
     }
 
+    // When last database message is not loaded, Invalidate messagesDataSource to scroll down
+    public void invalidateData() {
+        Log.d(TAG, "mama MessagesListRepository invalidateData ");
+        //messagesRepository.setInitialKey(null);
+        messagesRepository.invalidateData();
+    }
+
     @Override
     public boolean isInvalid() {
         Log.d(TAG, "isInvalid = "+super.isInvalid());
