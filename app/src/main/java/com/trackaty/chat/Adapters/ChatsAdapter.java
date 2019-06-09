@@ -242,8 +242,10 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                             && (oldChat.getLastSentLong() == newChat.getLastSentLong())));*/
 
                     // compare old and new chat's sent time and last messages
-                    return (oldChat.getLastMessage().equals(newChat.getLastMessage())
-                            && (oldChat.getLastSentLong() == newChat.getLastSentLong()));
+                    /*return (oldChat.getLastMessage().equals(newChat.getLastMessage())
+                            && (oldChat.getLastSentLong() == newChat.getLastSentLong()));*/
+                    Log.d(TAG, "messages query DIFF_CALLBACK areContentsTheSame old name: " + oldChat.getLastMessage() + " new name: "+newChat.getLastMessage()+ " value= "+(oldChat.equals(newChat)));
+                    return oldChat.equals(newChat);
                     //return oldChat.getLastMessage().equals(newChat.getLastMessage());
                     //return false;
                 }

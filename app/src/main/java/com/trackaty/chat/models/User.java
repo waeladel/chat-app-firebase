@@ -147,7 +147,7 @@ public class User implements Parcelable{
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
-        result.put("created", created);
+        result.put("created", ServerValue.TIMESTAMP);
         result.put("lastOnline", lastOnline);
 
         result.put("avatar", avatar);

@@ -1238,6 +1238,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             // get the existing chat and post again after changing last message
             Log.d(TAG, "sendMessage: chat exist, get the existing chat and post again ");
             mChat.setLastMessage(messageText);
+            mChat.setMembers(members);// to update user name and avater when sending new message
             if(null == mChat.getSender()){
                 mChat.setSender(mCurrentUserId);
             }
