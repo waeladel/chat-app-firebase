@@ -69,11 +69,14 @@ public class ChatsFragment extends Fragment{
         return new ChatsFragment();
     }
 
+
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View fragView = inflater.inflate(R.layout.chats_fragment, container, false);
 
+        Log.d(TAG, "chats onCreateView");
         // prepare the Adapter
         mChatsArrayList = new ArrayList<>();
         mChatsAdapter = new ChatsAdapter();
@@ -167,6 +170,8 @@ public class ChatsFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "chats onActivityCreated");
+
         if(((MainActivity)getActivity())!= null) {
             ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
             actionbar.setTitle(R.string.chats_frag_title);
@@ -263,6 +268,7 @@ public class ChatsFragment extends Fragment{
                         }
                     }).get(ChatsViewModel.class);
 
+            Log.d(TAG, "mChatsViewModel hashCode= " +  mChatsViewModel.hashCode());
 
             // mChatsViewModel.setUserId(mCurrentUserId);
                     //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
@@ -291,20 +297,20 @@ public class ChatsFragment extends Fragment{
                                             while(items.size()==0) {
                                                 //Keep looping as long as items size is 0
                                                 Thread.sleep(20);
-                                                Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                                Log.d(TAG, "ChatsFragment onChanged. sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
                                                 if(sleepCounter == 1000){
                                                     break;
                                                 }
                                                 //handler.post(this);
                                             }
                                             //Now items size is greater than 0, let's submit the List
-                                            Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                            Log.d(TAG, "ChatsFragment onChanged. after  sleep finished. size= "+items.size());
                                             if(items.size() == 0 && sleepCounter == 1000){
                                                 // If we submit List after loop is finish with 0 results
                                                 // we may erase another results submitted via newer thread
-                                                Log.d(TAG, "Loop finished with 0 items. Don't submitList");
+                                                Log.d(TAG, "ChatsFragment onChanged. Loop finished with 0 items. Don't submitList");
                                             }else{
-                                                Log.d(TAG, "submitList");
+                                                Log.d(TAG, "ChatsFragment onChanged. submitList= "+items.size());
                                                 mChatsAdapter.submitList(items);
                                             }
 

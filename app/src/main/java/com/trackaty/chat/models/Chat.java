@@ -20,14 +20,14 @@ public class Chat {
     private Object lastSent ;
     private Long active;
     //private List<String> members = new ArrayList<>();
-    private Map<String, User> members = new HashMap<>();
+    private Map<String, ChatMember> members = new HashMap<>();
 
 
     public Chat() {
         this.lastSent = ServerValue.TIMESTAMP;
     }
 
-    public Chat( String lastMessage, String sender, Map<String, User> members) {
+    public Chat( String lastMessage, String sender, Map<String, ChatMember> members) {
         this.lastMessage = lastMessage;
         //this.members = members;
         this.members = members;
@@ -105,11 +105,11 @@ public class Chat {
 
     }*/
 
-    public Map<String, User> getMembers() {
+    public Map<String, ChatMember> getMembers() {
         return members;
     }
 
-    public void setMembers(Map<String, User> members) {
+    public void setMembers(Map<String, ChatMember> members) {
         this.members = members;
     }
 

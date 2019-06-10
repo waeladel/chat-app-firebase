@@ -15,6 +15,7 @@ import com.trackaty.chat.Fragments.ChatsFragmentDirections;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.ChatMember;
 import com.trackaty.chat.models.User;
 
 import java.text.DateFormat;
@@ -94,13 +95,13 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
             if (null != chat.getMembers()) {
                 // loop to get all chat members HashMap
                 //String participantId;
-                final List<User> membersList = new ArrayList<>();
+                final List<ChatMember> membersList = new ArrayList<>();
                 for (Object o : chat.getMembers().entrySet()) {
                     Map.Entry pair = (Map.Entry) o;
                     Log.d(TAG, "mama Chats getMember = " + pair.getKey() + " = " + pair.getValue() + currentUser.getUid());
 
                     if (!currentUser.getUid().equals(pair.getKey())) {
-                        User user = chat.getMembers().get(String.valueOf(pair.getKey()));
+                        ChatMember user = chat.getMembers().get(String.valueOf(pair.getKey()));
                         if (user != null) {
                             user.setKey(String.valueOf(pair.getKey()));
                             membersList.add(user);
@@ -221,8 +222,8 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                 @Override
                 public boolean areItemsTheSame(Chat oldChat, Chat newChat) {
 
-                    Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + newChat);
-                    //Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldUser.getCreatedLong() +" new: "+ newUser.getCreatedLong());
+                    //Log.d(TAG, " DIFF_CALLBACK areItemsTheSame " + newChat);
+                    //Log.d(TAG, " DIFF_CALLBACK areItemsTheSame keys= old: " + oldChat.getLastMessage() +" new: "+ oldChat.getLastMessage());
                     return oldChat.getKey().equals(newChat.getKey());
                     //return oldChat.getLastSentLong() == (newChat.getLastSentLong());
                     //return true;
@@ -244,7 +245,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                     // compare old and new chat's sent time and last messages
                     /*return (oldChat.getLastMessage().equals(newChat.getLastMessage())
                             && (oldChat.getLastSentLong() == newChat.getLastSentLong()));*/
-                    Log.d(TAG, "messages query DIFF_CALLBACK areContentsTheSame old name: " + oldChat.getLastMessage() + " new name: "+newChat.getLastMessage()+ " value= "+(oldChat.equals(newChat)));
+                    //Log.d(TAG, "messages query DIFF_CALLBACK areContentsTheSame old name: " + oldChat.getLastMessage() + " new name: "+newChat.getLastMessage()+ " value= "+(oldChat.equals(newChat)));
                     return oldChat.equals(newChat);
                     //return oldChat.getLastMessage().equals(newChat.getLastMessage());
                     //return false;

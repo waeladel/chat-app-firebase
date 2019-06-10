@@ -51,6 +51,7 @@ import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.ViewModels.MessagesViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.ChatMember;
 import com.trackaty.chat.models.DatabaseNotification;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;
@@ -1223,9 +1224,13 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
 
         // Create members Hash list, it's better to loop throw  selected members
-        Map<String, User> members = new HashMap<>();
-        members.put(mCurrentUserId, mCurrentUser);
-        members.put(mChatUserId, mChatUser);
+        ChatMember currentMember = new ChatMember(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mCurrentUser.getLastOnline());
+        ChatMember chatMember = new ChatMember(mChatUserId, mChatUser.getName(), mChatUser.getAvatar(), mChatUser.getLastOnline());
+
+
+        Map<String, ChatMember> members = new HashMap<>();
+        members.put(mCurrentUserId, currentMember);
+        members.put(mChatUserId, chatMember);
 
         // Update notifications
         String notificationKey;
@@ -1331,7 +1336,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     }
                 });
 
-        //mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
+        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
     }
 
     // Scroll to bottom function
