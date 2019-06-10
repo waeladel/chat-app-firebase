@@ -32,13 +32,7 @@ import com.trackaty.chat.ViewModels.ChatsViewModel;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.User;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 
 public class ChatsFragment extends Fragment{
 
@@ -69,7 +63,105 @@ public class ChatsFragment extends Fragment{
         return new ChatsFragment();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "chats onCreate");
 
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(mFirebaseCurrentUser != null){
+            mCurrentUserId = mFirebaseCurrentUser.getUid();
+        }
+
+        // prepare the Adapter in onCreate to use only one Adapter
+        mChatsArrayList = new ArrayList<>();
+        mChatsAdapter = new ChatsAdapter();
+
+        // Create ViewModel in onCreate to use only one ViewModel and observer
+        // So we don't recreate the observer when user comeback to active ViewModel
+        //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+        mChatsViewModel = ViewModelProviders.of(this,  new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                return (T)new ChatsViewModel (mCurrentUserId);
+            }
+        }).get(ChatsViewModel.class);
+
+        // mChatsViewModel.setUserId(mCurrentUserId);
+        //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
+                    /*mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+                        @NonNull
+                        @Override
+                        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                            return (T)new ChatsViewModel (mCurrentUserId);
+                        }
+                    }).get(ChatsViewModel.class);*/
+
+
+        mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {
+            @Override
+            public void onChanged(@Nullable final PagedList<Chat> items) {
+
+                if (items != null ){
+                    // your code here
+                    Log.d(TAG, "chats onChanged submitList size" +  items.size());
+                    // Create new Thread to loop until items.size() is greater than 0
+                    new Thread(new Runnable() {
+                        int sleepCounter = 0;
+                        @Override
+                        public void run() {
+                            try {
+                                while(items.size()==0) {
+                                    //Keep looping as long as items size is 0
+                                    Thread.sleep(20);
+                                    Log.d(TAG, "ChatsFragment onChanged. sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                    if(sleepCounter == 1000){
+                                        break;
+                                    }
+                                    //handler.post(this);
+                                }
+                                //Now items size is greater than 0, let's submit the List
+                                Log.d(TAG, "ChatsFragment onChanged. after  sleep finished. size= "+items.size());
+                                if(items.size() == 0 && sleepCounter == 1000){
+                                    // If we submit List after loop is finish with 0 results
+                                    // we may erase another results submitted via newer thread
+                                    Log.d(TAG, "ChatsFragment onChanged. Loop finished with 0 items. Don't submitList");
+                                }else{
+                                    Log.d(TAG, "ChatsFragment onChanged. submitList= "+items.size());
+                                    mChatsAdapter.submitList(items);
+                                }
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }).start();
+                                /*Thread thread = new Thread() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            while(items.size()==0) {
+                                                //Keep looping as long as items size is 0
+                                                sleep(10);
+                                                Log.d(TAG, "sleep 1000. size= "+items.size());
+                                                //handler.post(this);
+                                            }
+                                            //Now items size is greater than 0, let's submit the List
+                                            Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                            mChatsAdapter.submitList(items);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                };
+                                thread.start();*/
+                }
+            }
+        });
+
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -77,20 +169,16 @@ public class ChatsFragment extends Fragment{
         View fragView = inflater.inflate(R.layout.chats_fragment, container, false);
 
         Log.d(TAG, "chats onCreateView");
-        // prepare the Adapter
-        mChatsArrayList = new ArrayList<>();
-        mChatsAdapter = new ChatsAdapter();
+
 
         // Initiate the RecyclerView
         mChatsRecycler = (RecyclerView) fragView.findViewById(R.id.chats_recycler);
         mChatsRecycler.setHasFixedSize(true);
+
         mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mChatsRecycler.setLayoutManager(mLinearLayoutManager);
-
-        //viewModel.usersList.observe(this, mUsersAdapter::submitList);
-
-        //observe when a change happen to usersList live data
         mChatsRecycler.setAdapter(mChatsAdapter);
+
 
         mChatsRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -183,11 +271,6 @@ public class ChatsFragment extends Fragment{
             actionbar.setHomeButtonEnabled(true);
             actionbar.setDisplayShowCustomEnabled(false);*/
 
-            mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-            if(mFirebaseCurrentUser != null){
-                mCurrentUserId = mFirebaseCurrentUser.getUid();
-            }
-
            /* // Create members Hash list, it's better to loop throw  selected members
             User mCurrentUser1 = new User();
             mCurrentUser1.setKey("Hcs4JY1zMJgF1cZsTY9R4xI670R2");
@@ -259,90 +342,6 @@ public class ChatsFragment extends Fragment{
                 }
              });*/
 
-                    //mChatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-                    mChatsViewModel = ViewModelProviders.of(this,  new ViewModelProvider.Factory() {
-                        @NonNull
-                        @Override
-                        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                            return (T)new ChatsViewModel (mCurrentUserId);
-                        }
-                    }).get(ChatsViewModel.class);
-
-            Log.d(TAG, "mChatsViewModel hashCode= " +  mChatsViewModel.hashCode());
-
-            // mChatsViewModel.setUserId(mCurrentUserId);
-                    //Pass firebase callback to the viewModel constructor so that we can use it ar the repository
-                    /*mChatsViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
-                        @NonNull
-                        @Override
-                        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                            return (T)new ChatsViewModel (mCurrentUserId);
-                        }
-                    }).get(ChatsViewModel.class);*/
-
-
-                    mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {
-                        @Override
-                        public void onChanged(@Nullable final PagedList<Chat> items) {
-
-                            if (items != null ){
-                                // your code here
-                                Log.d(TAG, "chats onChanged submitList size" +  items.size());
-                                // Create new Thread to loop until items.size() is greater than 0
-                                new Thread(new Runnable() {
-                                    int sleepCounter = 0;
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            while(items.size()==0) {
-                                                //Keep looping as long as items size is 0
-                                                Thread.sleep(20);
-                                                Log.d(TAG, "ChatsFragment onChanged. sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                                if(sleepCounter == 1000){
-                                                    break;
-                                                }
-                                                //handler.post(this);
-                                            }
-                                            //Now items size is greater than 0, let's submit the List
-                                            Log.d(TAG, "ChatsFragment onChanged. after  sleep finished. size= "+items.size());
-                                            if(items.size() == 0 && sleepCounter == 1000){
-                                                // If we submit List after loop is finish with 0 results
-                                                // we may erase another results submitted via newer thread
-                                                Log.d(TAG, "ChatsFragment onChanged. Loop finished with 0 items. Don't submitList");
-                                            }else{
-                                                Log.d(TAG, "ChatsFragment onChanged. submitList= "+items.size());
-                                                mChatsAdapter.submitList(items);
-                                            }
-
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    }
-                                }).start();
-                                /*Thread thread = new Thread() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            while(items.size()==0) {
-                                                //Keep looping as long as items size is 0
-                                                sleep(10);
-                                                Log.d(TAG, "sleep 1000. size= "+items.size());
-                                                //handler.post(this);
-                                            }
-                                            //Now items size is greater than 0, let's submit the List
-                                            Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                            mChatsAdapter.submitList(items);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                };
-                                thread.start();*/
-                            }
-                        }
-                    });
-
         }
 
         /*// update the CurrentUserId whenever it changes due to log out
@@ -358,3 +357,4 @@ public class ChatsFragment extends Fragment{
 
     }
 }
+

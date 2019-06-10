@@ -154,12 +154,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
+        Log.d(TAG,"onCreate");
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -180,6 +175,292 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             Log.d(TAG, "currentUserId = " + mCurrentUserId + " mChatUserId= " + mChatUserId+ " mChatId= "+ mChatId);
         }
 
+        // prepare the Adapter
+        mMessagesArrayList = new ArrayList<>();
+        mMessagesAdapter = new MessagesAdapter(mChatId); // Pass chat id because it's needed to update message revelation
+
+        //mMessagesViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
+
+        // start init  mMessagesViewModel here after mCurrentUserId is received//
+        // extend mMessagesViewModel to pass Chat Key value and chat user key //
+        mMessagesViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                return (T)new MessagesViewModel (mChatId, mChatUserId, mCurrentUserId);
+            }
+        }).get(MessagesViewModel.class);
+
+
+        mMessagesViewModel.itemPagedList.observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
+            @Override
+            public void onChanged(@Nullable final PagedList<Message> items) {
+                System.out.println("mama onChanged");
+                if (items != null ){
+                    // your code here
+                    // Create new Thread to loop until items.size() is greater than 0
+                    new Thread(new Runnable() {
+                        int sleepCounter = 0;
+                        @Override
+                        public void run() {
+                            try {
+                                while(items.size()==0) {
+                                    //Keep looping as long as items size is 0
+                                    Thread.sleep(20);
+                                    Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                    if(sleepCounter == 1000){
+                                        break;
+                                    }
+                                    //handler.post(this);
+                                }
+                                //Now items size is greater than 0, let's submit the List
+                                Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                if(items.size() == 0 && sleepCounter == 1000){
+                                    // If we submit List after loop is finish with 0 results
+                                    // we may erase another results submitted via newer thread
+                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
+                                }else{
+                                    Log.d(TAG, "submitList");
+                                    // Scroll to last item
+                                    // Only scroll to bottom if user is not reading messages above
+                                    Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
+
+                                    // Check if we have isHitBottom saved when change configuration occur or not
+                                    if(savedInstanceState != null){
+                                        isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
+                                    }
+
+                                    Log.d(TAG, "isHitBottom= "+isHitBottom +" adapter getItemCount= "+ mMessagesAdapter.getItemCount());
+
+                                    mMessagesAdapter.submitList(items);
+
+                                        /*mMessagesViewModel.getLastMessageOnce(mChatId, new FirebaseMessageCallback() {
+                                            @Override
+                                            public void onCallback(Message message) {
+                                                if(message != null){
+                                                    LastMessageKey = message.getKey();
+                                                }
+                                            }
+                                        });*/
+
+                                        /*if( null == isHitBottom){
+                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                                mMessagesRecycler.postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }else if(isHitBottom){
+                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                                mMessagesRecycler.postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                    }
+                                                }, 500);
+                                            }
+                                        }*/
+
+                                    if( null == isHitBottom || isHitBottom){
+                                        if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
+                                            //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                            Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                            //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                            //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
+                                            mMessagesRecycler.postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                                }
+                                            }, 500);
+                                        }
+                                    }
+
+                                    mItems = items;
+                                }
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }).start();
+
+                        /*Thread thread = new Thread() {
+                            int sleepCounter = 0;
+                            @Override
+                            public void run() {
+                                try {
+                                    while(items.size()==0) {
+                                        //Keep looping as long as items size is 0
+                                        sleep(20);
+                                        Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
+                                        if(sleepCounter == 1000){
+                                            break;
+                                        }
+                                        //handler.post(this);
+                                    }
+                                    //Now items size is greater than 0, let's submit the List
+                                    Log.d(TAG, "after  sleep finished. size= "+items.size());
+                                    mMessagesAdapter.submitList(items);
+
+                                    // Scroll to last item
+                                    Log.d(TAG, "isHitBottom = "+isHitBottom);
+
+                                    // Only scroll to bottom if user is not reading messages above
+                                    if(null == isHitBottom || isHitBottom){
+                                        if(items.size()>0){// stop scroll to bottom if there are no items
+                                        //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
+                                        Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
+                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
+                                        }
+                                    }
+
+
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        };
+                        thread.start();*/
+
+                }
+            }
+        });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
+
+        // get Chat User
+        if(!isGroup){
+            mMessagesViewModel.getChatUser(mChatUserId).observe(this, new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
+                    mChatUser = user;
+                    mChatUser.setKey(mChatUserId);
+                    // display ChatUser name
+                    if(null != mChatUser.getName()){
+                        mUserName.setText(getFirstWord(mChatUser.getName()));
+                    }
+
+                    // display last online
+                    if(null != mChatUser.getLastOnline()){
+
+                        Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
+                        mLastOnlineEndTime = mChatUser.getLastOnline();
+
+                        if(mChatUser.getLastOnline() == 0){
+                            //user is active now
+                            Log.d(TAG, "LastOnline() == 0");
+                            mLastSeen.setText(R.string.user_active_now);
+                        }else{
+                            // Display last online
+                            //Calendar c = Calendar.getInstance();
+                            //c.setTimeInMillis(mChatUser.getLastOnline());
+
+
+                                /*mTimer.schedule( new TimerTask() {
+                                    public void run() {
+                                        // do your work
+                                        UpdateTimeAgo(mChatUser.getLastOnline());
+                                        *//*mLastSeen.setText(ago);
+                                        Log.d(TAG, "mTimer = "+ago);*//*
+                                        //new UpdateTimeAgo().execute(mChatUser.getLastOnline());
+                                    }
+                                }, 0, 5 *1000);*/
+
+                                /*mMessagesViewModel.getLastOnlineAgo(mChatUser.getLastOnline()).observe(MessagesFragment.this, new Observer<CharSequence>() {
+                                    @Override
+                                    public void onChanged(CharSequence charSequence) {
+                                        Log.d(TAG, "onChanged Time Ago = "+charSequence);
+                                    }
+                                });*/
+
+                            // Update Last online Time every minute
+                            UpdateTimeAgo(mLastOnlineEndTime);
+
+                        }
+
+                    }
+                    // Get user values
+                    if (null != mChatUser.getAvatar()) {
+                        Picasso.get()
+                                .load(mChatUser.getAvatar())
+                                .placeholder(R.drawable.ic_user_account_grey_white)
+                                .error(R.drawable.ic_broken_image)
+                                .into(mUserPhoto);
+                    }
+
+                }
+            });
+        }
+
+
+        mMessagesViewModel.getCurrentUser(mCurrentUserId).observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= " + user.getName());
+                mCurrentUser = user;
+                if(null == mCurrentUser.getKey()){
+                    mCurrentUser.setKey(mCurrentUserId);
+                }
+            }
+        });
+
+
+            /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(String senderId) {
+                    Log.d(TAG, "onChanged senderId = "+ senderId);
+                    if(senderId != null){
+                        if(senderId.equals(mCurrentUserId)){
+                            Log.d(TAG, "CurrentUser is the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = true;
+                        }else{
+                            Log.d(TAG, "CurrentUser isn't the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = false;
+                        }
+                    }else{
+                        Log.d(TAG, "sender is null. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                        isSender = null;
+                    }
+                }
+            });*/
+
+        mMessagesViewModel.getChat(mChatId).observe(this, new Observer<Chat>() {
+            @Override
+            public void onChanged(Chat chat) {
+                if (chat != null){
+                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                    mChat = chat;
+                    if(null != mChat.getActive()){
+                        // End timestamp is needed to restart the countdown on fragment start
+                        mActiveEndTime = mChat.getActive();
+                        // pass chat to MessagesAdapter to get active end time
+                        mMessagesAdapter.setChat(mChat);
+                    }
+                    // Display the time left till deactivate the conversation
+                    ShowRemainingTime(mChat);
+                }
+            }
+        });
+
+
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
+
         mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
         mScrollFab = (FloatingActionButton) fragView.findViewById(R.id.scroll_fab);
@@ -191,10 +472,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         mNotificationsRef = mDatabaseRef.child("notifications");
 
         //isHitBottom = true;
-
-        // prepare the Adapter
-        mMessagesArrayList = new ArrayList<>();
-        mMessagesAdapter = new MessagesAdapter(mChatId); // Pass chat id because it's needed to update message revelation
 
         // Initiate the RecyclerView
         mMessagesRecycler = (RecyclerView) fragView.findViewById(R.id.messages_recycler);
@@ -629,283 +906,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId);
                 }
             });*/ // End init  mMessagesViewModel getChatUser//
-
-
-
-
-            //mMessagesViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
-
-            // start init  mMessagesViewModel here after mCurrentUserId is received//
-            // extend mMessagesViewModel to pass Chat Key value and chat user key //
-            mMessagesViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
-                @NonNull
-                @Override
-                public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                    return (T)new MessagesViewModel (mChatId, mChatUserId, mCurrentUserId);
-                }
-            }).get(MessagesViewModel.class);
-
-
-            mMessagesViewModel.itemPagedList.observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
-                @Override
-                public void onChanged(@Nullable final PagedList<Message> items) {
-                    System.out.println("mama onChanged");
-                    if (items != null ){
-                        // your code here
-                        // Create new Thread to loop until items.size() is greater than 0
-                        new Thread(new Runnable() {
-                            int sleepCounter = 0;
-                            @Override
-                            public void run() {
-                                try {
-                                    while(items.size()==0) {
-                                        //Keep looping as long as items size is 0
-                                        Thread.sleep(20);
-                                        Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                        if(sleepCounter == 1000){
-                                            break;
-                                        }
-                                        //handler.post(this);
-                                    }
-                                    //Now items size is greater than 0, let's submit the List
-                                    Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                    if(items.size() == 0 && sleepCounter == 1000){
-                                        // If we submit List after loop is finish with 0 results
-                                        // we may erase another results submitted via newer thread
-                                        Log.d(TAG, "Loop finished with 0 items. Don't submitList");
-                                    }else{
-                                        Log.d(TAG, "submitList");
-                                        // Scroll to last item
-                                        // Only scroll to bottom if user is not reading messages above
-                                        Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
-
-                                        // Check if we have isHitBottom saved when change configuration occur or not
-                                        if(savedInstanceState != null){
-                                            isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
-                                        }
-
-                                        Log.d(TAG, "isHitBottom= "+isHitBottom +" adapter getItemCount= "+ mMessagesAdapter.getItemCount());
-
-                                        mMessagesAdapter.submitList(items);
-
-                                        /*mMessagesViewModel.getLastMessageOnce(mChatId, new FirebaseMessageCallback() {
-                                            @Override
-                                            public void onCallback(Message message) {
-                                                if(message != null){
-                                                    LastMessageKey = message.getKey();
-                                                }
-                                            }
-                                        });*/
-
-                                        /*if( null == isHitBottom){
-                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                                mMessagesRecycler.postDelayed(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                    }
-                                                }, 500);
-                                            }
-                                        }else if(isHitBottom){
-                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                                mMessagesRecycler.postDelayed(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                    }
-                                                }, 500);
-                                            }
-                                        }*/
-
-                                        if( null == isHitBottom || isHitBottom){
-                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                                Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                                mMessagesRecycler.postDelayed(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                    }
-                                                }, 500);
-                                            }
-                                        }
-
-                                        mItems = items;
-                                    }
-
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        }).start();
-
-                        /*Thread thread = new Thread() {
-                            int sleepCounter = 0;
-                            @Override
-                            public void run() {
-                                try {
-                                    while(items.size()==0) {
-                                        //Keep looping as long as items size is 0
-                                        sleep(20);
-                                        Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                        if(sleepCounter == 1000){
-                                            break;
-                                        }
-                                        //handler.post(this);
-                                    }
-                                    //Now items size is greater than 0, let's submit the List
-                                    Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                    mMessagesAdapter.submitList(items);
-
-                                    // Scroll to last item
-                                    Log.d(TAG, "isHitBottom = "+isHitBottom);
-
-                                    // Only scroll to bottom if user is not reading messages above
-                                    if(null == isHitBottom || isHitBottom){
-                                        if(items.size()>0){// stop scroll to bottom if there are no items
-                                        //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                        Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                        }
-                                    }
-
-
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        thread.start();*/
-
-                    }
-                }
-            });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
-
-            // get Chat User
-            if(!isGroup){
-                mMessagesViewModel.getChatUser(mChatUserId).observe(this, new Observer<User>() {
-                    @Override
-                    public void onChanged(User user) {
-                        Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
-                        mChatUser = user;
-                        mChatUser.setKey(mChatUserId);
-                        // display ChatUser name
-                        if(null != mChatUser.getName()){
-                            mUserName.setText(getFirstWord(mChatUser.getName()));
-                        }
-
-                        // display last online
-                        if(null != mChatUser.getLastOnline()){
-
-                            Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
-                            mLastOnlineEndTime = mChatUser.getLastOnline();
-
-                            if(mChatUser.getLastOnline() == 0){
-                                //user is active now
-                                Log.d(TAG, "LastOnline() == 0");
-                                mLastSeen.setText(R.string.user_active_now);
-                            }else{
-                                // Display last online
-                                //Calendar c = Calendar.getInstance();
-                                //c.setTimeInMillis(mChatUser.getLastOnline());
-
-
-                                /*mTimer.schedule( new TimerTask() {
-                                    public void run() {
-                                        // do your work
-                                        UpdateTimeAgo(mChatUser.getLastOnline());
-                                        *//*mLastSeen.setText(ago);
-                                        Log.d(TAG, "mTimer = "+ago);*//*
-                                        //new UpdateTimeAgo().execute(mChatUser.getLastOnline());
-                                    }
-                                }, 0, 5 *1000);*/
-
-                                /*mMessagesViewModel.getLastOnlineAgo(mChatUser.getLastOnline()).observe(MessagesFragment.this, new Observer<CharSequence>() {
-                                    @Override
-                                    public void onChanged(CharSequence charSequence) {
-                                        Log.d(TAG, "onChanged Time Ago = "+charSequence);
-                                    }
-                                });*/
-
-                                // Update Last online Time every minute
-                                UpdateTimeAgo(mLastOnlineEndTime);
-
-                            }
-
-                        }
-                        // Get user values
-                        if (null != mChatUser.getAvatar()) {
-                            Picasso.get()
-                                    .load(mChatUser.getAvatar())
-                                    .placeholder(R.drawable.ic_user_account_grey_white)
-                                    .error(R.drawable.ic_broken_image)
-                                    .into(mUserPhoto);
-                        }
-
-                    }
-                });
-            }
-
-
-                mMessagesViewModel.getCurrentUser(mCurrentUserId).observe(this, new Observer<User>() {
-                    @Override
-                    public void onChanged(User user) {
-                        Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= " + user.getName());
-                        mCurrentUser = user;
-                        if(null == mCurrentUser.getKey()){
-                            mCurrentUser.setKey(mCurrentUserId);
-                        }
-                    }
-                });
-
-
-            /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
-                @Override
-                public void onChanged(String senderId) {
-                    Log.d(TAG, "onChanged senderId = "+ senderId);
-                    if(senderId != null){
-                        if(senderId.equals(mCurrentUserId)){
-                            Log.d(TAG, "CurrentUser is the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                            isSender = true;
-                        }else{
-                            Log.d(TAG, "CurrentUser isn't the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                            isSender = false;
-                        }
-                    }else{
-                        Log.d(TAG, "sender is null. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                        isSender = null;
-                    }
-                }
-            });*/
-
-            mMessagesViewModel.getChat(mChatId).observe(this, new Observer<Chat>() {
-                @Override
-                public void onChanged(Chat chat) {
-                    if (chat != null){
-                        Log.d(TAG, "onChanged chat active = "+ chat.getActive());
-                        mChat = chat;
-                        if(null != mChat.getActive()){
-                            // End timestamp is needed to restart the countdown on fragment start
-                            mActiveEndTime = mChat.getActive();
-                            // pass chat to MessagesAdapter to get active end time
-                            mMessagesAdapter.setChat(mChat);
-                        }
-                        // Display the time left till deactivate the conversation
-                        ShowRemainingTime(mChat);
-                    }
-                }
-            });
 
             // Open user profile with custom actionBar is clicked //
             actionBarView.setOnClickListener(new View.OnClickListener() {

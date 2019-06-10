@@ -65,82 +65,11 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        /*if(activity != null){
-            activity.setTitle(R.string.main_frag_title);
-        }*/
-        View fragView = inflater.inflate(R.layout.fragment_main, container, false);
+        Log.d(TAG,"onCreate");
 
         // prepare the Adapter
         mUserArrayList  = new ArrayList<>();
         mUsersAdapter = new UsersAdapter();
-
-        // Initiate the RecyclerView
-        mUsersRecycler = (RecyclerView) fragView.findViewById(R.id.users_recycler);
-        mUsersRecycler.setHasFixedSize(true);
-        mUsersRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
-
-        //viewModel.usersList.observe(this, mUsersAdapter::submitList);
-
-        //observe when a change happen to usersList live data
-        mUsersRecycler.setAdapter(mUsersAdapter);
-
-        // just a test to compare two objects
-        User user1 = new User();
-        //user1.setAvatar("wello");
-        user1.setName("wello");
-        user1.setBiography("wello");
-        user1.setRelationship("wello");
-        user1.setInterestedIn("wello");
-        user1.setGender("wello");
-        user1.setBirthDate(30L);
-        user1.setHoroscope("wello");
-
-        User user2 = new User();
-        user2.setAvatar("wello");
-        user2.setName("wello");
-        user2.setBiography("wello");
-        user2.setRelationship("wello");
-        user2.setInterestedIn("wello");
-        user2.setGender("wello");
-        user2.setBirthDate(30L);
-        user2.setHoroscope("wello");
-
-        if(user1.equals(user2)){
-            Log.d(TAG, "users are the same");
-        }else{
-            Log.d(TAG, "users are the deffrent");
-        }
-
-        return fragView;
-    }
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mActivityContext = context;
-        if (context instanceof Activity){// check if fragmentContext is an activity
-            activity =(Activity) context;
-        }
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
-            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.main_frag_title);
-            actionbar.setDisplayHomeAsUpEnabled(false);
-            actionbar.setHomeButtonEnabled(false);
-            actionbar.setDisplayShowCustomEnabled(false);
-        }
 
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
@@ -201,6 +130,78 @@ public class MainFragment extends Fragment {
             }
         });
 
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        /*if(activity != null){
+            activity.setTitle(R.string.main_frag_title);
+        }*/
+        View fragView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        // Initiate the RecyclerView
+        mUsersRecycler = (RecyclerView) fragView.findViewById(R.id.users_recycler);
+        mUsersRecycler.setHasFixedSize(true);
+        mUsersRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
+
+        //viewModel.usersList.observe(this, mUsersAdapter::submitList);
+
+        //observe when a change happen to usersList live data
+        mUsersRecycler.setAdapter(mUsersAdapter);
+
+       /* // just a test to compare two objects
+        User user1 = new User();
+        //user1.setAvatar("wello");
+        user1.setName("wello");
+        user1.setBiography("wello");
+        user1.setRelationship("wello");
+        user1.setInterestedIn("wello");
+        user1.setGender("wello");
+        user1.setBirthDate(30L);
+        user1.setHoroscope("wello");
+
+        User user2 = new User();
+        user2.setAvatar("wello");
+        user2.setName("wello");
+        user2.setBiography("wello");
+        user2.setRelationship("wello");
+        user2.setInterestedIn("wello");
+        user2.setGender("wello");
+        user2.setBirthDate(30L);
+        user2.setHoroscope("wello");
+
+        if(user1.equals(user2)){
+            Log.d(TAG, "users are the same");
+        }else{
+            Log.d(TAG, "users are the deffrent");
+        }*/
+
+        return fragView;
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActivityContext = context;
+        if (context instanceof Activity){// check if fragmentContext is an activity
+            activity =(Activity) context;
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(((MainActivity)getActivity())!= null){
+            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+            actionbar.setTitle(R.string.main_frag_title);
+            actionbar.setDisplayHomeAsUpEnabled(false);
+            actionbar.setHomeButtonEnabled(false);
+            actionbar.setDisplayShowCustomEnabled(false);
+        }
         //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
     }
 
