@@ -126,7 +126,9 @@ public class Chat {
         //Log.d("chats are", "chats are . lastSentLong ="+lastSentLong +" chat1LastSentLong= "+chat1LastSentLong);
 
 
+            //members.get("Hcs4JY1zMJgF1cZsTY9R4xI670R2").isSaw();
         return TextUtils.equals(lastMessage, chat1.lastMessage) &&
+                (members == chat1.members || (members!=null && members.equals(chat1.members)))&&
                 (lastSent == chat1.lastSent || (lastSent!=null && lastSent.equals(chat1.lastSent)));
                 //getLastSent() == null ? null == chat1.getLastSent()  : (long) lastSent == (long) chat1.lastSent;
                 //lastSentLong.compareTo(chat1LastSentLong) == 0;
@@ -145,7 +147,7 @@ public class Chat {
         int result = 1;
         result = 31 * result + (lastMessage == null ? 0 : lastMessage.hashCode());
         result = 31 * result + (lastSent == null ? 0 : lastSent.hashCode());
-        //result = 31 * result + (members == null ? 0 : members.hashCode());
+        result = 31 * result + (members == null ? 0 : members.hashCode());
         return result;
     }
 

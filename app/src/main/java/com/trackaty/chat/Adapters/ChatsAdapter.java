@@ -1,5 +1,6 @@
 package com.trackaty.chat.Adapters;
 
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -108,6 +109,23 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                             Log.d(TAG, "mama Chats membersListSize=" + membersList.size());
                             Log.d(TAG, "mama Chats getMember name=" + user.getName());
                         }
+                    }else{
+                        // this is the current user
+                        ChatMember currentMember = chat.getMembers().get(String.valueOf(pair.getKey()));
+                        if (currentMember != null) {
+                            currentMember.setKey(String.valueOf(pair.getKey()));
+                            // Check if current user saw this chat or not
+                            if(!currentMember.isSaw()){
+                                // Bold text
+                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
+                                holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                            }else{
+                                // Normal text
+                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
+                                holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                            }
+                        }
+
                     }
                     //iterator.remove(); // avoids a ConcurrentModificationException
                 }

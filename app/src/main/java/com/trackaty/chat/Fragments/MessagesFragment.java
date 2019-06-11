@@ -1224,8 +1224,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
 
         // Create members Hash list, it's better to loop throw  selected members
-        ChatMember currentMember = new ChatMember(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mCurrentUser.getLastOnline());
-        ChatMember chatMember = new ChatMember(mChatUserId, mChatUser.getName(), mChatUser.getAvatar(), mChatUser.getLastOnline());
+        ChatMember currentMember = new ChatMember(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mCurrentUser.getLastOnline(), true);
+        ChatMember chatMember = new ChatMember(mChatUserId, mChatUser.getName(), mChatUser.getAvatar(), mChatUser.getLastOnline(), false);
 
 
         Map<String, ChatMember> members = new HashMap<>();
@@ -1243,7 +1243,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             // get the existing chat and post again after changing last message
             Log.d(TAG, "sendMessage: chat exist, get the existing chat and post again ");
             mChat.setLastMessage(messageText);
-            mChat.setMembers(members);// to update user name and avater when sending new message
+            mChat.setMembers(members);// to update user name and avatar when sending new message
             if(null == mChat.getSender()){
                 mChat.setSender(mCurrentUserId);
             }
@@ -1270,7 +1270,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         }
 
-
         /*Map<String, Object> chatValues = new HashMap<>();
         chatValues.put("lastMessage", messageText);
         chatValues.put("lastSent", ServerValue.TIMESTAMP);
@@ -1289,6 +1288,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         childUpdates.put("/userChats/" + mChatUserId + "/" + mChatId, chatValues);
 
         childUpdates.put("/notifications/" + mChatUserId + "/" +notificationKey, notificationValues);
+
+        // Update counts
+        childUpdates.put("/counts/" + mCurrentUserId + "/chats/" + mChatId, null);
+        childUpdates.put("/counts/" + mChatUserId + "/chats/" + mChatId, true);
 
         //mScrollDirection = REACHED_THE_BOTTOM;
         //mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);

@@ -111,7 +111,7 @@ public class MessagesListRepository {
 
                             // Add only seen messages by current user to seenItemsList
                             // If current user is not the sender, the other user is seeing this message
-                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                            if(!TextUtils.equals(message.getSenderId(), currentUserId)){
                                 //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
                                     Log.d(TAG, "getMessagesAfter. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
@@ -188,7 +188,7 @@ public class MessagesListRepository {
 
                             // Add only seen messages by current user to seenItemsList
                             // If current user is not the sender, the other user is seeing this message
-                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                            if(!TextUtils.equals(message.getSenderId(), currentUserId)){
                                 //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
                                     Log.d(TAG, "getMessagesBefore. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
@@ -385,11 +385,12 @@ public class MessagesListRepository {
 
                             // Add only seen messages by current user to seenItemsList
                             // If current user is not the sender, the other user is seeing this message
-                            if(null!= message.getSenderId() && !message.getSenderId().equals(currentUserId)){
+                            if(!TextUtils.equals(message.getSenderId(), currentUserId)){
                                 //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
                                     Log.d(TAG, "initiated. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
-                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    //updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    updateMap.put("/messages/" + chatKey + "/" +snapshot.getKey()+"/status", Message_STATUS_SEEN);
                                     message.setStatus(Message_STATUS_SEEN);
                                 }
                             }
@@ -403,7 +404,13 @@ public class MessagesListRepository {
 
                     // Update seen messages
                     if(updateMap.size() > 0){
-                        mMessagesRef.updateChildren(updateMap);
+                        // Update chats member saw
+                        updateMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
+                        updateMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
+
+                        // Update seen chats count
+                        updateMap.put("/counts/" + currentUserId + "/chats/" + chatKey, null);
+                        mDatabaseRef.updateChildren(updateMap);
                         return;
                     }
 
