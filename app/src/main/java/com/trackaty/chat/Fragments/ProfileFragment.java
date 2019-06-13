@@ -509,7 +509,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                     Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey()+ " = "+ mRelationsList.get(i).getValue().getPublic());
                                 }
 
-                                showDialog(mRelationsList);
+                                showDialog(mRelationsList, mRelationStatus);
                                 break;
                             case RELATION_STATUS_RECEIVER:
                                 // If this selected received a request from me
@@ -540,7 +540,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 }
 
                                 if(mPrivateContactsList.size()> 0){
-                                    showDialog(mPrivateContactsList);
+                                    showDialog(mPrivateContactsList, mRelationStatus);
                                 }
 
                                 break;
@@ -610,8 +610,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     }
 
     //Show request/approve dialog
-    private void showDialog(ArrayList<Social> contactsList) {
-        requestFragment = RevealFragment.newInstance(contactsList,this);
+    private void showDialog(ArrayList<Social> contactsList, String relationStatus) {
+        requestFragment = RevealFragment.newInstance(contactsList, this);
+        requestFragment.setRelationStatus(relationStatus);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             requestFragment.show(fragmentManager, REQUEST_FRAGMENT);
@@ -1132,7 +1133,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     for (int i = 0; i < mRelationsList.size(); i++) {
                         Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey()+ " = "+ mRelationsList.get(i).getValue().getPublic());
                     }
-                    showDialog(mRelationsList);
+                    showDialog(mRelationsList, mRelationStatus);
                     break;
                 case 4:
                     // un-reveal clicked

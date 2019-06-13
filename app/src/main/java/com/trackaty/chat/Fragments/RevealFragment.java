@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.trackaty.chat.Adapters.RevealAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
@@ -32,8 +33,14 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     private RevealAdapter mRequestAdapter;
     private RecyclerView mRequestRecycler;
     private Button mSendButton, mCancelButton;
-
-
+    private TextView mTitle;
+    // requests and relations status
+    private static final String RELATION_STATUS_SENDER = "sender";
+    private static final String RELATION_STATUS_RECEIVER = "receiver";
+    private static final String RELATION_STATUS_STALKER = "stalker";
+    private static final String RELATION_STATUS_FOLLOWED = "followed";
+    private static final String RELATION_STATUS_NOT_FRIEND = "notFriend";
+    private String mRelationStatus;
 
     private Context mActivityContext;
     private Activity activity;
@@ -62,6 +69,9 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         return fragment;
     }
 
+    public void setRelationStatus(String relationStatus){
+        mRelationStatus = relationStatus;
+    }
     public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
         ondateSet = ondate;
     }
@@ -122,6 +132,29 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
             mSendButton = (Button) fragView.findViewById(R.id.send_button);
             mCancelButton = (Button) fragView.findViewById(R.id.cancel_button);
+            mTitle = (TextView) fragView.findViewById(R.id.dialog_title);
+
+            // Adjust button text and dialog title according to relationship status
+            switch (mRelationStatus){
+                case RELATION_STATUS_SENDER:
+                    // If this selected user sent me the request
+                    //Approve request
+                    mSendButton.setText(R.string.request_button_approve_hint);
+                    mTitle.setText(R.string.user_request_approve_dialog_hint);
+                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                    break;
+                case RELATION_STATUS_STALKER:
+                    // If this selected user sent me the request and i am editing it
+                    // edit relation
+                    mSendButton.setText(R.string.save_button);
+                    mTitle.setText(R.string.user_request_edit_dialog_hint);
+                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                    break;
+                default:
+                    // Show request dialog
+                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                    break;
+            }
 
             mSendButton.setOnClickListener(new View.OnClickListener() {
                 @Override

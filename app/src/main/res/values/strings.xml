@@ -158,6 +158,9 @@
 
     <!--<string name="user_request_dialog_title">Select contacts you want to see:</string>-->
     <string name="user_request_dialog_hint">Send a request to see selected contacts:</string>
+    <string name="user_request_approve_dialog_hint">Select contacts you approve to reveal:</string>
+    <string name="user_request_edit_dialog_hint">Edit revealed contacts:</string>
+
     <string name="user_request_dialog_title">Select contacts</string>
     <string name="user_confirm_dialog_message">This user will not see your private contacts and you can\'t see his. Are you sure you want to unreveal your contacts?</string>
     <string name="user_confirm_dialog_positive">Yes</string>
