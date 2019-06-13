@@ -60,4 +60,10 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>-->
 
+    <!-- Bottom Navigation -->
+    <style name="Widget.BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+        <item name="android:textSize">9sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

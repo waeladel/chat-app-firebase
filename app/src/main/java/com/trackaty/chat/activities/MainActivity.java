@@ -192,11 +192,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Log.d(TAG, "destination Label= "+ destination.getLabel());
                 Log.d(TAG, "destination id= "+ destination.getId());
 
-
-                if("fragment_main".equals(destination.getLabel())){
+                if(TextUtils.equals("fragment_main", destination.getLabel())){
                    bottomNavigation.setVisibility(View.VISIBLE);
-                }else if(("chats_fragment".equals(destination.getLabel()))){
+                    bottomNavigation.setSelectedItemId(R.id.navigation_home);
+                }else if(TextUtils.equals("chats_fragment", destination.getLabel())){
                     bottomNavigation.setVisibility(View.VISIBLE);
+                    bottomNavigation.setSelectedItemId(R.id.navigation_chats);
+                }else if(TextUtils.equals("notifications_fragment", destination.getLabel())) {
+                    bottomNavigation.setVisibility(View.VISIBLE);
+                    bottomNavigation.setSelectedItemId(R.id.navigation_notifications);
                 }else{
                     bottomNavigation.setVisibility(View.GONE);
                 }
@@ -275,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                     goToMain();
                     // set selected bottomNavigation to main icon
-                    bottomNavigation.setSelectedItemId(R.id.navigation_home);
+                    //bottomNavigation.setSelectedItemId(R.id.navigation_home);
                     initiateLogin(); // start login activity
 
                     // Remove all MainViewModel Listeners
@@ -298,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     chatsBadge = bottomNavigation.showBadge(R.id.navigation_chats); // show badge over chats menu item
                     chatsBadge.setMaxCharacterCount(3); // Max number is 99
                     //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
-                    chatsBadge.setNumber(Math.toIntExact(count));
+                    chatsBadge.setNumber(count.intValue());
                 }else{
                     // Hide chat badge
                     chatsBadge.setVisible(false);
