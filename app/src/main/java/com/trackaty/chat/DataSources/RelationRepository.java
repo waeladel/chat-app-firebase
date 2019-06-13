@@ -398,7 +398,7 @@ public class RelationRepository {
         //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
         DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId);
         Map<String, Object> notificationValues = notification.toMap();
-        childUpdates.put("/notifications/" + userId + "/" +notificationKey, notificationValues);
+        childUpdates.put("/notifications/alerts/" + userId + "/" +notificationKey, notificationValues);
 
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

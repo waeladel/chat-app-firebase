@@ -1188,7 +1188,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_APPROVED;
                 databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_APPROVED, mCurrentUserId);
                 notificationValues = databaseNotification.toMap();
-                childUpdates.put("/notifications/" + mUserId + "/" +notificationKey, notificationValues);
+                childUpdates.put("/notifications/alerts/" + mUserId + "/" +notificationKey, notificationValues);
 
                 break;
             case RELATION_STATUS_RECEIVER:
@@ -1237,7 +1237,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_SENT;
                 databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_SENT, mCurrentUserId);
                 notificationValues = databaseNotification.toMap();
-                childUpdates.put("/notifications/" + mUserId + "/" +notificationKey, notificationValues);
+                childUpdates.put("/notifications/alerts/" + mUserId + "/" +notificationKey, notificationValues);
 
                 break;
         }

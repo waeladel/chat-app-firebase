@@ -408,8 +408,8 @@ public class MessagesListRepository {
                         updateMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
                         updateMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
 
-                        // Update seen chats count
-                        updateMap.put("/counts/" + currentUserId + "/chats/" + chatKey, null);
+                       /* // Update seen chats count
+                        updateMap.put("/counts/" + currentUserId + "/chats/" + chatKey, null);*/
                         mDatabaseRef.updateChildren(updateMap);
                         return;
                     }

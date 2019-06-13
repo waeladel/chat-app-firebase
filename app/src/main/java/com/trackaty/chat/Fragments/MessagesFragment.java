@@ -1213,6 +1213,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             message = new Message(messageText, mCurrentUserId, mCurrentUser.getName(),mCurrentUser.getAvatar(), Message_STATUS_SENDING, false);
         }
 
+        Map<String, Object> childUpdates = new HashMap<>();// Map to update all
+
         Map<String, Object> messageValues = message.toMap();
 
         /*// Create members array list, it's better to loop throw  selected members
@@ -1255,6 +1257,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
             databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_MESSAGE, mCurrentUserId, mChatId);
             notificationValues = databaseNotification.toMap();
+            childUpdates.put("/notifications/messages/" + mChatUserId + "/" +notificationKey, notificationValues);
+
         }else{
             // Create new chat from scratch
             Log.d(TAG, "sendMessage: chat is null, create new chat from scratch");
@@ -1267,7 +1271,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
             databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_PICK_UP, mCurrentUserId, mChatId);
             notificationValues = databaseNotification.toMap();
-
+            childUpdates.put("/notifications/alerts/" + mChatUserId + "/" +notificationKey, notificationValues);
         }
 
         /*Map<String, Object> chatValues = new HashMap<>();
@@ -1279,7 +1283,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         childUpdates.put("/chats/" + mChatId + "/lastMessage/", messageText);
         childUpdates.put("/chats/" + mChatId + "/lastSent/", ServerValue.TIMESTAMP);*/
 
-        Map<String, Object> childUpdates = new HashMap<>();
+
         childUpdates.put("/messages/" + mChatId + "/" + messageKey, messageValues);
         childUpdates.put("/chats/" + mChatId ,chatValues);
 
@@ -1287,11 +1291,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         childUpdates.put("/userChats/" + mCurrentUserId + "/" + mChatId, chatValues);
         childUpdates.put("/userChats/" + mChatUserId + "/" + mChatId, chatValues);
 
-        childUpdates.put("/notifications/" + mChatUserId + "/" +notificationKey, notificationValues);
-
-        // Update counts
+        /*// Update counts
         childUpdates.put("/counts/" + mCurrentUserId + "/chats/" + mChatId, null);
-        childUpdates.put("/counts/" + mChatUserId + "/chats/" + mChatId, true);
+        childUpdates.put("/counts/" + mChatUserId + "/chats/" + mChatId, true);*/
 
         //mScrollDirection = REACHED_THE_BOTTOM;
         //mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);
