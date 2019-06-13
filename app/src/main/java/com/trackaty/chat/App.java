@@ -23,6 +23,8 @@ import com.trackaty.chat.models.User;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
+//import androidx.multidex.MultiDexApplication;
+
 
 /**
  * Created on 25/03/2017.

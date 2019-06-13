@@ -3,8 +3,8 @@
 
     <!--buttons and menus -->
 
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_find">Find</string>
+    <string name="title_chats">Chats</string>
     <string name="title_notifications">Notifications</string>
     <string name="menu_log_out">Log Out</string>
     <string name="menu_action_profile">Profile</string>
@@ -202,6 +202,7 @@
     <string name="loading_animation">Loading animation</string>
     <string name="send_text_icon">Send message</string>
     <string name="message_sent_icon">Message sent icon</string>
+    <string name="chat_icon">Chats icon</string>
 
     <!--Notifications-->
     <string name="notification_like_title">New like</string>

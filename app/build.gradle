@@ -9,7 +9,7 @@ android {
         applicationId "com.trackaty.chat"
         minSdkVersion 16
         targetSdkVersion 28
-        // multiDexEnabled true // Enabling multidex support.
+        //multiDexEnabled true // Enabling multidex support.
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,11 +32,11 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //implementation 'com.android.support:multidex:1.0.3' // for multidex
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
-    implementation 'com.google.android.material:material:1.1.0-alpha06'
+    //implementation 'androidx.multidex:multidex:2.0.1' // for multidex
+    implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
+    implementation 'com.google.android.material:material:1.1.0-alpha07'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0-beta01'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0-beta02'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-database:17.0.0'
@@ -48,8 +48,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:17.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-alpha01'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     def nav_version = "1.0.0"
     implementation "android.arch.navigation:navigation-fragment:$nav_version" // use -ktx for Kotlin
@@ -75,9 +75,9 @@ dependencies {
 
     //implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView
     implementation 'com.clock.scratch:Scratch:1.0.0'// A better ScratchView
-    //implementation 'com.google.firebase:firebase-messaging:17.0.0' // for notifications
 
     //implementation 'com.github.bumptech.glide:glide:4.9.0'
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
 
 }

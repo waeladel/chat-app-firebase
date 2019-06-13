@@ -9,9 +9,13 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +35,7 @@ import com.trackaty.chat.models.User;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -39,6 +44,7 @@ import androidx.navigation.Navigation;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,10 +60,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private TextView mTextMessage;
     private static final int RC_SIGN_IN = 123;
 
-    NavController navController ;
-    BottomNavigationView bottomNavigation;
+    private NavController navController ;
+    private BottomNavigationView bottomNavigation;
+    private BadgeDrawable chatsBadge, notificationsBadge;
 
-    public String currentUserId;
+    //public String currentUserId;
     public String currentUserName;
     public String currentUserEmail;
     public Uri currentUserPhoto;
@@ -65,11 +72,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private User mUser;
     private String mUserId;
 
-
     private boolean isFirstloaded; // boolean to check if back button is clicked on startActivityForResult
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    // get the currentUser Id, we will user the AuthStateListener if logged out
+    FirebaseUser FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+    String currentUserId = FirebaseCurrentUser != null ? FirebaseCurrentUser.getUid() : null;
 
     private NavController.OnDestinationChangedListener mDestinationListener ;
 
@@ -98,17 +108,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    mTextMessage.setText(R.string.title_find);
                     goToMain();
                     return true;
-                case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                case R.id.navigation_chats:
+                    mTextMessage.setText(R.string.title_chats);
                     goToChats();
                     return true;
                 case R.id.navigation_notifications:
                     mTextMessage.setText(R.string.title_notifications);
                     return true;
             }
+
             return false;
         }
 
@@ -164,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // update CurrentUserId for all observer fragments
         mMainViewModel = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
 
+        // update CurrentUserId for all observer fragments
+        //mMainViewModel.updateCurrentUserId(currentUserId);
         /*navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
 
             @Override
@@ -197,7 +210,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
 
+        /*Menu menu = bottomNavigation.getMenu();
+        MenuItem mItem =  menu.findItem(R.id.navigation_chats);
+        mItem.getIcon()
+        mChatsBadge = (NotificationBadge) findViewById(R.id.badge);*/
+/*
+        BottomNavigationMenuView mbottomNavigationMenuView =
+                (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+
+        View view = mbottomNavigationMenuView.getChildAt(1);
+
+        BottomNavigationItemView itemView = (BottomNavigationItemView) view;*/
+
+        /*View chat_badge = LayoutInflater.from(this)
+                .inflate(R.layout.chat_alerts_layout,
+                        mbottomNavigationMenuView, false);
+        itemView.addView(chat_badge);
+
+        Menu menu = bottomNavigation.getMenu();
+        MenuItem mItem =  menu.findItem(R.id.navigation_chats);
+        */
 
         mAuth = FirebaseAuth.getInstance();
         isFirstloaded = true; // first time to open the app
@@ -209,8 +243,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
+                // User is signed in
                 if (user != null) {
-                    // User is signed in
+
+                    // Only update current userId if it's changed
+                    if(!TextUtils.equals(currentUserId, user.getUid())){
+                        // update CurrentUserId for all observer fragments
+                        mMainViewModel.updateCurrentUserId(user.getUid());
+                    }
 
                     currentUserId = user.getUid();
                     currentUserName = user.getDisplayName();
@@ -226,8 +266,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     isUserExist(currentUserId); // if not start complete profile
 
-                    // update CurrentUserId for all observer fragments
-                    mMainViewModel.updateCurrentUserId(currentUserId);
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -239,13 +277,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     // set selected bottomNavigation to main icon
                     bottomNavigation.setSelectedItemId(R.id.navigation_home);
                     initiateLogin(); // start login activity
+
+                    // Remove all MainViewModel Listeners
+                    mMainViewModel.clearViewModel();
                 }
             }
         };
 
         //navController = Navigation.findNavController(this, R.id.host_fragment);
-        Log.d(TAG, "onCreat handleDeepLink. notification intent = "+intent);
+        Log.d(TAG, "onCreate handleDeepLink. notification intent = "+intent);
         navController.handleDeepLink(intent);
+
+        // Get counts for unread chats. first use currentUserId then update it whenever it changed using AuthStateListener
+        mMainViewModel.getChatsCount(currentUserId).observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long count) {
+                Log.d(TAG, "onChanged chats count = "+ count + " currentUserId= "+currentUserId);
+                // Display chats count if > 0
+                if(count != null && count != 0){
+                    chatsBadge = bottomNavigation.showBadge(R.id.navigation_chats); // show badge over chats menu item
+                    chatsBadge.setMaxCharacterCount(3); // Max number is 99
+                    //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
+                    chatsBadge.setNumber(Math.toIntExact(count));
+                }else{
+                    // Hide chat badge
+                    chatsBadge.setVisible(false);
+                }
+
+            }
+        });
 
     }//End of onCreate
 
