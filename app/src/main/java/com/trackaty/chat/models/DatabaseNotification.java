@@ -1,11 +1,15 @@
 package com.trackaty.chat.models;
 
+import android.text.TextUtils;
+import android.util.Log;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @IgnoreExtraProperties
 public class DatabaseNotification {
@@ -16,10 +20,11 @@ public class DatabaseNotification {
     private String type;
     private String senderId;
     private String chatId;
-    //private String senderName;
-    //private String senderAvatar;
-    private boolean seen;
-    private Object created ;
+    private String senderName;
+    private String senderAvatar;
+    private boolean seen; // to reset notification counter when user see the notifications
+    private boolean clicked; // to change item background when clicked
+    private Object sent; // sent time
 
     public DatabaseNotification() {
     }
@@ -31,24 +36,28 @@ public class DatabaseNotification {
         this.senderId = senderId;
         this.senderName = senderName;
         this.senderAvatar = senderAvatar;
-        //this.created = created;
+        //this.sent = sent;
     }*/
 
-    public DatabaseNotification(String type, String senderId) {
+    public DatabaseNotification(String type, String senderId, String senderName, String senderAvatar) {
         //this.title = title;
         //this.message = message;
+        this.senderName = senderName;
+        this.senderAvatar = senderAvatar;
         this.type = type;
         this.senderId = senderId;
-        this.created = ServerValue.TIMESTAMP;
+        this.sent = ServerValue.TIMESTAMP;
     }
 
-    public DatabaseNotification(String type, String senderId, String chatId) {
+    public DatabaseNotification(String type, String senderId, String senderName, String senderAvatar, String chatId) {
         //this.title = title;
         //this.message = message;
+        this.senderName = senderName;
+        this.senderAvatar = senderAvatar;
         this.type = type;
         this.senderId = senderId;
         this.chatId = chatId;
-        this.created = ServerValue.TIMESTAMP;
+        this.sent = ServerValue.TIMESTAMP;
     }
 
     // [START post_to_map]
@@ -60,10 +69,11 @@ public class DatabaseNotification {
         result.put("type", type);
         result.put("senderId", senderId);
         result.put("chatId", chatId);
-        /*result.put("senderName", senderName);
-        result.put("senderAvatar", senderAvatar);*/
+        result.put("senderName", senderName);
+        result.put("senderAvatar", senderAvatar);
         result.put("seen", seen);
-        result.put("created", created);
+        result.put("sent", sent);
+        result.put("clicked", clicked);
 
         return result;
     }
@@ -109,20 +119,20 @@ public class DatabaseNotification {
     }
 
 
-    public Object getCreated() {
-        return created;
+    public Object getSent() {
+        return sent;
     }
 
     @Exclude
-    public long getCreatedLong() {
-        return (long) created;
+    public long getSentLong() {
+        return (long) sent;
     }
 
-    public void setCreated(Object created) {
-        this.created = created;
+    public void setSent(Object sent) {
+        this.sent = sent;
     }
 
-    /*public String getSenderName() {
+    public String getSenderName() {
         return senderName;
     }
 
@@ -136,7 +146,7 @@ public class DatabaseNotification {
 
     public void setSenderAvatar(String senderAvatar) {
         this.senderAvatar = senderAvatar;
-    }*/
+    }
 
     public String getChatId() {
         return chatId;
@@ -152,6 +162,44 @@ public class DatabaseNotification {
 
     public void setSeen(boolean seen) {
         this.seen = seen;
+    }
+
+    public boolean isClicked() {
+        return clicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        this.clicked = clicked;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DatabaseNotification notification1 = (DatabaseNotification) o;
+
+        Log.d("Notifications equals", "Notifications equals . lastMessage ="+senderName +" chat1.lastMessage= "+notification1.senderName + " value=" + TextUtils.equals(senderName, notification1.senderName) );
+        Log.d("Notifications equals", "Notifications equals . lastMessage ="+sent +" chat1.lastMessage= "+notification1.sent + " value=" + sent.equals(notification1.sent) );
+
+        return (seen == notification1.seen) &&
+                (clicked == notification1.clicked) &&
+                (TextUtils.equals(senderName, notification1.senderName)) &&
+                (TextUtils.equals(senderAvatar, notification1.senderAvatar)) &&
+                (sent == notification1.sent || (sent!=null && sent.equals(notification1.sent)));
+
+        //sent == notification1.sent || (sent!=null && sent.equals(notification1.sent)
+    }
+
+    @Override
+    public int hashCode() {
+        //return Objects.hash(senderName, senderAvatar, seen, sent);
+        int result = 1;
+        result = 31 * result + (seen ? 1 : 0);
+        result = 31 * result + (clicked ? 1 : 0);
+        result = 31 * result + (senderName == null ? 0 : senderName.hashCode());
+        result = 31 * result + (senderAvatar == null ? 0 : senderAvatar.hashCode());
+        result = 31 * result + (sent == null ? 0 : sent.hashCode());
+        return result;
     }
 
     // [END post_to_map]

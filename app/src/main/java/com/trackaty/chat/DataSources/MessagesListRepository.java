@@ -62,7 +62,7 @@ public class MessagesListRepository {
     private ItemKeyedDataSource.LoadCallback loadAfterCallback;
     private ItemKeyedDataSource.LoadCallback loadBeforeCallback;
 
-    /*private ValueEventListener initialChatsListener;
+    /*private ValueEventListener initialListener;
     private ValueEventListener afterMessagesListener;
     private ValueEventListener beforeMessagesListener;*/
 

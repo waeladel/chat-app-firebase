@@ -222,6 +222,12 @@
     <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
     <string name="notification_request_approved_body">%1$s approved your reveal request.</string>
 
+    <string name="notification_default_like_body">You received a new like.</string>
+    <string name="notification_default_pick_up_body">You received a new pick-up line.</string>
+    <string name="notification_default_message_body">You received a new message.</string>
+    <string name="notification_default_request_sent_body">You received a new request.</string>
+    <string name="notification_default_request_approved_body">Your request has been approved.</string>
+
 
     <!--<string name="notification_like_channel_description">Receive likes from your stalkers</string>-->
     <string name="likes_notification_channel_name">Likes</string>
@@ -368,6 +374,8 @@
     <string name="main_frag_title">Find</string>
     <string name="display_image_title">Profile Photo</string>
     <string name="chats_frag_title">Chats</string>
+    <string name="notifications_frag_title">Notifications</string>
+
 
     <!-- countryText.setText(getString(R.string.country, country.getName()));-->
 

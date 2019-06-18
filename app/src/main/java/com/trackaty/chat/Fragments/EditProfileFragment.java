@@ -979,9 +979,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
         //Log.d(TAG, "currentUser getCreatedLong= "+currentUser.getCreatedLong());
         /* //apparently it's updated automatically
-        if( currentUser != null && currentUser.getCreated() == null){
-            Log.d(TAG, "profileSave getCreated= "+currentUser.getCreated());
-            currentUser.setCreated(ServerValue.TIMESTAMP);
+        if( currentUser != null && currentUser.getSent() == null){
+            Log.d(TAG, "profileSave getSent= "+currentUser.getSent());
+            currentUser.setSent(ServerValue.TIMESTAMP);
         }*/
 
         /*for (int i = 0; i < mProfileDataArrayList.size(); i++) {

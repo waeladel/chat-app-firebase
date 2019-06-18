@@ -17,7 +17,6 @@ import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.ChatMember;
-import com.trackaty.chat.models.User;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -26,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
-import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -171,9 +168,9 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
                 switch (membersList.size()){
                     case 1:// there is only one member other than current user
-                        Log.d(TAG, "mama getChats membersList name= "+membersList.get(0).getName());
-                        Log.d(TAG, "mama getChats membersList key= "+membersList.get(0).getKey());
-                        Log.d(TAG, "mama getChats membersList avatar= "+membersList.get(0).getAvatar());
+                        Log.d(TAG, "mama getItems membersList name= "+membersList.get(0).getName());
+                        Log.d(TAG, "mama getItems membersList key= "+membersList.get(0).getKey());
+                        Log.d(TAG, "mama getItems membersList avatar= "+membersList.get(0).getAvatar());
                         // names text value
                         if (null != membersList.get(0).getName()) {
                             holder.mChatTitle.setText(membersList.get(0).getName());
@@ -216,8 +213,8 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
                         break;
                     case 2:// there is 2 member other than current user
-                        Log.d(TAG, "mama getChats getMember= "+membersList.get(0));
-                        Log.d(TAG, "mama getChats getMember= "+membersList.get(1));
+                        Log.d(TAG, "mama getItems getMember= "+membersList.get(0));
+                        Log.d(TAG, "mama getItems getMember= "+membersList.get(1));
                         break;
                 }
 
@@ -296,7 +293,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
             //itemView = row;
 
             row = itemView;
-            mLastMessage = row.findViewById(R.id.message_button_text);
+            mLastMessage = row.findViewById(R.id.notification_text);
             mAvatar = row.findViewById(R.id.user_image);
             mLastSentTime = row.findViewById(R.id.last_sent);
             mChatTitle = row.findViewById(R.id.user_name);

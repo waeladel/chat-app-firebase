@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -151,7 +150,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         mMessageButton = (FloatingActionButton) fragView.findViewById(R.id.message_button);
         mRevealButton = (FloatingActionButton) fragView.findViewById(R.id.reveal_button);
         mLovedByHint = (TextView) fragView.findViewById(R.id.love_text);
-        mMessageHint = (TextView) fragView.findViewById(R.id.message_button_text);
+        mMessageHint = (TextView) fragView.findViewById(R.id.notification_text);
         mRevealHint = (TextView) fragView.findViewById(R.id.reveal_button_text);
         mCover = (ImageView) fragView.findViewById(R.id.coverImage);
         mAvatar = (ImageView) fragView.findViewById(R.id.user_image);
@@ -208,8 +207,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             });
         }
 
-        // Get current user once
-        /*mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+        // Get current user once, to get currentUser's name and avatar for notifications
+        mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
             @Override
             public void onCallback(User user) {
                 if(user != null){
@@ -217,7 +216,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     mCurrentUser = user;
                 }
             }
-        });*/
+        });
         Log.i(TAG, "onChanged mProfileViewModel getRelation"+ mMessageButton.getBackgroundTintList());
 
 
@@ -468,8 +467,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }else{
 
                     //Current user didn't loved this user before, lit's love him
-                    mProfileViewModel.sendLove(mCurrentUserId, mUserId);
-                    //mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
+                    //mProfileViewModel.sendLove(mCurrentUserId, mUserId);
+                    mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
                 }
 
             }
@@ -1187,7 +1186,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                 // Update request notification
                 notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_APPROVED;
-                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_APPROVED, mCurrentUserId);
+                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_APPROVED, mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar());
                 notificationValues = databaseNotification.toMap();
                 childUpdates.put("/notifications/alerts/" + mUserId + "/" +notificationKey, notificationValues);
 
@@ -1236,7 +1235,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                 // Update request notification
                 notificationKey = mCurrentUserId + NOTIFICATION_TYPE_REQUESTS_SENT;
-                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_SENT, mCurrentUserId);
+                databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_REQUESTS_SENT, mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar());
                 notificationValues = databaseNotification.toMap();
                 childUpdates.put("/notifications/alerts/" + mUserId + "/" +notificationKey, notificationValues);
 

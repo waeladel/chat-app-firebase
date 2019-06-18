@@ -9,13 +9,10 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,7 +41,6 @@ import androidx.navigation.Navigation;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     return true;
                 case R.id.navigation_notifications:
                     mTextMessage.setText(R.string.title_notifications);
+                    goToNotifications();
                     return true;
             }
 
@@ -198,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }else if(TextUtils.equals("chats_fragment", destination.getLabel())){
                     bottomNavigation.setVisibility(View.VISIBLE);
                     bottomNavigation.setSelectedItemId(R.id.navigation_chats);
-                }else if(TextUtils.equals("notifications_fragment", destination.getLabel())) {
+                }else if(TextUtils.equals("fragment_notification", destination.getLabel())) {
                     bottomNavigation.setVisibility(View.VISIBLE);
                     bottomNavigation.setSelectedItemId(R.id.navigation_notifications);
                 }else{
@@ -253,7 +250,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     // Only update current userId if it's changed
                     if(!TextUtils.equals(currentUserId, user.getUid())){
                         // update CurrentUserId for all observer fragments
-                        mMainViewModel.updateCurrentUserId(user.getUid());
+                        Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId);
+
+                        if(currentUserId == null){
+                            // if currentUserId is null, it's the first time to open the app
+                            // and the user is not logged in. initiateObserveChatCount();
+                            initiateObserveChatCount(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " initiateObserveChatCount");
+                        }else{
+                            // It's not the first time to open the app
+                            // and the user is logged in. just updateCurrentUserId();
+                            mMainViewModel.updateCurrentUserId(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " updateCurrentUserId");
+
+                        }
                     }
 
                     currentUserId = user.getUid();
@@ -292,26 +302,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Log.d(TAG, "onCreate handleDeepLink. notification intent = "+intent);
         navController.handleDeepLink(intent);
 
-        // Get counts for unread chats. first use currentUserId then update it whenever it changed using AuthStateListener
-        mMainViewModel.getChatsCount(currentUserId).observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(Long count) {
-                Log.d(TAG, "onChanged chats count = "+ count + " currentUserId= "+currentUserId);
-                // Display chats count if > 0
-                if(count != null && count != 0){
-                    chatsBadge = bottomNavigation.showBadge(R.id.navigation_chats); // show badge over chats menu item
-                    chatsBadge.setMaxCharacterCount(3); // Max number is 99
-                    //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
-                    chatsBadge.setNumber(count.intValue());
-                }else{
-                    // Hide chat badge
-                    chatsBadge.setVisible(false);
-                }
-
-            }
-        });
+        initiateObserveChatCount(currentUserId);
 
     }//End of onCreate
+
+    // start observation for chat count
+    private void initiateObserveChatCount(String userKey) {
+        // Get counts for unread chats. first use currentUserId then update it whenever it changed using AuthStateListener
+        if(userKey != null){ // in case user is logged out, don't get chat count
+            // initiate chats count observer
+            mMainViewModel.getChatsCount(userKey).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long count) {
+                    Log.d(TAG, "getChatsCount onChanged chats count = "+ count + " currentUserId= "+userKey);
+                    // Display chats count if > 0
+                    if(count != null && count != 0){
+                        chatsBadge = bottomNavigation.showBadge(R.id.navigation_chats); // show badge over chats menu item
+                        chatsBadge.setMaxCharacterCount(3); // Max number is 99
+                        //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
+                        chatsBadge.setNumber(count.intValue());
+                    }else{
+                        // Hide chat badge. check first if it's null or not
+                        if(chatsBadge != null){
+                            chatsBadge.setNumber(0);
+                            chatsBadge.setVisible(false);
+                        }
+                    }
+                }
+            });
+        }
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -669,5 +689,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         .navigate(directions);*/
 
     }
+
+    // Go to notifications fragment
+    private void goToNotifications() {
+
+        //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
+        if (R.id.notificationsFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.notificationsFragment);
+        }
+
+    }
+
+
 
 }

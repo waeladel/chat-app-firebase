@@ -2,20 +2,20 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
-import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.DatabaseNotification;
 
 import androidx.annotation.NonNull;
 import androidx.paging.ItemKeyedDataSource;
 
-public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
+public class NotificationsDataSource extends ItemKeyedDataSource<Long, DatabaseNotification> {
 
-    private final static String TAG = ChatsDataSource.class.getSimpleName();
+    private final static String TAG = NotificationsDataSource.class.getSimpleName();
     private String mChatKey;
-    private ChatsRepository chatsRepository;
+    private NotificationsRepository mRepository;
 
     // get chatKey on the constructor
-    public ChatsDataSource(String chatKey){
-        //chatsRepository = new ChatsRepository(chatKey);
+    public NotificationsDataSource(String chatKey){
+        //mRepository = new ChatsRepository(chatKey);
         this.mChatKey = chatKey;
         Log.d(TAG, "mama ChatsDataSource initiated ");
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
@@ -26,7 +26,12 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
     }
     // Pass scrolling direction and last/first visible item to the repository
     public void setScrollDirection(int scrollDirection, int lastVisibleItem){
-        chatsRepository.setScrollDirection(scrollDirection, lastVisibleItem);
+        mRepository.setScrollDirection(scrollDirection, lastVisibleItem);
+    }
+
+    // removeListeners on viewModel cleared
+    public void removeListeners(){
+        mRepository.removeListeners();
     }
 
     // a callback to invalidate the data whenever a change happen
@@ -35,8 +40,8 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
         //super.addInvalidatedCallback(onInvalidatedCallback);
         Log.d(TAG, "mama Callback ChatsDataSource addInvalidatedCallback ");
         // pass firebase Callback to ChatsRepository
-        chatsRepository = new ChatsRepository(mChatKey, onInvalidatedCallback);
-        //chatsRepository.ChatsChanged(onInvalidatedCallback);
+        mRepository = new NotificationsRepository(mChatKey, onInvalidatedCallback);
+        //mRepository.ChatsChanged(onInvalidatedCallback);
         //invalidate();
     }
 
@@ -54,42 +59,42 @@ public class ChatsDataSource extends ItemKeyedDataSource<Long, Chat> {
 
     // load the initial data based on page size and key (key in null on the first load)
     @Override
-    public void loadInitial(@NonNull LoadInitialParams<Long> params, @NonNull LoadInitialCallback<Chat> callback) {
+    public void loadInitial(@NonNull LoadInitialParams<Long> params, @NonNull LoadInitialCallback<DatabaseNotification> callback) {
         /*List<User> items = usersRepository.getMessages(params.requestedInitialKey, params.requestedLoadSize);
         callback.onResult(items);*/
         Log.d(TAG, "mama loadInitial params key" +params.requestedInitialKey+" LoadSize " + params.requestedLoadSize);
-        chatsRepository.getChats(params.requestedInitialKey, params.requestedLoadSize, callback);
+        mRepository.getItems(params.requestedInitialKey, params.requestedLoadSize, callback);
         //usersRepository.getMessages( 0L, params.requestedLoadSize, callback);
 
     }
 
     // load next page
     @Override
-    public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Chat> callback) {
+    public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<DatabaseNotification> callback) {
         /*List<User> items = usersRepository.getMessages(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
-        chatsRepository.setLoadBeforeCallback(params.key , callback);
+        mRepository.setLoadBeforeCallback(params.key , callback);
         Log.d(TAG, "mama loadAfter params key " + params.key+" LoadSize " + params.requestedLoadSize);
         // using getBefore instead of getAfter because the order is reversed
-        //chatsRepository.getBefore(params.key -1, params.requestedLoadSize, callback);
-        chatsRepository.getChatsBefore(params.key , params.requestedLoadSize, callback);
+        //mRepository.getBefore(params.key -1, params.requestedLoadSize, callback);
+        mRepository.getBefore(params.key , params.requestedLoadSize, callback);
     }
 
     // load previous page
     @Override
-    public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Chat> callback) {
+    public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<DatabaseNotification> callback) {
         /*List<User> items = fetchItemsBefore(params.key, params.requestedLoadSize);
         callback.onResult(items);*/
-        chatsRepository.setLoadAfterCallback(params.key , callback);
+        mRepository.setLoadAfterCallback(params.key , callback);
         Log.d(TAG, "mama loadBefore params " + params.key+" LoadSize " + params.requestedLoadSize);
         // using getAfter instead of getBefore because the order is reversed
-        //chatsRepository.getAfter(params.key +1, params.requestedLoadSize, callback);
-        chatsRepository.getChatsAfter(params.key , params.requestedLoadSize, callback);
+        //mRepository.getAfter(params.key +1, params.requestedLoadSize, callback);
+        mRepository.getAfter(params.key , params.requestedLoadSize, callback);
     }
 
     @NonNull
     @Override
-    public Long getKey(@NonNull Chat chat) {
-        return  chat.getLastSentLong();
+    public Long getKey(@NonNull DatabaseNotification databaseNotification) {
+        return  databaseNotification.getSentLong();
     }
 }

@@ -380,7 +380,7 @@ public class RelationRepository {
 
     // update love and favourites Favorite
     //public void sendLove(String currentUserId, String name , String avatar, String userId) {
-    public void sendLove(String currentUserId, String userId) {
+    public void sendLove(String currentUserId, String name , String avatar, String userId) {
         /*User user = new User();
         user.setName("wal");
         // Create chat map
@@ -396,7 +396,7 @@ public class RelationRepository {
         //String notificationKey = mNotificationsRef.child(userId).push().getKey();
         String notificationKey = currentUserId+ NOTIFICATION_TYPE_LIKE;
         //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
-        DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId);
+        DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId, name, avatar);
         Map<String, Object> notificationValues = notification.toMap();
         childUpdates.put("/notifications/alerts/" + userId + "/" +notificationKey, notificationValues);
 

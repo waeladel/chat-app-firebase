@@ -563,7 +563,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             //itemView = row;
 
             row = itemView;
-            mMessage = row.findViewById(R.id.message_button_text);
+            mMessage = row.findViewById(R.id.notification_text);
             mScratch = row.findViewById(R.id.scratch_view); // Scratch view above text view
             mResetView = row.findViewById(R.id.reset_view); // Reset view above Scratch view
             mAvatar = row.findViewById(R.id.user_image);
@@ -750,7 +750,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             //itemView = row;
 
             row = itemView;
-            mMessage = row.findViewById(R.id.message_button_text);
+            mMessage = row.findViewById(R.id.notification_text);
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
             mSentIcon = row.findViewById(R.id.sending_icon);

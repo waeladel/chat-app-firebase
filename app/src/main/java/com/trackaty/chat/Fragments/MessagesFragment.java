@@ -461,7 +461,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                              @Nullable Bundle savedInstanceState) {
         View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
 
-        mMessage = (EditText) fragView.findViewById(R.id.message_button_text);
+        mMessage = (EditText) fragView.findViewById(R.id.notification_text);
         mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
         mScrollFab = (FloatingActionButton) fragView.findViewById(R.id.scroll_fab);
         mRemainingTimeText = (TextView) fragView.findViewById(R.id.remaining_time);
@@ -1255,7 +1255,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             //notificationKey = mNotificationsRef.child(mChatUserId).push().getKey();
             notificationKey = mCurrentUserId + NOTIFICATION_TYPE_MESSAGE;
             //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
-            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_MESSAGE, mCurrentUserId, mChatId);
+            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_MESSAGE, mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mChatId);
             notificationValues = databaseNotification.toMap();
             childUpdates.put("/notifications/messages/" + mChatUserId + "/" +notificationKey, notificationValues);
 
@@ -1269,7 +1269,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             //notificationKey = mNotificationsRef.child(mChatUserId).push().getKey();
             notificationKey = mCurrentUserId + NOTIFICATION_TYPE_PICK_UP;
             //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
-            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_PICK_UP, mCurrentUserId, mChatId);
+            databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_PICK_UP, mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mChatId);
             notificationValues = databaseNotification.toMap();
             childUpdates.put("/notifications/alerts/" + mChatUserId + "/" +notificationKey, notificationValues);
         }

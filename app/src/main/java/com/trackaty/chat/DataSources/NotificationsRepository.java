@@ -8,7 +8,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.DatabaseNotification;
 import com.trackaty.chat.models.FirebaseListeners;
 
 import java.util.ArrayList;
@@ -20,20 +20,20 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
-public class ChatsRepository {
+public class NotificationsRepository {
 
-    private final static String TAG = ChatsRepository.class.getSimpleName();
+    private final static String TAG = NotificationsRepository.class.getSimpleName();
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mChatsRef;
+    private DatabaseReference mNotificationsRef;
     private Boolean isFirstLoaded = true;
     //public ValueEventListener ChatsChangesListener;
-    public ValueEventListener initialChatsListener;
+    public ValueEventListener initialListener;
 
     private static List<FirebaseListeners> mListenersList;// = new ArrayList<>();
-    private MutableLiveData<Chat> mChat;
-    private static List<Chat> totalItemsList;// = new ArrayList<>();
+    private MutableLiveData<DatabaseNotification> mNotification;
+    private static List<DatabaseNotification> totalItemsList;// = new ArrayList<>();
 
     private DataSource.InvalidatedCallback invalidatedCallback;
     private ItemKeyedDataSource.LoadInitialCallback loadInitialCallback;
@@ -75,26 +75,26 @@ public class ChatsRepository {
             }
 
             if (dataSnapshot.exists()) {
-                List<Chat> chatsList = new ArrayList<>();
+                List<DatabaseNotification> list = new ArrayList<>();
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (chat != null) {
-                        chat.setKey(snapshot.getKey());
-                        if(getLoadAfterKey()!= chat.getLastSentLong()) { // if snapshot key = startAt key? don't add it again
-                            chatsList.add(chat);
+                    DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
+                    if (notification != null) {
+                        notification.setKey(snapshot.getKey());
+                        if(getLoadAfterKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
+                            list.add(notification);
                         }
                     }
                 }
 
-                if(chatsList.size() != 0){
+                if(list.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getAfter  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
-                    Collections.reverse(chatsList);
-                    getLoadAfterCallback().onResult(chatsList);
+                    Log.d(TAG, "mama getAfter  List.size= " +  list.size()+ " lastkey= "+list.get(list.size()-1).getKey());
+                    Collections.reverse(list);
+                    getLoadAfterCallback().onResult(list);
 
                     // Create a reversed list to add messages to the beginning of totalItemsList
-                    List<Chat> reversedList = new ArrayList<>(chatsList);
+                    List<DatabaseNotification> reversedList = new ArrayList<>(list);
                     Collections.reverse(reversedList);
                     for (int i = 0; i < reversedList.size(); i++) {
                         // Add messages to totalItemsList ArrayList to be used to get the initial key position
@@ -142,24 +142,24 @@ public class ChatsRepository {
             }
 
             if (dataSnapshot.exists()) {
-                List<Chat> chatsList = new ArrayList<>();
+                List<DatabaseNotification> list = new ArrayList<>();
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (chat != null) {
-                        chat.setKey(snapshot.getKey());
-                        if(getLoadBeforeKey()!= chat.getLastSentLong()) { // if snapshot key = startAt key? don't add it again
-                            chatsList.add(chat);
+                    DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
+                    if (notification != null) {
+                        notification.setKey(snapshot.getKey());
+                        if(getLoadBeforeKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
+                            list.add(notification);
                         }
                     }
                 }
 
-                if(chatsList.size() != 0){
+                if(list.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getBefore  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
-                    Collections.reverse(chatsList);
-                    getLoadBeforeCallback().onResult(chatsList);
-                    totalItemsList.addAll(chatsList); // add items to totalItems ArrayList to be used to get the initial key position
+                    Log.d(TAG, "mama getBefore  List.size= " +  list.size()+ " lastkey= "+list.get(list.size()-1).getKey());
+                    Collections.reverse(list);
+                    getLoadBeforeCallback().onResult(list);
+                    totalItemsList.addAll(list); // add items to totalItems ArrayList to be used to get the initial key position
 
                     /*for (int i = 0; i < chatsList.size(); i++) {
                         Log.d(TAG, "before totalItemsList : key= "+ chatsList.get(i).getKey()+ " message= "+ chatsList.get(i).getLastMessage()+ " size= "+chatsList.size());
@@ -184,12 +184,13 @@ public class ChatsRepository {
     };
 
 
-    public ChatsRepository(String userKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
+    public NotificationsRepository(String userKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // use received chatKey to create a database ref
-        mChatsRef = mDatabaseRef.child("userChats").child(userKey);
+
+        mNotificationsRef = mDatabaseRef.child("notifications").child("alerts").child(userKey);
         isFirstLoaded = true;
-        Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded= " + isFirstLoaded);
+        Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded= " + isFirstLoaded + " userKey= "+userKey);
         // call back to invalidate data
         this.invalidatedCallback = onInvalidatedCallback;
 
@@ -234,14 +235,14 @@ public class ChatsRepository {
     }
 
     // get initial data
-    public void getChats(Long initialKey, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadInitialCallback<Chat> callback){
+    public void getItems(Long initialKey, final int size,
+                         @NonNull final ItemKeyedDataSource.LoadInitialCallback<DatabaseNotification> callback){
 
         this.initialKey = initialKey;
-        Query chatsQuery;
+        Query query;
         isInitialFirstLoaded = true;
 
-        initialChatsListener = new ValueEventListener() {
+        initialListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     // [START_EXCLUDE]
@@ -261,44 +262,44 @@ public class ChatsRepository {
 
                     if (dataSnapshot.exists()) {
                         // loop throw users value
-                        List<Chat> chatsList = new ArrayList<>();
+                        List<DatabaseNotification> list = new ArrayList<>();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            Chat chat = snapshot.getValue(Chat.class);
-                            if (chat != null) {
-                                chat.setKey(snapshot.getKey());
+                            DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
+                            if (notification != null) {
+                                notification.setKey(snapshot.getKey());
                             }
 
-                            chatsList.add(chat);
-                            Log.d(TAG, "mama getItems = " + chat.getLastMessage() + " getSnapshotKey= " + snapshot.getKey());
+                            list.add(notification);
+                            Log.d(TAG, "mama getItems = " + notification.getSentLong() + " getSnapshotKey= " + snapshot.getKey());
 
                         }
 
-                        if (chatsList.size() != 0) {
-                            Collections.reverse(chatsList);
-                            callback.onResult(chatsList);
+                        if (list.size() != 0) {
+                            Collections.reverse(list);
+                            callback.onResult(list);
 
                             // Add messages to totalItemsList ArrayList to be used to get the initial key position
-                            totalItemsList.addAll(chatsList);
+                            totalItemsList.addAll(list);
                             printTotalItems("Initial");
-                            Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " lastkey= " + chatsList.get(chatsList.size() - 1).getKey());
+                            Log.d(TAG, "mama getMessages  List.size= " + list.size() + " lastkey= " + list.get(list.size() - 1).getKey());
                         }
 
                     } else {
                         // No data exist
-                        Log.w(TAG, "isInitialKey. getItems no chats exist");
+                        Log.w(TAG, "isInitialKey. getItems no notifications exist");
                         // It might failed because the initial key is changed and there is no data above it.
                         // Try to get any data regardless of the initial key
                         Log.d(TAG, "isInitialKey. Try to get any data regardless of the initial key "+ isInitialKey);
                         if(isInitialKey){
                             // If no data and we are doing a query with Initial Key, try another query without it
                             isInitialKey = false; // Make isInitialKey boolean false so that we don't loop forever
-                            Query chatsQuery = mChatsRef
-                                    .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                            Query query = mNotificationsRef
+                                    .orderByChild("sent")//limitToLast to start from the last (page size) items
                                     .limitToLast(size);
 
                             Log.d(TAG, "isInitialKey. initialListener is added to Query without InitialKey "+ isInitialKey);
-                            chatsQuery.addValueEventListener(initialChatsListener);
-                            mListenersList.add(new FirebaseListeners(chatsQuery, initialChatsListener));
+                            query.addValueEventListener(initialListener);
+                            mListenersList.add(new FirebaseListeners(query, initialListener));
                         }
                     }
 
@@ -314,58 +315,58 @@ public class ChatsRepository {
             };
 
         if (initialKey == null) {// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getChatss initialKey= " + initialKey);
+            Log.d(TAG, "mama getNotifications initialKey= " + initialKey);
             isInitialKey = false;
-            chatsQuery = mChatsRef
-                    .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+            query = mNotificationsRef
+                    .orderByChild("sent")//limitToLast to start from the last (page size) items
                     .limitToLast(size);
 
 
         } else {// not the first load. Key is the last seen key
-            Log.d(TAG, "mama getChatss initialKey= " + initialKey);
+            Log.d(TAG, "mama getNotifications initialKey= " + initialKey);
             isInitialKey = true;
             switch (mScrollDirection){
                 // No need to detected reaching to bottom
                 /*case REACHED_THE_BOTTOM:
                     Log.d(TAG, "messages query = REACHED_THE_BOTTOM. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                    chatsQuery = mNotificationsRef
+                            .orderByChild("sent")//limitToLast to start from the last (page size) items
                             .limitToFirst(size);
                     break;*/
                 case REACHED_THE_TOP:
                     Log.d(TAG, "messages query = REACHED_THE_TOP. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                    query = mNotificationsRef
+                            .orderByChild("sent")//limitToLast to start from the last (page size) items
                             .limitToLast(size);
                     break;
                 case SCROLLING_UP:
                     /*Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                    chatsQuery = mNotificationsRef
+                            .orderByChild("sent")//limitToLast to start from the last (page size) items
                             .endAt(initialKey)
                             .limitToLast(size);*/
 
                     // list is reversed, smaller Keys are on bottom
                     // InitialKey is in the top, must load data from top to bottom
                     // list is reversed, load data above InitialKey
-                    Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" first VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")
-                            .endAt(getItem(mVisibleItem).getLastSentLong())//Using first visible item key instead of initial key
+                    Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" first VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getSentLong() +" totalItemsList size= "+totalItemsList.size());
+                    query = mNotificationsRef
+                            .orderByChild("sent")
+                            .endAt(getItem(mVisibleItem).getSentLong())//Using first visible item key instead of initial key
                             .limitToLast(size);
                     break;
                 case SCROLLING_DOWN:
                     /*Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                    chatsQuery = mNotificationsRef
+                            .orderByChild("sent")//limitToLast to start from the last (page size) items
                             .startAt(initialKey)
                             .limitToFirst(size);*/
                     // InitialKey is in the bottom, must load data from bottom to top
                     // list is reversed, load data below InitialKey
-                    Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +"  last VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")
-                            .startAt(getItem(mVisibleItem).getLastSentLong())//Using last visible item key instead of initial key
+                    Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +"  last VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getSentLong() +" totalItemsList size= "+totalItemsList.size());
+                    query = mNotificationsRef
+                            .orderByChild("sent")
+                            .startAt(getItem(mVisibleItem).getSentLong())//Using last visible item key instead of initial key
                             .limitToFirst(size);
                     break;
                 default:
@@ -374,8 +375,8 @@ public class ChatsRepository {
                         // InitialKey is in the bottom, must load data from bottom to top
                         // list is reversed, load data below InitialKey
                         Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                        chatsQuery = mChatsRef
-                                .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                        chatsQuery = mNotificationsRef
+                                .orderByChild("sent")//limitToLast to start from the last (page size) items
                                 .startAt(initialKey)
                                 .limitToFirst(size);
 
@@ -384,15 +385,15 @@ public class ChatsRepository {
                         // InitialKey is in the top, must load data from top to bottom
                         // list is reversed, load data above InitialKey
                         Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                        chatsQuery = mChatsRef
-                                .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                        chatsQuery = mNotificationsRef
+                                .orderByChild("sent")//limitToLast to start from the last (page size) items
                                 .endAt(initialKey)
                                 .limitToLast(size);
                     }
                     break;*/
                     Log.d(TAG, "messages query = default. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mChatsRef
-                            .orderByChild("lastSent")//limitToLast to start from the last (page size) items
+                    query = mNotificationsRef
+                            .orderByChild("sent")//limitToLast to start from the last (page size) items
                             .limitToLast(size);
             }
         }
@@ -400,15 +401,15 @@ public class ChatsRepository {
         totalItemsList.clear();
         Log.d(TAG, "messages query = totalItemsList is cleared");
 
-        chatsQuery.addValueEventListener(initialChatsListener);
-        mListenersList.add(new FirebaseListeners(chatsQuery, initialChatsListener));
+        query.addValueEventListener(initialListener);
+        mListenersList.add(new FirebaseListeners(query, initialListener));
         //mUsersRef.addValueEventListener(usersListener);
 
     }
 
     // to get next data
-    public void getChatsAfter(final Long key, final int size,
-                         @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
+    public void getAfter(final Long key, final int size,
+                         @NonNull final ItemKeyedDataSource.LoadCallback<DatabaseNotification> callback){
         /*if(key == entireUsersList.get(entireUsersList.size()-1).getCreatedLong()){
             Log.d(TAG, "mama getUsersAfter init. afterKey= " +  key+ "entireUsersList= "+entireUsersList.get(entireUsersList.size()-1).getCreatedLong());
             return;
@@ -419,8 +420,8 @@ public class ChatsRepository {
         //this.afterKey = key;
         Query afterQuery;
 
-        afterQuery = mChatsRef
-                .orderByChild("lastSent")
+        afterQuery = mNotificationsRef
+                .orderByChild("sent")
                 .startAt(key)
                 .limitToFirst(size);
 
@@ -430,8 +431,8 @@ public class ChatsRepository {
     }
 
     // to get previous data
-    public void getChatsBefore(final Long key, final int size,
-                              @NonNull final ItemKeyedDataSource.LoadCallback<Chat> callback){
+    public void getBefore(final Long key, final int size,
+                          @NonNull final ItemKeyedDataSource.LoadCallback<DatabaseNotification> callback){
         Log.d(TAG, "mama getBefore. BeforeKey= " +  key);
         /*if(key == entireUsersList.get(0).getCreatedLong()){
             return;
@@ -440,8 +441,8 @@ public class ChatsRepository {
         //this.beforeKey = key;
         Query beforeQuery;
 
-        beforeQuery = mChatsRef
-                .orderByChild("lastSent")
+        beforeQuery = mNotificationsRef
+                .orderByChild("sent")
                 .endAt(key)
                 .limitToLast(size);
 
@@ -458,7 +459,7 @@ public class ChatsRepository {
     // to invalidate the data whenever a change happen
     /*public void ChatsChanged(final DataSource.InvalidatedCallback InvalidatedCallback) {
 
-        final Query query = mChatsRef.orderByChild("lastSent");
+        final Query query = mNotificationsRef.orderByChild("sent");
 
         ChatsChangesListener = new ValueEventListener() {
 
@@ -519,7 +520,7 @@ public class ChatsRepository {
     }*/
 
     //removeListeners is static so it can be triggered when ViewModel is onCleared
-    public static void removeListeners(){
+    public void removeListeners(){
 
         for (int i = 0; i < mListenersList.size(); i++) {
             //Log.d(TAG, "removed Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
@@ -550,7 +551,7 @@ public class ChatsRepository {
     public void printTotalItems(String type){
         Log.d(TAG, "Getting totalItemsList... Type"+ type );
         for (int i = 0; i < totalItemsList.size(); i++) {
-            Log.d(TAG, "totalItemsList : key= "+ totalItemsList.get(i).getKey()+ " message= "+ totalItemsList.get(i).getLastMessage()+ " size= "+totalItemsList.size());
+            Log.d(TAG, "totalItemsList : key= "+ totalItemsList.get(i).getKey()+ " message= "+ totalItemsList.get(i).getSentLong()+ " size= "+totalItemsList.size());
         }
     }
 
@@ -559,8 +560,8 @@ public class ChatsRepository {
         Log.d(TAG, "Getting get InitialKeyPosition... getInitialKey()= "+getInitialKey()+ " totalItemsList size= "+totalItemsList.size());
         int Position = 0;
         for (int i = 0; i < totalItemsList.size(); i++) {
-            if(totalItemsList.get(i).getLastSentLong() == getInitialKey()){
-                Log.d(TAG, "messages query InitialKeyPosition: key= "+ getInitialKey()+ " message= "+totalItemsList.get(i).getLastMessage() +" Position= " +Position);
+            if(totalItemsList.get(i).getSentLong() == getInitialKey()){
+                Log.d(TAG, "messages query InitialKeyPosition: key= "+ getInitialKey()+ " message= "+totalItemsList.get(i).getSentLong() +" Position= " +Position);
                 return Position;
             }else{
                 Position++;
@@ -570,8 +571,8 @@ public class ChatsRepository {
     }
 
     // get item and item's key from adapter position
-    public Chat getItem(int position){
-        Log.d(TAG, "Getting getItem... getInitialKey()= "+getInitialKey()+ " item message= "+ totalItemsList.get(position).getLastMessage());
+    public DatabaseNotification getItem(int position){
+        Log.d(TAG, "Getting getItem... getInitialKey()= "+getInitialKey()+ " item message= "+ totalItemsList.get(position).getSentLong());
         return totalItemsList.get(position);
     }
 
