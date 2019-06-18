@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
+        //notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
 
         /*Menu menu = bottomNavigation.getMenu();
         MenuItem mItem =  menu.findItem(R.id.navigation_chats);
@@ -303,10 +303,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         navController.handleDeepLink(intent);
 
         initiateObserveChatCount(currentUserId);
+        initiateObserveNotificationCount(currentUserId);
 
     }//End of onCreate
 
-    // start observation for chat count
+    // start observation for Notifications count
+    private void initiateObserveNotificationCount(String userKey) {
+        // Get counts for unread chats. first use currentUserId then update it whenever it changed using AuthStateListener
+        if(userKey != null){ // in case user is logged out, don't get notification count
+            // initiate notifications count observer
+            mMainViewModel.getNotificationsCount(userKey).observe(this, new Observer<Long>() {
+                @Override
+                public void onChanged(Long count) {
+                    Log.d(TAG, "getNotificationsCount onChanged notifications count = "+ count + " currentUserId= "+userKey);
+                    // Display chats count if > 0
+                    if(count != null && count != 0){
+                        notificationsBadge = bottomNavigation.showBadge(R.id.navigation_notifications); // show badge over chats menu item
+                        notificationsBadge.setMaxCharacterCount(3); // Max number is 99
+                        //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
+                        notificationsBadge.setNumber(count.intValue());
+                    }else{
+                        // Hide chat badge. check first if it's null or not
+                        if(notificationsBadge != null){
+                            notificationsBadge.setNumber(0);
+                            notificationsBadge.setVisible(false);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // start observation for chats count
     private void initiateObserveChatCount(String userKey) {
         // Get counts for unread chats. first use currentUserId then update it whenever it changed using AuthStateListener
         if(userKey != null){ // in case user is logged out, don't get chat count

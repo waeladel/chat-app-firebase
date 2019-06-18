@@ -189,7 +189,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                 holder.row.setBackgroundColor(Color.parseColor("#ffffff"));
             }else{
                 // item is not clicked, display colored background
-                holder.row.setBackgroundColor(Color.parseColor("#567845"));
+                holder.row.setBackgroundColor( App.getContext().getResources().getColor(R.color.LightSteelBlue));
             }
 
          }

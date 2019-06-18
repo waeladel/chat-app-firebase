@@ -24,13 +24,13 @@ public class UserRepository {
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUsersRef, mChatsRef;
+    private DatabaseReference mUsersRef, mChatsRef, mNotificationsRef;
     private Boolean isFirstLoaded = true;
 
     private MutableLiveData<User> mCurrentUser;
     private MutableLiveData<User> mUser;
     private MutableLiveData<User> mSingleValueUser;
-    private MutableLiveData<Long> mChatsCount;
+    private MutableLiveData<Long> mChatsCount, mNotifictionsCount;
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
@@ -86,10 +86,36 @@ public class UserRepository {
         }
     };
 
+    // A listener for notifications count changes
+    private ValueEventListener notificationsCountListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // Get chats count value
+                Log.d(TAG, "getNotificationsCount dataSnapshot key: "
+                        + dataSnapshot.getKey()+ " count= "+dataSnapshot.getChildrenCount()+" Listener = "+notificationsCountListener);
+                //mCurrentUser = dataSnapshot.getValue(User.class);
+                mNotifictionsCount.postValue(dataSnapshot.getChildrenCount());
+            } else {
+                // User is null, error out
+                mNotifictionsCount.postValue(0L);
+                Log.w(TAG, "User is null, no such user");
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+
+        }
+    };
+
     public UserRepository(){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUsersRef = mDatabaseRef.child("users");
         mChatsRef = mDatabaseRef.child("userChats");
+        mNotificationsRef = mDatabaseRef.child("notifications").child("alerts");
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         isFirstLoaded = true;
@@ -97,6 +123,7 @@ public class UserRepository {
         mUser = new MutableLiveData<>();
         mSingleValueUser = new MutableLiveData<>();
         mChatsCount = new MutableLiveData<>();
+        mNotifictionsCount = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -239,6 +266,53 @@ public class UserRepository {
             Log.d(TAG, "getChatsCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
         return mChatsCount;
+    }
+
+    public MutableLiveData<Long> getNotificationsCount(String userId){
+
+        // order by members/userKey/saw get only false results
+        Query query = mNotificationsRef.child(userId)
+                .orderByChild("seen").equalTo(false);
+
+        Log.d(TAG, "getChatsCount initiated: " + userId+ " chatsQuery= "+query);
+
+        Log.d(TAG, "getChatsCount ListenersList size= "+ mListenersList.size());
+
+        if(mListenersList.size()== 0){
+            // Need to add a new Listener
+            Log.d(TAG, "getNotificationsCount adding new Listener= "+ mListenersList);
+            //mListenersMap.put(postSnapshot.getRef(), mPickUpCounterListener);
+            query.addValueEventListener(notificationsCountListener);
+            mListenersList.add(new FirebaseListeners(query, notificationsCountListener));
+        }else{
+            Log.d(TAG, "postSnapshot Listeners size is not 0= "+ mListenersList.size());
+            //there is an old Listener, need to check if it's on this ref
+            for (int i = 0; i < mListenersList.size(); i++) {
+                //Log.d(TAG, "getChatsCount Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                if(mListenersList.get(i).getListener().equals(notificationsCountListener) &&
+                        !mListenersList.get(i).getQueryOrRef().equals(query)){
+                    // We used this listener before, but on another Ref
+                    Log.d(TAG, "We used this listener before, is it on the same ref?");
+                    Log.d(TAG, "getChatsCount adding new Listener= "+ notificationsCountListener);
+                    query.addValueEventListener(notificationsCountListener);
+                    mListenersList.add(new FirebaseListeners(query, notificationsCountListener));
+                }else if((mListenersList.get(i).getListener().equals(notificationsCountListener) &&
+                        mListenersList.get(i).getQueryOrRef().equals(query))){
+                    //there is old Listener on the ref
+                    Log.d(TAG, "getChatsCount Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                }else{
+                    //userListener is never used
+                    Log.d(TAG, "getChatsCount Listener is never created");
+                    query.addValueEventListener(notificationsCountListener);
+                    mListenersList.add(new FirebaseListeners(query, notificationsCountListener));
+                }
+            }
+        }
+
+        for (int i = 0; i < mListenersList.size(); i++) {
+            Log.d(TAG, "getChatsCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        }
+        return mNotifictionsCount;
     }
 
 

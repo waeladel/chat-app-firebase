@@ -14,7 +14,7 @@ public class MainActivityViewModel extends ViewModel {
     private UserRepository userRepository;
     public  MutableLiveData<User> currentUser;
     private MutableLiveData<String> currentUserId;
-    private MutableLiveData<Long> chatCount;
+    private MutableLiveData<Long> chatCount, notificationCount;
 
     public MainActivityViewModel() {
 
@@ -22,6 +22,7 @@ public class MainActivityViewModel extends ViewModel {
         userRepository = new UserRepository();
         currentUserId = new MutableLiveData<>();
         chatCount = new MutableLiveData<>();
+        notificationCount = new MutableLiveData<>();
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "MainActivityViewModel init");
     }
@@ -45,6 +46,7 @@ public class MainActivityViewModel extends ViewModel {
         if(!userId.equals(currentUserId.getValue())){
             // Get the chat counts of the new user
             chatCount = userRepository.getChatsCount(userId);
+            notificationCount = userRepository.getNotificationsCount(userId);
             Log.d(TAG, "updateCurrentUserId chatCount= "+ chatCount.getValue());
         }
         currentUserId.setValue(userId);
@@ -63,6 +65,14 @@ public class MainActivityViewModel extends ViewModel {
         chatCount = userRepository.getChatsCount(userId);
         Log.d(TAG, "getChatsCount chatCount= "+ chatCount.getValue());
         return chatCount;
+    }
+
+    // Get counts for unread chats
+    public MutableLiveData<Long> getNotificationsCount(String userId) {
+        Log.d(TAG, "getNotificationsCount"+ userId);
+        notificationCount = userRepository.getNotificationsCount(userId);
+        Log.d(TAG, "getNotificationsCount notification Count= "+ notificationCount.getValue());
+        return notificationCount;
     }
 
     public void clearViewModel() {

@@ -13,7 +13,9 @@ import com.trackaty.chat.models.FirebaseListeners;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -76,6 +78,10 @@ public class NotificationsRepository {
 
             if (dataSnapshot.exists()) {
                 List<DatabaseNotification> list = new ArrayList<>();
+
+                // Create a map for all seen notifications need to be updated
+                Map<String, Object> updateSeenMap = new HashMap<>();
+
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
@@ -83,8 +89,22 @@ public class NotificationsRepository {
                         notification.setKey(snapshot.getKey());
                         if(getLoadAfterKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
                             list.add(notification);
+
+                            // If is not seen, update seen to true
+                            if(!notification.isSeen()){
+                                updateSeenMap.put(snapshot.getKey()+"/seen", true);
+                                notification.setSeen(true);
+                            }
+
                         }
                     }
+                }
+
+                // Update seen notifications
+                if(updateSeenMap.size() > 0){
+                    //Update seen notifications
+                    mNotificationsRef.updateChildren(updateSeenMap);
+                    return;
                 }
 
                 if(list.size() != 0){
@@ -143,6 +163,10 @@ public class NotificationsRepository {
 
             if (dataSnapshot.exists()) {
                 List<DatabaseNotification> list = new ArrayList<>();
+
+                // Create a map for all seen notifications need to be updated
+                Map<String, Object> updateSeenMap = new HashMap<>();
+
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
@@ -150,8 +174,22 @@ public class NotificationsRepository {
                         notification.setKey(snapshot.getKey());
                         if(getLoadBeforeKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
                             list.add(notification);
+
+                            // If is not seen, update seen to true
+                            if(!notification.isSeen()){
+                                updateSeenMap.put(snapshot.getKey()+"/seen", true);
+                                notification.setSeen(true);
+                            }
+
                         }
                     }
+                }
+
+                // Update seen notifications
+                if(updateSeenMap.size() > 0){
+                    //Update seen notifications
+                    mNotificationsRef.updateChildren(updateSeenMap);
+                    return;
                 }
 
                 if(list.size() != 0){
@@ -263,15 +301,32 @@ public class NotificationsRepository {
                     if (dataSnapshot.exists()) {
                         // loop throw users value
                         List<DatabaseNotification> list = new ArrayList<>();
+
+                        // Create a map for all seen notifications need to be updated
+                        Map<String, Object> updateSeenMap = new HashMap<>();
+
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
                             if (notification != null) {
                                 notification.setKey(snapshot.getKey());
+
+                                // If is not seen, update seen to true
+                                if(!notification.isSeen()){
+                                    updateSeenMap.put(snapshot.getKey()+"/seen", true);
+                                    notification.setSeen(true);
+                                }
                             }
 
                             list.add(notification);
                             Log.d(TAG, "mama getItems = " + notification.getSentLong() + " getSnapshotKey= " + snapshot.getKey());
 
+                        }
+
+                        // Update seen notifications
+                        if(updateSeenMap.size() > 0){
+                            //Update seen notifications
+                            mNotificationsRef.updateChildren(updateSeenMap);
+                            return;
                         }
 
                         if (list.size() != 0) {
