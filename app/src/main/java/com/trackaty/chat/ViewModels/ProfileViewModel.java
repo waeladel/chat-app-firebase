@@ -45,8 +45,8 @@ public class ProfileViewModel extends ViewModel {
 
     // update love and favourites Favorite
     //public void sendLove(String currentUserId, String name, String avatar, String userId) {
-    public void sendLove(String currentUserId, String name, String avatar, String userId) {
-        relationRepository.sendLove(currentUserId ,name, avatar, userId);
+    public void sendLove(String currentUserId, String name, String avatar, String userId, String notificationType) {
+        relationRepository.sendLove(currentUserId ,name, avatar, userId, notificationType);
     }
 
     /*public void sendLove(String currentUserId, String name, String avatar, String userId) {
@@ -72,7 +72,7 @@ public class ProfileViewModel extends ViewModel {
     }
 
     // get love counts
-    public LiveData<Boolean> getLoveStatues(String currentUserId, String userId) {
+    public LiveData<String> getLoveStatues(String currentUserId, String userId) {
         return relationRepository.getLoveStatues(currentUserId, userId);
     }
 

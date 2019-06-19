@@ -48,7 +48,8 @@ public class MessagingService extends FirebaseMessagingService {
 
     private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
     private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
-    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like"; // if other user liked me. I did't liked him
+    private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack"; // if other user liked me after i liked him
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
 
@@ -128,6 +129,20 @@ public class MessagingService extends FirebaseMessagingService {
                 case NOTIFICATION_TYPE_LIKE:
                     messageTitle = getString(R.string.notification_like_title);
                     messageBody = getString(R.string.notification_like_body, name);
+
+                    bundle.clear();
+                    bundle.putString("userId", destinationId);
+                    pendingIntent = new NavDeepLinkBuilder(this)
+                            .setGraph(R.navigation.nav_graph)
+                            .setDestination(R.id.profileFragment)
+                            .setArguments(bundle)
+                            .createPendingIntent();
+
+                    sendNotification(messageTitle, messageBody, avatar, type ,notificationId, pendingIntent, LIKES_CHANNEL_ID);
+                    break;
+                case NOTIFICATION_TYPE_LIKE_BACK:
+                    messageTitle = getString(R.string.notification_like_title);
+                    messageBody = getString(R.string.notification_like_back_body, name);
 
                     bundle.clear();
                     bundle.putString("userId", destinationId);
@@ -243,6 +258,9 @@ public class MessagingService extends FirebaseMessagingService {
                                         case NOTIFICATION_TYPE_LIKE:
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
+                                        case NOTIFICATION_TYPE_LIKE_BACK:
+                                            notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
+                                            break;
                                         case NOTIFICATION_TYPE_PICK_UP:
                                             notificationManager.notify(notificationId, PICK_UPS_NOTIFICATION_ID, builder.build());
                                             break;
@@ -265,6 +283,9 @@ public class MessagingService extends FirebaseMessagingService {
                                     //notificationId is a unique int for each notification that you must define
                                     switch (type){
                                         case NOTIFICATION_TYPE_LIKE:
+                                            notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
+                                            break;
+                                        case NOTIFICATION_TYPE_LIKE_BACK:
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_PICK_UP:
@@ -295,6 +316,9 @@ public class MessagingService extends FirebaseMessagingService {
 
             switch (type){
                 case NOTIFICATION_TYPE_LIKE:
+                    notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
+                    break;
+                case NOTIFICATION_TYPE_LIKE_BACK:
                     notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                     break;
                 case NOTIFICATION_TYPE_PICK_UP:

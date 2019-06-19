@@ -72,6 +72,11 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private static final String RELATION_STATUS_FOLLOWED = "followed";
     private static final String RELATION_STATUS_NOT_FRIEND = "notFriend";
 
+    // Database Like's statues
+    private static final String LIKE_TYPE_LOVED = "Loved";
+    private static final String LIKE_TYPE_NOT_LOVED = "NotLoved";
+    private static final String LIKE_TYPE_ADMIRER= "Admirer";
+
     private String mRelationStatus;
 
 
@@ -88,8 +93,11 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
     private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
     private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack";
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
+
+    private String notificationType;
 
     private String mCurrentUserId, mUserId;
     private User mUser, mCurrentUser;
@@ -123,7 +131,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     // Create contacts Hash list, to hold user selections when sending a request
     Map<String, Boolean> contactsMap = new HashMap<>();
 
-    private Boolean isLovedStatues ;
+    private Boolean isCancelLove;
 
     private ProfileViewModel mProfileViewModel;
 
@@ -367,22 +375,34 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             });
 
             // get loves Statues
-            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<Boolean>() {
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<String>() {
                 @Override
-                public void onChanged(Boolean aBoolean) {
-                    if (aBoolean != null){
-                        Log.d(TAG, "onChanged love counts= "+aBoolean);
-                        if(aBoolean){
-                            // Statues = Liked
-                            isLovedStatues= true;
-                            mLovedByHint.setText(R.string.love_button_hint_unlove);
-                            mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
-                        }else{
-                            // Statues = Disliked
-                            isLovedStatues = false;
-                            mLovedByHint.setText(R.string.love_button_hint_love);
-                            mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                public void onChanged(String likeStatus) {
+                    if (likeStatus != null){
+                        Log.d(TAG, "onChanged love counts= "+likeStatus);
+                        switch (likeStatus){
+                            case LIKE_TYPE_LOVED:
+                                // Statues = Liked
+                                isCancelLove = true;
+                                notificationType = NOTIFICATION_TYPE_LIKE;
+                                mLovedByHint.setText(R.string.love_button_hint_unlove);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                                break;
+                            case LIKE_TYPE_ADMIRER:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                notificationType = NOTIFICATION_TYPE_LIKE_BACK;
+                                mLovedByHint.setText(R.string.love_button_hint_love_back);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                            case LIKE_TYPE_NOT_LOVED:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                mLovedByHint.setText(R.string.love_button_hint_love);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
                         }
+
                     }
                 }
             });
@@ -417,29 +437,38 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }
             });
 
-            // get loves Statues
-            mProfileViewModel.getLoveStatues(mCurrentUserId, mCurrentUserId).observe(this, new Observer<Boolean>() {
+            /*// get loves Statues
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<String>() {
                 @Override
-                public void onChanged(Boolean aBoolean) {
-                    if (aBoolean != null){
-                        Log.d(TAG, "onChanged love counts= "+aBoolean);
-                        if(aBoolean){
-                            // Statues = Liked
-                            isLovedStatues= true;
-                            mLovedByHint.setText(R.string.love_button_hint_unlove);
-                            mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
-                        }else{
-                            // Statues = Disliked
-                            isLovedStatues = false;
-                            mLovedByHint.setText(R.string.love_button_hint_love);
-                            mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                public void onChanged(String likeStatus) {
+                    if (likeStatus != null){
+                        Log.d(TAG, "onChanged love counts= "+likeStatus);
+                        switch (likeStatus){
+                            case LIKE_TYPE_LOVED:
+                                // Statues = Liked
+                                isCancelLove= true;
+                                mLovedByHint.setText(R.string.love_button_hint_unlove);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                                break;
+                            case LIKE_TYPE_ADMIRER:
+                                // Statues = Disliked
+                                isCancelLove= false;
+                                mLovedByHint.setText(R.string.love_button_hint_love_back);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                            case LIKE_TYPE_NOT_LOVED:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                mLovedByHint.setText(R.string.love_button_hint_love);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
                         }
+
                     }
                 }
-            });
+            });*/
 
         }
-
 
             mBlockEditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -461,14 +490,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "LoveButton is clicked");
-                if(isLovedStatues){
+                if(isCancelLove){
                     //Current user loved this user before, lit's unlove
                     mProfileViewModel.cancelLove(mCurrentUserId, mUserId);
                 }else{
 
                     //Current user didn't loved this user before, lit's love him
                     //mProfileViewModel.sendLove(mCurrentUserId, mUserId);
-                    mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId);
+                    mProfileViewModel.sendLove(mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mUserId, notificationType);
                 }
 
             }

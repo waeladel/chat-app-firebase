@@ -1,5 +1,6 @@
 package com.trackaty.chat.DataSources;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 public class RelationRepository {
@@ -26,19 +28,25 @@ public class RelationRepository {
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mRelationRef;
-    private DatabaseReference mLikesRef;
+    private DatabaseReference mLikesRef, mUserFavoritesRef;
     private DatabaseReference mUserChatsRef;
     private DatabaseReference mNotificationsRef;
 
     private MutableLiveData<Relation> mRelation;
     private MutableLiveData<Long> mlikesResult;
     private MutableLiveData<Long> mPickUpCount;
-    private MutableLiveData<Boolean> isLiked;
+    private MutableLiveData<String> likeStatus;
+
+    // Database Like's statues
+    private static final String LIKE_TYPE_LOVED = "Loved";
+    private static final String LIKE_TYPE_NOT_LOVED = "NotLoved";
+    private static final String LIKE_TYPE_ADMIRER= "Admirer";
 
     // DatabaseNotification's types
     private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
     private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
-    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like"; // if other user liked me. I did't liked him
+    private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack"; // if other user liked me after i liked him
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RevealSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RevealApproved";
 
@@ -129,21 +137,84 @@ public class RelationRepository {
             // Get Post object and use the values to update the UI
             if (dataSnapshot.exists()) {
                 // Get user value
-                Log.d(TAG, "isLiked dataSnapshot key: "
+                Log.d(TAG, "likeStatus dataSnapshot key: "
                         + dataSnapshot.getKey()+" Listener = "+ mLikesCounterListener+ " count= "+dataSnapshot.getChildrenCount());
                 //mRelation = dataSnapshot.getValue(User.class);
-                isLiked.postValue(true);
+                // Data exist, i (current user) loved this user already
+                likeStatus.postValue(LIKE_TYPE_LOVED);
+                Log.d(TAG, "isLiked is LIKE_TYPE_LOVED");
             } else {
-                // User is null, error out
-                isLiked.postValue(false);
+                //No data exist. check if this user liked me or not
+                if(mListenersList.size()== 0){
+                    // Need to add a new Listener
+                    Log.d(TAG, "getLoveStatus adding new Listener= "+ mFavoritesListener);
+                    //mListenersMap.put(postSnapshot.getRef(), mFavoritesListener);
+                    mUserFavoritesRef.addValueEventListener(mFavoritesListener);
+                    mListenersList.add(new FirebaseListeners(mUserFavoritesRef, mFavoritesListener));
+                }else{
+                    Log.d(TAG, "getLoveStatus Listeners size is not 0= "+ mListenersList.size());
+                    //there is an old Listener, need to check if it's on this ref
+                    for (int i = 0; i < mListenersList.size(); i++) {
+                        //Log.d(TAG, "getUser Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+                        if(mListenersList.get(i).getListener().equals(mFavoritesListener) &&
+                                !mListenersList.get(i).getQueryOrRef().equals(mUserFavoritesRef)){
+                            // We used this listener before, but on another Ref
+                            Log.d(TAG, "We used this listener before, is it on the same ref?");
+                            Log.d(TAG, "getLoveStatus adding new Listener= "+ mFavoritesListener);
+                            mUserFavoritesRef.addValueEventListener(mFavoritesListener);
+                            mListenersList.add(new FirebaseListeners(mUserFavoritesRef, mFavoritesListener));
+                        }else if((mListenersList.get(i).getListener().equals(mFavoritesListener) &&
+                                mListenersList.get(i).getQueryOrRef().equals(mUserFavoritesRef))){
+                            //there is old Listener on the ref
+                            Log.d(TAG, "getLoveStatus Listeners= there is old Listener on the ref= "+mListenersList.get(i).getQueryOrRef()+ " Listener= " + mListenersList.get(i).getListener());
+                        }else{
+                            //CounterListener is never used
+                            Log.d(TAG, "Listener is never created");
+                            mUserFavoritesRef.addValueEventListener(mFavoritesListener);
+                            mListenersList.add(new FirebaseListeners(mUserFavoritesRef, mFavoritesListener));
+                        }
+                    }
+                }
+                // I (current user) never liked this user, neither did he
+                likeStatus.postValue(LIKE_TYPE_NOT_LOVED);
                 Log.w(TAG, "isLiked is null, no data exist");
             }
+
         }
         @Override
         public void onCancelled(DatabaseError databaseError) {
             // Getting Post failed, log a message
             Log.w(TAG, "isLiked :onCancelled", databaseError.toException());
 
+        }
+    };
+
+    // A listener for Favorites changes, to know if this user liked me before or not
+    // To know if current logged in user is on this user favorite list
+    private ValueEventListener mFavoritesListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            if (dataSnapshot.exists()) {
+                // this user is admirer to current user
+                if(TextUtils.equals(likeStatus.getValue(),LIKE_TYPE_NOT_LOVED)){
+                    // Only change status to admirer if the status is "Not Loved" (button is love)
+                    likeStatus.postValue(LIKE_TYPE_ADMIRER);
+                    Log.d(TAG, "isLiked is LIKE_TYPE_ADMIRER");
+                }
+            }else{
+                // This user is not admirer. they never love each other
+                if(TextUtils.equals(likeStatus.getValue(),LIKE_TYPE_ADMIRER)){
+                    // Only change status to "Not Loved" if the status is Admirer (button is love back)
+                    likeStatus.postValue(LIKE_TYPE_NOT_LOVED);
+                    Log.d(TAG, "isLiked is LIKE_TYPE_NOT_LOVED");
+                }
+            }
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w(TAG, "isLiked :onCancelled", databaseError.toException());
         }
     };
 
@@ -159,7 +230,7 @@ public class RelationRepository {
         mRelation = new MutableLiveData<>();
         mlikesResult  = new MutableLiveData<>();
         mPickUpCount = new MutableLiveData<>();
-        isLiked = new MutableLiveData<>();
+        likeStatus = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -291,9 +362,12 @@ public class RelationRepository {
     }
 
     // Get relation if any between current user and selected user
-    public MutableLiveData<Boolean> getLoveStatues(String currentUserId, String userId){
+    public MutableLiveData<String> getLoveStatues(String currentUserId, String userId){
 
+        // This user is liked by current logged in user
         DatabaseReference userLikesRef = mLikesRef.child(userId).child(currentUserId);
+        // current logged in user is on this user favorite list
+        mUserFavoritesRef = mDatabaseRef.child("favorites").child(userId).child(currentUserId);
         //final MutableLiveData<User> mRelation = new MutableLiveData<>();
         Log.d(TAG, "getLoveStatus initiated: userId= "+userId );
         Log.d(TAG, "getLoveStatus Listeners size= "+ mListenersList.size());
@@ -330,7 +404,10 @@ public class RelationRepository {
         for (int i = 0; i < mListenersList.size(); i++) {
             Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
-        return isLiked;
+
+        Log.d(TAG, "wello likeStatus= "+ likeStatus.getValue());
+
+        return likeStatus;
     }
 
     // Get pick-up count if any between current user and selected user
@@ -380,7 +457,7 @@ public class RelationRepository {
 
     // update love and favourites Favorite
     //public void sendLove(String currentUserId, String name , String avatar, String userId) {
-    public void sendLove(String currentUserId, String name , String avatar, String userId) {
+    public void sendLove(String currentUserId, String name, String avatar, String userId, String notificationType) {
         /*User user = new User();
         user.setName("wal");
         // Create chat map
@@ -397,6 +474,7 @@ public class RelationRepository {
         String notificationKey = currentUserId+ NOTIFICATION_TYPE_LIKE;
         //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
         DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId, name, avatar);
+        notification.setType(notificationType);
         Map<String, Object> notificationValues = notification.toMap();
         childUpdates.put("/notifications/alerts/" + userId + "/" +notificationKey, notificationValues);
 

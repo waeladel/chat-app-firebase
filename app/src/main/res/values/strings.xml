@@ -12,6 +12,7 @@
     <string name="menu_save">Save</string>
 
     <string name="love_button_hint_love">Love</string>
+    <string name="love_button_hint_love_back">Love Back</string>
     <string name="love_button_hint_unlove">Unlove</string>
     <string name="message_button_hint">Message</string>
     <string name="request_button_hint">Reveal</string>
@@ -217,6 +218,7 @@
 
     <!--<string name="notification_like_message">%1$s likes you</string>-->
     <string name="notification_like_body">%1$s likes you.</string>
+    <string name="notification_like_back_body">%1$s liked you back.</string>
     <string name="notification_pick_up_body">%1$s started a new conversation with you.</string>
     <string name="notification_message_body">%1$s send you a new message.</string>
     <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
@@ -341,7 +343,7 @@
 
     <!-- values-->
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>
-    <string name="user_loved_by">Loved by %1$d people</string>
+    <string name="user_loved_by">Loved by %1$d person</string>
     <string name="user_pickedup_by">Received %1$d pick-up lines</string>
     <string name="user_age_value">Age: %1$d</string>
     <string name="user_gender_value">Gender: %1$s</string>

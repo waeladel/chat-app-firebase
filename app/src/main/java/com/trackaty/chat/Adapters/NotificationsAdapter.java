@@ -48,7 +48,8 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
     private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
     private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
-    private static final String NOTIFICATION_TYPE_LIKE = "Like";
+    private static final String NOTIFICATION_TYPE_LIKE = "Like"; // if other user liked me. I did't liked him
+    private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack"; // if other user liked me after i liked him
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
 
@@ -95,6 +96,17 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_like_body, name));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                        }else{
+                            holder.mNotificationBody.setText(R.string.notification_default_like_body);
+                        }
+                        // switch icons according to notification type
+                        holder.mIcon.setImageResource(R.drawable.ic_circle_favorite_24);
+                        break;
+                    case NOTIFICATION_TYPE_LIKE_BACK:
+                        if(null != notification.getSenderName()){
+                            String name = notification.getSenderName();
+                            String wholeText = (App.getContext().getString(R.string.notification_like_back_body, name));
                             setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_like_body);
@@ -304,6 +316,10 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                     if (null != notification.getType()) {
                         switch (notification.getType()){
                             case NOTIFICATION_TYPE_LIKE:
+                                //TODO Go to likes fragment
+                                Navigation.findNavController(view).navigate(ProfileDirection);
+                                break;
+                            case NOTIFICATION_TYPE_LIKE_BACK:
                                 //TODO Go to likes fragment
                                 Navigation.findNavController(view).navigate(ProfileDirection);
                                 break;
