@@ -420,6 +420,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 //finishAffinity();
                 //finish();
                 break;
+            case R.id.action_menu_home:
+                Log.d(TAG, "MenuItem = 3  home clicked ");
+                goToMain();
+                break;
             case android.R.id.home:
                 onBackPressed();
                 break;

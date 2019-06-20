@@ -20,6 +20,13 @@ public class ProfileViewModel extends ViewModel {
     private RelationRepository relationRepository;
     private UserRepository mUserRepository;
 
+    private LiveData<Relation> mRelation;
+    private LiveData<Long> mLoveCount;
+    private LiveData<Long> mPickUpCount;
+    private LiveData<String> mLoveStatues;
+    private LiveData<User> mUser;
+
+
     public ProfileViewModel() {
 
         // pass chatKey to the constructor of MessagesDataFactory
@@ -35,7 +42,13 @@ public class ProfileViewModel extends ViewModel {
     }*/
 
     public LiveData<Relation> getRelation(String currentUserId , String userId){
-        return relationRepository.getRelation(currentUserId, userId);
+        if(mRelation == null){
+            Log.d(TAG, "mRelation is null, get relation from database");
+            mRelation = relationRepository.getRelation(currentUserId, userId);
+        }else{
+            Log.d(TAG, "mRelation already exist");
+        }
+        return mRelation;
     }
 
 
@@ -62,22 +75,38 @@ public class ProfileViewModel extends ViewModel {
 
     // get love counts
     public LiveData<Long> getLoveCount(String userId) {
-        return relationRepository.getLoveCount(userId);
+        if(mLoveCount == null){
+            Log.d(TAG, "mLoveCount is null, get relation from database");
+            mLoveCount = relationRepository.getLoveCount(userId);
+        }
+        return mLoveCount;
 
     }
 
     // get love counts
     public LiveData<Long> getPickUpCount(String userId) {
-        return relationRepository.getPickUpCount(userId);
+        if(mPickUpCount == null){
+            Log.d(TAG, "mPickUpCount is null, get relation from database");
+            mPickUpCount = relationRepository.getPickUpCount(userId);
+        }
+        return mPickUpCount;
     }
 
     // get love counts
     public LiveData<String> getLoveStatues(String currentUserId, String userId) {
-        return relationRepository.getLoveStatues(currentUserId, userId);
+        if(mLoveStatues == null){
+            Log.d(TAG, "mLoveStatues is null, get relation from database");
+            mLoveStatues = relationRepository.getLoveStatues(currentUserId, userId);
+        }
+        return mLoveStatues;
     }
 
     public LiveData<User> getUser(String currentUserId){
-        return mUserRepository.getCurrentUser(currentUserId);
+        if(mUser == null){
+            Log.d(TAG, "mUser is null, get relation from database");
+            mUser =  mUserRepository.getCurrentUser(currentUserId);
+        }
+        return mUser;
     }
 
     public void getUserOnce(String userId, FirebaseUserCallback callback) {

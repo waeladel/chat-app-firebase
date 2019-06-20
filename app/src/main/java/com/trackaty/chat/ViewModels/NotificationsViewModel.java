@@ -19,7 +19,7 @@ public class NotificationsViewModel extends ViewModel {
 
     private NotificationsDataFactory mDataFactory;
     private PagedList.Config config;
-    public  LiveData<PagedList<DatabaseNotification>> itemPagedList;
+    private  LiveData<PagedList<DatabaseNotification>> itemPagedList;
     //public MutableLiveData<PagedList<Chat>> callbackPagedList;
 
     private DatabaseReference mDatabaseRef;
@@ -48,7 +48,7 @@ public class NotificationsViewModel extends ViewModel {
                 .setEnablePlaceholders(false)
                 .build();
 
-        itemPagedList = new LivePagedListBuilder<>(mDataFactory, config).build();
+
     }
 
     /*public void setUserId(String UserId){
@@ -60,6 +60,10 @@ public class NotificationsViewModel extends ViewModel {
 
 
     public LiveData<PagedList<DatabaseNotification>> getItemPagedList(){
+        if(itemPagedList == null){
+            Log.d(TAG, "itemPagedList is null, get chats from database");
+            itemPagedList = new LivePagedListBuilder<>(mDataFactory, config).build();
+        }
         return itemPagedList ;
     }
 
@@ -72,7 +76,7 @@ public class NotificationsViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
-        Log.d(TAG, "mama ChatsViewModel onCleared:");
+        Log.d(TAG, "mama NotificationsViewModel onCleared:");
         //NotificationsRepository.removeListeners();
         // Remove all listeners on viewModel cleared
         mDataFactory.removeListeners();

@@ -191,8 +191,11 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             }
         }).get(MessagesViewModel.class);
 
-
-        mMessagesViewModel.itemPagedList.observe(MessagesFragment.this, new Observer<PagedList<Message>>() {
+        // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
+        // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
+        // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
+        // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
+        mMessagesViewModel.itemPagedList.observe(this, new Observer<PagedList<Message>>() {
             @Override
             public void onChanged(@Nullable final PagedList<Message> items) {
                 System.out.println("mama onChanged");
@@ -337,121 +340,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 }
             }
         });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
-
-        // get Chat User
-        if(!isGroup){
-            mMessagesViewModel.getChatUser(mChatUserId).observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(User user) {
-                    Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= "+user.getName());
-                    mChatUser = user;
-                    mChatUser.setKey(mChatUserId);
-                    // display ChatUser name
-                    if(null != mChatUser.getName()){
-                        mUserName.setText(getFirstWord(mChatUser.getName()));
-                    }
-
-                    // display last online
-                    if(null != mChatUser.getLastOnline()){
-
-                        Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
-                        mLastOnlineEndTime = mChatUser.getLastOnline();
-
-                        if(mChatUser.getLastOnline() == 0){
-                            //user is active now
-                            Log.d(TAG, "LastOnline() == 0");
-                            mLastSeen.setText(R.string.user_active_now);
-                        }else{
-                            // Display last online
-                            //Calendar c = Calendar.getInstance();
-                            //c.setTimeInMillis(mChatUser.getLastOnline());
-
-
-                                /*mTimer.schedule( new TimerTask() {
-                                    public void run() {
-                                        // do your work
-                                        UpdateTimeAgo(mChatUser.getLastOnline());
-                                        *//*mLastSeen.setText(ago);
-                                        Log.d(TAG, "mTimer = "+ago);*//*
-                                        //new UpdateTimeAgo().execute(mChatUser.getLastOnline());
-                                    }
-                                }, 0, 5 *1000);*/
-
-                                /*mMessagesViewModel.getLastOnlineAgo(mChatUser.getLastOnline()).observe(MessagesFragment.this, new Observer<CharSequence>() {
-                                    @Override
-                                    public void onChanged(CharSequence charSequence) {
-                                        Log.d(TAG, "onChanged Time Ago = "+charSequence);
-                                    }
-                                });*/
-
-                            // Update Last online Time every minute
-                            UpdateTimeAgo(mLastOnlineEndTime);
-
-                        }
-
-                    }
-                    // Get user values
-                    if (null != mChatUser.getAvatar()) {
-                        Picasso.get()
-                                .load(mChatUser.getAvatar())
-                                .placeholder(R.drawable.ic_user_account_grey_white)
-                                .error(R.drawable.ic_broken_image)
-                                .into(mUserPhoto);
-                    }
-
-                }
-            });
-        }
-
-
-        mMessagesViewModel.getCurrentUser(mCurrentUserId).observe(this, new Observer<User>() {
-            @Override
-            public void onChanged(User user) {
-                Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= " + user.getName());
-                mCurrentUser = user;
-                if(null == mCurrentUser.getKey()){
-                    mCurrentUser.setKey(mCurrentUserId);
-                }
-            }
-        });
-
-
-            /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
-                @Override
-                public void onChanged(String senderId) {
-                    Log.d(TAG, "onChanged senderId = "+ senderId);
-                    if(senderId != null){
-                        if(senderId.equals(mCurrentUserId)){
-                            Log.d(TAG, "CurrentUser is the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                            isSender = true;
-                        }else{
-                            Log.d(TAG, "CurrentUser isn't the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                            isSender = false;
-                        }
-                    }else{
-                        Log.d(TAG, "sender is null. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
-                        isSender = null;
-                    }
-                }
-            });*/
-
-        mMessagesViewModel.getChat(mChatId).observe(this, new Observer<Chat>() {
-            @Override
-            public void onChanged(Chat chat) {
-                if (chat != null){
-                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
-                    mChat = chat;
-                    if(null != mChat.getActive()){
-                        // End timestamp is needed to restart the countdown on fragment start
-                        mActiveEndTime = mChat.getActive();
-                        // pass chat to MessagesAdapter to get active end time
-                        mMessagesAdapter.setChat(mChat);
-                    }
-                    // Display the time left till deactivate the conversation
-                    ShowRemainingTime(mChat);
-                }
-            }
-        });
 
 
     }
@@ -926,7 +814,123 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     }
 
-}
+        // get Chat User
+        if(!isGroup){
+            mMessagesViewModel.getChatUser(mChatUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    Log.d(TAG, "mMessagesViewModel onChanged chatUser name= "+user.getName()+ " hashcode= "+ hashCode());
+                    mChatUser = user;
+                    mChatUser.setKey(mChatUserId);
+                    // display ChatUser name
+                    if(null != mChatUser.getName()){
+                        mUserName.setText(getFirstWord(mChatUser.getName()));
+                    }
+
+                    // display last online
+                    if(null != mChatUser.getLastOnline()){
+
+                        Log.d(TAG, "getLastOnline()= "+mChatUser.getLastOnline());
+                        mLastOnlineEndTime = mChatUser.getLastOnline();
+
+                        if(mChatUser.getLastOnline() == 0){
+                            //user is active now
+                            Log.d(TAG, "LastOnline() == 0");
+                            mLastSeen.setText(R.string.user_active_now);
+                        }else{
+                            // Display last online
+                            //Calendar c = Calendar.getInstance();
+                            //c.setTimeInMillis(mChatUser.getLastOnline());
+
+
+                                /*mTimer.schedule( new TimerTask() {
+                                    public void run() {
+                                        // do your work
+                                        UpdateTimeAgo(mChatUser.getLastOnline());
+                                        *//*mLastSeen.setText(ago);
+                                        Log.d(TAG, "mTimer = "+ago);*//*
+                                        //new UpdateTimeAgo().execute(mChatUser.getLastOnline());
+                                    }
+                                }, 0, 5 *1000);*/
+
+                                /*mMessagesViewModel.getLastOnlineAgo(mChatUser.getLastOnline()).observe(MessagesFragment.this, new Observer<CharSequence>() {
+                                    @Override
+                                    public void onChanged(CharSequence charSequence) {
+                                        Log.d(TAG, "onChanged Time Ago = "+charSequence);
+                                    }
+                                });*/
+
+                            // Update Last online Time every minute
+                            UpdateTimeAgo(mLastOnlineEndTime);
+
+                        }
+
+                    }
+                    // Get user values
+                    if (null != mChatUser.getAvatar()) {
+                        Picasso.get()
+                                .load(mChatUser.getAvatar())
+                                .placeholder(R.drawable.ic_user_account_grey_white)
+                                .error(R.drawable.ic_broken_image)
+                                .into(mUserPhoto);
+                    }
+
+                }
+            });
+        }
+
+
+        mMessagesViewModel.getCurrentUser(mCurrentUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                Log.d(TAG, "mMessagesViewModel onChanged chatUser userId name= " + user.getName());
+                mCurrentUser = user;
+                if(null == mCurrentUser.getKey()){
+                    mCurrentUser.setKey(mCurrentUserId);
+                }
+            }
+        });
+
+
+            /*mMessagesViewModel.getSenderId(mChatId).observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(String senderId) {
+                    Log.d(TAG, "onChanged senderId = "+ senderId);
+                    if(senderId != null){
+                        if(senderId.equals(mCurrentUserId)){
+                            Log.d(TAG, "CurrentUser is the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = true;
+                        }else{
+                            Log.d(TAG, "CurrentUser isn't the sender. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                            isSender = false;
+                        }
+                    }else{
+                        Log.d(TAG, "sender is null. onChanged senderId = "+ senderId + " mCurrentUserId "+ mCurrentUserId);
+                        isSender = null;
+                    }
+                }
+            });*/
+
+        mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
+            @Override
+            public void onChanged(Chat chat) {
+                if (chat != null){
+                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                    mChat = chat;
+                    if(null != mChat.getActive()){
+                        // End timestamp is needed to restart the countdown on fragment start
+                        mActiveEndTime = mChat.getActive();
+                        // pass chat to MessagesAdapter to get active end time
+                        mMessagesAdapter.setChat(mChat);
+                    }
+                    // Display the time left till deactivate the conversation
+                    ShowRemainingTime(mChat);
+                }
+            }
+        });
+
+
+    }
 
     // A countdown timer to update last online time every minute
     private void UpdateTimeAgo(final Long lastOnline) {
@@ -941,13 +945,25 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             @Override
             public void onTick(long millisUntilFinished) {
 
-                long now = System.currentTimeMillis();
-                Log.d(TAG, "mAgoTimer onTick: now = "+now + " getLastOnline= "+mChatUser.getLastOnline());
-                CharSequence ago =
-                        DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS);
-                Activity activity = getActivity();
-                if(activity != null && isAdded()){
-                    mLastSeen.setText(getString(R.string.user_active_ago, ago));
+                if(mChatUser.getLastOnline() == 0){
+                    mLastSeen.setText(R.string.user_active_now);
+                }else{
+                    long now = System.currentTimeMillis();
+                    Log.d(TAG, "mAgoTimer onTick: now = "+now + " getLastOnline= "+mChatUser.getLastOnline());
+
+                    // check if now is greater than last online value
+                    // if now is less, ago message will me active in 1 minutes
+                    if(now > mChatUser.getLastOnline()){
+                        CharSequence ago =
+                                DateUtils.getRelativeTimeSpanString(lastOnline, now, DateUtils.MINUTE_IN_MILLIS);
+                        Activity activity = getActivity();
+                        if(activity != null && isAdded()){
+                            mLastSeen.setText(getString(R.string.user_active_ago, ago));
+                        }
+                    }else{
+                        mLastSeen.setText(R.string.user_active_now);
+                    }
+
                 }
 
             }

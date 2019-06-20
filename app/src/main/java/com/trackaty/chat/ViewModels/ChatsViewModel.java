@@ -19,7 +19,7 @@ public class ChatsViewModel extends ViewModel {
 
     private ChatsDataFactory chatsDataFactory;
     private PagedList.Config config;
-    public  LiveData<PagedList<Chat>> itemPagedList;
+    private  LiveData<PagedList<Chat>> itemPagedList;
     //public MutableLiveData<PagedList<Chat>> callbackPagedList;
 
     private DatabaseReference mDatabaseRef;
@@ -48,7 +48,8 @@ public class ChatsViewModel extends ViewModel {
                 .setEnablePlaceholders(false)
                 .build();
 
-        itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
+
+
     }
 
     /*public void setUserId(String UserId){
@@ -60,6 +61,10 @@ public class ChatsViewModel extends ViewModel {
 
 
     public LiveData<PagedList<Chat>> getItemPagedList(){
+        if(itemPagedList == null){
+            Log.d(TAG, "itemPagedList is null, get chats from database");
+            itemPagedList = new LivePagedListBuilder<>(chatsDataFactory, config).build();
+        }
         return itemPagedList ;
     }
 

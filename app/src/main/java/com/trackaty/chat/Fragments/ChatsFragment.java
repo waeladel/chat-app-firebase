@@ -103,7 +103,11 @@ public class ChatsFragment extends Fragment{
                     }).get(ChatsViewModel.class);*/
 
 
-        mChatsViewModel.itemPagedList.observe(this, new Observer<PagedList<Chat>>() {
+        // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
+        // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
+        // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
+        // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
+        mChatsViewModel.getItemPagedList().observe(this, new Observer<PagedList<Chat>>() {
             @Override
             public void onChanged(@Nullable final PagedList<Chat> items) {
 

@@ -12,7 +12,7 @@ public class MainActivityViewModel extends ViewModel {
 
     private final static String TAG = MainActivityViewModel.class.getSimpleName();
     private UserRepository userRepository;
-    public  MutableLiveData<User> currentUser;
+    private  MutableLiveData<User> currentUser;
     private MutableLiveData<String> currentUserId;
     private MutableLiveData<Long> chatCount, notificationCount;
 
@@ -20,9 +20,11 @@ public class MainActivityViewModel extends ViewModel {
 
         // pass userId to the constructor of MessagesDataFactory
         userRepository = new UserRepository();
-        currentUserId = new MutableLiveData<>();
-        chatCount = new MutableLiveData<>();
-        notificationCount = new MutableLiveData<>();
+
+        //currentUserId = new MutableLiveData<>();
+        //chatCount = new MutableLiveData<>();
+        //notificationCount = new MutableLiveData<>();
+
         //liveDataSource = messagesDataFactory.getItemLiveDataSource();
         Log.d(TAG, "MainActivityViewModel init");
     }
@@ -45,9 +47,18 @@ public class MainActivityViewModel extends ViewModel {
         // if currentUser id is changed, update chat count
         if(!userId.equals(currentUserId.getValue())){
             // Get the chat counts of the new user
+            if(chatCount == null){
+                chatCount = new MutableLiveData<>();
+            }
             chatCount = userRepository.getChatsCount(userId);
-            notificationCount = userRepository.getNotificationsCount(userId);
             Log.d(TAG, "updateCurrentUserId chatCount= "+ chatCount.getValue());
+
+            // update notification count of the new user
+            if(notificationCount == null){
+                notificationCount = new MutableLiveData<>();
+            }
+            notificationCount = userRepository.getNotificationsCount(userId);
+
         }
         currentUserId.setValue(userId);
         //getCurrentUser(); // to fitch user with the new id
@@ -62,15 +73,23 @@ public class MainActivityViewModel extends ViewModel {
     // Get counts for unread chats
     public MutableLiveData<Long> getChatsCount(String userId) {
         Log.d(TAG, "getChatsCount"+ userId);
-        chatCount = userRepository.getChatsCount(userId);
-        Log.d(TAG, "getChatsCount chatCount= "+ chatCount.getValue());
+        if(chatCount == null){
+            Log.d(TAG, "chatCount is null, get relation from database");
+            chatCount = new MutableLiveData<>();
+            chatCount = userRepository.getChatsCount(userId);
+        }
+        Log.d(TAG, "getChatsCount chatCount Count= "+ chatCount.getValue());
         return chatCount;
     }
 
     // Get counts for unread chats
     public MutableLiveData<Long> getNotificationsCount(String userId) {
         Log.d(TAG, "getNotificationsCount"+ userId);
-        notificationCount = userRepository.getNotificationsCount(userId);
+        if(notificationCount == null){
+            Log.d(TAG, "notificationCount is null, get relation from database");
+            notificationCount = new MutableLiveData<>();
+            notificationCount = userRepository.getNotificationsCount(userId);
+        }
         Log.d(TAG, "getNotificationsCount notification Count= "+ notificationCount.getValue());
         return notificationCount;
     }

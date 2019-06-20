@@ -23,7 +23,7 @@ public class UsersViewModel extends ViewModel {
     private UsersDataFactory usersDataSourceFactory;
     private PagedList.Config config;
     private LiveData<PagedList<User>> liveDataSource;
-    public final LiveData<PagedList<User>> usersList;
+    private  LiveData<PagedList<User>> usersList;
     //LiveData<ItemKeyedDataSource<Long, User>> liveDataSource;
 
     private DatabaseReference mDatabaseRef;
@@ -48,7 +48,15 @@ public class UsersViewModel extends ViewModel {
                 .setEnablePlaceholders(false)
                 .build();
 
-        usersList = new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
+        //usersList = new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
+    }
+
+    public LiveData<PagedList<User>> getItemPagedList(){
+        if(usersList == null){
+            Log.d(TAG, "itemPagedList is null, get items from database");
+            usersList = new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
+        }
+        return usersList ;
     }
 
     /*public Observable<PagedList> getPagedListObservable(){

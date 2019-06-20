@@ -473,8 +473,8 @@ public class RelationRepository {
         //String notificationKey = mNotificationsRef.child(userId).push().getKey();
         String notificationKey = currentUserId+ NOTIFICATION_TYPE_LIKE;
         //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
-        DatabaseNotification notification = new DatabaseNotification(NOTIFICATION_TYPE_LIKE, currentUserId, name, avatar);
-        notification.setType(notificationType);
+        DatabaseNotification notification = new DatabaseNotification(notificationType, currentUserId, name, avatar);
+        //notification.setType(notificationType);
         Map<String, Object> notificationValues = notification.toMap();
         childUpdates.put("/notifications/alerts/" + userId + "/" +notificationKey, notificationValues);
 

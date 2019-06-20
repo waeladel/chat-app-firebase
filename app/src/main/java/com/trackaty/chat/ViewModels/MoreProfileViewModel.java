@@ -17,6 +17,9 @@ public class MoreProfileViewModel extends ViewModel {
 
     private RelationRepository relationRepository;
     private UserRepository mUserRepository;
+    private LiveData<Relation> mRelation;
+    private LiveData<User> mUser;
+
 
     public MoreProfileViewModel() {
 
@@ -32,12 +35,21 @@ public class MoreProfileViewModel extends ViewModel {
     }*/
 
     public LiveData<Relation> getRelation(String currentUserId , String userId){
-        return relationRepository.getRelation(currentUserId, userId);
+        if(mRelation == null){
+            Log.d(TAG, "mRelation is null, get relation from database");
+            mRelation = relationRepository.getRelation(currentUserId, userId);
+        }
+        return mRelation;
+
     }
 
 
     public LiveData<User> getUser(String userId){
-        return mUserRepository.getCurrentUser(userId);
+        if(mUser == null){
+            Log.d(TAG, "mUser is null, get relation from database");
+            mUser =  mUserRepository.getCurrentUser(userId);
+        }
+        return mUser;
     }
 
     @Override

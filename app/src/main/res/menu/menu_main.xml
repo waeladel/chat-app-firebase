@@ -20,4 +20,10 @@
         android:orderInCategory="3"
         android:title="@string/menu_log_out"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_menu_home"
+        android:orderInCategory="4"
+        android:title="@string/title_find"
+        app:showAsAction="never" />
 </menu>

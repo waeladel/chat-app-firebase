@@ -143,6 +143,26 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(getArguments() != null) {
+            //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
+            mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
+            //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
+        }
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
+        mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
+
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+
+        fragmentManager = getFragmentManager();
+
+        // instantiate a new user relations to use it for reveal requests
+        mRelations = new Relation();
     }
 
 
@@ -172,328 +192,31 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         mInterestedIcon = (ImageView) fragView.findViewById(R.id.interested_in_icon);
         mmRelationshipIcon = (ImageView) fragView.findViewById(R.id.relationship_icon);
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
-        // instantiate a new user relations to use it for reveal requests
-        mRelations = new Relation();
-
-        if(getArguments() != null) {
-            //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
-            mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
-            //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
-        }
-
-        //Get current logged in user
-        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
-
-        mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
-
-        // display user data
-        if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-
-            mProfileViewModel.getUser(mUserId).observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(User user) {
-                    if(user != null){
-                        mUser = user;
-                        showCurrentUser();
-                    }
-                }
-            });
-        }else{
-            // get current logged in user
-            mProfileViewModel.getUser(mCurrentUserId).observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(User user) {
-                    if(user != null){
-                        mUser = user;
-                        showCurrentUser();
-                    }
-                }
-            });
-        }
-
-        // Get current user once, to get currentUser's name and avatar for notifications
-        mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+        mBlockEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCallback(User user) {
-                if(user != null){
-                    Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName());
-                    mCurrentUser = user;
+            public void onClick(View view) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    Log.d(TAG, "blockUser clicked");
+                    //blockUser();
+                } else {
+                    Log.i(TAG, "going to edit profile fragment= ");
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(direction);
                 }
+
             }
         });
-        Log.i(TAG, "onChanged mProfileViewModel getRelation"+ mMessageButton.getBackgroundTintList());
-
-
-            // toggle mBlockEditButton
-            if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                mBlockEditButton.setImageResource(R.drawable.ic_block_24dp);
-                mBlockEditHint.setText(R.string.block_button);
-                //mUserRef = mDatabaseRef.child("users").child(mUserId);
-                //showUser(mUserId);
-                // update the reveal request
-                mRelationStatus = RELATION_STATUS_NOT_FRIEND;
-                // get relations with selected user if any
-                mProfileViewModel.getRelation(mCurrentUserId, mUserId).observe(this, new Observer<Relation>() {
-                    @Override
-                    public void onChanged(Relation relation) {
-                        Log.i(TAG, "onChanged mProfileViewModel getRelation");
-                        if (relation != null){
-                            // Relation exist
-                            switch (relation.getStatus()){
-                                case RELATION_STATUS_SENDER:
-                                    // If this selected user sent me the request
-                                    //Approve request
-                                    mRelationStatus = RELATION_STATUS_SENDER;
-                                    mRevealHint.setText(R.string.request_button_approve_hint);
-                                    mRevealButton.setEnabled(true);
-                                    mRevealButton.setClickable(true);
-                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
-                                    mRevealHint.setEnabled(true);
-                                    mRelationsMap = relation.getContacts();
-                                    mOriginalRelationsMap = new HashMap<>(mRelationsMap);
-                                    break;
-                                case RELATION_STATUS_RECEIVER:
-                                    // If this selected received a request from me
-                                    //Cancel request
-                                    mRelationStatus = RELATION_STATUS_RECEIVER;
-                                    mRevealHint.setText(R.string.request_button_cancel_hint);
-                                    mRevealButton.setEnabled(true);
-                                    mRevealButton.setClickable(true);
-                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
-                                    mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
-                                    mRevealHint.setEnabled(true);
-                                    break;
-                                case RELATION_STATUS_STALKER:
-                                    // If this selected i (currentUser) approved his request
-                                    //Edit/ Un-reveal
-                                    mRelationStatus = RELATION_STATUS_STALKER;
-                                    mRevealHint.setText(R.string.request_button_unreveal_hint);
-                                    mRevealButton.setEnabled(true);
-                                    mRevealButton.setClickable(true);
-                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
-                                    mRevealHint.setEnabled(true);
-                                    mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
-                                    mRelationsMap = relation.getContacts();
-                                    mOriginalRelationsMap = new HashMap<>(mRelationsMap);
-                                    break;
-                                case RELATION_STATUS_FOLLOWED:
-                                    // If this selected user approved my (currentUser) request
-                                    //Un reveal
-                                    mRelationStatus = RELATION_STATUS_FOLLOWED;
-                                    mRevealHint.setText(R.string.request_button_unreveal_hint);
-                                    mRevealButton.setEnabled(true);
-                                    mRevealButton.setClickable(true);
-                                    mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                    mRevealHint.setEnabled(true);
-                                    mRevealHint.setEnabled(true);
-                                    mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
-                                    mRelationsMap = relation.getContacts();
-                                    mOriginalRelationsMap = new HashMap<>(mRelationsMap);
-                                    break;
-                            }
-                            Log.d(TAG, "onChanged relation Status= " + relation.getStatus() + " size= " + relation.getContacts().size());
-
-                        }else{
-                            // Relation doesn't exist, use default user settings
-                            Log.i(TAG, "onChanged relation Status= Relation dosn't exist");
-                            mRelationStatus = RELATION_STATUS_NOT_FRIEND;
-
-                            mPrivateContactsList = getPrivateContacts();
-                            if(mPrivateContactsList.size()> 0){
-                                mRevealHint.setText(R.string.request_button_hint);
-                            }else{
-                                // disable RevealButton because there are no private contacts
-                                mRevealHint.setText(R.string.request_button_hint);
-                                mRevealButton.setEnabled(false);
-                                mRevealButton.setClickable(false);
-                                mRevealButton.setBackgroundTintList(ColorStateList.valueOf
-                                        (getResources().getColor(R.color.disabled_button)));
-                                mRevealHint.setEnabled(false);
-                            }
-
-                        }
-
-                    }
-                });// End of mProfileViewModel
-            } else {
-                // it's logged in user profile
-                Log.d(TAG, "it's logged in user profile= " + mUserId);
-                mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
-                mBlockEditHint.setText(R.string.edit_profile_button);
-
-                mLoveButton.setEnabled(false);
-                mLoveButton.setClickable(false);
-                mLoveButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-
-                mMessageButton.setEnabled(false);
-                mMessageButton.setClickable(false);
-                mMessageButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-
-                mRevealButton.setEnabled(false);
-                mRevealButton.setClickable(false);
-                mRevealButton.setBackgroundTintList(ColorStateList.valueOf
-                        (getResources().getColor(R.color.disabled_button)));
-                //getResources().getColor(R.color.colorPrimary));
-                mLovedByHint.setEnabled(false);
-                mMessageHint.setEnabled(false);
-                mRevealHint.setEnabled(false);
-            }
-
-        // get Pick Up counts
-        if (null != mUserId && !mUserId.equals(mCurrentUserId)) {
-            // it's not logged in user. It's another user
-            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
-            mProfileViewModel.getPickUpCount(mUserId).observe(this, new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                    Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                    if (aLong != null){
-                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
-                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
-                    }
-
-                }
-            });
-
-            // get loves counts
-            mProfileViewModel.getLoveCount(mUserId).observe(this, new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                    Log.d(TAG, "onChanged love counts= "+aLong);
-                    if (aLong != null){
-                        Log.d(TAG, "onChanged love counts= "+aLong);
-                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
-                    }
-
-                }
-            });
-
-            // get loves Statues
-            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<String>() {
-                @Override
-                public void onChanged(String likeStatus) {
-                    if (likeStatus != null){
-                        Log.d(TAG, "onChanged love counts= "+likeStatus);
-                        switch (likeStatus){
-                            case LIKE_TYPE_LOVED:
-                                // Statues = Liked
-                                isCancelLove = true;
-                                notificationType = NOTIFICATION_TYPE_LIKE;
-                                mLovedByHint.setText(R.string.love_button_hint_unlove);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
-                                break;
-                            case LIKE_TYPE_ADMIRER:
-                                // Statues = Disliked
-                                isCancelLove = false;
-                                notificationType = NOTIFICATION_TYPE_LIKE_BACK;
-                                mLovedByHint.setText(R.string.love_button_hint_love_back);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-                                break;
-                            case LIKE_TYPE_NOT_LOVED:
-                                // Statues = Disliked
-                                isCancelLove = false;
-                                mLovedByHint.setText(R.string.love_button_hint_love);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-                                break;
-                        }
-
-                    }
-                }
-            });
-
-
-        }else{
-            // get current logged in user
-            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
-            mProfileViewModel.getPickUpCount(mCurrentUserId).observe(this, new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                    Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                    if (aLong != null){
-                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
-                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
-                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
-                    }
-
-                }
-            });
-
-            // get loves counts
-            mProfileViewModel.getLoveCount(mCurrentUserId).observe(this, new Observer<Long>() {
-                @Override
-                public void onChanged(Long aLong) {
-                    Log.d(TAG, "onChanged love counts= "+aLong);
-                    if (aLong != null){
-                        Log.d(TAG, "onChanged love counts= "+aLong);
-                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
-                    }
-
-                }
-            });
-
-            /*// get loves Statues
-            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(this, new Observer<String>() {
-                @Override
-                public void onChanged(String likeStatus) {
-                    if (likeStatus != null){
-                        Log.d(TAG, "onChanged love counts= "+likeStatus);
-                        switch (likeStatus){
-                            case LIKE_TYPE_LOVED:
-                                // Statues = Liked
-                                isCancelLove= true;
-                                mLovedByHint.setText(R.string.love_button_hint_unlove);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
-                                break;
-                            case LIKE_TYPE_ADMIRER:
-                                // Statues = Disliked
-                                isCancelLove= false;
-                                mLovedByHint.setText(R.string.love_button_hint_love_back);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-                                break;
-                            case LIKE_TYPE_NOT_LOVED:
-                                // Statues = Disliked
-                                isCancelLove = false;
-                                mLovedByHint.setText(R.string.love_button_hint_love);
-                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-                                break;
-                        }
-
-                    }
-                }
-            });*/
-
-        }
-
-            mBlockEditButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                        Log.d(TAG, "blockUser clicked");
-                        //blockUser();
-                    } else {
-                        Log.i(TAG, "going to edit profile fragment= ");
-                        NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
-                        NavController navController = Navigation.findNavController(view);
-                        navController.navigate(direction);
-                    }
-
-                }
-            });
 
         mLoveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "LoveButton is clicked");
-                if(isCancelLove){
+                if (isCancelLove) {
                     //Current user loved this user before, lit's unlove
                     mProfileViewModel.cancelLove(mCurrentUserId, mUserId);
-                }else{
+                } else {
 
                     //Current user didn't loved this user before, lit's love him
                     //mProfileViewModel.sendLove(mCurrentUserId, mUserId);
@@ -503,117 +226,115 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             }
         });
 
-            mMessageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                        Log.d(TAG, "send message to user");
-                        NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(null, mUserId,false);
-                        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-                        //check if we are on Main Fragment not on complete Profile already
-                        Navigation.findNavController(view).navigate(MessageDirection);
-                    } else {
-                        Log.i(TAG, "don't send message to current logged in user ");
+        mMessageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    Log.d(TAG, "send message to user");
+                    NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(null, mUserId, false);
+                    //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+                    //check if we are on Main Fragment not on complete Profile already
+                    Navigation.findNavController(view).navigate(MessageDirection);
+                } else {
+                    Log.i(TAG, "don't send message to current logged in user ");
+                }
+
+            }
+        });
+
+        mRevealButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    switch (mRelationStatus) {
+                        case RELATION_STATUS_SENDER:
+                            // If this selected user sent me the request
+                            //Approve request
+                            // Show Approve dialog
+                            contactsMap.clear(); // clear all previous selected check boxes
+                            Log.d(TAG, "RevealButton clicked mProfileViewModel Approve request");
+                            mRelationsList = getRelationsList(mRelationsMap);
+                            for (int i = 0; i < mRelationsList.size(); i++) {
+                                Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey() + " = " + mRelationsList.get(i).getValue().getPublic());
+                            }
+
+                            showDialog(mRelationsList, mRelationStatus);
+                            break;
+                        case RELATION_STATUS_RECEIVER:
+                            // If this selected received a request from me
+                            //Cancel request
+                            mProfileViewModel.cancelRequest(mCurrentUserId, mUserId);
+                            Log.d(TAG, "RevealButton clicked mProfileViewModel cancelRequest");
+                            break;
+                        case RELATION_STATUS_STALKER:
+                            // If this selected i (currentUser) approved his request
+                            //Edit/ Un-reveal
+                            // select to edit contacts or un-reveal all contacts
+                            showEditUnrevealDialog();
+                            break;
+                        case RELATION_STATUS_FOLLOWED:
+                            // If this selected user approved my (currentUser) request
+                            //Un reveal
+                            // select to un-reveal all contacts, you don't have permission to edit contacts
+                            showConfirmationDialog();
+                            break;
+                        default:
+                            // Show request dialog
+                            contactsMap.clear(); // clear all previous selected check boxs
+                            Log.d(TAG, "send reveal request");
+                            mPrivateContactsList = getPrivateContacts();
+
+                            for (int i = 0; i < mPrivateContactsList.size(); i++) {
+                                Log.i(TAG, "mPrivateContactsList sorted " + mPrivateContactsList.get(i).getKey());
+                            }
+
+                            if (mPrivateContactsList.size() > 0) {
+                                showDialog(mPrivateContactsList, mRelationStatus);
+                            }
+
+                            break;
                     }
-
-                }
-            });
-
-            fragmentManager = getFragmentManager();
-
-            mRevealButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                        switch (mRelationStatus){
-                            case RELATION_STATUS_SENDER:
-                                // If this selected user sent me the request
-                                //Approve request
-                                // Show Approve dialog
-                                contactsMap.clear(); // clear all previous selected check boxes
-                                Log.d(TAG, "RevealButton clicked mProfileViewModel Approve request");
-                                mRelationsList = getRelationsList(mRelationsMap);
-                                for (int i = 0; i < mRelationsList.size(); i++) {
-                                    Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey()+ " = "+ mRelationsList.get(i).getValue().getPublic());
-                                }
-
-                                showDialog(mRelationsList, mRelationStatus);
-                                break;
-                            case RELATION_STATUS_RECEIVER:
-                                // If this selected received a request from me
-                                //Cancel request
-                                mProfileViewModel.cancelRequest(mCurrentUserId, mUserId);
-                                Log.d(TAG, "RevealButton clicked mProfileViewModel cancelRequest");
-                                break;
-                            case RELATION_STATUS_STALKER:
-                                // If this selected i (currentUser) approved his request
-                                //Edit/ Un-reveal
-                                // select to edit contacts or un-reveal all contacts
-                                showEditUnrevealDialog();
-                                break;
-                            case RELATION_STATUS_FOLLOWED:
-                                // If this selected user approved my (currentUser) request
-                                //Un reveal
-                                // select to un-reveal all contacts, you don't have permission to edit contacts
-                                showConfirmationDialog();
-                                break;
-                            default:
-                                // Show request dialog
-                                contactsMap.clear(); // clear all previous selected check boxs
-                                Log.d(TAG, "send reveal request");
-                                mPrivateContactsList = getPrivateContacts();
-
-                                for (int i = 0; i < mPrivateContactsList.size(); i++) {
-                                    Log.i(TAG, "mPrivateContactsList sorted " + mPrivateContactsList.get(i).getKey());
-                                }
-
-                                if(mPrivateContactsList.size()> 0){
-                                    showDialog(mPrivateContactsList, mRelationStatus);
-                                }
-
-                                break;
-                        }
-                    } else {
-                        Log.i(TAG, "don't send message to current logged in user ");
-                    }
-
+                } else {
+                    Log.i(TAG, "don't send message to current logged in user ");
                 }
 
-            });
+            }
 
-            mCover.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                  if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                        Log.i(TAG, "going to Cover image view");
-                        NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, COVER_ORIGINAL_NAME);
-                        NavController navController = Navigation.findNavController(view);
-                        navController.navigate(direction);
-                    }else{
-                      Log.i(TAG, "going to Cover image view");
-                      NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, COVER_ORIGINAL_NAME);
-                      NavController navController = Navigation.findNavController(view);
-                      navController.navigate(direction);
-                  }
-                }
-            });
+        });
 
-            mAvatar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                   if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                        Log.i(TAG, "going to Avatar image view");
-                        NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, AVATAR_ORIGINAL_NAME);
-                        NavController navController = Navigation.findNavController(view);
-                        navController.navigate(direction);
-                    }else{
-                       Log.i(TAG, "going to Avatar image view");
-                       NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, AVATAR_ORIGINAL_NAME);
-                       NavController navController = Navigation.findNavController(view);
-                       navController.navigate(direction);
-                   }
+        mCover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    Log.i(TAG, "going to Cover image view");
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, COVER_ORIGINAL_NAME);
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(direction);
+                } else {
+                    Log.i(TAG, "going to Cover image view");
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, COVER_ORIGINAL_NAME);
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(direction);
                 }
-            });
+            }
+        });
+
+        mAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    Log.i(TAG, "going to Avatar image view");
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mUserId, AVATAR_ORIGINAL_NAME);
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(direction);
+                } else {
+                    Log.i(TAG, "going to Avatar image view");
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToDisplayImage(mCurrentUserId, AVATAR_ORIGINAL_NAME);
+                    NavController navController = Navigation.findNavController(view);
+                    navController.navigate(direction);
+                }
+            }
+        });
 
 
         mSeeMoreButton.setOnClickListener(new View.OnClickListener() {
@@ -621,10 +342,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             public void onClick(View v) {
                 Log.i(TAG, "SeeMoreButton id clicked= ");
                 if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
-                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile( mUserId);
+                    NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mUserId);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
-                }else{
+                } else {
                     NavDirections direction = ProfileFragmentDirections.actionProfileToMoreProfile(mCurrentUserId);
                     NavController navController = Navigation.findNavController(v);
                     navController.navigate(direction);
@@ -997,6 +718,289 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             actionbar.setDisplayHomeAsUpEnabled(true);
             actionbar.setHomeButtonEnabled(true);
             actionbar.setDisplayShowCustomEnabled(false);
+        }
+
+        // display user data
+        if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+
+            mProfileViewModel.getUser(mUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    if(user != null){
+                        Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
+
+                        mUser = user;
+                        showCurrentUser();
+                    }
+                }
+            });
+        }else{
+            // get current logged in user
+            mProfileViewModel.getUser(mCurrentUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    if(user != null){
+                        Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
+                        mUser = user;
+                        showCurrentUser();
+                    }
+                }
+            });
+        }
+
+        // Get current user once, to get currentUser's name and avatar for notifications
+        mProfileViewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+            @Override
+            public void onCallback(User user) {
+                if(user != null){
+                    Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName() + " hashcode= "+ hashCode());
+                    mCurrentUser = user;
+                }
+            }
+        });
+        Log.i(TAG, "onChanged mProfileViewModel getRelation"+ mMessageButton.getBackgroundTintList());
+
+
+        // toggle mBlockEditButton
+        if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+            mBlockEditButton.setImageResource(R.drawable.ic_block_24dp);
+            mBlockEditHint.setText(R.string.block_button);
+            //mUserRef = mDatabaseRef.child("users").child(mUserId);
+            //showUser(mUserId);
+            // update the reveal request
+            mRelationStatus = RELATION_STATUS_NOT_FRIEND;
+            // get relations with selected user if any
+            mProfileViewModel.getRelation(mCurrentUserId, mUserId).observe(getViewLifecycleOwner(), new Observer<Relation>() {
+                @Override
+                public void onChanged(Relation relation) {
+                    Log.i(TAG, "onChanged mProfileViewModel getRelation" + " hashcode= "+ hashCode());
+                    if (relation != null){
+                        // Relation exist
+                        switch (relation.getStatus()){
+                            case RELATION_STATUS_SENDER:
+                                // If this selected user sent me the request
+                                //Approve request
+                                mRelationStatus = RELATION_STATUS_SENDER;
+                                mRevealHint.setText(R.string.request_button_approve_hint);
+                                mRevealButton.setEnabled(true);
+                                mRevealButton.setClickable(true);
+                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                mRevealHint.setEnabled(true);
+                                mRelationsMap = relation.getContacts();
+                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                break;
+                            case RELATION_STATUS_RECEIVER:
+                                // If this selected received a request from me
+                                //Cancel request
+                                mRelationStatus = RELATION_STATUS_RECEIVER;
+                                mRevealHint.setText(R.string.request_button_cancel_hint);
+                                mRevealButton.setEnabled(true);
+                                mRevealButton.setClickable(true);
+                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRevealHint.setEnabled(true);
+                                break;
+                            case RELATION_STATUS_STALKER:
+                                // If this selected i (currentUser) approved his request
+                                //Edit/ Un-reveal
+                                mRelationStatus = RELATION_STATUS_STALKER;
+                                mRevealHint.setText(R.string.request_button_unreveal_hint);
+                                mRevealButton.setEnabled(true);
+                                mRevealButton.setClickable(true);
+                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                mRevealHint.setEnabled(true);
+                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRelationsMap = relation.getContacts();
+                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                break;
+                            case RELATION_STATUS_FOLLOWED:
+                                // If this selected user approved my (currentUser) request
+                                //Un reveal
+                                mRelationStatus = RELATION_STATUS_FOLLOWED;
+                                mRevealHint.setText(R.string.request_button_unreveal_hint);
+                                mRevealButton.setEnabled(true);
+                                mRevealButton.setClickable(true);
+                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                    mRevealHint.setEnabled(true);
+                                mRevealHint.setEnabled(true);
+                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRelationsMap = relation.getContacts();
+                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                break;
+                        }
+                        Log.d(TAG, "onChanged relation Status= " + relation.getStatus() + " size= " + relation.getContacts().size());
+
+                    }else{
+                        // Relation doesn't exist, use default user settings
+                        Log.i(TAG, "onChanged relation Status= Relation dosn't exist");
+                        mRelationStatus = RELATION_STATUS_NOT_FRIEND;
+
+                        mPrivateContactsList = getPrivateContacts();
+                        if(mPrivateContactsList.size()> 0){
+                            mRevealHint.setText(R.string.request_button_hint);
+                        }else{
+                            // disable RevealButton because there are no private contacts
+                            mRevealHint.setText(R.string.request_button_hint);
+                            mRevealButton.setEnabled(false);
+                            mRevealButton.setClickable(false);
+                            mRevealButton.setBackgroundTintList(ColorStateList.valueOf
+                                    (getResources().getColor(R.color.disabled_button)));
+                            mRevealHint.setEnabled(false);
+                        }
+
+                    }
+
+                }
+            });// End of mProfileViewModel
+        } else {
+            // it's logged in user profile
+            Log.d(TAG, "it's logged in user profile= " + mUserId);
+            mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
+            mBlockEditHint.setText(R.string.edit_profile_button);
+
+            mLoveButton.setEnabled(false);
+            mLoveButton.setClickable(false);
+            mLoveButton.setBackgroundTintList(ColorStateList.valueOf
+                    (getResources().getColor(R.color.disabled_button)));
+
+            mMessageButton.setEnabled(false);
+            mMessageButton.setClickable(false);
+            mMessageButton.setBackgroundTintList(ColorStateList.valueOf
+                    (getResources().getColor(R.color.disabled_button)));
+
+            mRevealButton.setEnabled(false);
+            mRevealButton.setClickable(false);
+            mRevealButton.setBackgroundTintList(ColorStateList.valueOf
+                    (getResources().getColor(R.color.disabled_button)));
+            //getResources().getColor(R.color.colorPrimary));
+            mLovedByHint.setEnabled(false);
+            mMessageHint.setEnabled(false);
+            mRevealHint.setEnabled(false);
+        }
+
+        // get Pick Up counts
+        if (null != mUserId && !mUserId.equals(mCurrentUserId)) {
+            // it's not logged in user. It's another user
+            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
+            mProfileViewModel.getPickUpCount(mUserId).observe(getViewLifecycleOwner(), new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged PickUp counts= "+aLong + " hashcode= "+ hashCode());
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
+                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                    }
+
+                }
+            });
+
+            // get loves counts
+            mProfileViewModel.getLoveCount(mUserId).observe(getViewLifecycleOwner(), new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged love counts= "+aLong + " hashcode= "+ hashCode());
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged love counts= "+aLong);
+                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                    }
+
+                }
+            });
+
+            // get loves Statues
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(String likeStatus) {
+                    if (likeStatus != null){
+                        Log.d(TAG, "onChanged love Statues= "+likeStatus+ " hashcode= "+ hashCode());
+                        switch (likeStatus){
+                            case LIKE_TYPE_LOVED:
+                                // Statues = Liked
+                                isCancelLove = true;
+                                notificationType = NOTIFICATION_TYPE_LIKE;
+                                mLovedByHint.setText(R.string.love_button_hint_unlove);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                                break;
+                            case LIKE_TYPE_ADMIRER:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                notificationType = NOTIFICATION_TYPE_LIKE_BACK;
+                                mLovedByHint.setText(R.string.love_button_hint_love_back);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                            case LIKE_TYPE_NOT_LOVED:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                mLovedByHint.setText(R.string.love_button_hint_love);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                        }
+
+                    }
+                }
+            });
+
+
+        }else{
+            // get current logged in user
+            Log.d(TAG, "mProfileViewModel getPickUpCount mUserId= "+mUserId);
+            mProfileViewModel.getPickUpCount(mCurrentUserId).observe(getViewLifecycleOwner(), new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged PickUp counts= "+aLong);
+                        //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
+                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                    }
+
+                }
+            });
+
+            // get loves counts
+            mProfileViewModel.getLoveCount(mCurrentUserId).observe(getViewLifecycleOwner(), new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+                    Log.d(TAG, "onChanged love counts= "+aLong);
+                    if (aLong != null){
+                        Log.d(TAG, "onChanged love counts= "+aLong);
+                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                    }
+
+                }
+            });
+
+            /*// get loves Statues
+            mProfileViewModel.getLoveStatues(mCurrentUserId, mUserId).observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(String likeStatus) {
+                    if (likeStatus != null){
+                        Log.d(TAG, "onChanged love counts= "+likeStatus);
+                        switch (likeStatus){
+                            case LIKE_TYPE_LOVED:
+                                // Statues = Liked
+                                isCancelLove= true;
+                                mLovedByHint.setText(R.string.love_button_hint_unlove);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                                break;
+                            case LIKE_TYPE_ADMIRER:
+                                // Statues = Disliked
+                                isCancelLove= false;
+                                mLovedByHint.setText(R.string.love_button_hint_love_back);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                            case LIKE_TYPE_NOT_LOVED:
+                                // Statues = Disliked
+                                isCancelLove = false;
+                                mLovedByHint.setText(R.string.love_button_hint_love);
+                                mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                break;
+                        }
+
+                    }
+                }
+            });*/
+
         }
     }
 

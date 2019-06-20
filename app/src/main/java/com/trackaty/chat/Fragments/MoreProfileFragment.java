@@ -100,18 +100,8 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View fragView = inflater.inflate(R.layout.fragment_more_profile, container, false);
-
-        // prepare the Adapter
-        mUserArrayList  = new ArrayList<>();
-        /*mUserArrayList.add("mama");
-        mUserArrayList.add("baba");
-        mUserArrayList.add("lala");
-        mUserArrayList.add("tata");
-        mUserArrayList.add("kaka");*/
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -124,24 +114,19 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
         }
 
+        // prepare the Adapter
+        mUserArrayList  = new ArrayList<>();
+        mProfileAdapter  = new ProfileAdapter(MoreProfileFragment.this,mUserArrayList,mUserId,this);
+
         mMoreProfileViewModel = ViewModelProviders.of(this).get(MoreProfileViewModel.class);
 
-        mMoreProfileViewModel.getUser(mUserId).observe(this, new Observer<User>() {
-            @Override
-            public void onChanged(User user) {
-                if(user != null){
-                    mUser = user;
-                    if(mUserArrayList != null && mUserArrayList.size()>0){
-                        // Clear old Array data
-                        mUserArrayList.clear();
-                        showCurrentUser(mUser);
-                    }else{
-                        showCurrentUser(mUser);
-                    }
+    }
 
-                }
-            }
-        });
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View fragView = inflater.inflate(R.layout.fragment_more_profile, container, false);
 
         // [display parcelable data]
             /*if (null != mCurrentUserId && mCurrentUserId.equals(mUserId)) {
@@ -152,8 +137,6 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
                 //mUserRef = mDatabaseRef.child("users").child(mUserId);
                 //showUser(mUserId);
             }*/
-
-            mProfileAdapter  = new ProfileAdapter(MoreProfileFragment.this,mUserArrayList,mUserId,this);
 
             // Initiate the RecyclerView
             mProfileRecycler  = (RecyclerView) fragView.findViewById(R.id.profile_recycler);
@@ -211,6 +194,25 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             actionbar.setHomeButtonEnabled(true);
             actionbar.setDisplayShowCustomEnabled(false);
         }
+
+        // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
+        mMoreProfileViewModel.getUser(mUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if(user != null){
+                    Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
+                    mUser = user;
+                    if(mUserArrayList != null && mUserArrayList.size()>0){
+                        // Clear old Array data
+                        mUserArrayList.clear();
+                        showCurrentUser(mUser);
+                    }else{
+                        showCurrentUser(mUser);
+                    }
+
+                }
+            }
+        });
 
     }
 

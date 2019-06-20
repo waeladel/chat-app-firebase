@@ -35,17 +35,17 @@ dependencies {
     //implementation 'androidx.multidex:multidex:2.0.1' // for multidex
     implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
     implementation 'com.google.android.material:material:1.1.0-alpha07'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0-beta02'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-database:17.0.0'
-    implementation 'com.google.firebase:firebase-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-core:17.0.0'
+    implementation 'com.google.firebase:firebase-database:18.0.0'
+    implementation 'com.google.firebase:firebase-auth:18.0.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.0'
-    implementation 'com.google.firebase:firebase-messaging:18.0.0'
+    implementation 'com.google.firebase:firebase-messaging:19.0.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.firebase:firebase-storage:17.0.0'
+    implementation 'com.google.firebase:firebase-storage:18.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-alpha01'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -68,8 +68,8 @@ dependencies {
 
 
     implementation 'android.arch.paging:runtime:2.1.0' //Add the paging library
-    //implementation 'android.arch.lifecycle:extensions:1.1.1' //Adding Lifecycle
-    //implementation "android.arch.lifecycle:viewmodel:1.1.1" //Adding ViewModel
+    implementation 'android.arch.lifecycle:extensions:1.1.1' //Adding Lifecycle
+    implementation "android.arch.lifecycle:viewmodel:1.1.1" //Adding ViewModel
     //annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
     //implementation 'org.awaitility:awaitility:3.1.6'
 
