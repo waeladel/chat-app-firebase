@@ -127,6 +127,7 @@ public class MessagingService extends FirebaseMessagingService {
             String messageBody;
             switch (type){
                 case NOTIFICATION_TYPE_LIKE:
+                    Log.d(TAG, "Notification type= = " + NOTIFICATION_TYPE_LIKE);
                     messageTitle = getString(R.string.notification_like_title);
                     messageBody = getString(R.string.notification_like_body, name);
 
@@ -141,6 +142,7 @@ public class MessagingService extends FirebaseMessagingService {
                     sendNotification(messageTitle, messageBody, avatar, type ,notificationId, pendingIntent, LIKES_CHANNEL_ID);
                     break;
                 case NOTIFICATION_TYPE_LIKE_BACK:
+                    Log.d(TAG, "Notification type= = " + NOTIFICATION_TYPE_LIKE_BACK);
                     messageTitle = getString(R.string.notification_like_title);
                     messageBody = getString(R.string.notification_like_back_body, name);
 
@@ -155,6 +157,7 @@ public class MessagingService extends FirebaseMessagingService {
                     sendNotification(messageTitle, messageBody, avatar, type ,notificationId, pendingIntent, LIKES_CHANNEL_ID);
                     break;
                 case NOTIFICATION_TYPE_PICK_UP:
+                    Log.d(TAG, "Notification type = " + NOTIFICATION_TYPE_PICK_UP);
                     messageTitle = getString(R.string.notification_pick_up_title);
                     messageBody = getString(R.string.notification_pick_up_body, name);
 
@@ -171,6 +174,7 @@ public class MessagingService extends FirebaseMessagingService {
                     sendNotification(messageTitle, messageBody, avatar, type , notificationId,pendingIntent, PICK_UPS_CHANNEL_ID);
                     break;
                 case NOTIFICATION_TYPE_MESSAGE:
+                    Log.d(TAG, "Notification type = " + NOTIFICATION_TYPE_MESSAGE);
                     messageTitle = getString(R.string.notification_message_title);
                     messageBody = getString(R.string.notification_message_body, name);
 
@@ -187,6 +191,7 @@ public class MessagingService extends FirebaseMessagingService {
                     sendNotification(messageTitle, messageBody, avatar, type, notificationId, pendingIntent, MESSAGES_CHANNEL_ID);
                     break;
                 case NOTIFICATION_TYPE_REQUESTS_SENT:
+                    Log.d(TAG, "Notification type = " + NOTIFICATION_TYPE_REQUESTS_SENT);
                     messageTitle = getString(R.string.notification_request_sent_title);
                     messageBody = getString(R.string.notification_request_sent_body, name);
 
@@ -201,7 +206,7 @@ public class MessagingService extends FirebaseMessagingService {
                     sendNotification(messageTitle, messageBody, avatar, type, notificationId,pendingIntent, REQUESTS_CHANNEL_ID);
                     break;
                 case NOTIFICATION_TYPE_REQUESTS_APPROVED:
-
+                    Log.d(TAG, "Notification type = " + NOTIFICATION_TYPE_REQUESTS_APPROVED);
                     messageTitle = getString(R.string.notification_request_approved_title);
                     messageBody = getString(R.string.notification_request_approved_body, name);
 
