@@ -261,22 +261,28 @@ public class MessagingService extends FirebaseMessagingService {
                                     // change notification's tag and Id's according to notification's types
                                     switch (type){
                                         case NOTIFICATION_TYPE_LIKE:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_LIKE);
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_LIKE_BACK:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_LIKE_BACK);
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_PICK_UP:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_PICK_UP);
                                             notificationManager.notify(notificationId, PICK_UPS_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_MESSAGE:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_MESSAGE);
                                             notificationManager.notify(notificationId, MESSAGES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_REQUESTS_SENT:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_REQUESTS_SENT);
                                             notificationManager.notify(notificationId, REQUESTS_SENT_NOTIFICATION_ID, builder.build());
 
                                             break;
                                         case NOTIFICATION_TYPE_REQUESTS_APPROVED:
+                                            Log.d(TAG, "onBitmapLoaded Notification type = " + NOTIFICATION_TYPE_REQUESTS_APPROVED);
                                             notificationManager.notify(notificationId, REQUESTS_APPROVED_NOTIFICATION_ID, builder.build());
                                             break;
 
