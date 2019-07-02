@@ -333,7 +333,6 @@ public class MessagingService extends FirebaseMessagingService {
 
             switch (type){
                 case NOTIFICATION_TYPE_LIKE:
-                    Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_LIKE);
                     notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                     break;
                 case NOTIFICATION_TYPE_LIKE_BACK:
@@ -481,3 +480,4 @@ public class MessagingService extends FirebaseMessagingService {
     }
 
 }
+
