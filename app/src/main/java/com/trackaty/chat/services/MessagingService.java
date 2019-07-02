@@ -229,19 +229,19 @@ public class MessagingService extends FirebaseMessagingService {
     private void sendNotification(String messageTitle, String messageBody, String avatar, String type, String notificationId, PendingIntent pendingIntent, String channelId) {
 
         // Build notification
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(MessagingService.this, channelId)
-                    //.setLargeIcon(bitmap)
-                    //.setSmallIcon(R.mipmap.ic_launcher)
-                    .setSmallIcon(R.drawable.album_ic_back_white)
-                    .setColor(getResources().getColor(R.color.album_ColorPrimary))
-                    .setContentTitle(messageTitle)
-                    .setContentText(messageBody)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setCategory(NotificationCompat.CATEGORY_SOCIAL)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(MessagingService.this, channelId)
+                //.setLargeIcon(bitmap)
+                //.setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.album_ic_back_white)
+                .setColor(getResources().getColor(R.color.album_ColorPrimary))
+                .setContentTitle(messageTitle)
+                .setContentText(messageBody)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
 
-            // if Avater is not null, set it as a large icon
+        // if Avater is not null, set it as a large icon
         if(avatar != null){
             final Handler uiHandler = new Handler(Looper.getMainLooper());
             uiHandler.post(new Runnable() {
@@ -294,22 +294,28 @@ public class MessagingService extends FirebaseMessagingService {
                                     //notificationId is a unique int for each notification that you must define
                                     switch (type){
                                         case NOTIFICATION_TYPE_LIKE:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_LIKE);
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_LIKE_BACK:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_LIKE_BACK);
                                             notificationManager.notify(notificationId, LIKES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_PICK_UP:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_PICK_UP);
                                             notificationManager.notify(notificationId, PICK_UPS_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_MESSAGE:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_MESSAGE);
                                             notificationManager.notify(notificationId, MESSAGES_NOTIFICATION_ID, builder.build());
                                             break;
                                         case NOTIFICATION_TYPE_REQUESTS_SENT:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_REQUESTS_SENT);
                                             notificationManager.notify(notificationId, REQUESTS_SENT_NOTIFICATION_ID, builder.build());
 
                                             break;
                                         case NOTIFICATION_TYPE_REQUESTS_APPROVED:
+                                            Log.d(TAG, "onBitmapFailed Notification type = " + NOTIFICATION_TYPE_REQUESTS_APPROVED);
                                             notificationManager.notify(notificationId, REQUESTS_APPROVED_NOTIFICATION_ID, builder.build());
                                             break;
 
