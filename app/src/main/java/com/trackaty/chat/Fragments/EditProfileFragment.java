@@ -24,7 +24,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -84,14 +84,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final int MENU_ITEM_SAVE_ID = 1;
 
-    private  static final int SECTION_IMAGE = 100;
-    private  static final int SECTION_EDIT_TEXT = 200;
-    private  static final int SECTION_TEXT = 300;
-    private  static final int SECTION_SPINNER = 400;
-    private  static final int SECTION_ABOUT = 500;
-    private  static final int SECTION_WORK = 600;
-    private  static final int SECTION_HABITS = 700;
-    private  static final int SECTION_SOCIAL = 800;
+    private  static final int SECTION_AVATAR = 100;
+    private  static final int SECTION_COVER = 200;
+    private  static final int SECTION_EDIT_TEXT = 300;
+    private  static final int SECTION_TEXT = 400;
+    private  static final int SECTION_SPINNER = 500;
+    private  static final int SECTION_ABOUT = 600;
+    private  static final int SECTION_WORK = 700;
+    private  static final int SECTION_HABITS = 800;
+    private  static final int SECTION_SOCIAL = 900;
 
 
     public  final static String SECTION_ABOUT_HEADLINE = "about";
@@ -305,6 +306,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUserRef = mDatabaseRef.child("users").child(currentUserId);
 
+        navController = NavHostFragment.findNavController(this);
+
         return fragView;
     }
 
@@ -316,7 +319,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
-            navController = Navigation.findNavController(activity, R.id.host_fragment);
         }
 
         /*Album.initialize(AlbumConfig.newBuilder(activity)
@@ -474,9 +476,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             Log.d(TAG, "Method=" +method.getName()+" = "+ value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
-                            if(fieldName.equals("avatar") || fieldName.equals("coverImage")){
-                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_IMAGE, SECTION_IMAGE));
-                            }
+                        if(fieldName.equals("avatar")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_AVATAR, SECTION_AVATAR));
+                        }
+
+                        if(fieldName.equals("coverImage")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_COVER, SECTION_COVER));
+                        }
 
                         if(fieldName.equals("name")){
                             mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_EDIT_TEXT, SECTION_EDIT_TEXT));
@@ -874,14 +880,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-                        mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_IMAGE, SECTION_IMAGE));
 
                         // set EditProfileViewModel.user values
                         switch (type){
                             case "avatar":
+                                mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_AVATAR, SECTION_AVATAR));
                                 mEditProfileViewModel.getUser().setAvatar(String.valueOf(downloadUri));
                                 break;
                             case "coverImage":
+                                mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_COVER, SECTION_COVER));
                                 mEditProfileViewModel.getUser().setCoverImage(String.valueOf(downloadUri));
                                 break;
                         }
@@ -1227,12 +1234,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 // Write was successful!
                 Log.i(TAG, "mUserRef onSuccess");
                 // Return to main fragment
-                if (R.id.mainFragment != navController.getCurrentDestination().getId()) {
+                /*if (R.id.mainFragment != navController.getCurrentDestination().getId()) {
                     if(navController != null){
                         //navController.navigate(R.id.profileFragment);
+                        navController = Navigation.findNavController(activity, R.id.host_fragment);
                         navController.navigateUp();
                     }
-                }
+
+                }*/
+                navController.navigateUp();
             }
         })
                 .addOnFailureListener(new OnFailureListener() {

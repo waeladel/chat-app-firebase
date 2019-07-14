@@ -11,5 +11,6 @@
     <dimen name="medium_avatar">72dp</dimen>
     <dimen name="button_padding">16dp</dimen>
     <dimen name="elevation">4dp</dimen>
+    <dimen name="small_margin">4dp</dimen>
 
 </resources>

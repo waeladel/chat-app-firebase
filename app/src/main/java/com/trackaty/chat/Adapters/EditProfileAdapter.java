@@ -48,14 +48,15 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final static String TAG = EditProfileAdapter.class.getSimpleName();
 
-    private  static final int SECTION_IMAGE = 100;
-    private  static final int SECTION_EDIT_TEXT = 200;
-    private  static final int SECTION_TEXT = 300;
-    private  static final int SECTION_SPINNER = 400;
-    private  static final int SECTION_ABOUT = 500;
-    private  static final int SECTION_WORK = 600;
-    private  static final int SECTION_HABITS = 700;
-    private  static final int SECTION_SOCIAL = 800;
+    private  static final int SECTION_AVATAR = 100;
+    private  static final int SECTION_COVER = 200;
+    private  static final int SECTION_EDIT_TEXT = 300;
+    private  static final int SECTION_TEXT = 400;
+    private  static final int SECTION_SPINNER = 500;
+    private  static final int SECTION_ABOUT = 600;
+    private  static final int SECTION_WORK = 700;
+    private  static final int SECTION_HABITS = 800;
+    private  static final int SECTION_SOCIAL = 900;
 
     private  static final String SECTION_ABOUT_HEADLINE = "about";
     private  static final String SECTION_WORK_HEADLINE  = "work_and_education";
@@ -127,28 +128,32 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         switch (viewType){
             case 100:
-                // SECTION_IMAGE;
-            View imageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_image_item, parent, false);
-            return new ImageHolder(imageView , itemClickListener);
+                // SECTION_COVER;
+            View avatarImageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_avatar_item, parent, false);
+            return new avatarImageHolder(avatarImageView , itemClickListener);
             case 200:
+                // SECTION_COVER;
+                View coverImageView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_cover_item, parent, false);
+                return new coverImageHolder(coverImageView , itemClickListener);
+            case 300:
                 // SECTION_EDIT_TEXT;
                 View textInputView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_item, parent, false);
                 return new TextInputHolder(textInputView);
-            case 300:
+            case 400:
                 // SECTION_TEXT;
                 View textView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_text_child_item, parent, false);
                 return new TextHolder(textView, itemClickListener);
-            case 400:
+            case 500:
                 // SECTION_SPINNER;
                 View spinnerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_spinner_item, parent, false);
                 return new SpinnerHolder(spinnerView);
-            case 500:
-                // SECTION_ABOUT;
             case 600:
-                // SECTION_WORK;
+                // SECTION_ABOUT;
             case 700:
-                // SECTION_HABITS;
+                // SECTION_WORK;
             case 800:
+                // SECTION_HABITS;
+            case 900:
                 // SECTION_SOCIAL;
         }
         View expandableView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_profile_expandable_parent, parent, false);
@@ -159,12 +164,83 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         Log.i(TAG, "onBindViewHolder called="+ mProfileDataArrayList.get(position).getKey());
 
-        if (holder instanceof ImageHolder){
-            ImageHolder imageHolder = (ImageHolder) holder;
+        if (holder instanceof avatarImageHolder){
+            avatarImageHolder imageHolder = (avatarImageHolder) holder;
             ViewGroup.LayoutParams layoutParams;
 
             switch (mProfileDataArrayList.get(position).getKey()){
                 case "avatar":
+                    // set frame layout to WRAP_CONTENT
+                    /*float factor = imageHolder.frameLayout.getContext().getResources().getDisplayMetrics().density;
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = (int)(100 * factor);
+                    layoutParams.height = (int)(100 * factor);
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);*/
+
+                    imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        Picasso.get()
+                                .load(mProfileDataArrayList.get(position).getValue())
+                                .placeholder(R.drawable.ic_user_account_grey_white )
+                                .error(R.drawable.ic_broken_image)
+                                .into(imageHolder.profileImage);
+                        imageHolder.profileImage.setVisibility(View.VISIBLE);
+                        imageHolder.divider.setVisibility(View.INVISIBLE);
+                        imageHolder.icon.setImageResource(R.drawable.ic_user_account_grey_white);
+
+
+                    }
+                    // Add black color filter
+                    // Move filter outside if statement to activate the black color even if avatar is null
+                    int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
+                    ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
+                    imageHolder.profileImage.setColorFilter(colorFilter);
+                    break;
+                /*case "coverImage":
+                    // set frame layout to MATCH_PARENT
+                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);
+
+                    imageHolder.itemHeadline.setText(R.string.user_cover_headline);
+                    if(null != mProfileDataArrayList.get(position).getValue()){
+                        Picasso.get()
+                                .load(mProfileDataArrayList.get(position).getValue())
+                                .placeholder(R.drawable.ic_picture_gallery_white )
+                                .error(R.drawable.ic_broken_image)
+                                .into(imageHolder.coverImage);
+                        imageHolder.coverImage.setVisibility(View.VISIBLE);
+                        imageHolder.profileImage.setVisibility(View.INVISIBLE);
+                        imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
+
+                    }
+                    break;*/
+
+            }
+
+            // hide progress animation when done
+            if(variablesArrayList != null && variablesArrayList.get(position).getValue()){
+                imageHolder.progressIcon.setVisibility(View.VISIBLE);
+            }else{
+                imageHolder.progressIcon.setVisibility(View.GONE);
+            }
+
+            // needed only if i want the listener to be inside the adapter
+            /*imageHolder.setItemClickListener(new ItemClickListener() {
+                @Override
+                public void onClick(View view, int position, boolean isLongClick) {
+                    Log.d(TAG, "item clicked= " + position);
+                }
+            });*/
+        }
+
+        if (holder instanceof coverImageHolder){
+            coverImageHolder imageHolder = (coverImageHolder) holder;
+            ViewGroup.LayoutParams layoutParams;
+
+            switch (mProfileDataArrayList.get(position).getKey()){
+                /*case "avatar":
                     // set frame layout to WRAP_CONTENT
                     float factor = imageHolder.frameLayout.getContext().getResources().getDisplayMetrics().density;
 
@@ -190,13 +266,13 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
                         imageHolder.profileImage.setColorFilter(colorFilter);
                     }
-                    break;
+                    break;*/
                 case "coverImage":
                     // set frame layout to MATCH_PARENT
-                    layoutParams = imageHolder.frameLayout.getLayoutParams();
+                    /*layoutParams = imageHolder.frameLayout.getLayoutParams();
                     layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
                     layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    imageHolder.frameLayout.setLayoutParams(layoutParams);
+                    imageHolder.frameLayout.setLayoutParams(layoutParams);*/
 
                     imageHolder.itemHeadline.setText(R.string.user_cover_headline);
                     if(null != mProfileDataArrayList.get(position).getValue()){
@@ -206,8 +282,12 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 .error(R.drawable.ic_broken_image)
                                 .into(imageHolder.coverImage);
                         imageHolder.coverImage.setVisibility(View.VISIBLE);
-                        imageHolder.profileImage.setVisibility(View.INVISIBLE);
                         imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
+
+                        /*// add black color filter
+                        int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
+                        ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
+                        imageHolder.coverImage.setColorFilter(colorFilter);*/
 
                     }
                     break;
@@ -1179,23 +1259,25 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         switch (mProfileDataArrayList.get(position).getSection()){
             case 100:
-                return SECTION_IMAGE;
+                return SECTION_AVATAR;
             case 200:
-                return SECTION_EDIT_TEXT;
+                return SECTION_COVER;
             case 300:
-                return SECTION_TEXT;
+                return SECTION_EDIT_TEXT;
             case 400:
-                return SECTION_SPINNER;
+                return SECTION_TEXT;
             case 500:
-                return SECTION_ABOUT;
+                return SECTION_SPINNER;
             case 600:
-                return SECTION_WORK;
+                return SECTION_ABOUT;
             case 700:
-                return SECTION_HABITS;
+                return SECTION_WORK;
             case 800:
+                return SECTION_HABITS;
+            case 900:
                 return SECTION_SOCIAL;
         }
-        return 900;
+        return 1000;
     }
 
     // ViewHolder for user info list /////
@@ -1237,24 +1319,66 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    // ViewHolder for user images list /////
-    public class ImageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    // ViewHolder for user avatar images list /////
+    public class avatarImageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         View row;
         private TextView itemHeadline;
-        private ImageView profileImage, coverImage, icon, progressIcon;
+        private ImageView profileImage, icon, progressIcon;
         private View divider;
         private FrameLayout frameLayout;
         ItemClickListener itemClickListener;
 
 
-        public ImageHolder(View itemView, ItemClickListener itemClickListener) {
+        public avatarImageHolder(View itemView, ItemClickListener itemClickListener) {
             super(itemView);
             this.itemClickListener = itemClickListener;
 
             row = itemView;
             itemHeadline = row.findViewById(R.id.item_title);
             profileImage = row.findViewById(R.id.user_image);
+            icon = row.findViewById(R.id.edit_profile_icon);
+            progressIcon = row.findViewById(R.id.progress_icon);
+            frameLayout = row.findViewById(R.id.image_frameLayout);
+
+            divider = row.findViewById(R.id.top_divider);
+
+            row.setOnClickListener(this);
+        }
+
+
+
+        @Override
+        public void onClick(View view) {
+            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getAdapterPosition(), false);
+            }
+
+        }
+
+        // needed only if i want the listener to be inside the adapter
+        public void setItemClickListener(ItemClickListener itemClickListener) {
+            this.itemClickListener = itemClickListener;
+        }
+    }
+
+    // ViewHolder for user cover images list /////
+    public class coverImageHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
+        View row;
+        private TextView itemHeadline;
+        private ImageView  coverImage, icon, progressIcon;
+        private View divider;
+        private FrameLayout frameLayout;
+        ItemClickListener itemClickListener;
+
+
+        public coverImageHolder(View itemView, ItemClickListener itemClickListener) {
+            super(itemView);
+            this.itemClickListener = itemClickListener;
+
+            row = itemView;
+            itemHeadline = row.findViewById(R.id.item_title);
             coverImage = row.findViewById(R.id.cover_image);
             icon = row.findViewById(R.id.edit_profile_icon);
             progressIcon = row.findViewById(R.id.progress_icon);
@@ -1280,6 +1404,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             this.itemClickListener = itemClickListener;
         }
     }
+
 
     // ViewHolder for user textInputs list /////
     public class TextInputHolder extends RecyclerView.ViewHolder {
