@@ -2,6 +2,9 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,9 +17,6 @@ import com.trackaty.chat.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
 public class UserRepository {
 
@@ -209,7 +209,9 @@ public class UserRepository {
                     User user = dataSnapshot.getValue(User.class);
                     callback.onCallback(user);
                 } else {
-                    // User is null, error out
+                    // Return a null user to view model to know when user doesn't exist,
+                    // So we don't create or update tokens and online presence
+                    callback.onCallback(null);
                     Log.w(TAG, "getUserOnce User is null, no such user");
                 }
             }

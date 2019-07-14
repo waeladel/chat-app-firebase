@@ -371,6 +371,7 @@
 
     <!--nav titles-->
     <string name="edit_profile_frag_title">Edit Profile</string>
+    <string name="complete_profile_frag_title">Complete Profile</string>
     <string name="more_profile_frag_title">More Info</string>
     <string name="profile_frag_title">Profile</string>
     <string name="main_frag_title">Find</string>

@@ -1,6 +1,5 @@
 package com.trackaty.chat.Adapters;
 
-import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -9,21 +8,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.RecyclerView;
 
 import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
 
@@ -39,11 +36,11 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
 
     public ArrayList<Profile> workArrayList;
     //public Context fragmentContext;
-    public EditProfileFragment fragmentContext;
+    public Fragment fragmentContext;
     private EditProfileViewModel mEditProfileViewModel;
 
 
-    public WorkAdapter(EditProfileFragment fragmentContext, ArrayList<Profile> workArrayList){
+    public WorkAdapter(Fragment fragmentContext, ArrayList<Profile> workArrayList){
         this.workArrayList = workArrayList;
         this.fragmentContext = fragmentContext; // To use it as observer
 

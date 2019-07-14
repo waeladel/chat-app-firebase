@@ -1,6 +1,5 @@
 package com.trackaty.chat.Adapters;
 
-import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -12,9 +11,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Social;
@@ -23,10 +26,6 @@ import com.trackaty.chat.models.SocialObj;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.RecyclerView;
 
 import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
 
@@ -41,12 +40,12 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
     public  final static int  SMALL_INPUT_MAX_LINES = 1;
 
     public ArrayList<Social> socialArrayList;
-    public EditProfileFragment fragmentContext;
+    public Fragment fragmentContext;
     private EditProfileViewModel mEditProfileViewModel;
 
     Map<String, SocialObj> socialMap = new HashMap<>();
 
-    public SocialAdapter(EditProfileFragment fragmentContext, ArrayList<Social> socialArrayList){
+    public SocialAdapter(Fragment fragmentContext, ArrayList<Social> socialArrayList){
         this.socialArrayList = socialArrayList;
         this.fragmentContext = fragmentContext;
         //socialObj = new SocialObj();

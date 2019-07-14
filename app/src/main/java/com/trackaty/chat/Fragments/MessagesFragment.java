@@ -1,26 +1,8 @@
 package com.trackaty.chat.Fragments;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-import androidx.paging.PagedList;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import de.hdodenhof.circleimageview.CircleImageView;
-
 import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -34,6 +16,21 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.paging.PagedList;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -62,6 +59,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 import static com.trackaty.chat.Utils.StringUtils.getFirstWord;
@@ -375,9 +374,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         //observe when a change happen to usersList live data
         mMessagesRecycler.setAdapter(mMessagesAdapter);
 
-        // Push up content when clicking in edit text
+        // resize content when clicking in edit text
+        //adjustPan effects all input fields UI (Spinners, avatar and expandable layout) on edit and complete profile
         activity.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         /*activity.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
 
@@ -754,7 +754,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean (IS_HII_BOTTOM, isHitBottom);
+        if(isHitBottom != null){
+            outState.putBoolean (IS_HII_BOTTOM, isHitBottom);
+        }
+
     }
 
     @Override

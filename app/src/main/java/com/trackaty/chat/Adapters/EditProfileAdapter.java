@@ -21,13 +21,18 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.github.aakira.expandablelayout.ExpandableLayoutListenerAdapter;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.github.aakira.expandablelayout.Utils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.squareup.picasso.Picasso;
-import com.trackaty.chat.Fragments.EditProfileFragment;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
@@ -38,11 +43,6 @@ import com.trackaty.chat.models.Variables;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -82,7 +82,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public SocialAdapter socialAdapter;
 
     public Context context;
-    public EditProfileFragment fragmentContext;
+    public Fragment mFragment;
 
     private ItemClickListener itemClickListener;
 
@@ -96,7 +96,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ,ArrayList<Profile> habitsArrayList
             ,ArrayList<Social> socialArrayList
             ,ArrayList<Variables> variablesArrayList
-            , EditProfileFragment fragmentContext
+            , Fragment mFragment
             , ItemClickListener itemClickListener){
 
         this.mProfileDataArrayList = userDataArrayList;
@@ -108,17 +108,18 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
         this.context = context;
-        this.fragmentContext = fragmentContext; // To use it as observer
+        this.mFragment = mFragment; // To use it as observer
         this.itemClickListener = itemClickListener;
 
-        aboutAdapter = new AboutAdapter(fragmentContext, aboutArrayList);
-        workAdapter = new WorkAdapter(fragmentContext, workArrayList);
-        habitsAdapter = new HabitsAdapter(fragmentContext, habitsArrayList);
-        socialAdapter = new SocialAdapter (fragmentContext, socialArrayList);
+        aboutAdapter = new AboutAdapter(mFragment, aboutArrayList);
+        workAdapter = new WorkAdapter(mFragment, workArrayList);
+        habitsAdapter = new HabitsAdapter(mFragment, habitsArrayList);
+        socialAdapter = new SocialAdapter (mFragment, socialArrayList);
 
         // get EditProfileViewModel to access user object
-        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
+        mEditProfileViewModel = ViewModelProviders.of(mFragment).get(EditProfileViewModel.class);
     }
+
 
     @NonNull
     @Override
@@ -1294,7 +1295,6 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             row = itemView;
             itemValue = row.findViewById(R.id.edit_profile_value);
             inputLayout = row.findViewById(R.id.edit_profile_InputLayout);
-
             itemValue.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
