@@ -26,8 +26,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -104,6 +105,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private ImageButton mSendButton;
     private FloatingActionButton mScrollFab;
 
+    private NavController navController ;
 
     //private Timer mTimer;
     private static CountDownTimer mAgoTimer, mRemainingTimer;
@@ -659,6 +661,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         }else{
             Log.d(TAG, "messages are the deffrent");
         }*/
+        navController = NavHostFragment.findNavController(this);
 
         return fragView;
     }
@@ -811,7 +814,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     //check if we are on Main Fragment not on complete Profile already
                     //Navigation.findNavController(view).navigate(ProfileDirection);
 
-                    Navigation.findNavController(activity, R.id.host_fragment).navigate(ProfileDirection);
+                    //Navigation.findNavController(activity, R.id.host_fragment).navigate(ProfileDirection);
+                    navController.navigate(ProfileDirection);
+
                 }
             });
 
