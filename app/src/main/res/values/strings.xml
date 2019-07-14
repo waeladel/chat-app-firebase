@@ -49,6 +49,9 @@
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
+    <string name="empty_profile_avatar_error">Profile picture can\'t be blank.</string>
+    <string name="empty_profile_name_error">You must enter your name.</string>
+
     <string name="send_message_error">Sorry, couldn\'t send your message.</string>
     <string name="send_request_error">Sorry, couldn\'t send your request.</string>
     <string name="activate_chat_error">Sorry, couldn\'t activate you conversation, check your internet connection</string>

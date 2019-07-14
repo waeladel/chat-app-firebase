@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -1241,6 +1242,18 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
         // no need to loop through array lists, get values from mEditProfileViewModel.user
         Log.d(TAG, "getUser token= " +mEditProfileViewModel.getUser().getTokens().size());
+        if(TextUtils.isEmpty(mEditProfileViewModel.getUser().getName())){
+            Toast.makeText(getActivity(), R.string.empty_profile_name_error,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if(TextUtils.isEmpty(mEditProfileViewModel.getUser().getAvatar())){
+            Toast.makeText(getActivity(), R.string.empty_profile_avatar_error,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         mUserRef.setValue(mEditProfileViewModel.getUser()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
