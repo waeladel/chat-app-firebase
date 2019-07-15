@@ -1,6 +1,5 @@
 package com.trackaty.chat.Adapters;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,16 +8,16 @@ import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.trackaty.chat.Fragments.EditProfileFragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder> {
 
@@ -28,10 +27,10 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
 
 
     //public Context fragmentContext;
-    public EditProfileFragment fragmentContext;
+    public Fragment fragmentContext;
     private EditProfileViewModel mEditProfileViewModel;
 
-    public HabitsAdapter(EditProfileFragment fragmentContext, ArrayList<Profile> habitsArrayList){
+    public HabitsAdapter(Fragment fragmentContext, ArrayList<Profile> habitsArrayList){
         this.habitsArrayList = habitsArrayList;
         this.fragmentContext = fragmentContext; // To use it as observer
 

@@ -3,7 +3,24 @@ package com.trackaty.chat.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -28,24 +45,6 @@ import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -458,7 +457,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         // Set time for last time online when activity stops
         if(null != lastOnlineRef){
+            // Only update last online time when it's not null
+            // if lastOnlineRef is null it means the user is new and not recorded on database yet
             lastOnlineRef.setValue(ServerValue.TIMESTAMP);
+            Log.d(TAG, "lastOnlineRef is not null");
         }
 
         if (mAuthListener != null) {
@@ -578,13 +580,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Log.d(TAG, "currentUserId Value is: " + currentUserId);
         mUserRef = mDatabaseRef.child("users").child(currentUserId);
 
-        // database references for online
-        myConnectionsRef = mDatabaseRef.child("users").child(currentUserId).child("connections");
-        lastOnlineRef  = mDatabaseRef.child("users").child(currentUserId).child("lastOnline");
-
-        // database reference that holds information about user presence
-        connectedRef  = FirebaseDatabase.getInstance().getReference(".info/connected");
-
 // [START single_value_read]
         //ValueEventListener postListener = new ValueEventListener() {
         //mUserRef.addValueEventListener(postListener);
@@ -598,9 +593,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     mUserId = dataSnapshot.getKey();
                     /*String userName = dataSnapshot.child("name").getValue().toString();
                     String currentUserId = dataSnapshot.getKey();*/
-                    if (mUser != null) {
+
+                    // If name or avatar is empty go to goToCompleteProfile
+                    if (null == mUser.getName() || null == mUser.getAvatar()) {
                         Log.d(TAG, "user exist: Name=" + mUser.getName());
+                        goToCompleteProfile();
+                        //return;
                     }
+
+                    // Don't update tokens or lastOnline unless user exist, that's why references are moved here
+                    // database references for online
+                    myConnectionsRef = mDatabaseRef.child("users").child(currentUserId).child("connections");
+                    lastOnlineRef  = mDatabaseRef.child("users").child(currentUserId).child("lastOnline");
+
+                    // database reference that holds information about user presence
+                    connectedRef  = FirebaseDatabase.getInstance().getReference(".info/connected");
+
                     // To store all connections from all devices, Add this device to my connections list
                     if(connection == null){
                         connection = myConnectionsRef.push();
@@ -630,8 +638,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
-                    //completeProfile(currentUserName, currentUserEmail);
-                    //completeProfile(mUser);
+                    //goToCompleteProfile(currentUserName, currentUserEmail);
+                    // Make all presence references null, Incase user logout from existing account
+                    // then creates a new account that is not exist on the database yet.
+                    myConnectionsRef = null;
+                    lastOnlineRef  = null;
+                    connectedRef  = null;
+                    goToCompleteProfile();
                 }
 
             }
@@ -647,16 +660,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // [END single_value_read]
     }
 
-    private void completeProfile( String UserName, String UserEmail) {
+    private void goToCompleteProfile() {
 
-        NavDirections directions = MainFragmentDirections.actionMainToCompleteProfile(UserName,UserEmail);
-
+        NavDirections direction = MainFragmentDirections.actionMainToCompleteProfile();
         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
         //check if we are on Main Fragment not on complete Profile already
         if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
-            Navigation.findNavController(this, R.id.host_fragment)
-                    .navigate(directions);
+            navController.navigate(direction);
         }
 
     }
@@ -679,6 +690,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         }*/
     }
+
     // Go to Chats fragment
     private void goToChats() {
 

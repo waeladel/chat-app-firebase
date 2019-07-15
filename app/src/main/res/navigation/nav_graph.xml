@@ -34,16 +34,7 @@
         android:id="@+id/completeProfileFragment"
         android:name="com.trackaty.chat.Fragments.CompleteProfileFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_complete_profile" >
-        <argument
-            android:name="userName"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="userEmail"
-            app:argType="string"
-            app:nullable="true" />
-    </fragment>
+        tools:layout="@layout/fragment_complete_profile"/>
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.trackaty.chat.Fragments.ProfileFragment"

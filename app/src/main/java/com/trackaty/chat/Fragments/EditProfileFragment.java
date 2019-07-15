@@ -7,18 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import top.zibin.luban.Luban;
-import top.zibin.luban.OnCompressListener;
-
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +18,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -69,6 +69,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 
+import top.zibin.luban.Luban;
+import top.zibin.luban.OnCompressListener;
+
 import static android.app.Activity.RESULT_OK;
 import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
 
@@ -82,14 +85,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private final int MENU_ITEM_SAVE_ID = 1;
 
-    private  static final int SECTION_IMAGE = 100;
-    private  static final int SECTION_EDIT_TEXT = 200;
-    private  static final int SECTION_TEXT = 300;
-    private  static final int SECTION_SPINNER = 400;
-    private  static final int SECTION_ABOUT = 500;
-    private  static final int SECTION_WORK = 600;
-    private  static final int SECTION_HABITS = 700;
-    private  static final int SECTION_SOCIAL = 800;
+    private  static final int SECTION_AVATAR = 100;
+    private  static final int SECTION_COVER = 200;
+    private  static final int SECTION_EDIT_TEXT = 300;
+    private  static final int SECTION_TEXT = 400;
+    private  static final int SECTION_SPINNER = 500;
+    private  static final int SECTION_ABOUT = 600;
+    private  static final int SECTION_WORK = 700;
+    private  static final int SECTION_HABITS = 800;
+    private  static final int SECTION_SOCIAL = 900;
 
 
     public  final static String SECTION_ABOUT_HEADLINE = "about";
@@ -160,6 +164,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private ArrayList<AlbumFile> mMediaFiles;
 
     private Long birthInMillis;
+    private NavController navController ;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -175,6 +180,47 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         //setRetainInstance(true);
         //show Menu
         setHasOptionsMenu(true);
+
+        // [initialize the adapter on oCreate to create it only once, not every onCreateView when user get back to this fragment]
+        mEditProfileAdapter = new EditProfileAdapter(activityContext
+                , mProfileDataArrayList
+                , mAboutArrayList
+                , mWorkArrayList
+                , mHabitsArrayList
+                , mSocialArrayList
+                , mVariablesArrayList
+                ,this
+                , this);
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
+
+        mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
+
+        /*currentUser = mEditProfileViewModel.getUserOnce(currentUserId);
+        showCurrentUser(currentUser);*/
+
+        // Get EditProfileViewModel.User from database if it's null
+        if(mEditProfileViewModel.getUser() == null){
+            mEditProfileViewModel.getUserOnce(currentUserId, new FirebaseUserCallback() {
+                @Override
+                public void onCallback(User user) {
+                    if(user != null){
+                        Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName());
+                        mEditProfileViewModel.setUser(user);
+                        //currentUser = mEditProfileViewModel.getUser();
+                        showCurrentUser(mEditProfileViewModel.getUser());
+                    }
+                }
+            });
+        }else{
+            Log.d(TAG,  "FEditProfileViewModel.getUser is not null. no need to get user from database "+mEditProfileViewModel.getUser().getName());
+            //currentUser = mEditProfileViewModel.getUser();
+            showCurrentUser(mEditProfileViewModel.getUser());
+            //restoreLayoutManagerPosition();
+        }
+
     }
 
 
@@ -223,49 +269,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 showCurrentUser(currentUser); // No saved data, get data from remote
             }
         }*/
-        // [initialize the adapter]
-        mEditProfileAdapter = new EditProfileAdapter(activityContext
-                , mProfileDataArrayList
-                , mAboutArrayList
-                , mWorkArrayList
-                , mHabitsArrayList
-                , mSocialArrayList
-                , mVariablesArrayList
-                ,EditProfileFragment.this
-                , this);
+
 
         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
-
-
-        //Get current logged in user
-        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
-
-        mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
-
-        /*currentUser = mEditProfileViewModel.getUserOnce(currentUserId);
-        showCurrentUser(currentUser);*/
-
-        // Get EditProfileViewModel.User from database if it's null
-        if(mEditProfileViewModel.getUser() == null){
-            mEditProfileViewModel.getUserOnce(currentUserId, new FirebaseUserCallback() {
-                @Override
-                public void onCallback(User user) {
-                    if(user != null){
-                        Log.d(TAG,  "FirebaseUserCallback onCallback. name= " + user.getName());
-                        mEditProfileViewModel.setUser(user);
-                        //currentUser = mEditProfileViewModel.getUser();
-                        showCurrentUser(mEditProfileViewModel.getUser());
-                    }
-                }
-            });
-        }else{
-            Log.d(TAG,  "FEditProfileViewModel.getUser is not null. no need to get user from database "+mEditProfileViewModel.getUser().getName());
-            //currentUser = mEditProfileViewModel.getUser();
-            showCurrentUser(mEditProfileViewModel.getUser());
-            restoreLayoutManagerPosition();
-        }
 
        /* .observe(this, new Observer<User>() {
             @Override
@@ -299,6 +306,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         // [START database reference]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUserRef = mDatabaseRef.child("users").child(currentUserId);
+
+        navController = NavHostFragment.findNavController(this);
 
         return fragView;
     }
@@ -383,7 +392,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 , mHabitsArrayList
                 , mSocialArrayList
                 , mVariablesArrayList
-                ,EditProfileFragment.this
+                ,this
                 , this);
 
         Log.d(TAG, "mWorkArrayList college 0="+mWorkArrayList.get(0).getValue());
@@ -392,7 +401,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
         mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
-        restoreLayoutManagerPosition();
+        //restoreLayoutManagerPosition();
         mEditProfileAdapter.notifyDataSetChanged();
     }
 
@@ -468,9 +477,13 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             Log.d(TAG, "Method=" +method.getName()+" = "+ value);
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
-                            if(fieldName.equals("avatar") || fieldName.equals("coverImage")){
-                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_IMAGE, SECTION_IMAGE));
-                            }
+                        if(fieldName.equals("avatar")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_AVATAR, SECTION_AVATAR));
+                        }
+
+                        if(fieldName.equals("coverImage")){
+                            mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_COVER, SECTION_COVER));
+                        }
 
                         if(fieldName.equals("name")){
                             mProfileDataArrayList.add(new Profile(fieldName, value,SECTION_EDIT_TEXT, SECTION_EDIT_TEXT));
@@ -868,14 +881,15 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-                        mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_IMAGE, SECTION_IMAGE));
 
                         // set EditProfileViewModel.user values
                         switch (type){
                             case "avatar":
+                                mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_AVATAR, SECTION_AVATAR));
                                 mEditProfileViewModel.getUser().setAvatar(String.valueOf(downloadUri));
                                 break;
                             case "coverImage":
+                                mProfileDataArrayList.set(position,new Profile(type, String.valueOf(downloadUri),SECTION_COVER, SECTION_COVER));
                                 mEditProfileViewModel.getUser().setCoverImage(String.valueOf(downloadUri));
                                 break;
                         }
@@ -1214,12 +1228,34 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         }// end of mSocialArrayList loop*/
 
         // no need to loop through array lists, get values from mEditProfileViewModel.user
+        Log.d(TAG, "getUser token= " +mEditProfileViewModel.getUser().getTokens().size());
+        if(TextUtils.isEmpty(mEditProfileViewModel.getUser().getName())){
+            Toast.makeText(getActivity(), R.string.empty_profile_name_error,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if(TextUtils.isEmpty(mEditProfileViewModel.getUser().getAvatar())){
+            Toast.makeText(getActivity(), R.string.empty_profile_avatar_error,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         mUserRef.setValue(mEditProfileViewModel.getUser()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "mUserRef onSuccess");
-                // ...
+                // Return to main fragment
+                /*if (R.id.mainFragment != navController.getCurrentDestination().getId()) {
+                    if(navController != null){
+                        //navController.navigate(R.id.profileFragment);
+                        navController = Navigation.findNavController(activity, R.id.host_fragment);
+                        navController.navigateUp();
+                    }
+
+                }*/
+                navController.navigateUp();
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
