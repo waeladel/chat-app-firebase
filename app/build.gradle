@@ -34,7 +34,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.multidex:multidex:2.0.1' // for multidex
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'com.google.android.material:material:1.1.0-alpha08'
+    implementation 'com.google.android.material:material:1.1.0-alpha07'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0-rc01'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
@@ -85,6 +85,6 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
     implementation 'com.king.view:radarview:1.0.2'
-    //implementation "io.chirp:chirpsdk:3.9.2"
+    implementation "io.chirp:chirpsdk:3.9.2"
 }
 

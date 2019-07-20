@@ -61,7 +61,7 @@
     </style>-->
 
     <!-- Bottom Navigation -->
-    <style name="Widget.BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+    <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="android:textSize">9sp</item>
         <item name="android:textStyle">bold</item>
     </style>
