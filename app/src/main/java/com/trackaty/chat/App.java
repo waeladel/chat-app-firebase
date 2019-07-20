@@ -1,28 +1,18 @@
 package com.trackaty.chat;
 
 
-import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.multidex.MultiDexApplication;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
-import com.trackaty.chat.models.User;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationManagerCompat;
 //import androidx.multidex.MultiDexApplication;
 
 
@@ -30,7 +20,7 @@ import androidx.core.app.NotificationManagerCompat;
  * Created on 25/03/2017.
  */
 
-public class App extends Application {
+public class App extends MultiDexApplication { // had to enable MultiDex after adding chirpsdk:3.9.2
 
     private final static String TAG = App.class.getSimpleName();
     private static Context sApplicationContext;
@@ -63,6 +53,7 @@ public class App extends Application {
     public static final String MESSAGES_CHANNEL_ID = "Messages_id";
     public static final String LIKES_CHANNEL_ID = "Likes_id";
     public static final String REQUESTS_CHANNEL_ID = "Reveal_id";
+    public static final String FIND_NEARBY_CHANNEL_ID = "Find_id";
 
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
@@ -177,11 +168,20 @@ public class App extends Application {
             );
             RevealChannel.setDescription(getString(R.string.reveal_notification_channel_description));
 
+            NotificationChannel NearbyChannel = new NotificationChannel(
+                    FIND_NEARBY_CHANNEL_ID,
+                    getString(R.string.nearby_notification_channel_name),
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            NearbyChannel.setDescription(getString(R.string.nearby_notification_channel_description));
+
+
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(LikesChannel);
             manager.createNotificationChannel(PickupsChannel);
             manager.createNotificationChannel(MessagesChannel);
             manager.createNotificationChannel(RevealChannel);
+            manager.createNotificationChannel(NearbyChannel);
         }
     }
 

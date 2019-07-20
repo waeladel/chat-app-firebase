@@ -9,7 +9,7 @@ android {
         applicationId "com.trackaty.chat"
         minSdkVersion 16
         targetSdkVersion 28
-        //multiDexEnabled true // Enabling multidex support.
+        multiDexEnabled true // Enabling multidex support.
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,7 +32,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //implementation 'androidx.multidex:multidex:2.0.1' // for multidex
+    implementation 'androidx.multidex:multidex:2.0.1' // for multidex
     implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
     implementation 'com.google.android.material:material:1.1.0-alpha07'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
@@ -80,5 +80,5 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
     implementation 'com.king.view:radarview:1.0.2'
-
+    implementation "io.chirp:chirpsdk:3.9.2"
 }

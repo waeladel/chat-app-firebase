@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private MainActivityViewModel mMainViewModel;// ViewMode for getting the latest current user id
     private Intent intent;
+    private  static final int RESULT_REQUEST_RECORD_AUDIO = 21; // for record audio permission
+    private  static final String PERMISSION_RATIONALE_FRAGMENT = "permissionFragment";
+    private Intent serviceIntent;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -388,6 +391,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int id = item.getItemId();
 
         switch (id){
+            /*case 1:
+                Log.d(TAG, "MenuItem search is clicked");
+                if(!isPermissionGranted()){
+                    requestPermission();
+                }else{
+                    startStopSearchService();
+                }
+
+                break;*/
             case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
                 goToProfile();
@@ -741,9 +753,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (R.id.notificationsFragment != navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.notificationsFragment);
         }
-
     }
-
-
 
 }
