@@ -54,6 +54,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     public static final String LIKES_CHANNEL_ID = "Likes_id";
     public static final String REQUESTS_CHANNEL_ID = "Reveal_id";
     public static final String FIND_NEARBY_CHANNEL_ID = "Find_id";
+    public static final String VISIBILITY_CHANNEL_ID = "Visibility_id";
 
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
@@ -175,6 +176,13 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
             );
             NearbyChannel.setDescription(getString(R.string.nearby_notification_channel_description));
 
+            NotificationChannel VisibilityChannel = new NotificationChannel(
+                    VISIBILITY_CHANNEL_ID,
+                    getString(R.string.visibility_notification_channel_name),
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            VisibilityChannel.setDescription(getString(R.string.visibility_notification_channel_description));
+
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(LikesChannel);
@@ -182,6 +190,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
             manager.createNotificationChannel(MessagesChannel);
             manager.createNotificationChannel(RevealChannel);
             manager.createNotificationChannel(NearbyChannel);
+            manager.createNotificationChannel(VisibilityChannel);
         }
     }
 

@@ -9,6 +9,10 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.navigation.NavDeepLinkBuilder;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -23,10 +27,6 @@ import com.trackaty.chat.R;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.navigation.NavDeepLinkBuilder;
 
 import static com.trackaty.chat.App.LIKES_CHANNEL_ID;
 import static com.trackaty.chat.App.MESSAGES_CHANNEL_ID;
@@ -58,6 +58,8 @@ public class MessagingService extends FirebaseMessagingService {
     private static final int MESSAGES_NOTIFICATION_ID = 3;
     private static final int REQUESTS_SENT_NOTIFICATION_ID = 4;
     private static final int REQUESTS_APPROVED_NOTIFICATION_ID = 5;
+    private static final int FIND_NOTIFICATION_ID = 6;
+    private static final int VISIBILITY_NOTIFICATION_ID = 7;
 
     private Target mTarget;
     private ImageView mAvatarImageView;

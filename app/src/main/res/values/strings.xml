@@ -222,6 +222,7 @@
     <string name="notification_request_sent_title">New reveal request</string>
     <string name="notification_request_approved_title">Request approved</string>
     <string name="notification_nearby_title">Searching For Lovers</string>
+    <string name="notification_visibility_title">You Are Visible</string>
 
     <!--<string name="notification_like_message">%1$s likes you</string>-->
     <string name="notification_like_body">%1$s likes you.</string>
@@ -231,6 +232,8 @@
     <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
     <string name="notification_request_approved_body">%1$s approved your reveal request.</string>
     <string name="notification_nearby_body">Searching for nearby devices is currently active</string>
+    <string name="notification_visibility_body">You are currently visible to nearby potential lovers</string>
+
 
     <string name="notification_default_like_body">You received a new like.</string>
     <string name="notification_default_pick_up_body">You received a new pick-up line.</string>
@@ -245,12 +248,15 @@
     <string name="messages_notification_channel_name">Messages</string>
     <string name="reveal_notification_channel_name">Reveal requests</string>
     <string name="nearby_notification_channel_name">Nearby lovers</string>
+    <string name="visibility_notification_channel_name">Visibility status</string>
 
     <string name="likes_notification_channel_description">Get notifications about likes from nearby people.</string>
     <string name="pickups_notification_channel_description">Get notifications about pick-up lines from nearby people.</string>
     <string name="messages_notification_channel_description">Get notifications when you have a new message.</string>
     <string name="reveal_notification_channel_description">Get notifications when people send you requests to reveal your private contacts.</string>
     <string name="nearby_notification_channel_description">Display a notification indicates that you are currently searching for a person you target.</string>
+    <string name="visibility_notification_channel_description">Display a notification indicates that you are currently visible to others.</string>
+
 
 
     <!--Notifications-->

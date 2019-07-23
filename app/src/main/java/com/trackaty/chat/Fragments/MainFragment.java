@@ -4,12 +4,17 @@ package com.trackaty.chat.Fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +29,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -40,11 +47,14 @@ import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.UsersViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.receivers.SoundIdAlarm;
 import com.trackaty.chat.services.FindNearbyService;
 
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,6 +73,8 @@ public class MainFragment extends Fragment {
     private FragmentManager fragmentManager;
     private  static final String PERMISSION_RATIONALE_FRAGMENT = "permissionFragment";
     private  static final int RESULT_REQUEST_RECORD_AUDIO = 21; // for record audio permission
+    private static final int REQUEST_CODE_ALARM = 13; // To detect if alarm is already set or not
+    private static final String USER_SOUND_ID_KEY = "userSoundId";
     private Intent serviceIntent;
 
     private Context mActivityContext;
@@ -74,15 +86,29 @@ public class MainFragment extends Fragment {
 
     private FloatingActionButton mVisibilityButton; // button to make your self visible to others
 
+    private AlarmManager alarmManager;
+    private Intent alarmIntent;
+    private PendingIntent pendingIntent;
+    private NotificationManagerCompat notificationManager;
+    private Notification mNotification;
+
     /*public  FindNearbyService mService;
     public  boolean mBound = false;*/
 
     private CountDownTimer mSearchingTimer; // Timer for closing search service when finished
     private long mTimeLiftInMillis; // remaining time in milliseconds
+
     private static final String SEARCH_END_TIME_KEY = "Search end time"; // Key for save EndTime to SharedPreferences
     private final static int SEARCHING_PERIOD = 10*60*1000; //1*60*1000;
+    private final static int NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 55; // For visibility notification
 
-
+    private static final int LIKES_NOTIFICATION_ID = 1;
+    private static final int PICK_UPS_NOTIFICATION_ID = 2;
+    private static final int MESSAGES_NOTIFICATION_ID = 3;
+    private static final int REQUESTS_SENT_NOTIFICATION_ID = 4;
+    private static final int REQUESTS_APPROVED_NOTIFICATION_ID = 5;
+    private static final int FIND_NOTIFICATION_ID = 6;
+    private static final int VISIBILITY_NOTIFICATION_ID = 7; // channel Id for visibility notification, Used to cancel it too
 
     private SharedPreferences mSharedPreferences; // So save EndTime in SharedPreferences
 
@@ -114,6 +140,10 @@ public class MainFragment extends Fragment {
         // prepare the Adapter
         mUserArrayList  = new ArrayList<>();
         mUsersAdapter = new UsersAdapter();
+
+        // Create alarm manager and Intent to be used when user set the visibility alarm
+        alarmManager  =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+        alarmIntent  = new Intent(activity, SoundIdAlarm.class);
 
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
@@ -238,6 +268,8 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "mVisibilityButton is clicked");
+                startStopAlarm(); // start the alarm if it's null, stop it if already started
+                toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
             }
         });
 
@@ -254,6 +286,7 @@ public class MainFragment extends Fragment {
         }
         // get the default SharedPreferences. We will use it to save EndTime for search countdown
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        notificationManager = NotificationManagerCompat.from(context); // To notify the manager to create or cancel notification
     }
 
     @Override
@@ -288,6 +321,7 @@ public class MainFragment extends Fragment {
         Log.d(TAG, "onStart");
         // Update searching UI (radar & timer) on onStart
         toggleSearchingUI();
+        toggleVisibleUI();
     }
 
     @Override
@@ -424,6 +458,98 @@ public class MainFragment extends Fragment {
         mRadarView.setVisibility(View.GONE);
     }
 
+    // Update FAb icon according to the alarm status
+    private void toggleVisibleUI() {
+        if(isAlarmExist()){
+            Log.d(TAG , "toggleVisibleUI: Alarm already exist.");
+            /*mVisibilityButton.setEnabled(true);
+            mVisibilityButton.setClickable(true);
+            mVisibilityButton.setBackgroundTintList(mVisibilityButton.getBackgroundTintList());*/
+            mVisibilityButton.setImageResource(R.drawable.ic_aries_symbol);
+        }else{
+            Log.d(TAG , "toggleVisibleUI: Alarm not exist.");
+            /*mVisibilityButton.setEnabled(false);
+            mVisibilityButton.setClickable(true);
+            mVisibilityButton.setBackgroundTintList(ColorStateList.valueOf
+                    (getResources().getColor(R.color.disabled_button)));*/
+            mVisibilityButton.setImageResource(R.drawable.album_abc_spinner_white);
+        }
+    }
+
+    // Start or stop the alarm when Visibility is clicked
+    private void startStopAlarm() {
+        if (isAlarmExist()) {
+            stopAlarm();
+        } else {
+            setAlarm();
+        }
+    }
+
+    private boolean isAlarmExist() {
+        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, PendingIntent.FLAG_NO_CREATE);
+        if (checkPendingIntent != null){
+            Log.d(TAG , "isAlarmExist: yet it is exist. checkPendingIntent= "+checkPendingIntent);
+            return true;
+        }else{
+            Log.d(TAG , "isAlarmExist: not exist. checkPendingIntent= "+checkPendingIntent);
+            return false;
+        }
+    }
+
+    private void setAlarm() {
+        Log.d(TAG , "setAlarm()");
+        alarmIntent.putExtra(USER_SOUND_ID_KEY, 2304);
+        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        if (alarmManager != null) {
+            Log.d(TAG , "setAlarm: alarmManager= "+alarmManager);
+            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),60000, pendingIntent);
+            //alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() , 60000, pendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), pendingIntent);
+            }else{
+                alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() , pendingIntent);
+            }
+        }
+        setNotification(); // Create Ongoing notification when alarm is set
+        /*//alarmManager.setAndAllowWhileIdle();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
+        }*/
+    }
+
+    private void stopAlarm() {
+        Log.d(TAG , "stopAlarm()");
+        alarmManager =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+        alarmIntent = new Intent(activity, SoundIdAlarm.class);
+        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+            pendingIntent.cancel();
+        }
+        cancelNotification();
+    }
+
+    // Create Ongoing notification when alarm is set
+    private void setNotification() {
+        Intent NotificationClickIntent = new Intent(mActivityContext, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mActivityContext, NOTIFICATION_PENDING_INTENT_REQUEST_CODE, NotificationClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mNotification = new NotificationCompat.Builder(mActivityContext, VISIBILITY_CHANNEL_ID)
+                .setContentTitle(getString(R.string.notification_visibility_title))
+                .setContentText(getString(R.string.notification_visibility_body))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .build();
+
+        notificationManager.notify(VISIBILITY_NOTIFICATION_ID, mNotification);
+
+    }
+
+    // Cancel Ongoing notification when user click visibility again
+    private void cancelNotification() {
+        notificationManager.cancel(VISIBILITY_NOTIFICATION_ID);
+    }
 
     // Get Request Permissions Result
     @Override

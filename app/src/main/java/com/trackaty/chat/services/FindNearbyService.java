@@ -19,6 +19,7 @@ import com.trackaty.chat.activities.MainActivity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 import io.chirp.connect.ChirpConnect;
@@ -35,7 +36,7 @@ public class FindNearbyService extends Service {
 
     private FirebaseUser mFirebaseCurrentUser;
     private String mCurrentUserId; //get current to get uid
-
+    private int receivedSoundID;
     // Binder given to clients
     //private final IBinder binder = new LocalBinder();
     // Random number generator
@@ -43,8 +44,15 @@ public class FindNearbyService extends Service {
 
 
     private final static int PENDING_INTENT_REQUESTCODE = 45; // For the notification
-    private final static int NOTIFICATION_ID = 6;
     private final static int SEARCHING_PERIOD = 10*60*1000; //1*60*1000;
+
+    private static final int LIKES_NOTIFICATION_ID = 1;
+    private static final int PICK_UPS_NOTIFICATION_ID = 2;
+    private static final int MESSAGES_NOTIFICATION_ID = 3;
+    private static final int REQUESTS_SENT_NOTIFICATION_ID = 4;
+    private static final int REQUESTS_APPROVED_NOTIFICATION_ID = 5;
+    private static final int FIND_NOTIFICATION_ID = 6;
+    private static final int VISIBILITY_NOTIFICATION_ID = 7;
 
     private Notification mNotification;
     private ChirpConnect chirp;
@@ -71,12 +79,13 @@ public class FindNearbyService extends Service {
 
         // After we received a sound Id
         @Override
-        public void onReceived(@Nullable byte[] data, int i) {
-            if (data != null) {
-                String identifier = new String(data);
-                Log.v("ChirpSDK: ", "Received " + identifier);
+        public void onReceived(@Nullable byte[] bytes, int i) {
+            if (bytes != null && bytes.length > 0) {
+                //String identifier = new String(bytes);
+                receivedSoundID = bytesToInt(bytes);
+                Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+bytes.length);
             } else {
-                Log.e("ChirpError: ", "Decode failed");
+                Log.e(TAG, "ChirpError: Decode failed");
             }
         }
 
@@ -118,6 +127,9 @@ public class FindNearbyService extends Service {
             return;
         }
 
+        // Create new chirp instance
+        chirp = new ChirpConnect(this, CHIRP_APP_KEY, CHIRP_APP_SECRET);
+
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
@@ -129,11 +141,9 @@ public class FindNearbyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //userID = intent.getStringExtra("userID");
-        Log.d(TAG, "onStartCommand. userId= ");
+        Log.d(TAG, "onStartCommand");
 
         if (chirp != null) {
-            // Create new chirp instance if not already created
-            chirp = new ChirpConnect(this, CHIRP_APP_KEY, CHIRP_APP_SECRET);
             Log.d(TAG, "chirp Connect Version: " + chirp.getVersion());
             //return super.onStartCommand(intent, flags, startId);
             ChirpError setConfigError = chirp.setConfig(CHIRP_APP_CONFIG);
@@ -142,7 +152,6 @@ public class FindNearbyService extends Service {
             }else{
                 // If configuration succeeded, let's start the Sdk and attach the listener
                 startSdk();
-                chirp.setListener(chirpEventListener);
             }
         }
 
@@ -157,7 +166,7 @@ public class FindNearbyService extends Service {
                 .build();
 
 
-        startForeground(NOTIFICATION_ID, mNotification);
+        startForeground(FIND_NOTIFICATION_ID, mNotification);
 
         return START_REDELIVER_INTENT;
     }
@@ -197,6 +206,7 @@ public class FindNearbyService extends Service {
             return;
         }else{
             Log.d(TAG, "chirp started. lets start timer");
+            chirp.setListener(chirpEventListener);
             StartTimer();
         }
     }
@@ -215,7 +225,7 @@ public class FindNearbyService extends Service {
         mSearchingTimer = new CountDownTimer( mTimeLiftInMillis,1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
+                //Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
                 //mTimeLiftInMillis = millisUntilFinished;
             }
 
@@ -252,6 +262,21 @@ public class FindNearbyService extends Service {
             return FindNearbyService.this;
         }
     }*/
+
+    public int bytesToInt (byte[] bytes) {
+
+        /*ByteBuffer wrapped = ByteBuffer.wrap(bytes); // big-endian by default
+        return wrapped.getInt(); // 1*/
+
+        //return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
+
+        /*return ((bytes[0] & 0xFF) << 24) |
+                ((bytes[1] & 0xFF) << 16) |
+                ((bytes[2] & 0xFF) << 8 ) |
+                ((bytes[3] & 0xFF) << 0 );*/
+
+        return ByteBuffer.wrap(bytes).getInt();
+    }
 
 }
 

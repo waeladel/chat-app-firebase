@@ -80,8 +80,13 @@
         <service
             android:name=".services.FindNearbyService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
         </service>
+        <receiver
+            android:name=".receivers.SoundIdAlarm"
+            android:enabled="true"
+            android:exported="false" />
+
     </application>
 
 </manifest>
