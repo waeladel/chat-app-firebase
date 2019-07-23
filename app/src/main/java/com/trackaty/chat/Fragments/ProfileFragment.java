@@ -5,6 +5,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,16 +25,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -148,7 +147,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
             mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user
-            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + "mUserId= " + mUserId );
+            Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mUserId= " + mUserId );
         }
 
         //Get current logged in user
