@@ -3,14 +3,16 @@ package com.trackaty.chat.DataSources;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.DatabaseNotification;
+import com.trackaty.chat.models.FirebaseListeners;
 import com.trackaty.chat.models.Relation;
 
 import java.util.ArrayList;
@@ -18,8 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
+import static com.trackaty.chat.Utils.DatabaseKeys.getJoinedKeys;
 
 public class RelationRepository {
 
@@ -49,6 +50,15 @@ public class RelationRepository {
     private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack"; // if other user liked me after i liked him
     private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RevealSent";
     private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RevealApproved";
+
+    // requests and relations status
+    private static final String RELATION_STATUS_SENDER = "sender";
+    private static final String RELATION_STATUS_RECEIVER = "receiver";
+    private static final String RELATION_STATUS_STALKER = "stalker";
+    private static final String RELATION_STATUS_FOLLOWED = "followed";
+    private static final String RELATION_STATUS_NOT_FRIEND = "notFriend";
+    private static final String RELATION_STATUS_BLOCKING = "blocking"; // the selected user is blocking me (current user)
+    private static final String RELATION_STATUS_BLOCKED= "blocked"; // the selected user is blocked by me (current user)
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
@@ -511,6 +521,97 @@ public class RelationRepository {
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "unlove onSuccess");
+                // ...
+            }
+        });
+    }
+
+    // Block user without deleting conversation
+    public void blockUser(String currentUserId, String userId) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        //Cancel likes i (current user) sent to this (target user). Keep like he sent to me (current user)
+        childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
+        //likes is to display who send likes to this particular user
+        childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
+
+        // Update relations to blocking (current user) and blocked (target user)
+        childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKED);
+        childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKING);
+
+        // Chat ID is not passed from MainFragment, we need to create
+        String chatId = getJoinedKeys(currentUserId , userId);
+        // update chat active to -1, which means it's blocked chat room
+        childUpdates.put("/chats/" + chatId +"/active",-1);
+
+        // Delete chats with this person from chats recycler view
+        /*childUpdates.put("/userChats/" + currentUserId + "/" + chatId, null);
+        childUpdates.put("/userChats/" + userId + "/" + chatId, null);*/
+
+        // Delete notifications
+
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "block onSuccess");
+                // ...
+            }
+        });
+    }
+
+    // Block user and delete the conversation (userChat table)
+    public void blockDelete(String currentUserId, String userId) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        //Cancel likes i (current user) sent to this (target user). Keep like he sent to me (current user)
+        childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
+        //likes is to display who send likes to this particular user
+        childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
+
+        // Update relations to blocking (current user) and blocked (target user)
+        childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKED);
+        childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKING);
+
+        // Chat ID is not passed from MainFragment, we need to create
+        String chatId = getJoinedKeys(currentUserId , userId);
+        // update chat active to -1, which means it's blocked chat room
+        childUpdates.put("/chats/" + chatId +"/active",-1);
+
+        // Delete chats with this person from chats recycler view
+        childUpdates.put("/userChats/" + currentUserId + "/" + chatId, null);
+        childUpdates.put("/userChats/" + userId + "/" + chatId, null);
+
+        // Delete notifications
+
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "block onSuccess");
+                // ...
+            }
+        });
+    }
+
+    // Delete blocking/blocked relation to start fresh
+    public void unblockUser(String currentUserId, String userId) {
+        Map<String, Object> childUpdates = new HashMap<>();
+
+        // Update relations to null. To start fresh
+        childUpdates.put("/relations/" + currentUserId + "/" + userId, null);
+        childUpdates.put("/relations/" + userId + "/" + currentUserId, null);
+
+        // Chat ID is not passed from MainFragment, we need to create
+        String chatId = getJoinedKeys(currentUserId , userId);
+        // update chat to null, to delete the chat room and start fresh
+        childUpdates.put("/chats/" + chatId ,null);
+
+        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Write was successful!
+                Log.i(TAG, "block onSuccess");
                 // ...
             }
         });

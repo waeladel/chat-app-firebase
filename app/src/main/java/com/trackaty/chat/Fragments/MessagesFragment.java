@@ -86,6 +86,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     private  static final String CHAT_INACTIVE_FRAGMENT = "InactiveFragment";
     private  static final String ACTIVATE_CHAT_FRAGMENT = "ActivateFragment";
+    private  static final String BLOCKED_CHAT_FRAGMENT = "BlockedChatFragment";
+
 
     private MessagesViewModel mMessagesViewModel;
     private MainActivityViewModel mMainViewModel;
@@ -999,7 +1001,13 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             if(null != chat.getActive()) {
                 // Active is set
                 Log.d(TAG, "RemainingTime: Active is set");
-                if (chat.getActive() == 0) {
+                if (chat.getActive() == -1) {
+                    // This chat is blocked
+                    Log.d(TAG, "sendMessage: You can't Communicate with this user");
+                    CancelActiveTimer();
+                    mRemainingTimeText.setVisibility(View.VISIBLE);
+                    mRemainingTimeText.setText(R.string.chat_blocked_alert_dialog_title);
+                }else if (chat.getActive() == 0) {
                     // This chat is active forever
                     Log.d(TAG, "RemainingTime: This chat is active forever, don't show timer");
                     mRemainingTimeText.setVisibility(View.GONE);
@@ -1122,7 +1130,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             if(null != mChat.getActive()) {
                 // Active is set
                 Log.d(TAG, "sendMessage: Active is set");
-                if (mChat.getActive() == 0) {
+                if (mChat.getActive() == -1) {
+                    // This chat is blocked
+                    Log.d(TAG, "sendMessage: You can't Communicate with this user");
+                    //mSendButton.setImageAlpha(0x3F); 0xFF
+                    showChatBlockedDialog();
+                } else if (mChat.getActive() == 0) {
                     // This chat is active forever
                     Log.d(TAG, "sendMessage: This chat is active forever, send message");
                     sendMessage(mChatId, messageText);
@@ -1468,6 +1481,16 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             fragmentManager = getFragmentManager();
             chatInactiveFragment.show(fragmentManager, CHAT_INACTIVE_FRAGMENT);
             Log.i(TAG, "edit/chatInactiveFragment show clicked ");
+        }
+    }
+
+    //Show blocked alert dialog
+    private void showChatBlockedDialog() {
+        ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance();
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            chatBlockedAlert.show(fragmentManager, BLOCKED_CHAT_FRAGMENT);
+            Log.i(TAG, "chatBlockedAlert show clicked ");
         }
     }
 

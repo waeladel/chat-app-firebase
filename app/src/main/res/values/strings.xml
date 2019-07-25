@@ -11,6 +11,9 @@
     <string name="menu_invite">Invite Friends</string>
     <string name="menu_save">Save</string>
 
+    <string name="popup_menu_block">Block</string>
+    <string name="popup_menu_block_delete">Block and delete chat</string>
+
     <string name="love_button_hint_love">Love</string>
     <string name="love_button_hint_love_back">Love Back</string>
     <string name="love_button_hint_unlove">Unlove</string>
@@ -21,10 +24,13 @@
     <string name="request_button_unreveal_hint">Unreveal</string>
     <string name="alert_dialog_edit">Edit revealed contacts</string>
     <string name="alert_dialog_unreveal">Unreveal my contacts</string>
+    <string name="alert_dialog_block">Block this user</string>
     <string name="edit_unreveal_alert_dialog_title">Select Options:</string>
-    <string name="chat_inactive_alert_dialog_title">Conversation is inactive</string>
+    <string name="chat_inactive_alert_dialog_title">Conversation Is Inactive</string>
+    <string name="chat_blocked_alert_dialog_title">Conversation Disabled</string>
 
     <string name="block_button">Block</string>
+    <string name="unblock_button">Unblock</string>
     <string name="edit_profile_button">Edit Profile</string>
 
     <string name="see_more_about_button">See more about %1$s</string>
@@ -166,11 +172,19 @@
     <string name="user_request_edit_dialog_hint">Edit revealed contacts:</string>
 
     <string name="user_request_dialog_title">Select contacts</string>
-    <string name="user_confirm_dialog_message">This user will not see your private contacts and you can\'t see his. Are you sure you want to unreveal your contacts?</string>
+    <string name="confirm_delete_relation_dialog_message">This user will not see your private contacts and you can\'t see his. Are you sure you want to unreveal your contacts?</string>
+<!--
+    <string name="confirm_block_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You can\'t exchange messages, likes or reveal requests.</string>
+    <string name="confirm_block_delete_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You can\'t exchange messages, likes or reveal requests. Are you sure you want to block this user and delete your conversation with him/her?</string>
+-->
+    <string name="confirm_block_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You won\'t be able to exchange messages, likes or reveal requests.</string>
+    <string name="confirm_block_delete_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You won\'t be able to exchange messages, likes or reveal requests and your conversation will be deleted. </string>
     <string name="user_confirm_dialog_positive">Yes</string>
+    <string name="user_confirm_blocking_dialog">Block</string>
     <string name="user_confirm_dialog_negative">Cancel</string>
     <string name="confirm_dialog_positive_button">OK</string>
     <string name="chat_inactive_dialog_message">This conversation isn\'t active right now. You must wait until the recipient reactivate it.</string>
+    <string name="chat_blocked_dialog_message">Communication with this person is disabled.</string>
     <string name="activate_chat_dialog_title">Keep conversation active for:</string>
     <!--<string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without the need to scratch it. Therefore, don\'t choose it unless you feel comfortable with this person.</string>-->
     <string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without scratching. Therefore, don\'t choose it unless you start to trust this person.</string>
