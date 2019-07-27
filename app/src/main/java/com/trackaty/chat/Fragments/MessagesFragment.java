@@ -693,10 +693,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             mTimeLiftInMillis = mActiveEndTime - now;
             ShowRemainingTime(mChat);
         }
-
         // Re-start Last online countdown timer on fragment start
         if(mLastOnlineEndTime != null){
             UpdateTimeAgo(mLastOnlineEndTime);
+
         }
     }
 
@@ -824,6 +824,58 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     }
 
+        // Get chat before getting chat user, to knoe if chat is blocked or not
+        mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
+            @Override
+            public void onChanged(Chat chat) {
+                mChat = chat;// to get chat even if null, it helps to detect blocked chat
+                if (chat != null){
+                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                    if(null != mChat.getActive()){
+                        // End timestamp is needed to restart the countdown on fragment start
+                        mActiveEndTime = mChat.getActive();
+
+                        // check if chat is blocked or not
+                        if(mActiveEndTime == -1){
+                            //Chat is blocked, hide last active time and avatar
+                            mUserPhoto.setImageResource(R.drawable.ic_user_account_grey_white);
+                            mLastSeen.setVisibility(View.GONE);
+                        }else{
+                            //Chat is not blocked, show last active time and avatar
+                            // display Last online countdown timer, as chat user is not blocked anymore
+                            mLastSeen.setVisibility(View.VISIBLE);
+                            // display chatUser avatar again, as chat user is not blocked anymore
+                            if (null != mChatUser.getAvatar()) {
+                                Picasso.get()
+                                        .load(mChatUser.getAvatar())
+                                        .placeholder(R.drawable.ic_user_account_grey_white)
+                                        .error(R.drawable.ic_broken_image)
+                                        .into(mUserPhoto);
+                            }
+                        }
+
+                        // pass chat to MessagesAdapter to get active end time
+                        mMessagesAdapter.setChat(mChat);
+                    }
+                    // Display the time left till deactivate the conversation
+                    ShowRemainingTime(mChat);
+
+                }else{// Chat is null, which is probably deleted after unblock happens to start fresh
+                    // display Last online countdown timer, as chat user is not blocked anymore
+                    mLastSeen.setVisibility(View.VISIBLE);
+                    // display chatUser avatar again, as chat user is not blocked anymore
+                    if (mChatUser != null && null != mChatUser.getAvatar()) {
+                        Picasso.get()
+                                .load(mChatUser.getAvatar())
+                                .placeholder(R.drawable.ic_user_account_grey_white)
+                                .error(R.drawable.ic_broken_image)
+                                .into(mUserPhoto);
+                    }
+
+                }
+            }
+        });
+
         // get Chat User
         if(!isGroup){
             mMessagesViewModel.getChatUser(mChatUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
@@ -876,6 +928,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                         }
 
                     }
+                    // check if chat is blocked or not
+                    if(mActiveEndTime != null && mActiveEndTime == -1){
+                        //Chat is blocked, return so that we don't display avatar
+                        //CancelLastOnlineTimer();
+                        return;
+                    }
                     // Get user values
                     if (null != mChatUser.getAvatar()) {
                         Picasso.get()
@@ -921,25 +979,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 }
             });*/
 
-        mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
-            @Override
-            public void onChanged(Chat chat) {
-                if (chat != null){
-                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
-                    mChat = chat;
-                    if(null != mChat.getActive()){
-                        // End timestamp is needed to restart the countdown on fragment start
-                        mActiveEndTime = mChat.getActive();
-                        // pass chat to MessagesAdapter to get active end time
-                        mMessagesAdapter.setChat(mChat);
-                    }
-                    // Display the time left till deactivate the conversation
-                    ShowRemainingTime(mChat);
-                }
-            }
-        });
-
-
     }
 
     // A countdown timer to update last online time every minute
@@ -951,7 +990,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             CancelLastOnlineTimer();
         }
 
-        mAgoTimer = new CountDownTimer(10*60*1000, 60*1000) {
+        mAgoTimer = new CountDownTimer(10*60*1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
 

@@ -2,6 +2,9 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,11 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.ItemKeyedDataSource;
 
 public class MessagesRepository {
 
@@ -102,7 +100,9 @@ public class MessagesRepository {
             } else {
                 // Chat is null, error out
                 Log.w(TAG, "chat is null, no such chat");
-                //mChat.postValue(null);
+                // Return null because we need to know when chat is deleted due to unblocking user
+                // We delete the chat node when unblocking a user to start fresh.
+                mChat.postValue(null);
             }
         }
         @Override
