@@ -10,14 +10,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.trackaty.chat.Interface.ItemClickListener;
-import com.trackaty.chat.R;
-
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ConfirmationAlertFragment extends DialogFragment implements ItemClickListener {
-    private final static String TAG = ConfirmationAlertFragment.class.getSimpleName();
+import com.trackaty.chat.Interface.ItemClickListener;
+import com.trackaty.chat.R;
+
+public class DeleteRelationAlertFragment extends DialogFragment implements ItemClickListener {
+    private final static String TAG = DeleteRelationAlertFragment.class.getSimpleName();
     DatePickerDialog.OnDateSetListener ondateSet;
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
@@ -30,26 +30,22 @@ public class ConfirmationAlertFragment extends DialogFragment implements ItemCli
     private static ItemClickListener itemClickListen;
 
 
-    public ConfirmationAlertFragment() {
+    public DeleteRelationAlertFragment() {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
     }
 
-    public static ConfirmationAlertFragment newInstance(ItemClickListener itemClickListener) {
+    public static DeleteRelationAlertFragment newInstance(ItemClickListener itemClickListener) {
 
         // instantiate click listener to pass click events to parent fragment
         itemClickListen = itemClickListener;
 
-        ConfirmationAlertFragment fragment = new ConfirmationAlertFragment();
+        DeleteRelationAlertFragment fragment = new DeleteRelationAlertFragment();
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
-        ondateSet = ondate;
     }
 
     /*@NonNull
@@ -81,15 +77,6 @@ public class ConfirmationAlertFragment extends DialogFragment implements ItemCli
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mActivityContext = context;
-        if (context instanceof Activity){// check if fragmentContext is an activity
-            activity =(Activity) context;
-        }
-    }
-
-    @Override
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -97,7 +84,7 @@ public class ConfirmationAlertFragment extends DialogFragment implements ItemCli
         // AlertDialog.Builder to create the dialog wihtouht custum xml layout
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         //alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));
-        alertDialogBuilder.setMessage(R.string.user_confirm_dialog_message);
+        alertDialogBuilder.setMessage(R.string.confirm_delete_relation_dialog_message);
 
         // set click listener for Yes button
         alertDialogBuilder.setPositiveButton(R.string.user_confirm_dialog_positive,  new DialogInterface.OnClickListener() {

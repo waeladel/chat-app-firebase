@@ -2,15 +2,14 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.trackaty.chat.DataSources.RelationRepository;
 import com.trackaty.chat.DataSources.UserRepository;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModel;
-import androidx.paging.DataSource;
 
 public class ProfileViewModel extends ViewModel {
 
@@ -99,6 +98,18 @@ public class ProfileViewModel extends ViewModel {
             mLoveStatues = relationRepository.getLoveStatues(currentUserId, userId);
         }
         return mLoveStatues;
+    }
+
+    public void blockUser(String currentUserId, String userId) {
+        relationRepository.blockUser(currentUserId, userId);
+    }
+
+    public void blockDelete(String currentUserId, String userId) {
+        relationRepository.blockDelete(currentUserId, userId);
+    }
+
+    public void unblockUser(String currentUserId, String userId) {
+        relationRepository.unblockUser(currentUserId, userId);
     }
 
     public LiveData<User> getUser(String currentUserId){

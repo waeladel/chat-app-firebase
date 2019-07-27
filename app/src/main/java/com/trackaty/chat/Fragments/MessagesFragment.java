@@ -86,6 +86,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     private  static final String CHAT_INACTIVE_FRAGMENT = "InactiveFragment";
     private  static final String ACTIVATE_CHAT_FRAGMENT = "ActivateFragment";
+    private  static final String BLOCKED_CHAT_FRAGMENT = "BlockedChatFragment";
+
 
     private MessagesViewModel mMessagesViewModel;
     private MainActivityViewModel mMainViewModel;
@@ -691,10 +693,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             mTimeLiftInMillis = mActiveEndTime - now;
             ShowRemainingTime(mChat);
         }
-
         // Re-start Last online countdown timer on fragment start
         if(mLastOnlineEndTime != null){
             UpdateTimeAgo(mLastOnlineEndTime);
+
         }
     }
 
@@ -822,6 +824,64 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     }
 
+        // Get chat before getting chat user, to knoe if chat is blocked or not
+        mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
+            @Override
+            public void onChanged(Chat chat) {
+                mChat = chat;// to get chat even if null, it helps to detect blocked chat
+                if (chat != null){
+                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                    if (null != mChat.getActive()) {
+                        // End timestamp is needed to restart the countdown on fragment start
+                        mActiveEndTime = mChat.getActive();
+
+                        // check if chat is blocked or not active forever
+                        if (mActiveEndTime == -1) {
+                            //Chat is blocked, hide last active time and avatar
+                            mUserPhoto.setImageResource(R.drawable.ic_user_account_grey_white);
+                            mLastSeen.setVisibility(View.GONE);
+                        }else{
+                            //Chat is not blocked, show avatar
+                            if (mChatUser != null && null != mChatUser.getAvatar()) {
+                                Picasso.get()
+                                        .load(mChatUser.getAvatar())
+                                        .placeholder(R.drawable.ic_user_account_grey_white)
+                                        .error(R.drawable.ic_broken_image)
+                                        .into(mUserPhoto);
+                            }
+                            // check if chat active forever
+                            if (mActiveEndTime == 0) {
+                                // display Last online countdown timer, as chat is active forever
+                                mLastSeen.setVisibility(View.VISIBLE);
+                            } else {
+                                 //Chat is not active forever, hide last active time
+                                mLastSeen.setVisibility(View.GONE);
+                            }
+                        }
+                    }
+
+                    // pass chat to MessagesAdapter to get active end time
+                    mMessagesAdapter.setChat(mChat);
+
+                    // Display the time left till deactivate the conversation
+                    ShowRemainingTime(mChat);
+
+                }else{// Chat is null, which is probably deleted after unblock happens to start fresh
+                    // hide Last online countdown timer, as chat is null which means it's not active forever
+                    mLastSeen.setVisibility(View.GONE);
+                    // display chatUser avatar again, as chat user is not blocked anymore
+                    if (mChatUser != null && null != mChatUser.getAvatar()) {
+                        Picasso.get()
+                                .load(mChatUser.getAvatar())
+                                .placeholder(R.drawable.ic_user_account_grey_white)
+                                .error(R.drawable.ic_broken_image)
+                                .into(mUserPhoto);
+                    }
+
+                }
+            }
+        });
+
         // get Chat User
         if(!isGroup){
             mMessagesViewModel.getChatUser(mChatUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
@@ -874,6 +934,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                         }
 
                     }
+                    // check if chat is blocked or not
+                    if(mActiveEndTime != null && mActiveEndTime == -1){
+                        //Chat is blocked, return so that we don't display avatar
+                        //CancelLastOnlineTimer();
+                        return;
+                    }
                     // Get user values
                     if (null != mChatUser.getAvatar()) {
                         Picasso.get()
@@ -918,25 +984,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     }
                 }
             });*/
-
-        mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
-            @Override
-            public void onChanged(Chat chat) {
-                if (chat != null){
-                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
-                    mChat = chat;
-                    if(null != mChat.getActive()){
-                        // End timestamp is needed to restart the countdown on fragment start
-                        mActiveEndTime = mChat.getActive();
-                        // pass chat to MessagesAdapter to get active end time
-                        mMessagesAdapter.setChat(mChat);
-                    }
-                    // Display the time left till deactivate the conversation
-                    ShowRemainingTime(mChat);
-                }
-            }
-        });
-
 
     }
 
@@ -999,7 +1046,14 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             if(null != chat.getActive()) {
                 // Active is set
                 Log.d(TAG, "RemainingTime: Active is set");
-                if (chat.getActive() == 0) {
+                if (chat.getActive() == -1) {
+                    // This chat is blocked
+                    Log.d(TAG, "sendMessage: You can't Communicate with this user");
+                    CancelActiveTimer();
+                    mRemainingTimeText.setVisibility(View.VISIBLE);
+                    mRemainingTimeText.setText(R.string.chat_blocked_alert_dialog_title);
+                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                }else if (chat.getActive() == 0) {
                     // This chat is active forever
                     Log.d(TAG, "RemainingTime: This chat is active forever, don't show timer");
                     mRemainingTimeText.setVisibility(View.GONE);
@@ -1122,7 +1176,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             if(null != mChat.getActive()) {
                 // Active is set
                 Log.d(TAG, "sendMessage: Active is set");
-                if (mChat.getActive() == 0) {
+                if (mChat.getActive() == -1) {
+                    // This chat is blocked
+                    Log.d(TAG, "sendMessage: You can't Communicate with this user");
+                    //mSendButton.setImageAlpha(0x3F); 0xFF
+                    showChatBlockedDialog();
+                } else if (mChat.getActive() == 0) {
                     // This chat is active forever
                     Log.d(TAG, "sendMessage: This chat is active forever, send message");
                     sendMessage(mChatId, messageText);
@@ -1468,6 +1527,16 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             fragmentManager = getFragmentManager();
             chatInactiveFragment.show(fragmentManager, CHAT_INACTIVE_FRAGMENT);
             Log.i(TAG, "edit/chatInactiveFragment show clicked ");
+        }
+    }
+
+    //Show blocked alert dialog
+    private void showChatBlockedDialog() {
+        ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance();
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            chatBlockedAlert.show(fragmentManager, BLOCKED_CHAT_FRAGMENT);
+            Log.i(TAG, "chatBlockedAlert show clicked ");
         }
     }
 
