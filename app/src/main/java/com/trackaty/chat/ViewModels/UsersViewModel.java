@@ -1,20 +1,17 @@
 package com.trackaty.chat.ViewModels;
 
-import android.content.ClipData;
-import android.database.Observable;
 import android.util.Log;
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.DataSources.UsersDataFactory;
-import com.trackaty.chat.DataSources.UsersRepository;
-import com.trackaty.chat.models.User;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.paging.ItemKeyedDataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
+
+import com.google.firebase.database.DatabaseReference;
+import com.trackaty.chat.DataSources.UserRepository;
+import com.trackaty.chat.DataSources.UsersDataFactory;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
+import com.trackaty.chat.models.User;
 
 public class UsersViewModel extends ViewModel {
 
@@ -28,10 +25,13 @@ public class UsersViewModel extends ViewModel {
 
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mUsersRef;
+    private User mUser;
+    private UserRepository mUserRepository;
 
     public UsersViewModel() {
         usersDataSourceFactory = new UsersDataFactory();
         Log.d(TAG, "mama UsersViewModel init");
+        mUserRepository = new UserRepository();
         //liveDataSource = usersDataSourceFactory.getUserLiveDataSource();
 
         //Enabling Offline Capabilities//
@@ -57,6 +57,11 @@ public class UsersViewModel extends ViewModel {
             usersList = new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
         }
         return usersList ;
+    }
+
+    // get current user to send it's sound id extra to alarm receiver
+    public void getUserOnce(String userId, FirebaseUserCallback callback) {
+        mUserRepository.getUserOnce(userId, callback);
     }
 
     /*public Observable<PagedList> getPagedListObservable(){

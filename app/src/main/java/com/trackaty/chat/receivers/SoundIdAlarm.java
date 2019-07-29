@@ -6,20 +6,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.nio.ByteBuffer;
 
 import io.chirp.connect.ChirpConnect;
+import io.chirp.connect.interfaces.ConnectEventListener;
 import io.chirp.connect.models.ChirpError;
 
 public class SoundIdAlarm extends BroadcastReceiver {
 
     private final static String TAG = SoundIdAlarm.class.getSimpleName();
     //private String userID;
-    private int userSoundId;
+    private int mCurrentSoundId;
+    private String mCurrentUserId;
     byte[] payload ; // = {0, 0, 0, 0};
     //byte[] stringPayload;
 
@@ -34,8 +40,50 @@ public class SoundIdAlarm extends BroadcastReceiver {
     private PendingIntent pendingIntent;
     private final static int ALARM_INTERVAL = 60*1000;
     private static final int REQUEST_CODE_ALARM = 13;
-    private static final String USER_SOUND_ID_KEY = "userSoundId";
 
+    private static final String USER_SOUND_ID_KEY = "userSoundId";
+    private static final String USER_ID_KEY = "userId";
+    final Handler handler = new Handler();
+    // A listener for sound id
+    ConnectEventListener chirpEventListener = new ConnectEventListener() {
+        @Override
+        public void onSent(@NotNull byte[] bytes, int i) {
+            Log.d(TAG, "onSent");
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Do something after 5s = 5000ms
+                    closeSDK();
+                }
+            }, 1000);
+        }
+
+        @Override
+        public void onSending(@NotNull byte[] bytes, int i) {
+            Log.d(TAG, "onSending");
+        }
+
+        // After we received a sound Id
+        @Override
+        public void onReceived(@Nullable byte[] bytes, int i) {
+            Log.d(TAG, "onReceived");
+        }
+
+        @Override
+        public void onReceiving(int i) {
+            Log.d(TAG, "onReceiving");
+        }
+
+        @Override
+        public void onStateChanged(int i, int i1) {
+            Log.d(TAG, "onStateChanged");
+        }
+
+        @Override
+        public void onSystemVolumeChanged(float v, float v1) {
+            Log.d(TAG, "onSystemVolumeChanged");
+        }
+    };
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -50,13 +98,19 @@ public class SoundIdAlarm extends BroadcastReceiver {
             v.vibrate(500);
         }*/
 
+        //get the attached bundle from the intent
+        Bundle extras = intent.getExtras();
 
+        if(extras != null ){
+            mCurrentSoundId = extras.getInt(USER_SOUND_ID_KEY);
+            //mCurrentUserId = extras.getString(USER_ID_KEY);
+            //userID = intent.getStringExtra(USER_SOUND_ID_KEY);
+        }
         // you can do the processing here.
-        userSoundId = intent.getIntExtra(USER_SOUND_ID_KEY, 0);
-        //userID = intent.getStringExtra(USER_SOUND_ID_KEY);
-        Log.d(TAG, "onReceive. StringExtra= "+userSoundId);
+
+        Log.d(TAG, "onReceive. StringExtra soundId= "+ mCurrentSoundId);
         //stringPayload = userID.getBytes(Charset.forName("UTF-8"));
-        payload = intToBytes(userSoundId);
+        payload = intToBytes(mCurrentSoundId);
 
         // To schedule the next alarm, this is better than repeating alarm in case of one of the alarms was delayed
         alarmManager =  (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -88,7 +142,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.i(TAG, "Playing sound is Complete");
-                closeClean();
+                closeSDK();
             }
         });
 
@@ -104,7 +158,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
         //Toast.makeText(context,"BroadcastReceiver Received",Toast.LENGTH_LONG).show();
 
         chirpConnect = new ChirpConnect(context, APP_KEY, APP_SECRET);
-        Log.d(TAG , "BroadcastReceiver Received. userId= "+ userID+ " hash= "+chirpConnect.hashCode());
+        Log.d(TAG , "BroadcastReceiver Received. mCurrentUserId= "+ userID+ " hash= "+chirpConnect.hashCode());
 
         //chirpConnect.setConfigFromNetwork(new ConnectSetConfigListener() {
         ChirpError error = chirpConnect.setConfig(APP_CONFIG);
@@ -191,7 +245,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
     private void scheduleNextAlarm(Context context, AlarmManager alarmManager) {
 
         alarmIntent  = new Intent(context, SoundIdAlarm.class);
-        alarmIntent.putExtra(USER_SOUND_ID_KEY, userSoundId);
+        alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentSoundId);
         pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -210,12 +264,16 @@ public class SoundIdAlarm extends BroadcastReceiver {
     }*/
 
     private void startSDK() {
+        if (chirp == null) {
+            return;
+        }
         // Start ChirpSDK sender and receiver, if no arguments are passed both sender and receiver are started
         ChirpError error = chirp.start(true, false);
         if (error.getCode() > 0) {
             Log.e("ChirpError: ", error.getMessage());
         } else {
             Log.v("ChirpSDK: ", "Started ChirpSDK");
+            chirp.setListener(chirpEventListener);
             sendPayload();
         }
     }
@@ -232,18 +290,18 @@ public class SoundIdAlarm extends BroadcastReceiver {
         Log.d(TAG, "sending data: Payload size= "+payload.length);
         if (error.getCode() > 0) {
             Log.e(TAG, "ConnectError: " + error.getMessage());
-            closeClean();
+            closeSDK();
         }else{
             Log.i(TAG, "Data send successfully" );
             // Close after 3 second. Don't close immediately so that we don't interrupt the sending process
-            final Handler handler = new Handler();
+            /*final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     // Do something after 5s = 5000ms
-                    closeClean();
+                    closeSDK();
                 }
-            }, 3000);
+            }, 3000);*/
         }
     }
 
@@ -265,7 +323,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
                 (byte)value };*/
     }
 
-    private void closeClean(){
+    private void closeSDK(){
         chirp.stop();
         try {
             chirp.close();

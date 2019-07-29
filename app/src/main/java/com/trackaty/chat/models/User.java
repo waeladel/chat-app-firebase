@@ -26,6 +26,7 @@ public class User implements Parcelable{
     private int PickupCounter;
     private String relationship;
     private String interestedIn;
+    private  int soundId;
 
     public String gender;
     public Long birthDate;
@@ -93,6 +94,7 @@ public class User implements Parcelable{
         name = in.readString();
         biography = in.readString();
         loveCounter = in.readInt();
+        soundId = in.readInt();
         PickupCounter = in.readInt();
         relationship = in.readString();
         interestedIn = in.readString();
@@ -626,6 +628,12 @@ public class User implements Parcelable{
         this.tokens = tokens;
     }
 
+    //@Exclude
+    public int getSoundId() { return soundId; }
+
+    @Exclude
+    public void setSoundId(int soundId) { this.soundId = soundId; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -645,6 +653,7 @@ public class User implements Parcelable{
         dest.writeString(name);
         dest.writeString(biography);
         dest.writeInt(loveCounter);
+        dest.writeInt(soundId);
         dest.writeInt(PickupCounter);
         dest.writeString(relationship);
         dest.writeString(interestedIn);

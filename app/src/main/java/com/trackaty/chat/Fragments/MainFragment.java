@@ -41,8 +41,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.king.view.radarview.RadarView;
 import com.trackaty.chat.Adapters.UsersAdapter;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.UsersViewModel;
 import com.trackaty.chat.activities.MainActivity;
@@ -75,6 +78,7 @@ public class MainFragment extends Fragment {
     private  static final int RESULT_REQUEST_RECORD_AUDIO = 21; // for record audio permission
     private static final int REQUEST_CODE_ALARM = 13; // To detect if alarm is already set or not
     private static final String USER_SOUND_ID_KEY = "userSoundId";
+    private static final String USER_ID_KEY = "userId";
     private Intent serviceIntent;
 
     private Context mActivityContext;
@@ -112,6 +116,10 @@ public class MainFragment extends Fragment {
 
     private SharedPreferences mSharedPreferences; // So save EndTime in SharedPreferences
 
+    private FirebaseUser mFirebaseCurrentUser;
+    private String mCurrentUserId;
+    private User mCurrentUSer;
+
     public MainFragment() {
         // Required empty public constructor
     }
@@ -135,6 +143,10 @@ public class MainFragment extends Fragment {
 
         setHasOptionsMenu(true); // To add search menu item programmatically
 
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
         fragmentManager = getFragmentManager();
 
         // prepare the Adapter
@@ -147,6 +159,17 @@ public class MainFragment extends Fragment {
 
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+
+        // Get current user. User to send sound id extra to alarm receiver
+        viewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
+            @Override
+            public void onCallback(User user) {
+                if (user != null){
+                    Log.d(TAG , "getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                    mCurrentUSer = user;
+                }
+            }
+        });
 
         // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
         // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
@@ -497,8 +520,17 @@ public class MainFragment extends Fragment {
     }
 
     private void setAlarm() {
-        Log.d(TAG , "setAlarm()");
-        alarmIntent.putExtra(USER_SOUND_ID_KEY, 2304);
+        Log.d(TAG , "setAlarm(). mCurrentUserId= "+mCurrentUserId);
+
+        //create a Bundle object
+        Bundle extras = new Bundle();
+        //extras.putString(USER_ID_KEY, mCurrentUserId);
+        extras.putInt(USER_SOUND_ID_KEY, mCurrentUSer.getSoundId());
+        //attach the bundle to the Intent object
+        alarmIntent.putExtras(extras);
+
+        //alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentUSer.getSoundId());
+        //alarmIntent.putExtra(USER_ID_KEY, mCurrentUserId);
         pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         if (alarmManager != null) {
             Log.d(TAG , "setAlarm: alarmManager= "+alarmManager);
@@ -515,6 +547,7 @@ public class MainFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
         }*/
+
     }
 
     private void stopAlarm() {

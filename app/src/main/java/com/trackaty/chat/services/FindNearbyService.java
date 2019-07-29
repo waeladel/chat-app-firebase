@@ -6,21 +6,36 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.Interface.FirebaseRelationCallback;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
+import com.trackaty.chat.models.Relation;
+import com.trackaty.chat.models.User;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.chirp.connect.ChirpConnect;
 import io.chirp.connect.interfaces.ConnectEventListener;
@@ -40,7 +55,7 @@ public class FindNearbyService extends Service {
     // Binder given to clients
     //private final IBinder binder = new LocalBinder();
     // Random number generator
-    private final Random mGenerator = new Random();
+    //private final Random mGenerator = new Random();
 
 
     private final static int PENDING_INTENT_REQUESTCODE = 45; // For the notification
@@ -58,6 +73,12 @@ public class FindNearbyService extends Service {
     private ChirpConnect chirp;
     private CountDownTimer mSearchingTimer; // A timer to stop service when finished
     private long mTimeLiftInMillis;// Remaining time till the search ends
+
+    private DatabaseReference mDatabaseRef, mUsersRef, mSearchRef, mRelationsRef;
+
+    private static final String RELATION_STATUS_BLOCKING = "blocking"; // the selected user is blocking me (current user)
+    private static final String RELATION_STATUS_BLOCKED= "blocked"; // the selected user is blocked by me (current user)
+
 
     //private Bundle bundle;
 
@@ -82,7 +103,9 @@ public class FindNearbyService extends Service {
         public void onReceived(@Nullable byte[] bytes, int i) {
             if (bytes != null && bytes.length > 0) {
                 //String identifier = new String(bytes);
-                receivedSoundID = bytesToInt(bytes);
+                receivedSoundID = bytesToInt(bytes); // get soundId from received bytes
+                // get user from it's sound id, if there is no blocking relation, update search results
+                getUser(receivedSoundID);
                 Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+bytes.length);
             } else {
                 Log.e(TAG, "ChirpError: Decode failed");
@@ -104,7 +127,6 @@ public class FindNearbyService extends Service {
 
         }
     };
-
 
     public FindNearbyService() {
     }
@@ -133,6 +155,12 @@ public class FindNearbyService extends Service {
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
+
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mUsersRef = mDatabaseRef.child("users");
+        mSearchRef = mDatabaseRef.child("search");
+        mRelationsRef = mDatabaseRef.child("relations");
+
         notificationManager = NotificationManagerCompat.from(this);
         mTimeLiftInMillis = SEARCHING_PERIOD;
 
@@ -202,7 +230,7 @@ public class FindNearbyService extends Service {
         }
         ChirpError error = chirp.start(false, true);
         if (error.getCode() > 0) {
-            Log.e(TAG, error.getMessage());
+            Log.e("ChirpError: ", error.getMessage());
             return;
         }else{
             Log.d(TAG, "chirp started. lets start timer");
@@ -276,6 +304,109 @@ public class FindNearbyService extends Service {
                 ((bytes[3] & 0xFF) << 0 );*/
 
         return ByteBuffer.wrap(bytes).getInt();
+    }
+
+    private void getUser(int soundID) {
+        Query query = mUsersRef.orderByChild("soundId").equalTo(soundID).limitToFirst(1);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // User exist, loop throw users value
+                    List<User> usersList = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User user = snapshot.getValue(User.class);
+                        if (user != null) {
+                            Log.d(TAG, "User exist. user key= "+snapshot.getKey());
+                            if(!TextUtils.equals(mCurrentUserId, snapshot.getKey())){
+                                // It's not current logged on user, add it to the results list
+                                user.setKey(snapshot.getKey());
+                                user.setCreated(ServerValue.TIMESTAMP);
+                                //user.setCreated(System.currentTimeMillis());
+                                usersList.add(user);
+                            }
+
+                        }
+                    }// end of for loop
+                    // return if there are no results
+                    if(usersList.size()<= 0){
+                        return;
+                    }
+
+                    // Check if there is a blocking relation with this user or not
+                    isUserBlocked(usersList.get(0).getKey(), new FirebaseRelationCallback() {
+                        @Override
+                        public void onCallback(Relation relation) {
+                            if (relation == null){
+                                Log.d(TAG , "isUserBlocked Callback is null. Update user search");
+                                DatabaseReference mCurrentSearchRef = mSearchRef.child(usersList.get(0).getKey());
+                                mCurrentSearchRef.setValue(usersList.get(0)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "updated search ref successfully");
+                                        }else{
+                                            Log.w(TAG, "error during updating search ref");
+                                        }
+
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                }else{
+                    // User doesn't exist
+                    Log.w(TAG, "getUserOnce User is null, no such user");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUserOnce. User onCancelled" +databaseError);
+            }
+        });
+
+    }
+
+    private void isUserBlocked(String userID, final FirebaseRelationCallback callback) {
+        if(mCurrentUserId == null){
+            callback.onCallback(null);
+           return;
+        }
+        Log.d(TAG, "isUserBlocked. userID= "+userID+ " mCurrentUserId= "+mCurrentUserId);
+        DatabaseReference currentRelationRef = mRelationsRef.child(mCurrentUserId).child(userID);
+        currentRelationRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Relation relation = dataSnapshot.getValue(Relation.class);
+                    if (relation != null) {
+                        if(TextUtils.equals(relation.getStatus(), RELATION_STATUS_BLOCKING)
+                        || (TextUtils.equals(relation.getStatus(), RELATION_STATUS_BLOCKED))){
+                            // User is blocking me r blocked by me
+                            Log.d(TAG, "User is blocking me or blocked by me= "+dataSnapshot.getKey());
+                            callback.onCallback(relation);
+                        }else{
+                            Log.d(TAG, "There is a relation but not blocking: "+dataSnapshot.getKey());
+                            callback.onCallback(null);
+                        }
+
+                    }
+
+                } else {
+                    Log.d(TAG, "there is no relation");
+                    callback.onCallback(null);
+                }
+
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "getUserOnce. User onCancelled" +databaseError);
+            }
+        });
+
     }
 
 }
