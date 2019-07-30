@@ -4,7 +4,12 @@ package com.trackaty.chat.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
@@ -14,12 +19,8 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.Adapters.UsersAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.UsersViewModel;
@@ -46,6 +47,15 @@ public class MainFragment extends Fragment {
     private Activity activity;
 
     private UsersViewModel viewModel;
+
+    private FirebaseUser mFirebaseCurrentUser;
+    private String mCurrentUserId;
+    private User mCurrentUser;
+
+    //initialize the FirebaseAuth instance
+    private FirebaseAuth  mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
     public MainFragment() {
         // Required empty public constructor
     }
@@ -66,6 +76,10 @@ public class MainFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG,"onCreate");
+
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
 
         // prepare the Adapter
         mUserArrayList  = new ArrayList<>();
@@ -134,6 +148,27 @@ public class MainFragment extends Fragment {
             }
         });
 
+        mAuth = FirebaseAuth.getInstance();
+        //initialize the AuthStateListener method
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    // If user is logged in, show recycler
+                    // because it might be not showing due to previous log out
+                    Log.d(TAG, "onAuthStateChanged: signed in. set recycler to visible");
+                    mUsersRecycler.setVisibility(View.VISIBLE);
+                } else {
+                    // User is signed out
+                    // If user is logged out, hide recycler
+                    // because we don't want to show it before displaying login activity
+                    mUsersRecycler.setVisibility(View.INVISIBLE);
+                    Log.d(TAG, "onAuthStateChanged: signed_out. hide recycler");
+                }
+            }
+        };
 
     }
 
@@ -141,6 +176,7 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d(TAG, "onCreateView");
         /*if(activity != null){
             activity.setTitle(R.string.main_frag_title);
         }*/
@@ -190,6 +226,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.d(TAG, "onAttach");
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
@@ -199,6 +236,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated");
         if(((MainActivity)getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
             actionbar.setTitle(R.string.main_frag_title);
@@ -209,4 +247,21 @@ public class MainFragment extends Fragment {
         //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+        // Add firebase AuthStateListener
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+        // Remove firebase AuthStateListener
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
 }

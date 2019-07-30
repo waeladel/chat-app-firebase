@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
-                Log.d(TAG, "destination Label= "+ destination.getLabel());
+                Log.d(TAG, "destination Label= "+ destination.getLabel()+ " currentUserId="+ currentUserId);
                 Log.d(TAG, "destination id= "+ destination.getId());
 
                 if(TextUtils.equals("fragment_main", destination.getLabel())){
@@ -210,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         //notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
 
         /*Menu menu = bottomNavigation.getMenu();
@@ -245,6 +246,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 // User is signed in
                 if (user != null) {
+                    // If user is logged in, display bottomNavigation and ActionBar
+                    // because it might be not showing due to previous log out
+                    if(navController != null && null != navController.getCurrentDestination()){
+                        if(R.id.mainFragment == navController.getCurrentDestination().getId()){
+                            bottomNavigation.setVisibility(View.VISIBLE);
+                            if(getSupportActionBar() != null){
+                                getSupportActionBar().show();
+                            }
+                        }
+                    }
 
                     // Only update current userId if it's changed
                     if(!TextUtils.equals(currentUserId, user.getUid())){
@@ -282,6 +293,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
+                    // If user is logged out, hide bottomNavigation and ActionBar
+                    // because we don't want to show it before displaying login activity
+                    if(navController != null && null != navController.getCurrentDestination()){
+                        if(R.id.mainFragment == navController.getCurrentDestination().getId()){
+                            bottomNavigation.setVisibility(View.GONE);
+                            if(getSupportActionBar() != null){
+                                getSupportActionBar().hide();
+                            }
+                        }
+                    }
+
                     // clear mUser object in case user will log in with another account
                     if(mUser != null ){
                         mUser = null;
