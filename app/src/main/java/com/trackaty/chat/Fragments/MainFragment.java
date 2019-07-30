@@ -120,6 +120,10 @@ public class MainFragment extends Fragment {
     private String mCurrentUserId;
     private User mCurrentUSer;
 
+    //initialize the FirebaseAuth instance
+    private FirebaseAuth  mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
     public MainFragment() {
         // Required empty public constructor
     }
@@ -160,16 +164,6 @@ public class MainFragment extends Fragment {
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
 
-        // Get current user. User to send sound id extra to alarm receiver
-        viewModel.getUserOnce(mCurrentUserId, new FirebaseUserCallback() {
-            @Override
-            public void onCallback(User user) {
-                if (user != null){
-                    Log.d(TAG , "getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
-                    mCurrentUSer = user;
-                }
-            }
-        });
 
         // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
         // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
@@ -230,6 +224,45 @@ public class MainFragment extends Fragment {
                 }
             }
         });
+
+        mAuth = FirebaseAuth.getInstance();
+        //initialize the AuthStateListener method
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                // User is signed in
+                if (user != null) {
+                    Log.d(TAG, "onAuthStateChanged: signed in");
+                    // Get current user. User to send sound id extra to alarm receiver
+                    viewModel.getUserOnce(user.getUid(), new FirebaseUserCallback() {
+                        @Override
+                        public void onCallback(User user) {
+                            if (user != null){
+                                Log.d(TAG , "getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                                mCurrentUSer = user;
+                            }
+                        }
+                    });
+
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged: signed_out");
+                    // Stop find nearby service when log out
+                    //startStopSearchService();
+                    //toggleSearchingUI();
+                    stopMyService(FindNearbyService.class);
+                    CancelTimer();
+
+                    // Stop visibility alarm when log out
+                    //startStopAlarm(); // start the alarm if it's null, stop it if already started
+                    //toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
+                    stopAlarm();
+                    toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
+
+                }
+            }
+        };
 
 
     }
@@ -342,6 +375,9 @@ public class MainFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
+        // Add firebase AuthStateListener
+        mAuth.addAuthStateListener(mAuthListener);
+
         // Update searching UI (radar & timer) on onStart
         toggleSearchingUI();
         toggleVisibleUI();
@@ -351,6 +387,10 @@ public class MainFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+        // Remove firebase AuthStateListener
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
         //activity.unbindService(connection);
         //mBound = false;
         // Stop searching UI (radar & timer) on onStart
