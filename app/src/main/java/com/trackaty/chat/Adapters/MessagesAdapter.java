@@ -10,6 +10,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.clock.scratch.ScratchView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,12 +40,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.paging.PagedList;
-import androidx.paging.PagedListAdapter;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
@@ -307,7 +308,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 });*/
 
                 // Check if this conversation is active forever, if so reveal all messages
-                if(null != chat && chat.getActive() == 0){
+                if(null != chat && null != chat.getActive()&& chat.getActive() == 0){
                     // Show message
                     //ReceivedHolder.mScratch.clear();
                     ReceivedHolder.mScratch.setVisibility(View.GONE);
@@ -383,7 +384,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 }
 
                 // update sent icon according to message's sent boolean
-                if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SEEN) && chat != null && chat.getActive() == 0){
+                if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SEEN) && chat != null && null != chat.getActive() && chat.getActive() == 0){
                     // Show seen icon
                     SentHolder.mSentIcon.setImageResource(R.drawable.ic_seen_message_thick);
 

@@ -24,6 +24,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -164,7 +168,6 @@ public class MainFragment extends Fragment {
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
 
-
         // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
         // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
         // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
@@ -233,7 +236,11 @@ public class MainFragment extends Fragment {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 // User is signed in
                 if (user != null) {
-                    Log.d(TAG, "onAuthStateChanged: signed in");
+                    // User is signed in
+                    // If user is logged in, show recycler
+                    // because it might be not showing due to previous log out
+                    Log.d(TAG, "onAuthStateChanged: signed in. set recycler to visible");
+                    mUsersRecycler.setVisibility(View.VISIBLE);
                     // Get current user. User to send sound id extra to alarm receiver
                     viewModel.getUserOnce(user.getUid(), new FirebaseUserCallback() {
                         @Override
@@ -247,7 +254,10 @@ public class MainFragment extends Fragment {
 
                 } else {
                     // User is signed out
-                    Log.d(TAG, "onAuthStateChanged: signed_out");
+                    // If user is logged out, hide recycler
+                    // because we don't want to show it before displaying login activity
+                    mUsersRecycler.setVisibility(View.INVISIBLE);
+                    Log.d(TAG, "onAuthStateChanged: signed_out. hide recycler");
                     // Stop find nearby service when log out
                     //startStopSearchService();
                     //toggleSearchingUI();
@@ -336,6 +346,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.d(TAG, "onAttach");
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
@@ -348,6 +359,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated");
         if(((MainActivity)getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
             actionbar.setTitle(R.string.main_frag_title);
