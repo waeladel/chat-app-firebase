@@ -34,7 +34,8 @@
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/user_image"
-        app:layout_constraintTop_toBottomOf="@+id/user_name" />
+        app:layout_constraintTop_toBottomOf="@+id/user_name"
+        tools:text="@tools:sample/cities" />
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/user_image"
@@ -108,6 +109,7 @@
         android:id="@+id/age_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/age_icon"
         app:layout_constraintStart_toEndOf="@+id/age_icon"
         app:layout_constraintTop_toTopOf="@+id/age_icon" />

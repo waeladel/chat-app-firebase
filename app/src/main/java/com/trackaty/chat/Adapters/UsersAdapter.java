@@ -7,6 +7,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
@@ -17,13 +24,6 @@ import com.trackaty.chat.Utils.DateHelper;
 import com.trackaty.chat.models.User;
 
 import java.util.Calendar;
-
-import androidx.annotation.NonNull;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-import androidx.paging.PagedListAdapter;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertViewHolder> {
 
@@ -317,9 +317,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 */
                     // NOTE: if you use equals, your object must properly override Object#equals()
                     // Incorrectly returning false here will result in too many animations.
-                    //TODO override equals method on User object
-                    return oldUser.getName().equals(newUser.getName());
-                    //return false;
+                    return oldUser.equals(newUser);
+                    //return true;
                 }
             };
 

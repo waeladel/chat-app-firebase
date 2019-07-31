@@ -207,6 +207,9 @@ public class UserRepository {
                     //mSingleValueUser = dataSnapshot.getValue(User.class);
                     //mSingleValueUser.postValue(dataSnapshot.getValue(User.class));
                     User user = dataSnapshot.getValue(User.class);
+                    if(user != null){
+                        user.setKey(dataSnapshot.getKey());
+                    }
                     callback.onCallback(user);
                 } else {
                     // Return a null user to view model to know when user doesn't exist,

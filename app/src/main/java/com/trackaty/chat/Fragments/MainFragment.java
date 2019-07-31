@@ -42,6 +42,7 @@ public class MainFragment extends Fragment {
     private RecyclerView mUsersRecycler;
     private ArrayList<User> mUserArrayList;
     private UsersAdapter mUsersAdapter;
+    private  LinearLayoutManager mLinearLayoutManager;
 
     private Context mActivityContext;
     private Activity activity;
@@ -55,6 +56,13 @@ public class MainFragment extends Fragment {
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private static final int REACHED_THE_TOP = 2;
+    private static final int SCROLLING_UP = 1;
+    private static final int SCROLLING_DOWN = -1;
+    private static final int REACHED_THE_BOTTOM = -2;
+    private static int mScrollDirection;
+    private static int mLastVisibleItem;
 
     public MainFragment() {
         // Required empty public constructor
@@ -185,16 +193,76 @@ public class MainFragment extends Fragment {
         // Initiate the RecyclerView
         mUsersRecycler = (RecyclerView) fragView.findViewById(R.id.users_recycler);
         mUsersRecycler.setHasFixedSize(true);
-        mUsersRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
+        mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
+        mUsersRecycler.setLayoutManager(mLinearLayoutManager);
 
         //viewModel.usersList.observe(this, mUsersAdapter::submitList);
 
         //observe when a change happen to usersList live data
         mUsersRecycler.setAdapter(mUsersAdapter);
 
-       /* // just a test to compare two objects
+        mUsersRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                Log.d(TAG, "onScrollStateChanged newState= "+newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
+
+                //int lastCompletelyVisibleItem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition(); // the position of last displayed item
+                //int firstCompletelyVisibleItem = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition(); // the position of first displayed item
+                int lastVisibleItem = mLinearLayoutManager.findLastVisibleItemPosition(); // the position of last displayed item
+                int firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition(); // the position of first displayed item
+                int totalItemCount = mUsersAdapter.getItemCount(); // total items count from the adapter
+                int visibleItemCount = mUsersRecycler.getChildCount(); // items are shown on screen right now
+
+                Log.d(TAG, "visibleItemCount = "+visibleItemCount +" totalItemCount= "+totalItemCount+" lastVisibleItem "+lastVisibleItem +" firstVisibleItem "+firstVisibleItem);
+
+                //if(lastCompletelyVisibleItem >= (totalItemCount-1)){
+                /*if(lastVisibleItem >= (totalItemCount-1)){
+                    // The position of last displayed item = total items, witch means we are at the bottom
+                    mScrollDirection = REACHED_THE_BOTTOM;
+                    Log.i(TAG, "List reached the bottom");
+                    // Set scrolling direction and and last visible item which is needed to know
+                    // the initial key position weather it's above or below
+                    mChatsViewModel.setScrollDirection(mScrollDirection, lastVisibleItem);
+
+                }*/
+                if(firstVisibleItem <= 4){
+                    // The position of last displayed item is less than visibleItemCount, witch means we are at the top
+                    mScrollDirection = REACHED_THE_TOP;
+                    Log.i(TAG, "List reached the top");
+                    // Set scrolling direction and and last visible item which is needed to know
+                    // the initial key position weather it's above or below
+                    viewModel.setScrollDirection(mScrollDirection, firstVisibleItem);
+                }else{
+                    if(dy < 0 ){
+                        // dy is negative number,  scrolling up
+                        Log.i(TAG, "List scrolling up");
+                        mScrollDirection = SCROLLING_UP;
+                        // Set scrolling direction and and last visible item which is needed to know
+                        // the initial key position weather it's above or below
+                        viewModel.setScrollDirection(mScrollDirection, firstVisibleItem);
+                    }else{
+                        // dy is positive number,  scrolling down
+                        Log.i(TAG, "List scrolling down");
+                        mScrollDirection = SCROLLING_DOWN;
+                        // Set scrolling direction and and last visible item which is needed to know
+                        // the initial key position weather it's above or below
+                        viewModel.setScrollDirection(mScrollDirection, lastVisibleItem);
+                    }
+                }
+            }
+        });
+
+        /*Object timestamp = System.currentTimeMillis();
+        // just a test to compare two objects
         User user1 = new User();
-        //user1.setAvatar("wello");
+        user1.setAvatar("wello");
         user1.setName("wello");
         user1.setBiography("wello");
         user1.setRelationship("wello");
@@ -202,6 +270,7 @@ public class MainFragment extends Fragment {
         user1.setGender("wello");
         user1.setBirthDate(30L);
         user1.setHoroscope("wello");
+        user1.setCreated(timestamp);
 
         User user2 = new User();
         user2.setAvatar("wello");
@@ -212,6 +281,7 @@ public class MainFragment extends Fragment {
         user2.setGender("wello");
         user2.setBirthDate(30L);
         user2.setHoroscope("wello");
+        user2.setCreated(timestamp);
 
         if(user1.equals(user2)){
             Log.d(TAG, "users are the same");

@@ -1,7 +1,6 @@
 package com.trackaty.chat.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @IgnoreExtraProperties
-public class User implements Parcelable{
+public class User {
 
 
     private String key;
@@ -78,70 +77,9 @@ public class User implements Parcelable{
     //private Date joined;// anotation to put server timestamp
 
     public User() {
-        created = ServerValue.TIMESTAMP;
+        this.created = ServerValue.TIMESTAMP;
     }
 
-    protected User(Parcel in) {
-        key = in.readString();
-        if (in.readByte() == 0) {
-            lastOnline = null;
-        } else {
-            lastOnline = in.readLong();
-        }
-        avatar = in.readString();
-        coverImage = in.readString();
-        name = in.readString();
-        biography = in.readString();
-        loveCounter = in.readInt();
-        PickupCounter = in.readInt();
-        relationship = in.readString();
-        interestedIn = in.readString();
-        gender = in.readString();
-        if (in.readByte() == 0) {
-            birthDate = null;
-        } else {
-            birthDate = in.readLong();
-        }
-        horoscope = in.readString();
-        lives = in.readString();
-        hometown = in.readString();
-        nationality = in.readString();
-        religion = in.readString();
-        politics = in.readString();
-        work = in.readString();
-        college = in.readString();
-        school = in.readString();
-        byte tmpSmoke = in.readByte();
-        smoke = tmpSmoke == 0 ? null : tmpSmoke == 1;
-        byte tmpShisha = in.readByte();
-        shisha = tmpShisha == 0 ? null : tmpShisha == 1;
-        byte tmpDrugs = in.readByte();
-        drugs = tmpDrugs == 0 ? null : tmpDrugs == 1;
-        byte tmpDrink = in.readByte();
-        drink = tmpDrink == 0 ? null : tmpDrink == 1;
-        byte tmpGamer = in.readByte();
-        gamer = tmpGamer == 0 ? null : tmpGamer == 1;
-        byte tmpCook = in.readByte();
-        cook = tmpCook == 0 ? null : tmpCook == 1;
-        byte tmpRead = in.readByte();
-        read = tmpRead == 0 ? null : tmpRead == 1;
-        byte tmpAthlete = in.readByte();
-        athlete = tmpAthlete == 0 ? null : tmpAthlete == 1;
-        byte tmpTravel = in.readByte();
-        travel = tmpTravel == 0 ? null : tmpTravel == 1;
-    }
-
-    public static final Creator<User> CREATOR = new Creator<User>() {
-        @Override
-        public User createFromParcel(Parcel in) {
-            return new User(in);
-        }
-
-        @Override
-        public User[] newArray(int size) {
-            return new User[size];
-        }
-    };
 
     // [START post_to_map]
     @Exclude
@@ -627,52 +565,37 @@ public class User implements Parcelable{
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return
+                TextUtils.equals(avatar, user.avatar) &&
+                TextUtils.equals(name, user.name) &&
+                TextUtils.equals(biography, user.biography) &&
+                TextUtils.equals(relationship, user.relationship) &&
+                TextUtils.equals(interestedIn, user.interestedIn) &&
+                TextUtils.equals(gender, user.gender) &&
+                TextUtils.equals(horoscope, user.horoscope) &&
+                (birthDate == user.birthDate || (birthDate!= null && birthDate.equals(user.birthDate))) &&
+                (created == user.created || (created!=null && created.equals(user.created)));
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(key);
-        if (lastOnline == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(lastOnline);
-        }
-        dest.writeString(avatar);
-        dest.writeString(coverImage);
-        dest.writeString(name);
-        dest.writeString(biography);
-        dest.writeInt(loveCounter);
-        dest.writeInt(PickupCounter);
-        dest.writeString(relationship);
-        dest.writeString(interestedIn);
-        dest.writeString(gender);
-        if (birthDate == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(birthDate);
-        }
-        dest.writeString(horoscope);
-        dest.writeString(lives);
-        dest.writeString(hometown);
-        dest.writeString(nationality);
-        dest.writeString(religion);
-        dest.writeString(politics);
-        dest.writeString(work);
-        dest.writeString(college);
-        dest.writeString(school);
-        dest.writeByte((byte) (smoke == null ? 0 : smoke ? 1 : 2));
-        dest.writeByte((byte) (shisha == null ? 0 : shisha ? 1 : 2));
-        dest.writeByte((byte) (drugs == null ? 0 : drugs ? 1 : 2));
-        dest.writeByte((byte) (drink == null ? 0 : drink ? 1 : 2));
-        dest.writeByte((byte) (gamer == null ? 0 : gamer ? 1 : 2));
-        dest.writeByte((byte) (cook == null ? 0 : cook ? 1 : 2));
-        dest.writeByte((byte) (read == null ? 0 : read ? 1 : 2));
-        dest.writeByte((byte) (athlete == null ? 0 : athlete ? 1 : 2));
-        dest.writeByte((byte) (travel == null ? 0 : travel ? 1 : 2));
+    public int hashCode() {
+        //return Objects.hash(created, avatar, name, biography, relationship, interestedIn, gender, birthDate, horoscope);
+        int result = 1;
+        result = 31 * result + (avatar == null ? 0 : avatar.hashCode());
+        result = 31 * result + (name == null ? 0 : name.hashCode());
+        result = 31 * result + (biography == null ? 0 : biography.hashCode());
+        result = 31 * result + (relationship == null ? 0 : relationship.hashCode());
+        result = 31 * result + (interestedIn == null ? 0 : interestedIn.hashCode());
+        result = 31 * result + (gender == null ? 0 : gender.hashCode());
+        result = 31 * result + (horoscope == null ? 0 : horoscope.hashCode());
+        result = 31 * result + (birthDate == null ? 0 : birthDate.hashCode());
+        result = 31 * result + (created == null ? 0 : created.hashCode());
+        return result;
+
     }
 }
 // [END blog_user_class]

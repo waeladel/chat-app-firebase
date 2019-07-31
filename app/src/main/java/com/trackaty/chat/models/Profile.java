@@ -1,9 +1,6 @@
 package com.trackaty.chat.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-public class Profile implements Parcelable {
+public class Profile  {
 
     private String key;
     private String value;
@@ -30,25 +27,6 @@ public class Profile implements Parcelable {
         this.section = section;
     }
 
-
-    protected Profile(Parcel in) {
-        key = in.readString();
-        value = in.readString();
-        order = in.readInt();
-        section = in.readInt();
-    }
-
-    public static final Creator<Profile> CREATOR = new Creator<Profile>() {
-        @Override
-        public Profile createFromParcel(Parcel in) {
-            return new Profile(in);
-        }
-
-        @Override
-        public Profile[] newArray(int size) {
-            return new Profile[size];
-        }
-    };
 
     public String getKey() {
         return key;
@@ -90,16 +68,5 @@ public class Profile implements Parcelable {
         this.social = social;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(key);
-        dest.writeString(value);
-        dest.writeInt(order);
-        dest.writeInt(section);
-    }
 }

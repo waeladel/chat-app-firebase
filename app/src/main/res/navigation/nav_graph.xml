@@ -75,11 +75,7 @@
         android:id="@+id/editProfileFragment"
         android:name="com.trackaty.chat.Fragments.EditProfileFragment"
         android:label="fragment_edit_profile"
-        tools:layout="@layout/fragment_edit_profile" >
-        <argument
-            android:name="currentUser"
-            app:argType="com.trackaty.chat.models.User" />
-    </fragment>
+        tools:layout="@layout/fragment_edit_profile" />
     <fragment
         android:id="@+id/displayImageFragment"
         android:name="com.trackaty.chat.Fragments.DisplayImageFragment"
