@@ -256,9 +256,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     }
                 } else {
                     Log.i(TAG, "going to edit profile fragment= ");
-                    NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile(mUser);
+                    //NavDirections direction = ProfileFragmentDirections.actionProfileToEditProfile();
                     NavController navController = Navigation.findNavController(view);
-                    navController.navigate(direction);
+                    navController.navigate(R.id.editProfileFragment);
                 }
 
             }

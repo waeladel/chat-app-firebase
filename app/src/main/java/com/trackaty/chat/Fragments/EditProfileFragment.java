@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -139,7 +138,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private EditProfileAdapter mEditProfileAdapter;
 
-    private Parcelable savedRecyclerLayoutState;
+    //private Parcelable savedRecyclerLayoutState;
     private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
     private Context activityContext;
@@ -405,11 +404,11 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         mEditProfileAdapter.notifyDataSetChanged();
     }
 
-    private void restoreLayoutManagerPosition() {
+    /*private void restoreLayoutManagerPosition() {
         if (savedRecyclerLayoutState != null) {
             mEditProfileRecycler.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
         }
-    }
+    }*/
 
     private void showCurrentUser(User currentUser) {
 

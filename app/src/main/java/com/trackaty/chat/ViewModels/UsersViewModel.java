@@ -13,11 +13,16 @@ import com.trackaty.chat.DataSources.UsersDataFactory;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.User;
 
+import com.google.firebase.database.DatabaseReference;
+import com.trackaty.chat.DataSources.UsersDataFactory;
+import com.trackaty.chat.DataSources.UsersRepository;
+import com.trackaty.chat.models.User;
+
 public class UsersViewModel extends ViewModel {
 
     private final static String TAG = UsersViewModel.class.getSimpleName();
 
-    private UsersDataFactory usersDataSourceFactory;
+    private UsersDataFactory usersDataFactory;
     private PagedList.Config config;
     private LiveData<PagedList<User>> liveDataSource;
     private  LiveData<PagedList<User>> usersList;
@@ -29,9 +34,8 @@ public class UsersViewModel extends ViewModel {
     private UserRepository mUserRepository;
 
     public UsersViewModel() {
-        usersDataSourceFactory = new UsersDataFactory();
+        usersDataFactory = new UsersDataFactory();
         Log.d(TAG, "mama UsersViewModel init");
-        mUserRepository = new UserRepository();
         //liveDataSource = usersDataSourceFactory.getUserLiveDataSource();
 
         //Enabling Offline Capabilities//
@@ -54,7 +58,7 @@ public class UsersViewModel extends ViewModel {
     public LiveData<PagedList<User>> getItemPagedList(){
         if(usersList == null){
             Log.d(TAG, "itemPagedList is null, get items from database");
-            usersList = new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
+            usersList = new LivePagedListBuilder<>(usersDataFactory, config).build();
         }
         return usersList ;
     }
@@ -73,10 +77,16 @@ public class UsersViewModel extends ViewModel {
         return new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
     }*/
 
+    // Set scroll direction and last visible item which is used to get initialkey's position
+    public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
+        //MessagesListRepository.setScrollDirection(scrollDirection);
+        usersDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);
+    }
+
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama UsersViewModel onCleared:");
-        //ToDo remove listeners
+        UsersRepository.removeListeners();
         super.onCleared();
     }
 }

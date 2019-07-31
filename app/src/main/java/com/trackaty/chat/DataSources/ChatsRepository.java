@@ -2,6 +2,11 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.ItemKeyedDataSource;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,11 +19,6 @@ import com.trackaty.chat.models.FirebaseListeners;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.ItemKeyedDataSource;
 
 public class ChatsRepository {
 
@@ -277,7 +277,7 @@ public class ChatsRepository {
                             Collections.reverse(chatsList);
                             callback.onResult(chatsList);
 
-                            // Add messages to totalItemsList ArrayList to be used to get the initial key position
+                            // Add chats to totalItemsList ArrayList to be used to get the initial key position
                             totalItemsList.addAll(chatsList);
                             printTotalItems("Initial");
                             Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " lastkey= " + chatsList.get(chatsList.size() - 1).getKey());
