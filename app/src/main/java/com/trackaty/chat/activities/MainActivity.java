@@ -70,9 +70,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    // get the currentUser Id, we will user the AuthStateListener if logged out
-    FirebaseUser FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-    String currentUserId = FirebaseCurrentUser != null ? FirebaseCurrentUser.getUid() : null;
+    // currentUserId needs to be null at first load, to initiate observers for notifications counter and chats counter
+    /*FirebaseUser FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+    String currentUserId = FirebaseCurrentUser != null ? FirebaseCurrentUser.getUid() : null;*/
+    private String currentUserId;
 
     private NavController.OnDestinationChangedListener mDestinationListener ;
 
@@ -249,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if (user != null) {
                     // If user is logged in, display bottomNavigation and ActionBar
                     // because it might be not showing due to previous log out
+                    Log.d(TAG, "onAuthStateChanged: user is signed in. set bottomNavigation and ActionBar to visible");
                     if(navController != null && null != navController.getCurrentDestination()){
                         if(R.id.mainFragment == navController.getCurrentDestination().getId()){
                             bottomNavigation.setVisibility(View.VISIBLE);
@@ -261,24 +263,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     // Only update current userId if it's changed
                     if(!TextUtils.equals(currentUserId, user.getUid())){
                         // update CurrentUserId for all observer fragments
-                        Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId);
-
+                        Log.d(TAG, "onAuthStateChanged: : user is changed. old user = " + currentUserId+ " new= "+user.getUid());
                         if(currentUserId == null){
                             // if currentUserId is null, it's the first time to open the app
                             // and the user is not logged in. initiateObserveChatCount();
                             initiateObserveChatCount(user.getUid());
                             initiateObserveNotificationCount(user.getUid());
-                            Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " initiateObserveChatCount");
+                            Log.d(TAG, "onAuthStateChanged: first time to log in. user wasn't logged in. initiateObserveChatCount. oldCurrentUserId = " + currentUserId+ " new id= "+user.getUid());
                         }else{
                             // It's not the first time to open the app
                             // and the user is logged in. just updateCurrentUserId();
                             mMainViewModel.updateCurrentUserId(user.getUid());
-                            Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " updateCurrentUserId");
-
+                            Log.d(TAG, "onAuthStateChanged: second time to log in. user was logged in. updateCurrentUserId. oldCurrentUserId = " + currentUserId+ " new id= "+user.getUid());
                         }
-                    }
+                    }// End of checking if it's the same user or not
 
+                    // set current user id, will be used when comparing new logged in id with the old one
+                    Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " new id= "+user.getUid());
                     currentUserId = user.getUid();
+
                     currentUserName = user.getDisplayName();
                     currentUserEmail = user.getEmail();
                     currentUserPhoto = user.getPhotoUrl();
@@ -292,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 */
                     isUserExist(currentUserId); // if not start complete profile
 
-                } else {
+                } else { // End of checking if it's the same user or not
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     // If user is logged out, hide bottomNavigation and ActionBar
@@ -315,8 +318,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     //bottomNavigation.setSelectedItemId(R.id.navigation_home);
                     initiateLogin(); // start login activity
 
-                    // Remove all MainViewModel Listeners
-                    mMainViewModel.clearViewModel();
+                    // Don't Remove MainViewModel Listeners, Listeners are needed if the new user was the last logged in user
+                    // if Listeners are removed and new user is the same, we will not have Listeners for his counters
+                    //mMainViewModel.clearViewModel();
                 }
             }
         };

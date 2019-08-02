@@ -216,9 +216,6 @@ public class MainFragment extends Fragment {
                             viewModel.updateCurrentUserId(user.getUid());
                             Log.d(TAG, "onAuthStateChanged: second time to log in. user was logged in. updatePagedList. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
                         }
-                        // set current user id, will be used when comparing new logged in id with the old one
-                        viewModel.setCurrentUserId(user.getUid());
-                        Log.d(TAG, "onAuthStateChanged: userId is changed. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
 
                         // Get current user whenever user id is changed. To send the new sound id extra to alarm receiver
                         viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
@@ -230,27 +227,6 @@ public class MainFragment extends Fragment {
                                 }
                             }
                         });
-
-                        /*if(viewModel.getCurrentUserId() == null){
-                            // if currentUserId is null, it's the first time to open the app
-                            // and the user wasn't logged in. initiateObserveSearch();
-                            initiateObserveSearch(user.getUid());
-                            Log.d(TAG, "onAuthStateChanged: first time to log in. user wasn't logged in. initiateObserveSearch. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
-                        }else{
-                            // user was logged in already but he switched accounts
-                            // Remove all MainViewModel Listeners and observers, to establish new ones
-                            Log.d(TAG, "onAuthStateChanged: user was logged in but switched accounts. Remove all MainViewModel Listeners. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
-                            if(viewModel.getItemPagedList(user.getUid()).hasObservers()){
-                                viewModel.clearViewModel();
-                                viewModel.getItemPagedList(user.getUid()).removeObservers(MainFragment.this);
-                                Log.d(TAG, "onAuthStateChanged: user was logged in but switched accounts. MainViewModel Listeners Removed. oldCurrentUserId " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
-                            }
-                            // It's not the first time to open the app
-                            // and the user is logged in. initiate Observer again
-                            initiateObserveSearch(user.getUid());
-                            Log.d(TAG, "onAuthStateChanged: initiate Observe Search again. new user ID= " + user.getUid()+ " updateCurrentUserId");
-
-                        }*/
 
                     }else{
                         //The same user. if it's the last know user, updateCurrentUserId to invalidate
@@ -271,6 +247,10 @@ public class MainFragment extends Fragment {
 
                         }
                     }// End of checking if it's the same user or not
+
+                    // set current user id, will be used when comparing new logged in id with the old one
+                    viewModel.setCurrentUserId(user.getUid());
+                    Log.d(TAG, "onAuthStateChanged: userId is changed. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
 
                 } else {
                     // User is signed out
