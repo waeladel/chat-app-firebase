@@ -206,9 +206,12 @@ public class UserRepository {
                             + dataSnapshot.getKey()+" Listener = "+currentUserListener);
                     //mSingleValueUser = dataSnapshot.getValue(User.class);
                     //mSingleValueUser.postValue(dataSnapshot.getValue(User.class));
+                    //int sID = dataSnapshot.child("soundId").getValue(Integer.class);
+                    //Log.d(TAG, "getUserOnce User sound id= "+ sID);
                     User user = dataSnapshot.getValue(User.class);
                     if(user != null){
                         user.setKey(dataSnapshot.getKey());
+                        Log.d(TAG, "getUserOnce User sound id= "+ user.getSoundId());
                     }
                     callback.onCallback(user);
                 } else {

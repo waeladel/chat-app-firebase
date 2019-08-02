@@ -103,8 +103,13 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         if(extras != null ){
             mCurrentSoundId = extras.getInt(USER_SOUND_ID_KEY);
-            //mCurrentUserId = extras.getString(USER_ID_KEY);
+            mCurrentUserId = extras.getString(USER_ID_KEY);
             //userID = intent.getStringExtra(USER_SOUND_ID_KEY);
+        }
+
+        if(mCurrentSoundId == 0){
+            Log.d(TAG, "SoundId is not specified. no need to send data. SoundId= "+ mCurrentSoundId+ " mCurrentUserId= "+ mCurrentUserId);
+            return;
         }
         // you can do the processing here.
 

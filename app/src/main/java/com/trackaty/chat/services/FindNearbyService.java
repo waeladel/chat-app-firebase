@@ -339,7 +339,7 @@ public class FindNearbyService extends Service {
                         public void onCallback(Relation relation) {
                             if (relation == null){
                                 Log.d(TAG , "isUserBlocked Callback is null. Update user search");
-                                DatabaseReference mCurrentSearchRef = mSearchRef.child(usersList.get(0).getKey());
+                                DatabaseReference mCurrentSearchRef = mSearchRef.child(mCurrentUserId).child(usersList.get(0).getKey());
                                 mCurrentSearchRef.setValue(usersList.get(0)).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {

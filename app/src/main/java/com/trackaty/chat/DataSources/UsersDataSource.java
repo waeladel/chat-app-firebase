@@ -26,6 +26,11 @@ public class UsersDataSource extends ItemKeyedDataSource<Long, User> {
         usersRepository.setScrollDirection(scrollDirection, lastVisibleItem);
     }
 
+    // update user id when it's changed, to update the userRef and to invalidate data and fetch new one
+    public void updateCurrentUserId(String userId) {
+        usersRepository.updateCurrentUserId(userId);
+    }
+
     // a callback to invalidate the data whenever a change happen
     @Override
     public void addInvalidatedCallback(@NonNull InvalidatedCallback onInvalidatedCallback) {
@@ -84,4 +89,5 @@ public class UsersDataSource extends ItemKeyedDataSource<Long, User> {
     public Long getKey(@NonNull User user) {
         return  user.getCreatedLong();
     }
+
 }

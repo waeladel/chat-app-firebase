@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,7 +28,7 @@ public class UsersRepository {
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
-    private DatabaseReference mUsersRef;
+    private DatabaseReference mUserSearchRef;
     //List<User> usersList ;
     //List<User> entireUsersList ;
     private Boolean isFirstLoaded = true;
@@ -36,6 +37,7 @@ public class UsersRepository {
     private Long initialKey;
     private Long afterKey;
     private Long beforeKey;
+    private int loadSize ;
 
     private static volatile Boolean isInitialFirstLoaded;// = true;
     private static volatile Boolean isAfterFirstLoaded;// = true;
@@ -203,13 +205,13 @@ public class UsersRepository {
 
     public UsersRepository(@NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
 
-        /*FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = FirebaseCurrentUser != null ? FirebaseCurrentUser.getUid() : null;
 
-        Log.d(TAG, "create new UsersRepository. currentUserId="+ currentUserId);*/
+        Log.d(TAG, "create new UsersRepository. currentUserId="+ currentUserId);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mUsersRef = mDatabaseRef.child("users");
+        mUserSearchRef = mDatabaseRef.child("search").child(currentUserId);
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         isFirstLoaded = true;
@@ -256,6 +258,14 @@ public class UsersRepository {
 
     }
 
+    // update user id when it's changed, to update the userRef and to invalidate data and fetch new one
+    public void updateCurrentUserId(String userId) {
+        currentUserId = userId;
+        mUserSearchRef = mDatabaseRef.child("search").child(currentUserId);
+        invalidatedCallback.onInvalidated();
+        //getUsers(null, getLoadSize(), getLoadInitialCallback());
+    }
+
     // get initial data
     public void getUsers(Long initialKey, final int size,
                          @NonNull final ItemKeyedDataSource.LoadInitialCallback<User> callback){
@@ -264,6 +274,9 @@ public class UsersRepository {
         this.initialKey = initialKey;
         Query usersQuery;
         isInitialFirstLoaded = true;
+
+        setLoadInitialCallback(callback);
+        setLoadSize(size);
 
         initialUsersListener = new ValueEventListener() {
             @Override
@@ -316,7 +329,7 @@ public class UsersRepository {
                     if(isInitialKey){
                         // If no data and we are doing a query with Initial Key, try another query without it
                         isInitialKey = false; // Make isInitialKey boolean false so that we don't loop forever
-                        Query usersQuery = mUsersRef
+                        Query usersQuery = mUserSearchRef
                                 .orderByChild("created")//limitToLast to start from the last (page size) items
                                 .limitToLast(size);
 
@@ -340,7 +353,7 @@ public class UsersRepository {
         if (initialKey == null) {// if it's loaded for the first time. Key is null
             Log.d(TAG, "mama getUsers initialKey= " + initialKey);
             isInitialKey = false;
-            usersQuery = mUsersRef
+            usersQuery = mUserSearchRef
                     .orderByChild("created")//limitToLast to start from the last (page size) items
                     .limitToLast(size);
 
@@ -352,19 +365,19 @@ public class UsersRepository {
                 // No need to detected reaching to bottom
                 /*case REACHED_THE_BOTTOM:
                     Log.d(TAG, "messages query = REACHED_THE_BOTTOM. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mUsersRef
+                    chatsQuery = mUserSearchRef
                             .orderByChild("created")//limitToLast to start from the last (page size) items
                             .limitToFirst(size);
                     break;*/
                 case REACHED_THE_TOP:
                     Log.d(TAG, "users query = REACHED_THE_TOP. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    usersQuery = mUsersRef
+                    usersQuery = mUserSearchRef
                             .orderByChild("created")//limitToLast to start from the last (page size) items
                             .limitToLast(size);
                     break;
                 case SCROLLING_UP:
                     /*Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mUsersRef
+                    chatsQuery = mUserSearchRef
                             .orderByChild("created")//limitToLast to start from the last (page size) items
                             .endAt(initialKey)
                             .limitToLast(size);*/
@@ -373,21 +386,21 @@ public class UsersRepository {
                     // InitialKey is in the top, must load data from top to bottom
                     // list is reversed, load data above InitialKey
                     Log.d(TAG, "users query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" first VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getName() +" totalItemsList size= "+totalItemsList.size());
-                    usersQuery = mUsersRef
+                    usersQuery = mUserSearchRef
                             .orderByChild("created")
                             .endAt(getItem(mVisibleItem).getCreatedLong())//Using first visible item key instead of initial key
                             .limitToLast(size);
                     break;
                 case SCROLLING_DOWN:
                     /*Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+mVisibleItem+ " Item Message= "+ totalItemsList.get(mVisibleItem).getLastMessage() +" totalItemsList size= "+totalItemsList.size());
-                    chatsQuery = mUsersRef
+                    chatsQuery = mUserSearchRef
                             .orderByChild("created")//limitToLast to start from the last (page size) items
                             .startAt(initialKey)
                             .limitToFirst(size);*/
                     // InitialKey is in the bottom, must load data from bottom to top
                     // list is reversed, load data below InitialKey
                     Log.d(TAG, "users query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +"  last VisibleItem= "+ mVisibleItem + " Item Message= "+ totalItemsList.get(mVisibleItem).getName() +" totalItemsList size= "+totalItemsList.size());
-                    usersQuery = mUsersRef
+                    usersQuery = mUserSearchRef
                             .orderByChild("created")
                             .startAt(getItem(mVisibleItem).getCreatedLong())//Using last visible item key instead of initial key
                             .limitToFirst(size);
@@ -398,7 +411,7 @@ public class UsersRepository {
                         // InitialKey is in the bottom, must load data from bottom to top
                         // list is reversed, load data below InitialKey
                         Log.d(TAG, "messages query = Load data from bottom to top (below InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                        chatsQuery = mUsersRef
+                        chatsQuery = mUserSearchRef
                                 .orderByChild("created")//limitToLast to start from the last (page size) items
                                 .startAt(initialKey)
                                 .limitToFirst(size);
@@ -408,14 +421,14 @@ public class UsersRepository {
                         // InitialKey is in the top, must load data from top to bottom
                         // list is reversed, load data above InitialKey
                         Log.d(TAG, "messages query = Load data from top to bottom (above InitialKey cause list is reversed). ScrollDirection= "+mScrollDirection+ " InitialKey Position= "+getInitialKeyPosition() +" mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                        chatsQuery = mUsersRef
+                        chatsQuery = mUserSearchRef
                                 .orderByChild("created")//limitToLast to start from the last (page size) items
                                 .endAt(initialKey)
                                 .limitToLast(size);
                     }
                     break;*/
                     Log.d(TAG, "users query = default. ScrollDirection= "+mScrollDirection+ " mVisibleItem= "+ mVisibleItem + " totalItemsList size= "+totalItemsList.size());
-                    usersQuery = mUsersRef
+                    usersQuery = mUserSearchRef
                             .orderByChild("created")//limitToLast to start from the last (page size) items
                             .limitToLast(size);
             }
@@ -439,7 +452,7 @@ public class UsersRepository {
         //this.afterKey = key;
         Query afterQuery;
 
-        afterQuery = mUsersRef
+        afterQuery = mUserSearchRef
                 .orderByChild("created")
                 .startAt(key)
                 .limitToFirst(size);
@@ -458,7 +471,7 @@ public class UsersRepository {
         //this.beforeKey = key;
         Query beforeQuery;
 
-        beforeQuery = mUsersRef
+        beforeQuery = mUserSearchRef
                 .orderByChild("created")
                 .endAt(key)
                 .limitToLast(size);
@@ -473,7 +486,7 @@ public class UsersRepository {
     }*/
 
     /*public Single<List<User>> getAnimals(int count){
-        return RxFirebaseDatabase.data(mUsersRef.orderByKey().limitToFirst(count)).ma
+        return RxFirebaseDatabase.data(mUserSearchRef.orderByKey().limitToFirst(count)).ma
 
                 .map {
             for ArrayValue
@@ -483,7 +496,7 @@ public class UsersRepository {
 
     /*public MutableLiveData<User> getUser(String userId){
 
-        DatabaseReference currentUserRef = mUsersRef.child(userId);
+        DatabaseReference currentUserRef = mUserSearchRef.child(userId);
         //final MutableLiveData<User> currentUser = new MutableLiveData<>();
         Log.d(TAG, "getUser initiated: " + userId);
 
@@ -557,6 +570,15 @@ public class UsersRepository {
         Log.d(TAG, "Getting getItem... getInitialKey()= "+getInitialKey()+ " item name= "+ totalItemsList.get(position).getName());
         return totalItemsList.get(position);
     }
+
+    public void setLoadSize(int loadSize) {
+        this.loadSize = loadSize;
+    }
+
+    public int  getLoadSize() {
+        return loadSize ;
+    }
+
 
     public ItemKeyedDataSource.LoadInitialCallback getLoadInitialCallback() {
         return loadInitialCallback;

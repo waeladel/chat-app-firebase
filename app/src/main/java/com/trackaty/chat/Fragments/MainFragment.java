@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,10 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -122,8 +119,8 @@ public class MainFragment extends Fragment {
     private SharedPreferences mSharedPreferences; // So save EndTime in SharedPreferences
 
     private FirebaseUser mFirebaseCurrentUser;
-    private String mCurrentUserId;
-    private User mCurrentUSer;
+    //private String mCurrentUserId;
+    private User mCurrentUser;
 
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
@@ -155,13 +152,9 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"onCreate");
+        Log.d(TAG,"fragment state = onCreate");
 
         setHasOptionsMenu(true); // To add search menu item programmatically
-
-        //Get current logged in user
-        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
 
         fragmentManager = getFragmentManager();
 
@@ -176,65 +169,25 @@ public class MainFragment extends Fragment {
         // Initiate viewModel for this fragment instance
         viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
 
-        // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
-        // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
-        // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
-        // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
-        viewModel.getItemPagedList().observe(this, new Observer<PagedList<User>>() {
-            @Override
-            public void onChanged(@Nullable final PagedList<User> items) {
-                System.out.println("mama onChanged");
-                if (items != null ){
-                    // Create new Thread to loop until items.size() is greater than 0
+        //Get current logged in user
+        mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        // Current user id is used to know if it's the first log in or not
+        // if first login, we will initiate observing the page list, if not, we will just update the user id to invalidate
+        viewModel.setCurrentUserId(mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null);
 
-                    //delay submitList till items size is not 0
-                   /* new java.util.Timer().schedule(
-                            new java.util.TimerTask() {
-                                @Override
-                                public void run() {
-                                    // your code here
-                                    Log.d(TAG, "mama submitList size" +  items.size());
-                                    mUsersAdapter.submitList(items);
-
-                                }
-                            },
-                            1000
-                    );*/
-                    // Create new Thread to loop until items.size() is greater than 0
-                    new Thread(new Runnable() {
-                        int sleepCounter = 0;
-                        @Override
-                        public void run() {
-                            try {
-                                while(items.size()==0) {
-                                    //Keep looping as long as items size is 0
-                                    Thread.sleep(20);
-                                    Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                    if(sleepCounter == 1000){
-                                        break;
-                                    }
-                                    //handler.post(this);
-                                }
-                                //Now items size is greater than 0, let's submit the List
-                                Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                if(items.size() == 0 && sleepCounter == 1000){
-                                    // If we submit List after loop is finish with 0 results
-                                    // we may erase another results submitted via newer thread
-                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
-                                }else{
-                                    Log.d(TAG, "submitList");
-                                    mUsersAdapter.submitList(items);
-                                }
-
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }).start();
+        // Only get results when user is already loge in, will be ignored if he is logged out
+        if (viewModel.getCurrentUserId() != null) {
+            // Get current user. User to send sound id extra to alarm receiver
+            viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                @Override
+                public void onCallback(User user) {
+                    if (user != null){
+                        Log.d(TAG , "onAuthStateChanged: getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                        mCurrentUser = user;
+                    }
                 }
-            }
-        });
+            });
+        }
 
         mAuth = FirebaseAuth.getInstance();
         //initialize the AuthStateListener method
@@ -247,18 +200,77 @@ public class MainFragment extends Fragment {
                     // User is signed in
                     // If user is logged in, show recycler
                     // because it might be not showing due to previous log out
-                    Log.d(TAG, "onAuthStateChanged: signed in. set recycler to visible");
+                    Log.d(TAG, "onAuthStateChanged: user is signed in. set recycler to visible");
                     mUsersRecycler.setVisibility(View.VISIBLE);
-                    // Get current user. User to send sound id extra to alarm receiver
-                    viewModel.getUserOnce(user.getUid(), new FirebaseUserCallback() {
-                        @Override
-                        public void onCallback(User user) {
-                            if (user != null){
-                                Log.d(TAG , "getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
-                                mCurrentUSer = user;
-                            }
+
+                    // Only update current userId if it's changed. if not, we will check if it's the last logged out user
+                    // if last logged out, we will updateCurrentUserId to invalidate and get new data
+                    if(!TextUtils.equals(viewModel.getCurrentUserId(), user.getUid())){
+                        if(viewModel.getCurrentUserId() == null){
+                            // if currentUserId is null, it's the first time to open the app
+                            // and the user wasn't logged in. initiateObserveSearch();
+                            initiateObserveSearch(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: first time to log in. user wasn't logged in. initiateObserveSearch. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
+                        }else{
+                            // currentUserId exists. it's the second time to log in. user was logged in before. updatePagedList to invalidate and get the new user's list
+                            viewModel.updateCurrentUserId(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: second time to log in. user was logged in. updatePagedList. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
                         }
-                    });
+                        // set current user id, will be used when comparing new logged in id with the old one
+                        viewModel.setCurrentUserId(user.getUid());
+                        Log.d(TAG, "onAuthStateChanged: userId is changed. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
+
+                        // Get current user whenever user id is changed. To send the new sound id extra to alarm receiver
+                        viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                            @Override
+                            public void onCallback(User user) {
+                                if (user != null){
+                                    Log.d(TAG , "onAuthStateChanged: getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                                    mCurrentUser = user;
+                                }
+                            }
+                        });
+
+                        /*if(viewModel.getCurrentUserId() == null){
+                            // if currentUserId is null, it's the first time to open the app
+                            // and the user wasn't logged in. initiateObserveSearch();
+                            initiateObserveSearch(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: first time to log in. user wasn't logged in. initiateObserveSearch. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
+                        }else{
+                            // user was logged in already but he switched accounts
+                            // Remove all MainViewModel Listeners and observers, to establish new ones
+                            Log.d(TAG, "onAuthStateChanged: user was logged in but switched accounts. Remove all MainViewModel Listeners. oldCurrentUserId = " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
+                            if(viewModel.getItemPagedList(user.getUid()).hasObservers()){
+                                viewModel.clearViewModel();
+                                viewModel.getItemPagedList(user.getUid()).removeObservers(MainFragment.this);
+                                Log.d(TAG, "onAuthStateChanged: user was logged in but switched accounts. MainViewModel Listeners Removed. oldCurrentUserId " + viewModel.getCurrentUserId()+ " new id= "+user.getUid());
+                            }
+                            // It's not the first time to open the app
+                            // and the user is logged in. initiate Observer again
+                            initiateObserveSearch(user.getUid());
+                            Log.d(TAG, "onAuthStateChanged: initiate Observe Search again. new user ID= " + user.getUid()+ " updateCurrentUserId");
+
+                        }*/
+
+                    }else{
+                        //The same user. if it's the last know user, updateCurrentUserId to invalidate
+                        Log.d(TAG , "onAuthStateChanged: it's the same user. if it's the last know user, updateCurrentUserId to invalidate");
+                        if(TextUtils.equals(viewModel.getLastLogOutUserId(), user.getUid())){
+                            viewModel.updateCurrentUserId(user.getUid());
+
+                            // Get current user whenever user id is changed. To send the new sound id extra to alarm receiver
+                            viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                                @Override
+                                public void onCallback(User user) {
+                                    if (user != null){
+                                        Log.d(TAG , "onAuthStateChanged: getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                                        mCurrentUser = user;
+                                    }
+                                }
+                            });
+
+                        }
+                    }// End of checking if it's the same user or not
 
                 } else {
                     // User is signed out
@@ -278,17 +290,96 @@ public class MainFragment extends Fragment {
                     stopAlarm();
                     toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
 
+                    // clear mUser object in case user will log in with another account
+                    if(mCurrentUser != null ){
+                        mCurrentUser = null;
+                    }
+
+                    // Remove all MainViewModel Listeners
+                    /*if(viewModel.getItemPagedList(null).hasObservers()){
+                        Log.d(TAG, "onAuthStateChanged: signed_out. Remove all MainViewModel Listeners");
+                        viewModel.clearViewModel();
+                        viewModel.getItemPagedList(null).removeObservers(MainFragment.this);
+                    }*/
+                    //viewModel.setCurrentUserId(null);
+                    // used to know if the same user logged out then logged in again with the same account
+                    // if LastLogOutUserId is not set we can't know if he is the previous user or not, hence his list will be empty because it's not different user
+                    viewModel.setLastLogOutUserId(viewModel.getCurrentUserId());
+                    mUsersAdapter.submitList(null); // to delete previous list and start fresh
+
                 }
             }
         };
+    }
 
+    private void initiateObserveSearch(String userId) {
+        // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
+        // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
+        // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
+        // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
+        viewModel.getItemPagedList(userId).observe(getViewLifecycleOwner(), new Observer<PagedList<User>>() {
+            @Override
+            public void onChanged(@Nullable final PagedList<User> items) {
+                Log.d(TAG, "mama onChanged");
+                if (items != null) {
+                    // Create new Thread to loop until items.size() is greater than 0
+
+                    //delay submitList till items size is not 0
+                   /* new java.util.Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    // your code here
+                                    Log.d(TAG, "mama submitList size" +  items.size());
+                                    mUsersAdapter.submitList(items);
+
+                                }
+                            },
+                            1000
+                    );*/
+                    // Create new Thread to loop until items.size() is greater than 0
+                    new Thread(new Runnable() {
+                        int sleepCounter = 0;
+
+                        @Override
+                        public void run() {
+                            try {
+                                while (items.size() == 0) {
+                                    //Keep looping as long as items size is 0
+                                    Thread.sleep(20);
+                                    Log.d(TAG, "sleep 1000. size= " + items.size() + " sleepCounter=" + sleepCounter++);
+                                    if (sleepCounter == 1000) {
+                                        break;
+                                    }
+                                    //handler.post(this);
+                                }
+                                //Now items size is greater than 0, let's submit the List
+                                Log.d(TAG, "after  sleep finished. size= " + items.size());
+                                if (items.size() == 0 && sleepCounter == 1000) {
+                                    // If we submit List after loop is finish with 0 results
+                                    // we may erase another results submitted via newer thread
+                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
+                                } else {
+                                    Log.d(TAG, "submitList");
+                                    mUsersAdapter.submitList(items);
+                                }
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }).start();
+                }
+            }
+        });
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
+        Log.d(TAG, "fragment state = onCreateView");
         // Inflate the layout for this fragment
         /*if(activity != null){
             activity.setTitle(R.string.main_frag_title);
@@ -404,6 +495,22 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "mVisibilityButton is clicked");
+                if(mCurrentUser == null){
+                    // Get current user. User to send sound id extra to alarm receiver
+                    viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                        @Override
+                        public void onCallback(User user) {
+                            if (user != null){
+                                Log.d(TAG , "VisibilityButton clicked: getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
+                                mCurrentUser = user;
+                            }
+                        }
+                    });
+                    return;
+                }
+                if(mCurrentUser.getSoundId()== 0){
+                    return;
+                }
                 startStopAlarm(); // start the alarm if it's null, stop it if already started
                 toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
             }
@@ -416,7 +523,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log.d(TAG, "onAttach");
+        Log.d(TAG, "fragment state = onAttach");
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
@@ -429,13 +536,17 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "onActivityCreated");
+        Log.d(TAG, "fragment state = onActivityCreated");
         if(((MainActivity)getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
             actionbar.setTitle(R.string.main_frag_title);
             actionbar.setDisplayHomeAsUpEnabled(false);
             actionbar.setHomeButtonEnabled(false);
             actionbar.setDisplayShowCustomEnabled(false);
+        }
+
+        if(viewModel.getCurrentUserId() != null){
+            initiateObserveSearch(viewModel.getCurrentUserId());
         }
         //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
     }
@@ -456,7 +567,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart");
+        Log.d(TAG, "fragment state = onStart");
         // Add firebase AuthStateListener
         mAuth.addAuthStateListener(mAuthListener);
 
@@ -468,7 +579,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop");
+        Log.d(TAG, "fragment state = onStop");
         // Remove firebase AuthStateListener
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
@@ -642,16 +753,15 @@ public class MainFragment extends Fragment {
     }
 
     private void setAlarm() {
-        Log.d(TAG , "setAlarm(). mCurrentUserId= "+mCurrentUserId);
-
+        Log.d(TAG , "setAlarm(). mCurrentUserId= "+viewModel.getCurrentUserId() + " soundId="+ mCurrentUser.getSoundId());
         //create a Bundle object
         Bundle extras = new Bundle();
-        //extras.putString(USER_ID_KEY, mCurrentUserId);
-        extras.putInt(USER_SOUND_ID_KEY, mCurrentUSer.getSoundId());
+        extras.putString(USER_ID_KEY, viewModel.getCurrentUserId());
+        extras.putInt(USER_SOUND_ID_KEY, mCurrentUser.getSoundId());
         //attach the bundle to the Intent object
         alarmIntent.putExtras(extras);
 
-        //alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentUSer.getSoundId());
+        //alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentUser.getSoundId());
         //alarmIntent.putExtra(USER_ID_KEY, mCurrentUserId);
         pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         if (alarmManager != null) {

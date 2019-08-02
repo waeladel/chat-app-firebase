@@ -141,8 +141,6 @@ public class User {
         result.put("wikipedia", wikipedia);
         result.put("website", website);
 
-
-
         return result;
     }
     // [END post_to_map]

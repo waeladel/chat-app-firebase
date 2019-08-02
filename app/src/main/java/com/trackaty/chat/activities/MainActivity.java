@@ -267,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             // if currentUserId is null, it's the first time to open the app
                             // and the user is not logged in. initiateObserveChatCount();
                             initiateObserveChatCount(user.getUid());
+                            initiateObserveNotificationCount(user.getUid());
                             Log.d(TAG, "onAuthStateChanged: oldCurrentUserId = " + currentUserId+ " initiateObserveChatCount");
                         }else{
                             // It's not the first time to open the app
@@ -283,12 +284,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     currentUserPhoto = user.getPhotoUrl();
                     currentUserVerified = user.isEmailVerified();
 
-                    Log.d(TAG, "onAuthStateChanged:signed_in: user userId " + currentUserId);
+                  /*  Log.d(TAG, "onAuthStateChanged:signed_in: user userId " + currentUserId);
                     Log.d(TAG, "onAuthStateChanged:signed_in_getDisplayName:" + user.getDisplayName());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
                     Log.d(TAG, "onAuthStateChanged:signed_in_emailVerified?:" + user.isEmailVerified());
-
+*/
                     isUserExist(currentUserId); // if not start complete profile
 
                 } else {
@@ -324,8 +325,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Log.d(TAG, "onCreate handleDeepLink. notification intent = "+intent);
         navController.handleDeepLink(intent);
 
-        initiateObserveChatCount(currentUserId);
-        initiateObserveNotificationCount(currentUserId);
+        /*if(currentUserId != null){
+            initiateObserveChatCount(currentUserId);
+            initiateObserveNotificationCount(currentUserId);
+        }*/
 
     }//End of onCreate
 

@@ -1,5 +1,7 @@
 package com.trackaty.chat.DataSources;
 
+import android.util.Log;
+
 import androidx.paging.DataSource;
 
 import com.trackaty.chat.models.User;
@@ -7,9 +9,11 @@ import com.trackaty.chat.models.User;
 
 public class UsersDataFactory extends DataSource.Factory<Long, User>{
 
+    private final static String TAG = UsersDataFactory.class.getSimpleName();
     private UsersDataSource usersDataSource;
 
     public UsersDataFactory() {
+        Log.d(TAG, "UsersDataFactory init");
         usersDataSource = new UsersDataSource();
     }
 
@@ -22,8 +26,15 @@ public class UsersDataFactory extends DataSource.Factory<Long, User>{
         usersDataSource.setScrollDirection(scrollDirection, lastVisibleItem);
     }
 
+    // update user id when it's changed, to update the userRef and to invalidate data and fetch new one
+    public void updateCurrentUserId(String userId) {
+        usersDataSource.updateCurrentUserId(userId);
+
+    }
+
     @Override
     public DataSource<Long, User> create() {
         return usersDataSource;
     }
+
 }
