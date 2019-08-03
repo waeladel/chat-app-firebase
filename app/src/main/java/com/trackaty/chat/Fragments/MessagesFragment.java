@@ -824,7 +824,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     }
 
-        // Get chat before getting chat user, to knoe if chat is blocked or not
+        // Get chat before getting chat user, to know if chat is blocked or not
         mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
             @Override
             public void onChanged(Chat chat) {
@@ -858,6 +858,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                                 mLastSeen.setVisibility(View.GONE);
                             }
                         }
+                    }else{// chat.active is null. it's first time to chat, hide last seen online
+                        mLastSeen.setVisibility(View.GONE);
                     }
 
                     // pass chat to MessagesAdapter to get active end time
