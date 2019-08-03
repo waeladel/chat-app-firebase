@@ -218,7 +218,7 @@ public class MainFragment extends Fragment {
                         }
 
                         // Get current user whenever user id is changed. To send the new sound id extra to alarm receiver
-                        viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                        viewModel.getUserOnce(user.getUid(), new FirebaseUserCallback() {
                             @Override
                             public void onCallback(User user) {
                                 if (user != null){
@@ -235,7 +235,7 @@ public class MainFragment extends Fragment {
                             viewModel.updateCurrentUserId(user.getUid());
 
                             // Get current user whenever user id is changed. To send the new sound id extra to alarm receiver
-                            viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
+                            viewModel.getUserOnce(user.getUid(), new FirebaseUserCallback() {
                                 @Override
                                 public void onCallback(User user) {
                                     if (user != null){
