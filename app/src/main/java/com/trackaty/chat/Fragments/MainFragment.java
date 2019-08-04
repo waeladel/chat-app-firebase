@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import static android.content.Context.POWER_SERVICE;
 import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
 
 /**
@@ -77,6 +79,7 @@ public class MainFragment extends Fragment {
 
     private FragmentManager fragmentManager;
     private  static final String PERMISSION_RATIONALE_FRAGMENT = "permissionFragment";
+    private  static final String BATTERY_ALERT_FRAGMENT = "batteryFragment";
     private  static final int RESULT_REQUEST_RECORD_AUDIO = 21; // for record audio permission
     private static final int REQUEST_CODE_ALARM = 13; // To detect if alarm is already set or not
     private static final String USER_SOUND_ID_KEY = "userSoundId";
@@ -105,6 +108,8 @@ public class MainFragment extends Fragment {
     private long mTimeLiftInMillis; // remaining time in milliseconds
 
     private static final String SEARCH_END_TIME_KEY = "Search end time"; // Key for save EndTime to SharedPreferences
+    private static final String BATTERY_ALERT_SHOWING_TIMES_KEY = "Showing battery alert times"; // Key for number of showing battery optimization dialog
+
     private final static int SEARCHING_PERIOD = 10*60*1000; //1*60*1000;
     private final static int NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 55; // For visibility notification
 
@@ -717,6 +722,14 @@ public class MainFragment extends Fragment {
         if (isAlarmExist()) {
             stopAlarm();
         } else {
+            if(!isDozeWhiteList()){ // check if the app is already exempted from battery optimization
+                int batteryAlertShowTimes = mSharedPreferences.getInt(BATTERY_ALERT_SHOWING_TIMES_KEY, 0);
+                if(batteryAlertShowTimes < 3){
+                    // show the dialog only if it wasn't shown 3 times before
+                    showBatteryDialog();
+                    mSharedPreferences.edit().putInt(BATTERY_ALERT_SHOWING_TIMES_KEY, batteryAlertShowTimes+1).apply();
+                }
+            }
             setAlarm();
         }
     }
@@ -772,6 +785,33 @@ public class MainFragment extends Fragment {
             pendingIntent.cancel();
         }
         cancelNotification();
+    }
+
+    private boolean isDozeWhiteList() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String packageName = activity.getPackageName();
+            PowerManager pm = (PowerManager) activity.getSystemService(POWER_SERVICE);
+            if (pm.isIgnoringBatteryOptimizations(packageName)) {
+                // is exempt from power optimization
+                return true;
+            }else{
+                // Not exempt from power optimization
+                return false;
+            }
+        }else{
+            // API is below android marshmallow anyway
+            return true;
+        }
+    }
+
+    //Show a dialog to confirm blocking user
+    private void showBatteryDialog() {
+        BatteryAlertFragment batteryFragment = BatteryAlertFragment.newInstance();
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            batteryFragment.show(fragmentManager, BATTERY_ALERT_FRAGMENT);
+            Log.i(TAG, "blockFragment show clicked ");
+        }
     }
 
     // Create Ongoing notification when alarm is set
