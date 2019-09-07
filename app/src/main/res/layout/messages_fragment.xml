@@ -62,16 +62,17 @@
     </androidx.recyclerview.widget.RecyclerView>
 
 
-    <!-- A horizontal line between the chatbox and RecyclerView -->
+    <!-- A horizontal line between the chatbox and RecyclerView
+    android:background="#dfdfdf" -->
     <View
         android:id="@+id/divider"
         android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:background="#dfdfdf"
-        android:layout_marginBottom="0dp"
+        android:layout_height="1dp"
+        android:background="@color/color_on_background"
+        android:alpha=".25"
         app:layout_constraintBottom_toTopOf="@+id/layout_chatbox"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/scroll_fab"
@@ -84,7 +85,7 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_arrow_downward_black_24dp"
+        app:srcCompat="@drawable/ic_arrow_downward_24dp"
         android:visibility="invisible"
         app:elevation="8dp"
         app:layout_constraintBottom_toTopOf="@id/layout_chatbox"
@@ -95,9 +96,7 @@
         android:id="@+id/layout_chatbox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:background="#ffffff"
+        android:background="@color/color_surface_24_elevation"
         android:minHeight="48dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -133,7 +132,7 @@
             android:contentDescription="@string/send_text_icon"
             android:focusable="true"
             android:gravity="center"
-            android:src="@drawable/ic_send_black_24dp" />
+            app:srcCompat="@drawable/ic_send_black_24dp" />
 
     </LinearLayout>
 
@@ -158,7 +157,7 @@
              android:hint="@string/send_message_hint"
              android:importantForAutofill="no"
              android:inputType="textShortMessage|textAutoCorrect|textMultiLine|textCapSentences|textAutoComplete"
-             android:src="@drawable/ic_send_black_24dp"
+             app:srcCompat="@drawable/ic_send_black_24dp"
              app:layout_constraintBottom_toBottomOf="parent"
              app:layout_constraintEnd_toStartOf="@+id/send_button"
              app:layout_constraintStart_toStartOf="parent"
@@ -173,7 +172,7 @@
              android:layout_marginRight="8dp"
              android:layout_marginBottom="8dp"
              android:contentDescription="@string/send_text_icon"
-             android:src="@drawable/ic_send_black_24dp"
+             app:srcCompat="@drawable/ic_send_black_24dp"
              app:layout_constraintBottom_toBottomOf="parent"
              app:layout_constraintEnd_toEndOf="parent" />
 

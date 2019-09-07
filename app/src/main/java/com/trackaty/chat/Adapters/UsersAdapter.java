@@ -1,5 +1,6 @@
 package com.trackaty.chat.Adapters;
 
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
     private final static String TAG = UsersAdapter.class.getSimpleName();
     private FirebaseUser currentUser;
     private String currentUserId;
+    //private StateListDrawable placeholderList;
+    private Drawable mPlaceholderDrawable;
 
     public UsersAdapter() {
         super(DIFF_CALLBACK);
@@ -61,29 +64,27 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
                 @Override
                 public void onClick(View view, int position, boolean isLongClick) {
-                    switch (view.getId()) {
-                        case R.id.user_image: // only avatar is clicked
-                            //mListener.onTextViewNameClick(view, getAdapterPosition());
-                            Log.i(TAG, "user avatar clicked= "+view.getId());
-                            NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile( user.getKey());
-                            //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-                            //check if we are on Main Fragment not on complete Profile already
-                            Navigation.findNavController(view).navigate(ProfileDirection);
+
+                    if (view.getId() == R.id.user_image) { // only avatar is clicked
+                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        Log.i(TAG, "user avatar clicked= " + view.getId());
+                        NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(user.getKey());
+                        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+                        //check if we are on Main Fragment not on complete Profile already
+                        Navigation.findNavController(view).navigate(ProfileDirection);
 
                             /*Navigation.findNavController(this, R.id.host_fragment)
                             .navigate(directions);*/
-                            break;
-                        default://-1 entire row is clicked
-                            //mListener.onTextViewNameClick(view, getAdapterPosition());
-                            Log.i(TAG, "user row clicked= "+view.getId());
-                            NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(null, user.getKey(),false);
-                            //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-                            //check if we are on Main Fragment not on complete Profile already
-                            Navigation.findNavController(view).navigate(MessageDirection);
+                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                    } else {//-1 entire row is clicked
+                        Log.i(TAG, "user row clicked= " + view.getId());
+                        NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(null, user.getKey(), false);
+                        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
+                        //check if we are on Main Fragment not on complete Profile already
+                        Navigation.findNavController(view).navigate(MessageDirection);
 
                             /*Navigation.findNavController(this, R.id.host_fragment)
                             .navigate(directions);*/
-                            break;
                     }
 
                 }
@@ -103,7 +104,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
             // user name text value
             if (null != user.getName()) {
-                holder.userName.setText(user.getName()+user.getKey());
+                holder.userName.setText(user.getName());
             }else{
                 holder.userName.setText(null);
             }
@@ -111,20 +112,24 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
             // user biography text value
             if (null != user.getBiography()) {
                 holder.userBio.setText(user.getBiography());
+                holder.userBio.setVisibility(View.VISIBLE);
             }else{
                 holder.userBio.setText(null);
+                holder.userBio.setVisibility(View.GONE);
             }
 
             if (null != user.getAvatar()) {
-                holder.userAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                //final StateListDrawable placeholderList = (StateListDrawable) getContext().getResources().getDrawable(R.drawable.state_list_placeholder);
+                holder.userAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                 Picasso.get()
                         .load(user.getAvatar())
-                        .placeholder(R.drawable.ic_user_account_grey_white)
-                        .error(R.drawable.ic_broken_image)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
                         .into(holder.userAvatar);
+
             }else{
                 // end of user avatar
-                holder.userAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                holder.userAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
             }
 
 
@@ -138,8 +143,8 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 holder.userAge.setText(String.valueOf(DateHelper.getAge(c.getTime())));
                 holder.ageIcon.setImageResource(R.drawable.ic_cake_black_24dp);
             }else{
-                holder.userAge.setVisibility(View.INVISIBLE);
-                holder.ageIcon.setVisibility(View.INVISIBLE);
+                holder.userAge.setVisibility(View.GONE);
+                holder.ageIcon.setVisibility(View.GONE);
             }// end of  birthDate text value and icons
 
             // horoscope text value and icons
@@ -147,7 +152,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 holder.horoscopeIcon.setVisibility(View.VISIBLE);
                 switch (user.getHoroscope()) {
                     case "aries":
-                        holder.horoscopeIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
+                        holder.horoscopeIcon.setImageResource(R.drawable.ic_aries_symbol);
                         break;
                     case "taurus":
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_taurus_zodiac_symbol_of_bull_head_front);
@@ -156,7 +161,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_gemini_zodiac_symbol_of_two_twins_faces);
                         break;
                     case"cancer":
-                        holder.horoscopeIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette);
+                        holder.horoscopeIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette_simple);
                         break;
                     case"leo":
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_leo_astrological_sign);
@@ -168,7 +173,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_libra_scale_balance_symbol);
                         break;
                     case"scorpio":
-                        holder.horoscopeIcon.setImageResource(R.drawable.ic_scorpio_vertical_animal_shape_of_zodiac_symbol);
+                        holder.horoscopeIcon.setImageResource(R.drawable.ic_scorpio_animal_shape_of_zodiac_simple);
                         break;
                     case"sagittarius":
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_sagittarius_arch_and_arrow_symbol);
@@ -183,11 +188,11 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.horoscopeIcon.setImageResource(R.drawable.ic_pisces_astrological_sign_symbol);
                         break;
                     default:
-                        holder.horoscopeIcon.setVisibility(View.INVISIBLE);
+                        holder.horoscopeIcon.setVisibility(View.GONE);
                         break;
                 }
             }else{
-                holder.horoscopeIcon.setVisibility(View.INVISIBLE);
+                holder.horoscopeIcon.setVisibility(View.GONE);
             }//end of horoscope text value and icons
 
             //gender text value and icons
@@ -204,11 +209,11 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.genderIcon.setImageResource(R.drawable.ic_transsexual);
                         break;
                     default:
-                        holder.genderIcon.setVisibility(View.INVISIBLE);
+                        holder.genderIcon.setVisibility(View.GONE);
                         break;
                 }
             }else{
-                holder.genderIcon.setVisibility(View.INVISIBLE);
+                holder.genderIcon.setVisibility(View.GONE);
             }// end of gender text value and icons
 
             //interestedIn text value and icons
@@ -225,11 +230,11 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.interestedIcon.setImageResource(R.drawable.ic_wc_men_and_women_24dp);
                         break;
                     default:
-                        holder.interestedIcon.setVisibility(View.INVISIBLE);
+                        holder.interestedIcon.setVisibility(View.GONE);
                         break;
                 }
             }else{
-                holder.interestedIcon.setVisibility(View.INVISIBLE);
+                holder.interestedIcon.setVisibility(View.GONE);
             }// end of interestedIn text value and icons
 
             // relationship text value and icons
@@ -246,13 +251,13 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.relationIcon.setImageResource(R.drawable.ic_two_hearts);
                         break;
                     case "engaged":
-                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         break;
                     case "married":
-                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         break;
                     case "civil union":
-                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         break;
                     case "domestic partnership":
                         holder.relationIcon.setImageResource(R.drawable.ic_two_hearts);
@@ -261,39 +266,39 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                         holder.relationIcon.setImageResource(R.drawable.ic_two_hearts);
                         break;
                     case "open marriage":
-                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        holder.relationIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         break;
                     case "separated":
-                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart);
+                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         break;
                     case "divorced":
-                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart);
+                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         break;
                     case "widowed":
-                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart);
+                        holder.relationIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         break;
                     default:
-                        holder.relationIcon.setVisibility(View.INVISIBLE);
+                        holder.relationIcon.setVisibility(View.GONE);
                         break;
                 }
 
             }else{
-                holder.relationIcon.setVisibility(View.INVISIBLE);
+                holder.relationIcon.setVisibility(View.GONE);
                 //end of relationship text value and icons
             }
 
 
-        } else {
+        } /*else {
             // Null defines a placeholder item - PagedListAdapter automatically
             // invalidates this row when the actual object is loaded from the
             // database.
             //holder.clear();
-        }
+        }*/
     }
 
 
     // CALLBACK to calculate the difference between the old item and the new item
-    public static final DiffUtil.ItemCallback<User> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<User> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<User>() {
                 // User details may have changed if reloaded from the database,
                 // but ID is fixed.
@@ -338,7 +343,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
             row = itemView;
             userName = row.findViewById(R.id.user_name);
-            userBio = row.findViewById(R.id.notification_text);
+            userBio = row.findViewById(R.id.item_body);
             userAge  = row.findViewById(R.id.age_value);
             userAvatar =  row.findViewById(R.id.user_image);
             ageIcon =  row.findViewById(R.id.age_icon);

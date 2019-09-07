@@ -7,6 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -24,12 +32,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-import androidx.paging.PagedListAdapter;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder> {
@@ -46,9 +48,11 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
     private StorageReference mStorageRef;
 
-    public ChatsAdapter() {
+    private Fragment fragment;
+    public ChatsAdapter(Fragment fragment) {
         super(DIFF_CALLBACK);
         // [START create_storage_reference]
+        this.fragment = fragment;
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -74,7 +78,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
         if (chat != null) {
             // LastMessage text value
             if (null != chat.getLastMessage()) {
-                holder.mLastMessage.setText(chat.getLastMessage()+ chat.getKey());
+                holder.mLastMessage.setText(chat.getLastMessage());
             }else{
                 holder.mLastMessage.setText(null);
             }
@@ -116,10 +120,24 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                 // Bold text
                                 Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
                                 holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                                holder.mLastMessage.setTextColor(fragment.getResources().getColor(R.color.color_on_surface_emphasis_high));
+                                /*holder.mLastMessage.setTextAppearance(App.getContext(), R.style.TextAppearance_MyTheme_Headline5);
+                                holder.mLastMessage.setTextColor(R.drawable.my_on_surface_emphasis_high_type);*/
+                                //holder.mLastMessage.setAlpha(0.78f);
+                                // item is not clicked, display colored background
+                                //holder.row.setBackgroundColor(App.getContext().getResources().getColor(R.color.transparent_read_items));
+                                //holder.row.setBackgroundResource(R.color.color_highlighted_item);
                             }else{
                                 // Normal text
                                 Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
                                 holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                                holder.mLastMessage.setTextColor(fragment.getResources().getColor(R.color.color_on_surface_emphasis_medium));
+                                //holder.mLastMessage.setTextAppearance(App.getContext(), R.style.TextAppearance_MyTheme_Body2);
+                                //holder.mLastMessage.setTextColor(App.getContext().getResources().getColor(R.color.color_on_background));
+                                //holder.mLastMessage.setAlpha(0.54f);
+                                // If item was clicked, normal background
+                                //holder.row.setBackgroundColor(App.getContext().getResources().getColor(R.color.color_background));
+                                //holder.row.setBackgroundColor(android.R.attr.colorBackground);
                             }
                         }
 
@@ -133,35 +151,33 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
                         if(membersList.size()== 1){
                             // it's private chat
-                            switch (view.getId()) {
-                                case R.id.user_image: // only avatar is clicked
-                                    Log.i(TAG, "user avatar clicked= "+view.getId());
-                                    Log.i(TAG, "user avatar currenUserId= "+currentUserId+ " userId " + membersList.get(0).getKey() );
-                                    NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment( membersList.get(0).getKey());
-                                    Navigation.findNavController(view).navigate(ProfileDirection);
-                                    break;
-                                default://-1 entire row is clicked
-                                    Log.i(TAG, "user row clicked= "+view.getId());
-                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(chat.getKey(), membersList.get(0).getKey(), false);
-                                    Navigation.findNavController(view).navigate(MessageDirection);
-                                    break;
+                            //-1 entire row is clicked
+                            if (view.getId() == R.id.user_image) { // only avatar is clicked
+                                Log.i(TAG, "user avatar clicked= " + view.getId());
+                                Log.i(TAG, "user avatar currenUserId= " + currentUserId + " userId " + membersList.get(0).getKey());
+                                NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment(membersList.get(0).getKey());
+                                Navigation.findNavController(view).navigate(ProfileDirection);
+                            } else {
+                                Log.i(TAG, "user row clicked= " + view.getId());
+                                NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(chat.getKey(), membersList.get(0).getKey(), false);
+                                Navigation.findNavController(view).navigate(MessageDirection);
                             }
                         }else{
                             // it's group chat
-                            switch (view.getId()) {
-                                case R.id.user_image: // only avatar is clicked
+                            //-1 entire row is clicked
+                            if (view.getId() == R.id.user_image) { // only avatar is clicked
                                     /*Log.i(TAG, "user avatar clicked= "+view.getId());
                                     NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(currentUserId, membersList.get(0).getKey(), membersList.get(0));
                                     Navigation.findNavController(view).navigate(ProfileDirection);*/
-                                    break;
-                                default://-1 entire row is clicked
-                                    Log.i(TAG, "user row clicked= "+view.getId());
-                                    NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment( chat.getKey(), membersList.get(0).getKey(),true);
-                                    Navigation.findNavController(view).navigate(MessageDirection);
-                                    break;
+                                Log.i(TAG, "chat avatar is clicked= " + view.getId());
+                                NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(chat.getKey(), membersList.get(0).getKey(), true);
+                                Navigation.findNavController(view).navigate(MessageDirection);
+                            } else {
+                                Log.i(TAG, "user row clicked= " + view.getId());
+                                NavDirections MessageDirection = ChatsFragmentDirections.actionChatsFragmentToMessagesFragment(chat.getKey(), membersList.get(0).getKey(), true);
+                                Navigation.findNavController(view).navigate(MessageDirection);
                             }
                         }
-
 
                     }
                 });
@@ -180,15 +196,15 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
                         // Avatar
                         if (null != membersList.get(0).getAvatar()) {
-                            holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                            holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                             Picasso.get()
                                     .load(membersList.get(0).getAvatar())
-                                    .placeholder(R.drawable.ic_user_account_grey_white)
-                                    .error(R.drawable.ic_broken_image)
+                                    .placeholder(R.mipmap.ic_round_account_filled_72)
+                                    .error(R.drawable.ic_round_broken_image_72px)
                                     .into(holder.mAvatar);
                         }else{
                             // end of user avatar
-                            holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                            holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                         }
 
                         /*// [START create_storage_reference]
@@ -221,7 +237,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
             }else{
                 Log.d(TAG, "mama Chats= null");
-                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
             }
 
         }
@@ -229,7 +245,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
     }
 
     // CALLBACK to calculate the difference between the old item and the new item
-    public static final DiffUtil.ItemCallback<Chat> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<Chat> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Chat>() {
                 // User details may have changed if reloaded from the database,
                 // but ID is fixed.
@@ -293,7 +309,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
             //itemView = row;
 
             row = itemView;
-            mLastMessage = row.findViewById(R.id.notification_text);
+            mLastMessage = row.findViewById(R.id.chat_text);
             mAvatar = row.findViewById(R.id.user_image);
             mLastSentTime = row.findViewById(R.id.last_sent);
             mChatTitle = row.findViewById(R.id.user_name);

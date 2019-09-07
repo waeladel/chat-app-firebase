@@ -95,10 +95,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private  static final int SECTION_SOCIAL = 900;
 
 
-    public  final static String SECTION_ABOUT_HEADLINE = "about";
-    public  final static String SECTION_WORK_HEADLINE  = "work_and_education";
-    public  final static String SECTION_HABITS_HEADLINE  = "habits";
-    public  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
+    private  final static String SECTION_ABOUT_HEADLINE = "about";
+    private  final static String SECTION_WORK_HEADLINE  = "work_and_education";
+    private  final static String SECTION_HABITS_HEADLINE  = "habits";
+    private  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
 
     private static final String PROFILE_LIST_STATE = "list_state";
     private static final String ABOUT_LIST_STATE = "about_list_state";
@@ -112,10 +112,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private static final String AVATAR_ORIGINAL_NAME = "original_avatar.jpg";
     private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
 
-    public  final static String IMAGE_HOLDER_POSITION = "position";
+    private  final static String IMAGE_HOLDER_POSITION = "position";
 
-    public static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
-    public static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
+    private static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
+    private static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
 
 
     //private User currentUser;
@@ -340,11 +340,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        switch (id){
-            case MENU_ITEM_SAVE_ID:
-                Log.d(TAG, "MenuItem = SAVE");
-                profileSave();
-                break;
+        if (id == MENU_ITEM_SAVE_ID) {
+            Log.d(TAG, "MenuItem = SAVE");
+            profileSave();
         }
 
         //noinspection SimplifiableIfStatement
@@ -357,12 +355,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.edit_profile_frag_title);
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.edit_profile_frag_title);
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);
+            }
 
         }
 
@@ -784,33 +784,37 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     }
 
     private void compressImage(final Uri imageUri, final String type, final int position) {
-        File imageFile = new File(imageUri.getPath());
-        Luban.get(getContext())
-                .load(imageFile)                     // pass image to be compressed
-                .putGear(Luban.THIRD_GEAR)      // set compression level, defaults to 3
-                .setCompressListener(new OnCompressListener() { // Set up return
+        if (null != imageUri && null != imageUri.getPath()) {
+            File imageFile = new File(imageUri.getPath());
+            Luban.get(getContext())
+                    .load(imageFile)                     // pass image to be compressed
+                    .putGear(Luban.THIRD_GEAR)      // set compression level, defaults to 3
+                    .setCompressListener(new OnCompressListener() { // Set up return
 
-                    @Override
-                    public void onStart() {
-                        //Called when compression starts, display loading UI here
-                        Log.d(TAG, "compress :onStart= ");
-                    }
-                    @Override
-                    public void onSuccess(File file) {
-                        //Called when compression finishes successfully, provides compressed image
-                        Log.d(TAG, "compress :onSuccess= "+file.getPath());
-                        Uri compressImageUri = Uri.fromFile(file);
-                        uploadImage(compressImageUri, type, position);
-                    }
+                        @Override
+                        public void onStart() {
+                            //Called when compression starts, display loading UI here
+                            Log.d(TAG, "compress :onStart= ");
+                        }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        //Called if an error has been encountered while compressing
-                        Log.d(TAG, "compress :onError= "+e);
-                        uploadImage(imageUri, type, position);
+                        @Override
+                        public void onSuccess(File file) {
+                            //Called when compression finishes successfully, provides compressed image
+                            Log.d(TAG, "compress :onSuccess= " + file.getPath());
+                            Uri compressImageUri = Uri.fromFile(file);
+                            uploadImage(compressImageUri, type, position);
+                        }
 
-                    }
-                }).launch();    // Start compression
+                        @Override
+                        public void onError(Throwable e) {
+                            //Called if an error has been encountered while compressing
+                            Log.d(TAG, "compress :onError= " + e);
+                            uploadImage(imageUri, type, position);
+
+                        }
+                    }).launch();    // Start compression
+        }
+
     }
 
     private void uploadImage(Uri imageUri, final String type, final int position) {
@@ -1283,11 +1287,14 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 break;
             case "birthDate":
                 //mEditProfileAdapter.notifyDataSetChanged();
+                if(activityContext == null){
+                    return;
+                }
                 DatePickerFragment datePicker;
                 if(null != mEditProfileViewModel.getUser().getBirthDate()){
-                     datePicker = DatePickerFragment.newInstance(mEditProfileViewModel.getUser().getBirthDate());
+                     datePicker = DatePickerFragment.newInstance(activityContext, mEditProfileViewModel.getUser().getBirthDate());
                 }else{
-                     datePicker = new DatePickerFragment();
+                     datePicker = new DatePickerFragment(activityContext);
                 }
                 if (getFragmentManager() != null) {
                     datePicker.setCallBack(ondate); //Set Call back to capture selected date

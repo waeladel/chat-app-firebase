@@ -9,6 +9,10 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.navigation.NavDeepLinkBuilder;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -23,10 +27,6 @@ import com.trackaty.chat.R;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.navigation.NavDeepLinkBuilder;
 
 import static com.trackaty.chat.App.LIKES_CHANNEL_ID;
 import static com.trackaty.chat.App.MESSAGES_CHANNEL_ID;
@@ -232,8 +232,8 @@ public class MessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(MessagingService.this, channelId)
                 //.setLargeIcon(bitmap)
                 //.setSmallIcon(R.mipmap.ic_launcher)
-                .setSmallIcon(R.drawable.album_ic_back_white)
-                .setColor(getResources().getColor(R.color.album_ColorPrimary))
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setColor(getResources().getColor(R.color.color_primary))
                 .setContentTitle(messageTitle)
                 .setContentText(messageBody)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

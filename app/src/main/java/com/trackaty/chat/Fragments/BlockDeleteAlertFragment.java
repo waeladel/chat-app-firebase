@@ -1,7 +1,7 @@
 package com.trackaty.chat.Fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +10,7 @@ import android.view.View;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 
@@ -18,19 +19,21 @@ public class BlockDeleteAlertFragment extends DialogFragment implements ItemClic
 
     // click listener to pass click events to parent fragment
     private static ItemClickListener itemClickListen;
+    private Context context;
 
-    public BlockDeleteAlertFragment() {
+    private BlockDeleteAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static BlockDeleteAlertFragment newInstance(ItemClickListener itemClickListener) {
+    public static BlockDeleteAlertFragment newInstance(Context context, ItemClickListener itemClickListener) {
 
         // instantiate click listener to pass click events to parent fragment
         itemClickListen = itemClickListener;
 
-        BlockDeleteAlertFragment fragment = new BlockDeleteAlertFragment();
+        BlockDeleteAlertFragment fragment = new BlockDeleteAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -43,7 +46,8 @@ public class BlockDeleteAlertFragment extends DialogFragment implements ItemClic
 
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
         // AlertDialog.Builder to create the dialog wihtouht custum xml layout
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.confirm_block_delete_dialog_message);
 
@@ -82,7 +86,7 @@ public class BlockDeleteAlertFragment extends DialogFragment implements ItemClic
 
     // needed only if i want the listener to be inside the adapter
         public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListen = itemClickListener;
+            itemClickListen = itemClickListener;
         }
 
 }

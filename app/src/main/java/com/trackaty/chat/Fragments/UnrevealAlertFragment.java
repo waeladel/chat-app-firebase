@@ -1,33 +1,24 @@
 package com.trackaty.chat.Fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 
-import com.trackaty.chat.Adapters.RevealAdapter;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.models.Social;
 
-import java.util.ArrayList;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import org.jetbrains.annotations.NotNull;
 
 public class UnrevealAlertFragment extends DialogFragment implements ItemClickListener {
     private final static String TAG = UnrevealAlertFragment.class.getSimpleName();
-    DatePickerDialog.OnDateSetListener ondateSet;
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
 
@@ -56,9 +47,6 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
         return fragment;
     }
 
-    public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
-        ondateSet = ondate;
-    }
 
     /*@NonNull
     @Override
@@ -89,7 +77,7 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
@@ -97,13 +85,14 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
         }
     }
 
+    @NotNull
     @Override
-
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         // created options to select from
-        CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        CharSequence[] options = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
+        //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(getContext());
         alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));
         //alertDialogBuilder.setMessage("Are you sure?");
 

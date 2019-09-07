@@ -101,7 +101,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private Context mActivityContext;
     private Activity activity;
 
-    public TextView mUserName, mLastSeen , mRemainingTimeText;
+    private TextView mUserName, mLastSeen , mRemainingTimeText;
     private CircleImageView mUserPhoto;
     private EditText mMessage;
     private ImageButton mSendButton;
@@ -352,10 +352,10 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                              @Nullable Bundle savedInstanceState) {
         View fragView = inflater.inflate(R.layout.messages_fragment, container, false);
 
-        mMessage = (EditText) fragView.findViewById(R.id.notification_text);
-        mSendButton = (ImageButton) fragView.findViewById(R.id.send_button);
-        mScrollFab = (FloatingActionButton) fragView.findViewById(R.id.scroll_fab);
-        mRemainingTimeText = (TextView) fragView.findViewById(R.id.remaining_time);
+        mMessage = fragView.findViewById(R.id.notification_text);
+        mSendButton =  fragView.findViewById(R.id.send_button);
+        mScrollFab =  fragView.findViewById(R.id.scroll_fab);
+        mRemainingTimeText = fragView.findViewById(R.id.remaining_time);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mChatsRef = mDatabaseRef.child("chats");
@@ -365,7 +365,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         //isHitBottom = true;
 
         // Initiate the RecyclerView
-        mMessagesRecycler = (RecyclerView) fragView.findViewById(R.id.messages_recycler);
+        mMessagesRecycler =  fragView.findViewById(R.id.messages_recycler);
         mMessagesRecycler.setHasFixedSize(true);
         /* setStackFromEnd is usefuall to start stacking recycler from it's last
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
@@ -390,9 +390,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                switch(action) {
-                case (MotionEvent.ACTION_UP) :
-                    Log.d(TAG,"onTouch: Action was UP");
+                if (action == MotionEvent.ACTION_UP) {
+                    Log.d(TAG, "onTouch: Action was UP");
                     scrollToBottom();
                     v.performClick();
                     return false;
@@ -768,23 +767,28 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(null);
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(true);
+            if (actionbar != null) {
+                actionbar.setTitle(null);
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(true);
+            }
+
 
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View actionBarView = inflater.inflate(R.layout.messages_toolbar, null);
-            actionbar.setCustomView(actionBarView);
+            if (actionbar != null) {
+                actionbar.setCustomView(actionBarView);
+            }
 
 
             //mTimer = new Timer();
             // custom action bar items to add receiver's avatar and name //
-            mUserName = (TextView) actionBarView.findViewById(R.id.user_name);
-            mLastSeen = (TextView) actionBarView.findViewById(R.id.last_seen);
-            mUserPhoto = (CircleImageView) actionBarView.findViewById(R.id.user_image);
+            mUserName =  actionBarView.findViewById(R.id.user_name);
+            mLastSeen =  actionBarView.findViewById(R.id.last_seen);
+            mUserPhoto =  actionBarView.findViewById(R.id.user_image);
 
             // get Current User Id and object from main ViewModel
 
@@ -838,15 +842,15 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                         // check if chat is blocked or not active forever
                         if (mActiveEndTime == -1) {
                             //Chat is blocked, hide last active time and avatar
-                            mUserPhoto.setImageResource(R.drawable.ic_user_account_grey_white);
+                            mUserPhoto.setImageResource(R.drawable.ic_round_account_filled_72);
                             mLastSeen.setVisibility(View.GONE);
                         }else{
                             //Chat is not blocked, show avatar
                             if (mChatUser != null && null != mChatUser.getAvatar()) {
                                 Picasso.get()
                                         .load(mChatUser.getAvatar())
-                                        .placeholder(R.drawable.ic_user_account_grey_white)
-                                        .error(R.drawable.ic_broken_image)
+                                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                                        .error(R.drawable.ic_round_broken_image_72px)
                                         .into(mUserPhoto);
                             }
                             // check if chat active forever
@@ -875,8 +879,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     if (mChatUser != null && null != mChatUser.getAvatar()) {
                         Picasso.get()
                                 .load(mChatUser.getAvatar())
-                                .placeholder(R.drawable.ic_user_account_grey_white)
-                                .error(R.drawable.ic_broken_image)
+                                .placeholder(R.mipmap.ic_round_account_filled_72)
+                                .error(R.drawable.ic_round_broken_image_72px)
                                 .into(mUserPhoto);
                     }
 
@@ -946,8 +950,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     if (null != mChatUser.getAvatar()) {
                         Picasso.get()
                                 .load(mChatUser.getAvatar())
-                                .placeholder(R.drawable.ic_user_account_grey_white)
-                                .error(R.drawable.ic_broken_image)
+                                .placeholder(R.mipmap.ic_round_account_filled_72)
+                                .error(R.drawable.ic_round_broken_image_72px)
                                 .into(mUserPhoto);
                     }
 
@@ -1054,7 +1058,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     CancelActiveTimer();
                     mRemainingTimeText.setVisibility(View.VISIBLE);
                     mRemainingTimeText.setText(R.string.chat_blocked_alert_dialog_title);
-                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.color_error));
                 }else if (chat.getActive() == 0) {
                     // This chat is active forever
                     Log.d(TAG, "RemainingTime: This chat is active forever, don't show timer");
@@ -1067,14 +1071,14 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                         CancelActiveTimer();
                         mRemainingTimeText.setVisibility(View.VISIBLE);
                         mRemainingTimeText.setText(R.string.message_active_default_timer);
-                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.color_error));
                         Log.d(TAG, "RemainingTime: this chat room is not active");
 
                     } else {
                         // Chat is not active forever but it's still active so far
                         Log.d(TAG, "RemainingTime: Chat is not active forever but it's still active so far");
                         mRemainingTimeText.setVisibility(View.VISIBLE);
-                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.my_app_color_on_primary));
+                        mRemainingTimeText.setTextColor(getResources().getColor(R.color.color_on_background));
                         mTimeLiftInMillis = chat.getActive() - now;
                         Log.d(TAG, "RemainingTime: not active forever but still active. mTimeLiftInMillis= "+mTimeLiftInMillis);
 
@@ -1137,7 +1141,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     Log.d(TAG, "mRemainingTimer onFinish.");
                     mRemainingTimeText.setVisibility(View.VISIBLE);
                     mRemainingTimeText.setText(R.string.message_active_default_timer);
-                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+                    mRemainingTimeText.setTextColor(getResources().getColor(R.color.color_error));
                 }
             }.start();
 
@@ -1146,7 +1150,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             Log.i(TAG, "StartActiveTimer: timer is finished, should display 0");
             mRemainingTimeText.setVisibility(View.VISIBLE);
             mRemainingTimeText.setText(R.string.message_active_default_timer);
-            mRemainingTimeText.setTextColor(getResources().getColor(R.color.colorAccent));
+            mRemainingTimeText.setTextColor(getResources().getColor(R.color.color_error));
         }
     }
 
@@ -1524,7 +1528,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     //Show inactive alert dialog
     private void showChatInactiveDialog() {
-        ChatInactiveAlertFragment chatInactiveFragment = ChatInactiveAlertFragment.newInstance();
+        ChatInactiveAlertFragment chatInactiveFragment = ChatInactiveAlertFragment.newInstance(mActivityContext);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             chatInactiveFragment.show(fragmentManager, CHAT_INACTIVE_FRAGMENT);
@@ -1534,7 +1538,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     //Show blocked alert dialog
     private void showChatBlockedDialog() {
-        ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance();
+        ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance(mActivityContext);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             chatBlockedAlert.show(fragmentManager, BLOCKED_CHAT_FRAGMENT);
@@ -1547,6 +1551,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId, this);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
+            //chatActivateFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DatePickerMyTheme);
             chatActivateFragment.show(fragmentManager, ACTIVATE_CHAT_FRAGMENT);
             Log.i(TAG, "edit/chatActivateFragment show clicked ");
         }

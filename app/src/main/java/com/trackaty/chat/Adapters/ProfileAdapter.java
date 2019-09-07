@@ -8,6 +8,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.Fragments.MoreProfileFragment;
@@ -22,32 +28,26 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.RecyclerView;
-
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final static String TAG = ProfileAdapter.class.getSimpleName();
 
 
-    private  static final int SECTION_ABOUT = 500;
-    private  static final int SECTION_SOCIAL = 600;
+    private  static final int SECTION_SOCIAL = 500;
+    private  static final int SECTION_ABOUT =  600;
     private  static final int SECTION_WORK = 700;
     private  static final int SECTION_HABITS = 800;
 
-    public ArrayList<Profile> userDataArrayList;
+    private ArrayList<Profile> userDataArrayList;
     // Map to hold user selections results
-    private MutableLiveData<Map<String, Boolean>> mRelationsMap = new MutableLiveData<>();;
+    private MutableLiveData<Map<String, Boolean>> mRelationsMap = new MutableLiveData<>();
 
     public MoreProfileFragment fragmentContext;
     private MoreProfileViewModel mMoreProfileViewModel;
     private MutableLiveData<Relation>  mRelation; //= new MutableLiveData<>();
 
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    String currentUserId = currentUser != null ? currentUser.getUid() : null;
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private String currentUserId = currentUser != null ? currentUser.getUid() : null;
 
     private ItemClickListener itemClickListener;
 
@@ -136,13 +136,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_twitter) , null, null, null);
                     break;
                 case "snapchat":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_snapchat) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_snapchat_simple) , null, null, null);
                     break;
                 case "tumblr":
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_tumblr) , null, null, null);
                     break;
                 case "pubg":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_pubg_text) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.mipmap.ic_pubg_text) , null, null, null);
                     //buttonHolder.itemValue.setEnabled(false);
                     break;
                 case "vk":
@@ -155,16 +155,16 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_curiouscat) , null, null, null);
                     break;
                 case "saraha":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_saraha) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_saraha_hollow) , null, null, null);
                     break;
                 case "pinterest":
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_pinterest) , null, null, null);
                     break;
                 case "soundcloud":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_soundcloud) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.mipmap.ic_soundcloud) , null, null, null);
                     break;
                 case "spotify":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_spotify) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_spotify_logo_simple) , null, null, null);
                     break;
                 case "anghami":
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_anghami_black) , null, null, null);
@@ -182,7 +182,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_wikipedia_logo) , null, null, null);
                     break;
                 case "website":
-                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_website_black_24dp) , null, null, null);
+                    buttonHolder.itemValue.setCompoundDrawablesWithIntrinsicBounds(fragmentContext.getResources().getDrawable(R.drawable.ic_website_global) , null, null, null);
                     break;
 
             }
@@ -316,7 +316,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 switch (userDataArrayList.get(position).getValue()) {
                     case "aries":
                         viewHolder.itemValue.setText(R.string.aries);
-                        viewHolder.itemIcon.setImageResource(R.drawable.ic_aries_zodiac_symbol_of_frontal_goat_head);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_aries_symbol);
                         viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case "taurus":
@@ -331,7 +331,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         break;
                     case"cancer":
                         viewHolder.itemValue.setText(R.string.cancer);
-                        viewHolder.itemIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_cancer_astrological_sign_of_crab_silhouette_simple);
                         viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"leo":
@@ -351,7 +351,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         break;
                     case"scorpio":
                         viewHolder.itemValue.setText(R.string.scorpio);
-                        viewHolder.itemIcon.setImageResource(R.drawable.ic_scorpio_vertical_animal_shape_of_zodiac_symbol);
+                        viewHolder.itemIcon.setImageResource(R.drawable.ic_scorpio_animal_shape_of_zodiac_simple);
                         viewHolder.itemIcon.setVisibility(View.VISIBLE);
                         break;
                     case"sagittarius":
@@ -410,10 +410,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
             }
 
-            // college text value and icons
+            // school text value and icons
             if(userDataArrayList.get(position).getKey().equals("school")){
                 viewHolder.itemValue.setText(fragmentContext.getString(R.string.user_school_value, userDataArrayList.get(position).getValue()));
-                viewHolder.itemIcon.setImageResource(R.drawable.ic_school_black_24dp);
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_pencil);
             }
 
             // smoke text value and icons
@@ -428,7 +428,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             // shisha text value and icons
             if(userDataArrayList.get(position).getKey().equals("shisha")){
-                viewHolder.itemIcon.setImageResource(R.drawable.ic_shisha);
+                viewHolder.itemIcon.setImageResource(R.drawable.ic_shisha_one_hand);
                 if(userDataArrayList.get(position).getValue().equals("true")){
                     viewHolder.itemValue.setText(fragmentContext.getString(R.string.user_water_pipe_value, fragmentContext.getString(R.string.yes)));
                 }else{

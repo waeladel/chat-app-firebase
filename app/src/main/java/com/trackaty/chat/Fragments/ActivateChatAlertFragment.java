@@ -1,7 +1,6 @@
 package com.trackaty.chat.Fragments;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,29 +12,23 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.Adapters.RevealAdapter;
-import com.trackaty.chat.Interface.ItemClickListener;
-import com.trackaty.chat.R;
-import com.trackaty.chat.models.Social;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.trackaty.chat.Interface.ItemClickListener;
+import com.trackaty.chat.R;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.TimeUnit;
 
 public class ActivateChatAlertFragment extends DialogFragment implements ItemClickListener{
     private final static String TAG = ActivateChatAlertFragment.class.getSimpleName();
-    DatePickerDialog.OnDateSetListener ondateSet;
 
     private Button mSendButton, mCancelButton;
     private Spinner mSpinner;
@@ -69,10 +62,6 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
         return fragment;
     }
 
-    public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
-        ondateSet = ondate;
-    }
-
     /*@NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -99,10 +88,12 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
         // STYLE_NO_FRAME means that I will provide my own layout and style for the whole dialog
         // so for example the size of the default dialog will not get in my way
         // the style extends the default one. see bellow.
+        //setStyle(STYLE_NO_TITLE, R.style.DatePickerMyTheme);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
@@ -114,13 +105,16 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-       /* if(null != getDialog()){
-            getDialog().setTitle(R.string.user_request_dialog_title);
-        }*/
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        return inflater.inflate(R.layout.activate_chat_dialog_fragment, container);
+    }
 
-        View fragView = inflater.inflate(R.layout.activate_chat_dialog_fragment, container);
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Get field from view
+
+        // Fetch arguments from bundle and set title
         if (getArguments() != null) {
             chatId = (String) getArguments().get(ARGS_KEY_CHAT_ID);
             // use received chatKey to create a database ref
@@ -129,9 +123,9 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
 
         // get PrivateContactsList array from arguments
 
-        mSendButton = (Button) fragView.findViewById(R.id.send_button);
-        mCancelButton = (Button) fragView.findViewById(R.id.cancel_button);
-        mSpinner = (Spinner) fragView.findViewById(R.id.activation_spinner);
+        mSendButton = view.findViewById(R.id.send_button);
+        mCancelButton = view.findViewById(R.id.cancel_button);
+        mSpinner =  view.findViewById(R.id.activation_spinner);
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -235,30 +229,16 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
         });
 
 
-        // R.layout.dialog_color_picker is the custom layout of my dialog
-        //WindowManager.LayoutParams wmlp = getDialog().getWindow().getAttributes();
-        //wmlp.gravity = Gravity.LEFT;
-
-        return fragView;
     }
-
-
-
-    /*@Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if(null != getDialog()){
-            getDialog().setTitle(R.string.user_request_dialog_title);
-        }
-    }*/
 
     @Override
     public void onResume() {
         super.onResume();
-        ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+       /* ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);*/
+
     }
 
     @Override

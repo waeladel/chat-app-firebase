@@ -1,7 +1,6 @@
 package com.trackaty.chat.Fragments;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,21 +10,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.trackaty.chat.Adapters.RevealAdapter;
-import com.trackaty.chat.Interface.ItemClickListener;
-import com.trackaty.chat.R;
-import com.trackaty.chat.models.Social;
-
-import java.util.ArrayList;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.trackaty.chat.Adapters.RevealAdapter;
+import com.trackaty.chat.Interface.ItemClickListener;
+import com.trackaty.chat.R;
+import com.trackaty.chat.models.Social;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+
 public class RevealFragment extends DialogFragment implements ItemClickListener {
     private final static String TAG = RevealFragment.class.getSimpleName();
-    DatePickerDialog.OnDateSetListener ondateSet;
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
     public static ArrayList<Social> privateContacts;
@@ -72,9 +72,6 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     public void setRelationStatus(String relationStatus){
         mRelationStatus = relationStatus;
     }
-    public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
-        ondateSet = ondate;
-    }
 
     /*@NonNull
     @Override
@@ -102,10 +99,13 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         // STYLE_NO_FRAME means that I will provide my own layout and style for the whole dialog
         // so for example the size of the default dialog will not get in my way
         // the style extends the default one. see bellow.
+
+        setStyle(STYLE_NO_TITLE, R.style.DatePickerMyTheme);
+
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mActivityContext = context;
         if (context instanceof Activity){// check if fragmentContext is an activity
@@ -114,7 +114,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         if(null != getDialog()){
@@ -126,13 +126,15 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         // get PrivateContactsList array from arguments
         if (getArguments() != null) {
             pramsContacts = getArguments().getParcelableArrayList(PRIVET_CONTACTS_KEY);
-            for (int i = 0; i < pramsContacts.size(); i++) {
-                Log.i(TAG, "getArguments() PrivateContactsList sorted " + pramsContacts.get(i).getKey());
+            if (pramsContacts != null) {
+                for (int i = 0; i < pramsContacts.size(); i++) {
+                    Log.i(TAG, "getArguments() PrivateContactsList sorted " + pramsContacts.get(i).getKey());
+                }
             }
 
-            mSendButton = (Button) fragView.findViewById(R.id.send_button);
-            mCancelButton = (Button) fragView.findViewById(R.id.cancel_button);
-            mTitle = (TextView) fragView.findViewById(R.id.dialog_title);
+            mSendButton =  fragView.findViewById(R.id.send_button);
+            mCancelButton =  fragView.findViewById(R.id.cancel_button);
+            mTitle =  fragView.findViewById(R.id.dialog_title);
 
             // Adjust button text and dialog title according to relationship status
             switch (mRelationStatus){
@@ -178,7 +180,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
             mRequestAdapter  = new RevealAdapter(mActivityContext, pramsContacts, this);
 
             // Initiate the RecyclerView
-            mRequestRecycler  = (RecyclerView) fragView.findViewById(R.id.contacts_recycler);
+            mRequestRecycler  =  fragView.findViewById(R.id.contacts_recycler);
             mRequestRecycler.setHasFixedSize(true);
             mRequestRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
             mRequestRecycler.setAdapter(mRequestAdapter);
@@ -192,7 +194,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if(null != getDialog()){
             getDialog().setTitle(R.string.user_request_dialog_title);
@@ -201,11 +203,14 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
     @Override
     public void onResume() {
-        super.onResume();
+        // Get existing layout params for the window
         ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+        // Assign window properties to fill the parent
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        // Call super onResume after sizing
+        super.onResume();
     }
 
     @Override

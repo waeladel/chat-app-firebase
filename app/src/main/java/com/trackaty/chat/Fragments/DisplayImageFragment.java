@@ -5,12 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +12,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
@@ -40,7 +38,7 @@ public class DisplayImageFragment extends Fragment {
     private Context activityContext;
     private Activity activity;
     private ImageView  photoView , loadingIcon;
-    PhotoViewAttacher mAttacher;
+    private PhotoViewAttacher mAttacher;
 
     public DisplayImageFragment() {
         // Required empty public constructor
@@ -53,8 +51,8 @@ public class DisplayImageFragment extends Fragment {
         // Inflate the layout for this fragment
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_display_image, container, false);
-        photoView  = (ImageView ) fragView.findViewById(R.id.zoomed_image);
-        loadingIcon = (ImageView ) fragView.findViewById(R.id.loading_animation);
+        photoView  =  fragView.findViewById(R.id.zoomed_image);
+        loadingIcon = fragView.findViewById(R.id.loading_animation);
         if(getArguments() != null) {
             mUserId = DisplayImageFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             mImageName = DisplayImageFragmentArgs.fromBundle(getArguments()).getImageName();
@@ -69,8 +67,8 @@ public class DisplayImageFragment extends Fragment {
                 // Got the download URL for 'users/me/profile.png'
                 Picasso.get()
                         .load(uri)
-                        .placeholder(R.drawable.ic_picture_gallery_white)
-                        .error(R.drawable.ic_broken_image)
+                        .placeholder(R.mipmap.ic_picture_gallery_white_512px)
+                        .error(R.drawable.ic_broken_image_512px)
                         .into(photoView, new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
@@ -116,16 +114,16 @@ public class DisplayImageFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.display_image_title);
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.display_image_title);
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);
+            }
         }
-
     }
-
 }
 
 

@@ -30,22 +30,20 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:navGraph="@navigation/nav_graph" />
 
-    <TextView
-        android:id="@+id/last_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/title_find"
+    <View
+        android:id="@+id/bottom_nav_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/color_background"
+        android:alpha=".25"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/windowBackground"
         android:visibility="invisible"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -61,7 +61,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private  static final String SECTION_ABOUT_HEADLINE = "about";
     private  static final String SECTION_WORK_HEADLINE  = "work_and_education";
     private  static final String SECTION_HABITS_HEADLINE  = "habits";
-    public  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
+    private  final static String SECTION_SOCIAL_HEADLINE  = "social_and_contacts";
 
     private  static final int  NAME_INPUT_MAX_LENGTH = 40;
     private  static final int  NAME_INPUT_MAX_LINES = 1;
@@ -70,20 +70,20 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private  static final int  BIO_INPUT_MAX_LINES = 4;
 
 
-    public ArrayList<Profile> mProfileDataArrayList;
-    public ArrayList<Profile> aboutArrayList ;
-    public ArrayList<Profile> workArrayList ;
-    public ArrayList<Profile> habitsArrayList;
-    public ArrayList<Social> socialArrayList;
-    public ArrayList<Variables> variablesArrayList;
+    private ArrayList<Profile> mProfileDataArrayList;
+    private ArrayList<Profile> aboutArrayList ;
+    private ArrayList<Profile> workArrayList ;
+    private ArrayList<Profile> habitsArrayList;
+    private ArrayList<Social> socialArrayList;
+    private ArrayList<Variables> variablesArrayList;
 
-    public AboutAdapter aboutAdapter;
-    public WorkAdapter workAdapter;
-    public HabitsAdapter habitsAdapter;
-    public SocialAdapter socialAdapter;
+    private AboutAdapter aboutAdapter;
+    private WorkAdapter workAdapter;
+    private HabitsAdapter habitsAdapter;
+    private SocialAdapter socialAdapter;
 
-    public Context context;
-    public Fragment mFragment;
+    private Context context;
+    private Fragment mFragment;
 
     private ItemClickListener itemClickListener;
 
@@ -168,35 +168,32 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             avatarImageHolder imageHolder = (avatarImageHolder) holder;
             ViewGroup.LayoutParams layoutParams;
 
-            switch (mProfileDataArrayList.get(position).getKey()){
-                case "avatar":
-                    // set frame layout to WRAP_CONTENT
+            if ("avatar".equals(mProfileDataArrayList.get(position).getKey())) {
+                // set frame layout to WRAP_CONTENT
                     /*float factor = imageHolder.frameLayout.getContext().getResources().getDisplayMetrics().density;
                     layoutParams = imageHolder.frameLayout.getLayoutParams();
                     layoutParams.width = (int)(100 * factor);
                     layoutParams.height = (int)(100 * factor);
                     imageHolder.frameLayout.setLayoutParams(layoutParams);*/
 
-                    imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
-                    if(null != mProfileDataArrayList.get(position).getValue()){
-                        Picasso.get()
-                                .load(mProfileDataArrayList.get(position).getValue())
-                                .placeholder(R.drawable.ic_user_account_grey_white )
-                                .error(R.drawable.ic_broken_image)
-                                .into(imageHolder.profileImage);
-                        imageHolder.profileImage.setVisibility(View.VISIBLE);
-                        imageHolder.divider.setVisibility(View.INVISIBLE);
-                        imageHolder.icon.setImageResource(R.drawable.ic_user_account_grey_white);
+                imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
+                if (null != mProfileDataArrayList.get(position).getValue()) {
+                    Picasso.get()
+                            .load(mProfileDataArrayList.get(position).getValue())
+                            .placeholder(R.mipmap.ic_round_account_filled_72)
+                            .error(R.drawable.ic_round_broken_image_72px)
+                            .into(imageHolder.profileImage);
+                    imageHolder.profileImage.setVisibility(View.VISIBLE);
+                    imageHolder.divider.setVisibility(View.INVISIBLE);
+                    imageHolder.icon.setImageResource(R.drawable.ic_round_account_filled_72);
 
-
-                    }
-                    // Add black color filter
-                    // Move filter outside if statement to activate the black color even if avatar is null
-                    int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
-                    ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
-                    imageHolder.profileImage.setColorFilter(colorFilter);
-                    break;
-                /*case "coverImage":
+                }
+                // Add black color filter
+                // Move filter outside if statement to activate the black color even if avatar is null
+                int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
+                ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
+                imageHolder.profileImage.setColorFilter(colorFilter);
+                    /*case "coverImage":
                     // set frame layout to MATCH_PARENT
                     layoutParams = imageHolder.frameLayout.getLayoutParams();
                     layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -216,7 +213,6 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     }
                     break;*/
-
             }
 
             // hide progress animation when done
@@ -239,8 +235,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             coverImageHolder imageHolder = (coverImageHolder) holder;
             ViewGroup.LayoutParams layoutParams;
 
-            switch (mProfileDataArrayList.get(position).getKey()){
-                /*case "avatar":
+            /*case "avatar":
                     // set frame layout to WRAP_CONTENT
                     float factor = imageHolder.frameLayout.getContext().getResources().getDisplayMetrics().density;
 
@@ -267,31 +262,29 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         imageHolder.profileImage.setColorFilter(colorFilter);
                     }
                     break;*/
-                case "coverImage":
-                    // set frame layout to MATCH_PARENT
+            if ("coverImage".equals(mProfileDataArrayList.get(position).getKey())) {
+                // set frame layout to MATCH_PARENT
                     /*layoutParams = imageHolder.frameLayout.getLayoutParams();
                     layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
                     layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                     imageHolder.frameLayout.setLayoutParams(layoutParams);*/
 
-                    imageHolder.itemHeadline.setText(R.string.user_cover_headline);
-                    if(null != mProfileDataArrayList.get(position).getValue()){
-                        Picasso.get()
-                                .load(mProfileDataArrayList.get(position).getValue())
-                                .placeholder(R.drawable.ic_picture_gallery_white )
-                                .error(R.drawable.ic_broken_image)
-                                .into(imageHolder.coverImage);
-                        imageHolder.coverImage.setVisibility(View.VISIBLE);
-                        imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
+                imageHolder.itemHeadline.setText(R.string.user_cover_headline);
+                if (null != mProfileDataArrayList.get(position).getValue()) {
+                    Picasso.get()
+                            .load(mProfileDataArrayList.get(position).getValue())
+                            .placeholder(R.mipmap.ic_picture_gallery_white_512px)
+                            .error(R.drawable.ic_broken_image_512px)
+                            .into(imageHolder.coverImage);
+                    imageHolder.coverImage.setVisibility(View.VISIBLE);
+                    imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
 
                         /*// add black color filter
                         int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
                         ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
                         imageHolder.coverImage.setColorFilter(colorFilter);*/
 
-                    }
-                    break;
-
+                }
             }
 
             // hide progress animation when done
@@ -370,16 +363,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof TextHolder){
             TextHolder textHolder = (TextHolder) holder;
 
-            switch (mProfileDataArrayList.get(position).getKey()){
-                case "birthDate":
-                    textHolder.itemHeadline.setText(context.getString(R.string.user_birthday_headline));
-                    if(null != mProfileDataArrayList.get(position).getValue()){
-                        Calendar c = Calendar.getInstance();
-                        c.setTimeInMillis(Long.parseLong(mProfileDataArrayList.get(position).getValue()));
-                        String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
-                        textHolder.itemValue.setText(birthDate);
-                    }
-                    break;
+            if ("birthDate".equals(mProfileDataArrayList.get(position).getKey())) {
+                textHolder.itemHeadline.setText(context.getString(R.string.user_birthday_headline));
+                if (null != mProfileDataArrayList.get(position).getValue()) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTimeInMillis(Long.parseLong(mProfileDataArrayList.get(position).getValue()));
+                    String birthDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(c.getTime());
+                    textHolder.itemValue.setText(birthDate);
+                }
             }
 
         }

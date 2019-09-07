@@ -1,12 +1,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item
       android:gravity="fill"
-      android:drawable="@drawable/ic_brightness_1_black_24dp"
+      android:drawable="@drawable/notification_icon_background_red_24dp"
 
       />
   <item
       android:gravity="center"
-      android:drawable="@drawable/ic_favorite_black_24dp"
+      android:drawable="@drawable/ic_favorite_white_24dp"
       android:top="20dp"
       android:bottom="20dp"
       android:left="20dp"

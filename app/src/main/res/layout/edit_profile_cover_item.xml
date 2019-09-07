@@ -28,7 +28,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/ic_picture_gallery_white"
+        app:srcCompat="@drawable/ic_picture_gallery_white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_divider"
         tools:ignore="ContentDescription" />
@@ -63,7 +63,7 @@
             android:layout_height="100dp"
             android:contentDescription="@string/add_image_button_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_picture_gallery_white"
+            app:srcCompat="@drawable/ic_picture_gallery_white"
             android:tint="@color/transparent_edit_image" />
 
         <ImageView
@@ -74,14 +74,14 @@
             android:layout_marginBottom="@dimen/small_margin"
             android:contentDescription="@string/add_image_button_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_add_a_photo_black_24dp" />
+            app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
         <ImageView
             android:id="@+id/progress_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/progress_animation"
+            app:srcCompat="@drawable/progress_animation"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 

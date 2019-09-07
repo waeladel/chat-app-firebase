@@ -6,21 +6,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,24 +15,24 @@ import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.Adapters.ProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.ViewModels.MoreProfileViewModel;
-import com.trackaty.chat.ViewModels.ProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Relation;
-import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 
 import java.lang.reflect.Field;
@@ -53,7 +40,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 
 /**
@@ -67,8 +53,8 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
 
     private User mUser;
 
-    private  static final int SECTION_ABOUT = 500;
-    private  static final int SECTION_SOCIAL = 600;
+    private  static final int SECTION_SOCIAL = 500;
+    private  static final int SECTION_ABOUT =  600;
     private  static final int SECTION_WORK = 700;
     private  static final int SECTION_HABITS = 800;
 
@@ -139,7 +125,7 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             }*/
 
             // Initiate the RecyclerView
-            mProfileRecycler  = (RecyclerView) fragView.findViewById(R.id.profile_recycler);
+            mProfileRecycler  =  fragView.findViewById(R.id.profile_recycler);
             mProfileRecycler.setHasFixedSize(true);
             mProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
             mProfileRecycler.setAdapter(mProfileAdapter);
@@ -187,12 +173,14 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.more_profile_frag_title);
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.more_profile_frag_title);
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);
+            }
         }
 
         // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
@@ -227,7 +215,7 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
                     try {
                         // check if is not null or empty
                         if (method.invoke(user) != null){
-                            String value = method.invoke(user).toString();
+                            String value = String.valueOf(method.invoke(user));
                             Log.d(TAG, "Method Type=" + method.getGenericReturnType());
 
                             if(fieldName.equals("work")
@@ -482,7 +470,9 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             case "pubg":
                 ClipboardManager clipboard = (ClipboardManager) mActivityContext.getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(getResources().getString(R.string.user_pubg_clipboard_label), mUserArrayList.get(position).getSocial().getUrl());
-                clipboard.setPrimaryClip(clip);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
 
                 Toast.makeText(mActivityContext,R.string.user_pubg_clipboard_toast,
                         Toast.LENGTH_SHORT).show();

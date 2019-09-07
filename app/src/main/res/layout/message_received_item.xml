@@ -25,6 +25,8 @@
             android:id="@+id/notification_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textAppearance="@style/TextAppearance.MyTheme.Body1"
+            android:textColor="@drawable/my_on_surface_emphasis_high_type"
             tools:text="@tools:sample/first_names" />
 
         <!--<com.cooltechworks.views.ScratchTextView
@@ -39,14 +41,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:eraseSize="60"
-            app:watermark="@drawable/googleg_disabled_color_18" />
+            app:maskColor="@color/color_covered_message"
+             />
 
         <!-- scratch view -->
         <TextView
             android:id="@+id/reset_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/design_default_color_primary_dark" />
+            android:background="@color/color_covered_message"/>
 
     </FrameLayout>
 
@@ -58,14 +61,15 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MyTheme.Caption"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/user_image"
         app:layout_constraintTop_toBottomOf="@+id/frameLayout"
-        tools:text="@tools:sample/date/hhmm"/>
+        tools:text="@tools:sample/date/hhmm" />
 
-    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_image"
         android:layout_width="@dimen/small_avatar"
         android:layout_height="@dimen/small_avatar"
@@ -74,9 +78,7 @@
         android:layout_marginTop="8dp"
         android:contentDescription="@string/profile_image_description"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_user_account_grey_white"
-        app:civ_border_color="@color/colorAccent"
-        app:civ_border_width="2dp"
+        app:srcCompat="@drawable/ic_round_account_filled_72"
         app:layout_constraintDimensionRatio="w,1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

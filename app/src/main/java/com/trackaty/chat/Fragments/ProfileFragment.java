@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -112,7 +113,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private Button mSeeMoreButton;
     private FloatingActionButton mLoveButton, mMessageButton, mRevealButton, mBlockEditButton;
     private ColorStateList mFabDefaultColor; // To rest FAB's default color
-    private int mFabDefaultTextColor; // To rest the hint's default color of FAB buttons
+    private ColorStateList mFabDefaultTextColor; // To rest the hint's default color of FAB buttons
 
     private FragmentManager fragmentManager;// = getFragmentManager();
     private RevealFragment requestFragment;
@@ -138,7 +139,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private Relation mRelations;
 
     // Create contacts Hash list, to hold user selections when sending a request
-    Map<String, Boolean> contactsMap = new HashMap<>();
+    private Map<String, Boolean> contactsMap = new HashMap<>();
 
     private Boolean isCancelLove;
 
@@ -181,28 +182,29 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        mSeeMoreButton = (Button) fragView.findViewById(R.id.see_more_button);
-        mBlockEditButton = (FloatingActionButton) fragView.findViewById(R.id.block_edit_button);
-        mLoveButton = (FloatingActionButton) fragView.findViewById(R.id.love_button);
-        mMessageButton = (FloatingActionButton) fragView.findViewById(R.id.message_button);
-        mRevealButton = (FloatingActionButton) fragView.findViewById(R.id.reveal_button);
-        mLovedByHint = (TextView) fragView.findViewById(R.id.love_text);
-        mMessageHint = (TextView) fragView.findViewById(R.id.notification_text);
-        mRevealHint = (TextView) fragView.findViewById(R.id.reveal_button_text);
-        mCover = (ImageView) fragView.findViewById(R.id.coverImage);
-        mAvatar = (ImageView) fragView.findViewById(R.id.user_image);
-        mUserName = (TextView) fragView.findViewById(R.id.user_name_text);
-        mUserBio = (TextView) fragView.findViewById(R.id.user_bio_text);
-        mBlockEditHint = (TextView) fragView.findViewById(R.id.block_edit_text);
-        mLovedByValue = (TextView) fragView.findViewById(R.id.user_loved_by_value);
-        mPickUpValue = (TextView) fragView.findViewById(R.id.pick_up_value);
-        mRelationship = (TextView) fragView.findViewById(R.id.user_relationship_value);
-        mInterested = (TextView) fragView.findViewById(R.id.user_interested_value);
-        mInterestedIcon = (ImageView) fragView.findViewById(R.id.interested_in_icon);
-        mmRelationshipIcon = (ImageView) fragView.findViewById(R.id.relationship_icon);
+        mSeeMoreButton =  fragView.findViewById(R.id.see_more_button);
+        mBlockEditButton = fragView.findViewById(R.id.block_edit_button);
+        mLoveButton =  fragView.findViewById(R.id.love_button);
+        mMessageButton =  fragView.findViewById(R.id.message_button);
+        mRevealButton = fragView.findViewById(R.id.reveal_button);
+        mLovedByHint =  fragView.findViewById(R.id.love_text);
+        mMessageHint =  fragView.findViewById(R.id.notification_text);
+        mRevealHint =  fragView.findViewById(R.id.reveal_button_text);
+        mCover =  fragView.findViewById(R.id.coverImage);
+        mAvatar =  fragView.findViewById(R.id.user_image);
+        mUserName =  fragView.findViewById(R.id.user_name_text);
+        mUserBio =  fragView.findViewById(R.id.user_bio_text);
+        mBlockEditHint =  fragView.findViewById(R.id.block_edit_text);
+        mLovedByValue =  fragView.findViewById(R.id.user_loved_by_value);
+        mPickUpValue = fragView.findViewById(R.id.pick_up_value);
+        mRelationship =  fragView.findViewById(R.id.user_relationship_value);
+        mInterested = fragView.findViewById(R.id.user_interested_value);
+        mInterestedIcon =  fragView.findViewById(R.id.interested_in_icon);
+        mmRelationshipIcon = fragView.findViewById(R.id.relationship_icon);
 
         mFabDefaultColor = mBlockEditButton.getBackgroundTintList(); // get default FAB's color
-        mFabDefaultTextColor = mBlockEditHint.getCurrentTextColor(); // get default hint's color
+        //mFabDefaultTextColor = mBlockEditHint.getCurrentTextColor(); // get default hint's color
+        mFabDefaultTextColor = mBlockEditHint.getTextColors();
 
         mBlockEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -469,7 +471,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     //Show confirmation dialog before deleting relations
     private void showDeleteRelationDialog() {
-        DeleteRelationAlertFragment deleteAlertFragment = DeleteRelationAlertFragment.newInstance(this);
+        DeleteRelationAlertFragment deleteAlertFragment = DeleteRelationAlertFragment.newInstance(mActivityContext, this);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             deleteAlertFragment.show(fragmentManager, CONFIRM_DELETE_RELATION_ALERT_FRAGMENT);
@@ -489,7 +491,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     //Show a dialog to confirm blocking user
     private void showBlockDialog() {
-        BlockAlertFragment blockFragment = BlockAlertFragment.newInstance(this);
+        BlockAlertFragment blockFragment = BlockAlertFragment.newInstance(mActivityContext,this);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             blockFragment.show(fragmentManager, CONFIRM_BLOCK_ALERT_FRAGMENT);
@@ -499,7 +501,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     //Show a dialog to confirm blocking user and delete his conversation with us (current user)
     private void showBlockDeleteDialog() {
-        BlockDeleteAlertFragment blockDeleteFragment = BlockDeleteAlertFragment.newInstance(this);
+        BlockDeleteAlertFragment blockDeleteFragment = BlockDeleteAlertFragment.newInstance(mActivityContext, this);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             blockDeleteFragment.show(fragmentManager, CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
@@ -688,17 +690,22 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             if (null != mUser.getCoverImage()) {
                 Picasso.get()
                         .load(mUser.getCoverImage())
-                        .placeholder(R.drawable.ic_picture_gallery_white)
-                        .error(R.drawable.ic_broken_image)
+                        .placeholder(R.mipmap.ic_picture_gallery_white_512px)
+                        .error(R.drawable.ic_broken_image_512px)
                         .into(mCover);
+            }else{
+                mCover.setImageResource(R.drawable.ic_picture_gallery_white);
             }
 
             if (null != mUser.getAvatar()) {
                 Picasso.get()
                         .load(mUser.getAvatar())
-                        .placeholder(R.drawable.ic_user_account_grey_white)
-                        .error(R.drawable.ic_broken_image)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
                         .into(mAvatar);
+            }else{
+                // end of user avatar
+                mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
             }
 
             if (null != mUser.getName()) {
@@ -736,17 +743,17 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         break;
                     case "engaged":
                         mRelationship.setText(R.string.engaged);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "married":
                         mRelationship.setText(R.string.married);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "civil union":
                         mRelationship.setText(R.string.civil_union);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "domestic partnership":
@@ -761,22 +768,22 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         break;
                     case "open marriage":
                         mRelationship.setText(R.string.open_marriage);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_hearts_rings_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "separated":
                         mRelationship.setText(R.string.separated);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "divorced":
                         mRelationship.setText(R.string.divorced);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     case "widowed":
                         mRelationship.setText(R.string.widowed);
-                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart);
+                        mmRelationshipIcon.setImageResource(R.drawable.ic_broken_heart_filled);
                         mmRelationshipIcon.setVisibility(View.VISIBLE);
                         break;
                     default:
@@ -830,12 +837,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.profile_frag_title);
-            actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.profile_frag_title);
+                actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);
+            }
         }
 
         // display user data
@@ -876,8 +885,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 }
             }
         });
-        Log.i(TAG, "onChanged mProfileViewModel getRelation"+ mMessageButton.getBackgroundTintList());
-
 
         // toggle mBlockEditButton
         if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
@@ -891,8 +898,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             mProfileViewModel.getRelation(mCurrentUserId, mUserId).observe(getViewLifecycleOwner(), new Observer<Relation>() {
                 @Override
                 public void onChanged(Relation relation) {
-                    Log.i(TAG, "onChanged mProfileViewModel getRelation" + " hashcode= "+ hashCode());
                     if (relation != null){
+                        Log.i(TAG, "onChanged mProfileViewModel getRelation = " +relation.getStatus() + " hashcode= "+ hashCode());
                         // Relation exist
                         switch (relation.getStatus()){
                             case RELATION_STATUS_BLOCKING:
@@ -932,7 +939,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                                 // change block hint to Unblock, and change color to red
                                 mBlockEditHint.setText(R.string.unblock_button);
-                                mBlockEditHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mBlockEditHint.setTextColor(getResources().getColor(R.color.color_error));
 
                                 mLoveButton.setEnabled(false);
                                 mLoveButton.setClickable(false);
@@ -952,6 +959,16 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mLovedByHint.setEnabled(false);
                                 mMessageHint.setEnabled(false);
                                 mRevealHint.setEnabled(false);
+
+                                // return mRevealHint to it's default state when current user click on block
+                                // because selected user may have sent a reveal request before i click on blocking him
+                                mRevealHint.setText(R.string.request_button_hint);
+                                mRevealHint.setTextColor(mFabDefaultTextColor);
+
+                                // return mLovedByHint to it's default state when current user click on block
+                                // because selected user may have liked current user or vice versa before current user click on blocking him
+                                mLovedByHint.setText(R.string.love_button_hint_love);
+                                mLovedByHint.setTextColor(mFabDefaultTextColor);
                                 //mBlockEditHint.setEnabled(false);
                                 break;
                             case RELATION_STATUS_SENDER:
@@ -961,7 +978,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setText(R.string.request_button_approve_hint);
                                 mRevealButton.setEnabled(true);
                                 mRevealButton.setClickable(true);
-                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                mRevealButton.setBackgroundTintList(mFabDefaultColor);
                                 mRevealHint.setEnabled(true);
                                 mRelationsMap = relation.getContacts();
                                 mOriginalRelationsMap = new HashMap<>(mRelationsMap);
@@ -973,8 +990,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setText(R.string.request_button_cancel_hint);
                                 mRevealButton.setEnabled(true);
                                 mRevealButton.setClickable(true);
-                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
-                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRevealButton.setBackgroundTintList(mFabDefaultColor);
+                                mRevealHint.setTextColor(getResources().getColor(R.color.color_error));
                                 mRevealHint.setEnabled(true);
                                 break;
                             case RELATION_STATUS_STALKER:
@@ -984,9 +1001,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setText(R.string.request_button_unreveal_hint);
                                 mRevealButton.setEnabled(true);
                                 mRevealButton.setClickable(true);
-                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                     mRevealHint.setEnabled(true);
+                                mRevealButton.setBackgroundTintList(mFabDefaultColor);
                                 mRevealHint.setEnabled(true);
-                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRevealHint.setTextColor(getResources().getColor(R.color.color_error));
                                 mRelationsMap = relation.getContacts();
                                 mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                 break;
@@ -997,9 +1014,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setText(R.string.request_button_unreveal_hint);
                                 mRevealButton.setEnabled(true);
                                 mRevealButton.setClickable(true);
-                                mRevealButton.setBackgroundTintList(mMessageButton.getBackgroundTintList());                                    mRevealHint.setEnabled(true);
+                                mRevealButton.setBackgroundTintList(mFabDefaultColor);
                                 mRevealHint.setEnabled(true);
-                                mRevealHint.setTextColor(getResources().getColor(R.color.colorAccent));
+                                mRevealHint.setTextColor(getResources().getColor(R.color.color_error));
                                 mRelationsMap = relation.getContacts();
                                 mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                 break;
@@ -1008,11 +1025,31 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                     }else{
                         // Relation doesn't exist, use default user settings
-                        Log.i(TAG, "onChanged relation Status= Relation doesn't exist");
+                        Log.i(TAG, "onChanged relation Status= Relation doesn't exist. mRelationStatus= "+ mRelationStatus);
+                        // Check if it's null because it was blocked before or not
+                        // if it was blocked it means current user is unblocking this user, we need to force default buttons colors
+                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_BLOCKED)) {
+                            // Return to default text color when user cancel request or unreveal or unblock
+                            //mLovedByHint.setTextColor(mFabDefaultTextColor);
+                            //mMessageHint.setTextColor(mFabDefaultTextColor);
+                            mBlockEditHint.setTextColor(mFabDefaultTextColor);
+                            //mRevealHint.setTextColor(mFabDefaultTextColor);
+
+                        }
+
+                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_RECEIVER)) {
+                            // Return to default text color when user cancel request or unreveal or unblock
+                            //mLovedByHint.setTextColor(mFabDefaultTextColor);
+                            //mMessageHint.setTextColor(mFabDefaultTextColor);
+                            //mBlockEditHint.setTextColor(mFabDefaultTextColor);
+                            mRevealHint.setTextColor(mFabDefaultTextColor);
+
+                        }
+
                         mRelationStatus = RELATION_STATUS_NOT_FRIEND;
 
                         // Enable all buttons. In case they were disabled by previous block
-                        mBlockEditHint.setText(R.string.block_button); // in case it was set to unblock from frevious block
+                        mBlockEditHint.setText(R.string.block_button); // in case it was set to unblock from previous block
                         mBlockEditButton.setEnabled(true);
                         mBlockEditButton.setClickable(true);
                         mBlockEditButton.setBackgroundTintList(mFabDefaultColor);
@@ -1027,14 +1064,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                         mLovedByHint.setEnabled(true);
                         mMessageHint.setEnabled(true);
-                        mRevealHint.setEnabled(true);
+                        // don't enable reveal hint unless there are private contacts
+                        //mRevealHint.setEnabled(true);
                         mBlockEditHint.setEnabled(true);
-
-                        // Return to default text color when user cancel request or unreveal
-                        mLovedByHint.setTextColor(mFabDefaultTextColor);
-                        mMessageHint.setTextColor(mFabDefaultTextColor);
-                        mRevealHint.setTextColor(mFabDefaultTextColor);
-                        mBlockEditHint.setTextColor(mFabDefaultTextColor);
 
                         // Only enable reveal button if user has private contacts
                         mPrivateContactsList = getPrivateContacts();
@@ -1043,6 +1075,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             mRevealButton.setEnabled(true);
                             mRevealButton.setClickable(true);
                             mRevealButton.setBackgroundTintList(mFabDefaultColor);
+                            mRevealHint.setEnabled(true);
                         }else{
                             // disable RevealButton because there are no private contacts
                             mRevealHint.setText(R.string.request_button_hint);
@@ -1054,7 +1087,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         }
 
                     }
-
                 }
             });// End of mProfileViewModel
         } else {
@@ -1126,6 +1158,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 notificationType = NOTIFICATION_TYPE_LIKE;
                                 mLovedByHint.setText(R.string.love_button_hint_unlove);
                                 mLoveButton.setImageResource(R.drawable.ic_favorite_black_24dp);
+                                mLovedByHint.setTextColor(getResources().getColor(R.color.color_error));
                                 break;
                             case LIKE_TYPE_ADMIRER:
                                 // Statues = Disliked
@@ -1133,12 +1166,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 notificationType = NOTIFICATION_TYPE_LIKE_BACK;
                                 mLovedByHint.setText(R.string.love_button_hint_love_back);
                                 mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                mLovedByHint.setTextColor(mFabDefaultTextColor);
                                 break;
                             case LIKE_TYPE_NOT_LOVED:
                                 // Statues = Disliked
                                 isCancelLove = false;
                                 mLovedByHint.setText(R.string.love_button_hint_love);
                                 mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                                mLovedByHint.setTextColor(mFabDefaultTextColor);
                                 break;
                         }
 

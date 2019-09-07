@@ -4,15 +4,16 @@ apply plugin: "androidx.navigation.safeargs"
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.trackaty.chat"
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 29
         multiDexEnabled true // Enabling multidex support.
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -44,19 +45,19 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //implementation 'androidx.multidex:multidex:2.0.1' // multidex support for min SdkVersion above 20
     implementation 'com.android.support:multidex:1.0.3' // multidex support for SdkVersion 20
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'com.google.android.material:material:1.1.0-alpha07'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0-alpha09'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0-rc01'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
-    implementation 'com.google.firebase:firebase-core:17.0.1'
-    implementation 'com.google.firebase:firebase-database:18.0.0'
-    implementation 'com.google.firebase:firebase-auth:18.1.0'
+    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.firebase:firebase-database:19.0.0'
+    implementation 'com.google.firebase:firebase-auth:19.0.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.0'
-    implementation 'com.google.firebase:firebase-messaging:19.0.1'
+    implementation 'com.google.firebase:firebase-messaging:20.0.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.firebase:firebase-storage:18.1.0'
+    implementation 'com.google.firebase:firebase-storage:19.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -78,15 +79,16 @@ dependencies {
 
 
     implementation 'androidx.paging:paging-runtime:2.1.0' //Add the paging library
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0' // ViewModel and LiveData
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0' // ViewModel and LiveData
     //implementation "androidx.lifecycle:lifecycle-viewmodel:2.0.0"              // alternatively - just ViewModel
     //implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version" // alternatively - just LiveData
     //implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version" // alternatively - Lifecycles only
 
     //annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.0.0" // For Kotlin use kapt instead of annotationProcessor
     // alternately - if using Java8, use the following instead of lifecycle-compiler
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.0.0"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.1.0"
 
+    implementation "androidx.preference:preference:1.1.0" // For settings prefrences
 
     //implementation 'org.awaitility:awaitility:3.1.6'
     //implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView

@@ -57,7 +57,7 @@
             android:hint="@string/send_message_hint"
             android:importantForAutofill="no"
             android:inputType="textShortMessage|textAutoCorrect|textMultiLine|textCapSentences|textAutoComplete"
-            android:src="@drawable/ic_send_black_24dp"
+            app:srcCompat="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/send_button"
             app:layout_constraintStart_toStartOf="parent"
@@ -72,7 +72,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             android:contentDescription="@string/send_text_icon"
-            android:src="@drawable/ic_send_black_24dp"
+            app:srcCompat="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

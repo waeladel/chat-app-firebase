@@ -1,10 +1,10 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,13 +32,9 @@ import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.DatabaseNotification;
 
-import androidx.annotation.NonNull;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-import androidx.paging.PagedListAdapter;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static android.graphics.Typeface.BOLD;
 
 public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification, NotificationsAdapter.ViewHolder> {
 
@@ -57,10 +61,12 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mNotificationsRef;
 
-    public NotificationsAdapter() {
+    private Fragment fragment;
+
+    public NotificationsAdapter(Fragment fragment) {
         super(DIFF_CALLBACK);
 
-        //this.context = context;
+        this.fragment = fragment;
 
         firebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         if(firebaseCurrentUser != null){
@@ -96,7 +102,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_like_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_like_body);
                         }
@@ -107,7 +113,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_like_back_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_like_body);
                         }
@@ -118,7 +124,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_pick_up_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_pick_up_body);
                         }
@@ -129,7 +135,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_message_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
 
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_message_body);
@@ -141,7 +147,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_request_sent_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
 
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_request_sent_body);
@@ -154,7 +160,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_request_approved_body, name));
-                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(android.graphics.Typeface.BOLD));
+                            setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_request_approved_body);
                         }
@@ -187,21 +193,22 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                 String avatarUrl = notification.getSenderAvatar();
                 Picasso.get()
                         .load(avatarUrl)
-                        .placeholder(R.drawable.ic_user_account_grey_white)
-                        .error(R.drawable.ic_broken_image)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
                         .into(holder.mAvatar);
             }else{
                 // Handle if getSenderId() is null
-                holder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
             }
 
             // background color
             if (notification.isClicked()) {
-                // If item was clicked, transparent background
-                holder.row.setBackgroundColor(Color.parseColor("#ffffff"));
+                // If item was clicked, normal background
+                holder.row.setBackgroundColor(android.R.attr.colorBackground);
             }else{
                 // item is not clicked, display colored background
-                holder.row.setBackgroundColor( App.getContext().getResources().getColor(R.color.LightSteelBlue));
+                //holder.row.setBackgroundColor(App.getContext().getResources().getColor(R.color.transparent_read_items));
+                holder.row.setBackgroundResource(R.color.color_highlighted_item);
             }
 
          }
@@ -215,12 +222,14 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
         SpannableStringBuilder sb = new SpannableStringBuilder(wholeText);
         int start = wholeText.indexOf(spanText);
         int end = start + spanText.length();
-        sb.setSpan(style, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new StyleSpan(BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        int color = fragment.getResources().getColor(R.color.color_on_surface_emphasis_high);
+        sb.setSpan(new ForegroundColorSpan(color), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(sb);
     }
 
     // CALLBACK to calculate the difference between the old item and the new item
-    public static final DiffUtil.ItemCallback<DatabaseNotification> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<DatabaseNotification> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<DatabaseNotification>() {
                 // User details may have changed if reloaded from the database,
                 // but ID is fixed.

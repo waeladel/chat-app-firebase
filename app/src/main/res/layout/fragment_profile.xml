@@ -18,13 +18,13 @@
             android:layout_height="0dp"
             android:contentDescription="@string/cover_image_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_picture_gallery_white"
+            app:srcCompat="@drawable/ic_picture_gallery_white"
             app:layout_constraintDimensionRatio="2:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/user_image"
             android:layout_width="200dp"
             android:layout_height="200dp"
@@ -34,16 +34,17 @@
             android:layout_marginRight="8dp"
             android:contentDescription="@string/profile_image_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_user_account_grey_white"
-            app:civ_border_color="@color/colorAccent"
-            app:civ_border_width="4dp"
+            app:civ_border_color="?android:attr/colorBackground"
+            app:civ_border_width="6dp"
+            app:civ_fill_color="?android:attr/colorBackground"
             app:layout_constraintBottom_toBottomOf="@+id/coverImage"
-            app:layout_constraintDimensionRatio="w,1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/coverImage"
-            app:layout_constraintVertical_bias="0.39999998" />
+            app:layout_constraintVertical_bias="0.39999998"
+            app:srcCompat="@drawable/ic_round_account_filled_72"/>
+
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline30"
@@ -70,7 +71,7 @@
             android:layout_marginRight="8dp"
             android:gravity="center_horizontal"
             android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+            android:textAppearance="@style/TextAppearance.MyTheme.Headline4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -87,7 +88,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
             android:maxLines="4"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/TextAppearance.MyTheme.Body2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -101,7 +102,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:src="@drawable/ic_favorite_border_black_24dp"
+            app:srcCompat="@drawable/ic_favorite_border_black_24dp"
             app:layout_constraintEnd_toStartOf="@+id/message_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
@@ -115,7 +116,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:src="@drawable/ic_baseline_chat_24px"
+            app:srcCompat="@drawable/ic_baseline_chat_24px"
             app:layout_constraintEnd_toStartOf="@+id/reveal_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/love_button"
@@ -128,7 +129,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:src="@drawable/ic_visibility_black_24dp"
+            app:srcCompat="@drawable/ic_visibility_black_24dp"
             app:layout_constraintEnd_toStartOf="@+id/block_edit_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/message_button"
@@ -141,7 +142,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:src="@drawable/ic_block_24dp"
+            app:srcCompat="@drawable/ic_block_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/reveal_button"
@@ -203,6 +204,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="16dp"
             android:text="@string/user_statistics_headline"
+            android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/buttons_text_barrier" />
 
@@ -233,7 +235,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
-            android:src="@drawable/ic_favorite_black_24dp"
+            app:srcCompat="@drawable/ic_favorite_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_statistics_headline"
             tools:ignore="ContentDescription" />
@@ -243,7 +245,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:src="@drawable/ic_baseline_chat_24px"
+            app:srcCompat="@drawable/ic_baseline_chat_24px"
             app:layout_constraintStart_toStartOf="@+id/heart_icon"
             app:layout_constraintTop_toBottomOf="@+id/heart_icon"
             tools:ignore="ContentDescription" />
@@ -270,6 +272,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="16dp"
             android:text="@string/user_relationship_headline"
+            android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/relationship_divider" />
 
@@ -316,6 +319,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="16dp"
             android:text="@string/user_interested_in_headline"
+            android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/interested_divider" />
 
@@ -343,14 +347,14 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/see_more_button"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="24dp"
             android:maxLines="1"
             android:paddingLeft="@dimen/button_padding"
             android:paddingRight="@dimen/button_padding"
@@ -358,7 +362,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_interested_value"/>
+            app:layout_constraintTop_toBottomOf="@+id/user_interested_value" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
