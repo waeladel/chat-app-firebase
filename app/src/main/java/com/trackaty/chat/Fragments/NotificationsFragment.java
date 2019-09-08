@@ -8,19 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.trackaty.chat.Adapters.ChatsAdapter;
-import com.trackaty.chat.Adapters.NotificationsAdapter;
-import com.trackaty.chat.R;
-import com.trackaty.chat.ViewModels.ChatsViewModel;
-import com.trackaty.chat.ViewModels.NotificationsViewModel;
-import com.trackaty.chat.activities.MainActivity;
-import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.DatabaseNotification;
-
-import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -32,6 +19,17 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.trackaty.chat.Adapters.NotificationsAdapter;
+import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.NotificationsViewModel;
+import com.trackaty.chat.activities.MainActivity;
+import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.DatabaseNotification;
+
+import java.util.ArrayList;
 
 public class NotificationsFragment extends Fragment{
 
@@ -90,7 +88,7 @@ public class NotificationsFragment extends Fragment{
 
         // prepare the Adapter in onCreate to use only one Adapter
         mArrayList = new ArrayList<>();
-        mAdapter = new NotificationsAdapter();
+        mAdapter = new NotificationsAdapter(this);
         //mAdapter = new NotificationsAdapter(mActivityContext);
 
         // Create ViewModel in onCreate to use only one ViewModel and observer
@@ -192,7 +190,7 @@ public class NotificationsFragment extends Fragment{
 
 
         // Initiate the RecyclerView
-        mRecycler = (RecyclerView) fragView.findViewById(R.id.notifications_recycler);
+        mRecycler = fragView.findViewById(R.id.notifications_recycler);
         mRecycler.setHasFixedSize(true);
 
         mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
@@ -280,16 +278,18 @@ public class NotificationsFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
         Log.d(TAG, "chats onActivityCreated");
 
-        if(((MainActivity)getActivity())!= null) {
+        if((getActivity())!= null) {
             ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.notifications_frag_title);
-            // disable back button because we are using bottom nav
-            actionbar.setDisplayHomeAsUpEnabled(false);
-            actionbar.setHomeButtonEnabled(false);
-            actionbar.setDisplayShowCustomEnabled(false);
-            /*actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);*/
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.notifications_frag_title);
+                // disable back button because we are using bottom nav
+                actionbar.setDisplayHomeAsUpEnabled(false);
+                actionbar.setHomeButtonEnabled(false);
+                actionbar.setDisplayShowCustomEnabled(false);
+                /*actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);*/
+            }
 
             /*// Create members Hash list, it's better to loop throw  selected members
             ChatMember mCurrentUser1 = new ChatMember();

@@ -1,12 +1,13 @@
 package com.trackaty.chat.Fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.R;
 
 public class ChatBlockedAlertFragment extends DialogFragment  {
@@ -14,22 +15,23 @@ public class ChatBlockedAlertFragment extends DialogFragment  {
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
 
-
+    private Context context;
     // click listener to pass click events to parent fragment
     //private static ItemClickListener itemClickListen;
 
-    public ChatBlockedAlertFragment() {
+    private ChatBlockedAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static ChatBlockedAlertFragment newInstance() {
+    public static ChatBlockedAlertFragment newInstance(Context context) {
 
         // instantiate click listener to pass click events to parent fragment
         //itemClickListen = itemClickListener;
 
-        ChatBlockedAlertFragment fragment = new ChatBlockedAlertFragment();
+        ChatBlockedAlertFragment fragment = new ChatBlockedAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -41,7 +43,8 @@ public class ChatBlockedAlertFragment extends DialogFragment  {
 
         // created options to select from
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setCancelable(true);
         alertDialogBuilder.setTitle(getString(R.string.chat_blocked_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.chat_blocked_dialog_message);
@@ -61,7 +64,7 @@ public class ChatBlockedAlertFragment extends DialogFragment  {
                         }
                 );*/
 
-        return alertDialogBuilder.create();
+        return alertDialogBuilder.show();
     }
 
     /*@Override

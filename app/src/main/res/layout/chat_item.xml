@@ -8,30 +8,27 @@
 
     <TextView
         android:id="@+id/user_name"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textAppearance="@style/TextAppearance.MyTheme.Headline5"
         app:layout_constraintStart_toEndOf="@+id/user_image"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@tools:sample/cities" />
 
     <TextView
-        android:id="@+id/notification_text"
+        android:id="@+id/chat_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MyTheme.Body2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/user_image"
         app:layout_constraintTop_toBottomOf="@+id/user_name"
@@ -43,15 +40,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Overline"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="4dp"
+        android:textAppearance="@style/TextAppearance.MyTheme.Caption"
         app:layout_constraintStart_toEndOf="@+id/user_image"
-        app:layout_constraintTop_toBottomOf="@+id/notification_text"
+        app:layout_constraintTop_toBottomOf="@+id/chat_text"
         tools:text="@tools:sample/date/hhmm" />
 
-    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_image"
         android:layout_width="@dimen/medium_avatar"
         android:layout_height="@dimen/medium_avatar"
@@ -61,13 +56,10 @@
         android:layout_marginBottom="8dp"
         android:contentDescription="@string/profile_image_description"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_user_account_grey_white"
-        app:civ_border_color="@color/colorAccent"
-        app:civ_border_width="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="w,1:1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_round_account_filled_72" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

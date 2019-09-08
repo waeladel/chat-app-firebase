@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,8 +23,6 @@ import androidx.navigation.Navigation;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.badge.BadgeDrawable;
@@ -47,10 +44,9 @@ import com.trackaty.chat.models.User;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
-    private TextView mTextMessage;
     private static final int RC_SIGN_IN = 123;
 
     private NavController navController ;
@@ -105,15 +101,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_find);
                     goToMain();
                     return true;
                 case R.id.navigation_chats:
-                    mTextMessage.setText(R.string.title_chats);
                     goToChats();
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
                     goToNotifications();
                     return true;
             }
@@ -163,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Log.d(TAG, "MainActivity onCreate");
@@ -208,9 +201,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // [START initialize_database_ref]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
-        mTextMessage = (TextView) findViewById(R.id.last_message);
-
-        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation) ;
+        bottomNavigation =  findViewById(R.id.navigation) ;
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         //notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
@@ -347,16 +338,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.d(TAG, "getNotificationsCount onChanged notifications count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
                     if(count != null && count != 0){
-                        notificationsBadge = bottomNavigation.showBadge(R.id.navigation_notifications); // show badge over chats menu item
+                        notificationsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_notifications); //showBadge() show badge over chats menu item
                         notificationsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
+                        notificationsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
+                        notificationsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
+
+
                         notificationsBadge.setNumber(count.intValue());
+                        // Display cut icon when notifications' count is more than 0
+                        bottomNavigation.getMenu().getItem(2).setIcon(R.drawable.ic_notifications_outline_cut);
                     }else{
                         // Hide chat badge. check first if it's null or not
                         if(notificationsBadge != null){
                             notificationsBadge.setNumber(0);
                             notificationsBadge.setVisible(false);
                         }
+
+                        // Display normal icon because there is no notifications
+                        bottomNavigation.getMenu().getItem(2).setIcon(R.drawable.ic_notifications_outline);
                     }
                 }
             });
@@ -374,16 +374,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.d(TAG, "getChatsCount onChanged chats count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
                     if(count != null && count != 0){
-                        chatsBadge = bottomNavigation.showBadge(R.id.navigation_chats); // show badge over chats menu item
+                        chatsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_chats); // showBadge() show badge over chats menu item
                         chatsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
+                        chatsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
+                        chatsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
                         chatsBadge.setNumber(count.intValue());
+
+                        // Display cut icon when chats count is more than 0
+                        bottomNavigation.getMenu().getItem(1).setIcon(R.drawable.ic_chat_outline_cut);
                     }else{
                         // Hide chat badge. check first if it's null or not
                         if(chatsBadge != null){
                             chatsBadge.setNumber(0);
                             chatsBadge.setVisible(false);
                         }
+                        // Display normal icon because there is no chats
+                        bottomNavigation.getMenu().getItem(1).setIcon(R.drawable.ic_chat_outline);
                     }
                 }
             });
@@ -434,6 +441,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 1  INVITE clicked ");
                 break;
+            case R.id.action_settings:
+                Log.d(TAG, "MenuItem = 2  settings clicked");
+                goToSettings();
+                break;
             case R.id.action_log_out:
                 AuthUI.getInstance()
                         .signOut(this)
@@ -459,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 //finish();
                 break;
             case R.id.action_menu_home:
-                Log.d(TAG, "MenuItem = 3  home clicked ");
+                Log.d(TAG, "MenuItem = 4  home clicked ");
                 goToMain();
                 break;
             case android.R.id.home:
@@ -530,14 +541,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    @Override
+    /*@Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         //showMessage(getString(R.string.google_play_services_error));
         Toast.makeText(MainActivity.this, getString(R.string.google_play_services_error),
                 Toast.LENGTH_LONG).show();
         // Sending failed or it was canceled
-    }
+    }*/
 
     private void initiateLogin() {
 
@@ -556,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         .setAvailableProviders(providers)
                         .setLogo(R.mipmap.ic_launcher)      // Set logo drawable
                         .setAlwaysShowSignInMethodScreen(true)
-                        //.setTheme(R.style.Background_FirebaseUI)      // Set theme
+                        .setTheme(R.style.Background_FirebaseUI)      // Set theme
                         .setTosAndPrivacyPolicyUrls("https://sites.google.com/view/pray-4-mo/home","https://sites.google.com/view/pray-4-mo/home")
                         .build(),
                 RC_SIGN_IN);
@@ -586,8 +597,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 // Sign in failed
                 if (response == null) {
                     // User pressed back button
-                    Toast.makeText(MainActivity.this, getString(R.string.sign_in_cancelled),
-                            Toast.LENGTH_LONG).show();
+                    //Toast.makeText(MainActivity.this, getString(R.string.sign_in_cancelled), Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Sign in has been cancelled:" + response);
                     if(!isFirstloaded){
                         finish();
@@ -595,7 +605,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     return;
                 }
 
-                if (ErrorCodes.NO_NETWORK == response.getError().getErrorCode()) {
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Log.d(TAG, "No internet connection:" + response);
 
                     Toast.makeText(MainActivity.this, getString(R.string.no_internet_connection),
@@ -705,7 +715,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
         //check if we are on Main Fragment not on complete Profile already
-        if (R.id.mainFragment == navController.getCurrentDestination().getId()) {
+        if (null != navController.getCurrentDestination() && R.id.mainFragment == navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.completeProfileFragment);
         }
 
@@ -713,6 +723,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void goToProfile() {
         navController.navigate(R.id.profileFragment);
+
         /*if(user != null){
             Log.i(TAG, "UserId not null");
 
@@ -742,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }*/
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.chatsFragment);
-        if (R.id.chatsFragment != navController.getCurrentDestination().getId()) {
+        if (null != navController.getCurrentDestination() && R.id.chatsFragment != navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.chatsFragment);
         }
                 /*Navigation.findNavController(this, R.id.host_fragment)
@@ -762,7 +773,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }*/
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
-        if (R.id.mainFragment != navController.getCurrentDestination().getId()) {
+        if (null != navController.getCurrentDestination() && R.id.mainFragment != navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.mainFragment);
         }
 
@@ -773,11 +784,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
+    // Go to Settings fragment
+    private void goToSettings() {
+
+        //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
+        if (null != navController.getCurrentDestination() && R.id.settingsFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.settingsFragment);
+        }
+
+    }
+
     // Go to notifications fragment
     private void goToNotifications() {
 
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
-        if (R.id.notificationsFragment != navController.getCurrentDestination().getId()) {
+        if (null != navController.getCurrentDestination() && R.id.notificationsFragment != navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.notificationsFragment);
         }
     }

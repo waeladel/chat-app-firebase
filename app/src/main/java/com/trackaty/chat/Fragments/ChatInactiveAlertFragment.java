@@ -1,45 +1,38 @@
 package com.trackaty.chat.Fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-
-import com.trackaty.chat.Interface.ItemClickListener;
-import com.trackaty.chat.R;
 
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.trackaty.chat.R;
 
 public class ChatInactiveAlertFragment extends DialogFragment  {
     private final static String TAG = ChatInactiveAlertFragment.class.getSimpleName();
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
 
-
-    private Context mActivityContext;
-    private Activity activity;
+    private Context context;
 
     // click listener to pass click events to parent fragment
     //private static ItemClickListener itemClickListen;
 
-    public ChatInactiveAlertFragment() {
+    private ChatInactiveAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static ChatInactiveAlertFragment newInstance() {
+    public static ChatInactiveAlertFragment newInstance(Context context) {
 
         // instantiate click listener to pass click events to parent fragment
         //itemClickListen = itemClickListener;
 
-        ChatInactiveAlertFragment fragment = new ChatInactiveAlertFragment();
+        ChatInactiveAlertFragment fragment = new ChatInactiveAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -58,21 +51,13 @@ public class ChatInactiveAlertFragment extends DialogFragment  {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mActivityContext = context;
-        if (context instanceof Activity){// check if fragmentContext is an activity
-            activity =(Activity) context;
-        }
-    }
-
-    @Override
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         // created options to select from
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(getContext());
         //alertDialogBuilder.setCancelable(true);
         alertDialogBuilder.setTitle(getString(R.string.chat_inactive_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.chat_inactive_dialog_message);

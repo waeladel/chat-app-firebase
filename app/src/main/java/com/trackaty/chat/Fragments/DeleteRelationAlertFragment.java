@@ -1,7 +1,5 @@
 package com.trackaty.chat.Fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -13,6 +11,7 @@ import android.view.View;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 
@@ -22,26 +21,24 @@ public class DeleteRelationAlertFragment extends DialogFragment implements ItemC
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
 
-
-    private Context mActivityContext;
-    private Activity activity;
-
+    private Context context;
     // click listener to pass click events to parent fragment
     private static ItemClickListener itemClickListen;
 
 
-    public DeleteRelationAlertFragment() {
+    private DeleteRelationAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static DeleteRelationAlertFragment newInstance(ItemClickListener itemClickListener) {
+    public static DeleteRelationAlertFragment newInstance(Context context, ItemClickListener itemClickListener) {
 
         // instantiate click listener to pass click events to parent fragment
         itemClickListen = itemClickListener;
 
-        DeleteRelationAlertFragment fragment = new DeleteRelationAlertFragment();
+        DeleteRelationAlertFragment fragment = new DeleteRelationAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -82,7 +79,8 @@ public class DeleteRelationAlertFragment extends DialogFragment implements ItemC
 
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
         // AlertDialog.Builder to create the dialog wihtouht custum xml layout
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.confirm_delete_relation_dialog_message);
 
@@ -138,7 +136,7 @@ public class DeleteRelationAlertFragment extends DialogFragment implements ItemC
 
     // needed only if i want the listener to be inside the adapter
         public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListen = itemClickListener;
+            itemClickListen = itemClickListener;
         }
 
 }

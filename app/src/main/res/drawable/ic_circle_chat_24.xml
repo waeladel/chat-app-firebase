@@ -1,12 +1,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item
       android:gravity="fill"
-      android:drawable="@drawable/ic_brightness_1_black_24dp"
+      android:drawable="@drawable/notification_icon_background_blue_24dp"
 
       />
   <item
       android:gravity="center"
-      android:drawable="@drawable/ic_baseline_chat_24px"
+      android:drawable="@drawable/ic_baseline_chat_white_24px"
+      android:tint="?attr/colorOnSecondary"
       android:top="20dp"
       android:bottom="20dp"
       android:left="20dp"

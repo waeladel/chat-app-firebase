@@ -1,6 +1,10 @@
-<vector android:alpha="0.99" android:height="24dp"
-    android:viewportHeight="512" android:viewportWidth="512"
-    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#FF000000" android:pathData="m0,68.789v383.211h120v60h82.211l60,-60h151l98.789,-98.789v-353.211h-443.211zM90,60h362v233.211l-68.789,68.789h-121l-81.211,81.211v-81.211h-91zM90,60"/>
-    <path android:fillColor="#FF000000" android:pathData="m211,370.789 l38.789,-38.789h121l51.211,-51.211v-190.789h-302v242h91zM332,165h30v92h-30zM241,165h30v92h-30zM241,165"/>
+<vector android:alpha="0.99"
+    android:height="24dp"
+    android:viewportHeight="512"
+    android:viewportWidth="512"
+    android:width="24dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="m0,68.789v383.211h120v60h82.211l60,-60h151l98.789,-98.789v-353.211h-443.211zM90,60h362v233.211l-68.789,68.789h-121l-81.211,81.211v-81.211h-91zM90,60"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="m211,370.789 l38.789,-38.789h121l51.211,-51.211v-190.789h-302v242h91zM332,165h30v92h-30zM241,165h30v92h-30zM241,165"/>
 </vector>

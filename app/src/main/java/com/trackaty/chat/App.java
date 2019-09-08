@@ -4,15 +4,20 @@ package com.trackaty.chat;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDexApplication;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 //import androidx.multidex.MultiDexApplication;
 
 
@@ -56,6 +61,17 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     public static final String FIND_NEARBY_CHANNEL_ID = "Find_id";
     public static final String VISIBILITY_CHANNEL_ID = "Visibility_id";
 
+    private static final String PREFERENCE_KEY_NIGHT = "night" ;
+    private static final String PREFERENCE_KEY_RINGTONE = "ringtone";
+    private static final String PREFERENCE_KEY_VERSION = "version";
+
+    private static final String NIGHT_VALUE_LIGHT = "light";
+    private static final String NIGHT_VALUE_DARK = "dark";
+    private static final String NIGHT_VALUE_BATTERY = "battery";
+    private static final String NIGHT_VALUE_SYSTEM = "system";
+
+    private SharedPreferences sharedPreferences;
+
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot snapshot) {
@@ -95,6 +111,44 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     @Override
     public void onCreate() {
         super.onCreate();
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        // Activate the saved theme in preferences
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        String darkModeValue = sharedPreferences.getString(PREFERENCE_KEY_NIGHT, "");
+
+        switch (darkModeValue){
+            case NIGHT_VALUE_LIGHT:
+                setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case NIGHT_VALUE_DARK:
+                setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            case NIGHT_VALUE_BATTERY:
+                setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
+                break;
+            case NIGHT_VALUE_SYSTEM:
+                setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+
+                default:
+                    Log.i(TAG, "darkModeValue is not set yet");
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Set the default value to FOLLOW_SYSTEM because it's API 29 and above
+                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                        // Set the default value to AUTO_BATTERY because we are below api 29
+                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
+                    }else{
+                        // Set the default value to NIGHT_NO because
+                        // "system default" and "Battery Saver" not supported on api below 21
+                        setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    }
+                    break;
+        }
+
+
+
         sApplicationContext = getApplicationContext();
         Log.i(TAG, "Application class onCreate");
         // Initialize the SDK before executing any other operations,
@@ -185,12 +239,14 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
 
 
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(LikesChannel);
-            manager.createNotificationChannel(PickupsChannel);
-            manager.createNotificationChannel(MessagesChannel);
-            manager.createNotificationChannel(RevealChannel);
-            manager.createNotificationChannel(NearbyChannel);
-            manager.createNotificationChannel(VisibilityChannel);
+            if (manager != null) {
+                manager.createNotificationChannel(LikesChannel);
+                manager.createNotificationChannel(PickupsChannel);
+                manager.createNotificationChannel(MessagesChannel);
+                manager.createNotificationChannel(RevealChannel);
+                manager.createNotificationChannel(NearbyChannel);
+                manager.createNotificationChannel(VisibilityChannel);
+            }
         }
     }
 

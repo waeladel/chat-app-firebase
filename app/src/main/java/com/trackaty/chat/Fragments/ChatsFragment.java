@@ -1,42 +1,35 @@
 package com.trackaty.chat.Fragments;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.paging.PagedList;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ServerValue;
 import com.trackaty.chat.Adapters.ChatsAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.ChatsViewModel;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.ChatMember;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ChatsFragment extends Fragment{
 
@@ -79,7 +72,7 @@ public class ChatsFragment extends Fragment{
 
         // prepare the Adapter in onCreate to use only one Adapter
         mChatsArrayList = new ArrayList<>();
-        mChatsAdapter = new ChatsAdapter();
+        mChatsAdapter = new ChatsAdapter(this);
 
         // Create ViewModel in onCreate to use only one ViewModel and observer
         // So we don't recreate the observer when user comeback to active ViewModel
@@ -180,7 +173,7 @@ public class ChatsFragment extends Fragment{
 
 
         // Initiate the RecyclerView
-        mChatsRecycler = (RecyclerView) fragView.findViewById(R.id.chats_recycler);
+        mChatsRecycler = fragView.findViewById(R.id.chats_recycler);
         mChatsRecycler.setHasFixedSize(true);
 
         mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
@@ -268,16 +261,19 @@ public class ChatsFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
         Log.d(TAG, "chats onActivityCreated");
 
-        if(((MainActivity)getActivity())!= null) {
+        if((getActivity())!= null) {
             ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.chats_frag_title);
-            // disable back button because we are using bottom nav
-            actionbar.setDisplayHomeAsUpEnabled(false);
-            actionbar.setHomeButtonEnabled(false);
-            actionbar.setDisplayShowCustomEnabled(false);
-            /*actionbar.setDisplayHomeAsUpEnabled(true);
-            actionbar.setHomeButtonEnabled(true);
-            actionbar.setDisplayShowCustomEnabled(false);*/
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.chats_frag_title);
+                // disable back button because we are using bottom nav
+                actionbar.setDisplayHomeAsUpEnabled(false);
+                actionbar.setHomeButtonEnabled(false);
+                actionbar.setDisplayShowCustomEnabled(false);
+                /*actionbar.setDisplayHomeAsUpEnabled(true);
+                actionbar.setHomeButtonEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);*/
+            }
+
 
             /*// Create members Hash list, it's better to loop throw  selected members
             ChatMember mCurrentUser1 = new ChatMember();

@@ -1,69 +1,181 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorOnPrimary">@color/colorAccent</item>
-        <item name="colorOnSurface">@color/colorAccent</item>
+    <!-- Bottom Navigation - just to make it surface style not primary -->
+    <style name="BottomNavigationView.MyTheme" parent="Widget.MaterialComponents.BottomNavigationView">
+        <!--<item name="itemTextAppearanceInactive">?textAppearanceSubtitle1</item>-->
+        <!--<item name="itemIconTint">@drawable/bottom_nav_item_tint</item>-->
+        <!--<item name="itemTextColor">@drawable/bottom_nav_item_tint</item>-->
 
-
-        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
-        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.OutlinedButton</item>
-
+        <!--Make the text of selected item bold -->
+        <!--<item name="itemTextAppearanceInactive">?attr/textAppearanceCaptionBold</item>-->
+        <!--<item name="itemTextAppearanceActive">?attr/textAppearanceCaptionBold</item>-->
     </style>
 
-    <!--//to cut the shape of the button
-    <style name="myButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        &lt;!&ndash; Customize your theme here. &ndash;&gt;
-        <item name="shapeAppearance">@style/myShapeButtonSyule</item>
-
+    <!-- to make the background if all popup (blocking) elevated -->
+    <style name="PopupMenuStyle.MyTheme" parent="Widget.MaterialComponents.PopupMenu">
+        <!--Your custom shape here-->
+        <!--<item name="android:textStyle">bold</item>-->
+        <!--<item name="android:textSize">50sp</item>-->
+        <item name="android:popupBackground">@color/color_surface_24_elevation</item>
+        <!--To darken the text on light surface, it was used when the surface ir white -->
+        <!--<item name="android:textColor">?attr/colorError</item>-->
     </style>
 
-    <style name="myShapeButtonSyule">
-        &lt;!&ndash; Customize your theme here. &ndash;&gt;
-        <item name="cornerFamilyTopRight">cut</item>
-        <item name="cornerFamilyBottomRight">cut</item>
-        <item name="cornerSize">18dp</item>
+    <!-- to make the background of option menu elevated (API < 21)-->
+    <style name="OverflowMenuStyle.MyTheme" parent="Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:popupBackground">@color/color_surface_24_elevation</item>
+    </style>
 
-    </style>-->
+    <!-- To change the text of menu items (not used)-->
+    <style name="PopupMenuTextAppearance" parent="TextAppearance.AppCompat.Menu">
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
 
-    <!-- New MaterialComponents attributes. -->
-    <!--<item name="colorPrimaryVariant">@color/my_app_primary_variant_color</item>
-    <item name="colorSecondaryVariant">@color/my_app_secondary_variant_color</item>
-    <item name="colorSurface">@color/my_app_surface_color</item>
-    <item name="colorOnPrimary">@color/my_app_color_on_primary</item>
-    <item name="colorOnSecondary">@color/my_app_color_on_secondary</item>
-    <item name="colorOnBackground">@color/my_app_color_on_background</item>
-    <item name="colorOnError">@color/my_app_color_on_error</item>
-    <item name="colorOnSurface">@color/my_app_color_on_surface</item>
-    <item name="scrimBackground">@color/mtrl_scrim_color</item>
-    <item name="textAppearanceHeadline1">@style/TextAppearance.MaterialComponents.Headline1</item>
-    <item name="textAppearanceHeadline2">@style/TextAppearance.MaterialComponents.Headline2</item>
-    <item name="textAppearanceHeadline3">@style/TextAppearance.MaterialComponents.Headline3</item>
-    <item name="textAppearanceHeadline4">@style/TextAppearance.MaterialComponents.Headline4</item>
-    <item name="textAppearanceHeadline5">@style/TextAppearance.MaterialComponents.Headline5</item>
-    <item name="textAppearanceHeadline6">@style/TextAppearance.MaterialComponents.Headline6</item>
-    <item name="textAppearanceSubtitle1">@style/TextAppearance.MaterialComponents.Subtitle1</item>
-    <item name="textAppearanceSubtitle2">@style/TextAppearance.MaterialComponents.Subtitle2</item>
-    <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
-    <item name="textAppearanceBody2">@style/TextAppearance.MaterialComponents.Body2</item>
-    <item name="textAppearanceCaption">@style/TextAppearance.MaterialComponents.Caption</item>
-    <item name="textAppearanceButton">@style/TextAppearance.MaterialComponents.Button</item>
-    <item name="textAppearanceOverline">@style/TextAppearance.MaterialComponents.Overline</item>-->
-
-    <!--<style name="colorPickerStyle" parent="Theme.MaterialComponents.DayNight.Dialog">
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:cacheColorHint">@android:color/transparent</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-    </style>-->
-
-    <!-- Bottom Navigation -->
-    <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
-        <item name="android:textSize">9sp</item>
+    <!--(not used)-->
+    <style name="ContextMenuStyle.MyTheme" parent="Widget.MaterialComponents.PopupMenu.ContextMenu">
+        <!--Your custom shape here-->
+        <item name="android:textColorPrimary">@color/color_secondary</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textSize">50sp</item>
+        <item name="android:popupBackground">@android:color/white</item>
+    </style>
+
+    <!-- To make the Surface toolbar primary not surface, it has better shadow than Surface toolbar (for dark theme)-->
+    <style name="ToolbarStyle.Surface.MyTheme" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/color_surface_24_elevation</item>
+        <item name="titleTextColor">@color/mtrl_on_surface_emphasis_high_type</item>
+        <!--<item name="colorControlNormal">?colorOnPrimary</item>
+        <item name="actionMenuTextColor">?colorOnPrimary</item>
+        <item name="android:actionMenuTextColor">@color/color_on_primary</item>-->
+    </style>
+
+    <!--To change the text font to bold imprima-->
+    <style name="ToolbarStyle.Primary.MyTheme" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="titleTextAppearance">@style/ToolbarStyle.TitleTextStyle.MyTheme</item>
+        <!--<item name="colorControlNormal">?colorOnPrimary</item>
+        <item name="actionMenuTextColor">?colorOnPrimary</item>
+        <item name="android:actionMenuTextColor">@color/color_on_primary</item>-->
+    </style>
+
+    <!--To change the text font to bold imprima-->
+    <style name="ToolbarStyle.TitleTextStyle.MyTheme" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:fontFamily">@font/imprima</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MenuTextAppearance.MyTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+        <item name="android:textColor">@color/Tomato</item>
+    </style>
+
+    <style name="TextAppearance.MyTheme.Card" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textColor">@color/Tomato</item>
+    </style>
+
+    <style name="textViewStyle.MyTheme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:textAppearanceInverse">@color/color_on_background</item>
+    </style>
+
+    <!--to make Edit text OutlinedBox-->
+    <style name="EditTextStyle.MyTheme" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+       <!--<item name="boxStrokeColor">?colorOnBackground</item>-->
+    </style>
+
+    <!--to change calender's background to elevated surface-->
+    <style name="DatePickerMyTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <!--<item name="boxStrokeColor">@color/color_on_background</item>
+        <item name="showTitle">false</item>
+        <item name="colorControlActivated">#ffea00</item>
+        <item name="colorControlHighlight">#c51162</item>
+        <item name="android:headerBackground">#00c853</item>
+        <item name="android:calendarViewShown">false</item>-->
+        <!--<item name="android:background">?colorSurface</item>-->
+        <!--<item name="boxStrokeColor">@color/color_error</item>-->
+        <!--<item name="android:datePickerStyle">@style/MyDatePickerStyle</item>-->
+        <!--<item name="android:headerBackground">#ffea00</item>
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorAccent">@color/color_secondary</item>
+        <item name="boxStrokeColor">@color/color_secondary</item>-->
+
+        <!-- Define primary color. used for buttons -->
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <item name="android:background">@color/color_surface_24_elevation</item>
+        <!--<item name="android:windowBackground">?colorSurface</item>-->
+        <item name="android:backgroundDimAmount">@dimen/alert_dim_amount</item>
+        <!--<item name="android:windowElevation" tools:targetApi="lollipop">@dimen/keyLine_2</item>-->
+
+    </style>
+
+
+    <!--<style name="materialAlertDialog.MyTheme.Light" parent="materialAlertDialog.MyTheme">
+        <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.AppCompat.Inverse</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.MaterialComponents.Title.Text</item>
+        <item name="android:textColor">@color/mtrl_on_primary_disabled</item>
+    </style>-->
+
+    <!--to change buttons color to lighter color on all dialogs-->
+    <style name="materialAlertDialog.MyTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+
+        <!--<item name="alertDialogStyle">@style/MaterialAlertDialog.MaterialComponents</item>-->
+        <!--<item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.MyTheme.Body2</item>-->
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <item name="android:backgroundDimAmount">@dimen/alert_dim_amount</item>
+        <!--<item name="android:windowElevation" tools:targetApi="lollipop">@dimen/keyLine_2</item>-->
+
+        <!--<item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MaterialComponents.Button.TextButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.MaterialComponents.Button.TextButton</item>-->
+
+    </style>
+
+    <!--to change spinners background color to elevated surface-->
+    <style name="Spinner.MyTheme" parent="Widget.AppCompat.Spinner">
+        <!--Choose a lighter background color for spinner pop up menu -->
+        <item name="android:popupBackground">@color/color_surface_24_elevation</item>
+    </style>
+
+    <!--A style for all textViews. to reduce alpha of all texts (not used)-->
+    <style name="TextView.MyTheme" parent="Widget.MaterialComponents.TextView">
+        <!--Reduce text opacity for the entire app-->
+        <!--<item name="android:alpha">.8</item>-->
+    </style>
+
+    <!-- Define your custom dialog theme here extending from base -->
+    <style name="DialogTheme.MyTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <!-- Define primary color. used for buttons -->
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <!-- Define 24 dp elevated background color -->
+        <item name="android:background">@color/color_surface_24_elevation</item>
+        <!--<item name="android:windowElevation" tools:targetApi="lollipop">@dimen/keyLine_2</item>-->
+        <!--<item name="shapeAppearanceOverlay">@style/ShapeAppearance.MyTheme.DialogComponent</item>-->
+    </style>
+
+
+    <!-- Define your custom alert theme here extending from base -->
+    <style name="AlertDialogTheme.MyTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!-- Define primary color. used for buttons -->
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <!-- Define 24 dp elevated background color -->
+        <item name="android:background">@color/color_surface_24_elevation</item>
+
+        <!--<item name="android:windowElevation" tools:targetApi="lollipop">@dimen/keyLine_2</item>-->
+        <!--<item name="shapeAppearanceOverlay">@style/ShapeAppearance.MyTheme.DialogComponent</item>-->
+    </style>
+
+    <!--to change colors of login screen-->
+    <style name="Background.FirebaseUI" parent="FirebaseUI"/>
+
+    <style name="FirebaseUI" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Required for sign-in flow styling -->
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_surface_24_elevation</item>
+        <item name="colorAccent">@color/color_secondary</item>
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:navigationBarColor" tools:targetApi="lollipop">?android:colorBackground</item>
+<!--        <item name="android:buttonStyle">@style/Widget.MaterialComponents.Button</item>-->
     </style>
 
 </resources>

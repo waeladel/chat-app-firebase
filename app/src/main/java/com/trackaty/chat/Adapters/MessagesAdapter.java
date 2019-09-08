@@ -45,8 +45,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
 
     private final static String TAG = MessagesAdapter.class.getSimpleName();
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    String currentUserId = currentUser != null ? currentUser.getUid() : null;
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private String currentUserId = currentUser != null ? currentUser.getUid() : null;
 
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
     private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
@@ -183,7 +183,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     }
 
     // Get the position of the new sent message to notify the adapter
-    public int updateSentItemStatus(String key, PagedList<Message> itemsList ){
+    private int updateSentItemStatus(String key, PagedList<Message> itemsList ){
 
         int Position = 0;
 
@@ -253,7 +253,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 // click listener using interface
                 // user name text value
                 if (null != message.getMessage()) {
-                    ReceivedHolder.mMessage.setText(message.getMessage()+ message.getKey());
+                    ReceivedHolder.mMessage.setText(message.getMessage());
                     //ReceivedHolder.mScratch.setText(message.getMessage()+ message.getKey());
                 }else{
                     ReceivedHolder.mMessage.setText(null);
@@ -271,20 +271,20 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                             // Got the download URL for 'users/me/profile.png'
                             Picasso.get()
                                     .load(uri)
-                                    .placeholder(R.drawable.ic_user_account_grey_white)
-                                    .error(R.drawable.ic_broken_image)
+                                    .placeholder(R.mipmap.ic_round_account_filled_72)
+                                    .error(R.drawable.ic_round_broken_image_72px)
                                     .into(ReceivedHolder.mAvatar);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
                             // Handle any errors
-                            ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                            ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                         }
                     });
                 }else{
                     // Handle if getSenderId() is null
-                    ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
+                    ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                 }
 
                 if (null != message.getCreated()) {
@@ -369,7 +369,8 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 // click listener using interface
                 // user name text value
                 if (null != message.getMessage()) {
-                    SentHolder.mMessage.setText(message.getMessage()+ message.getKey());
+                    SentHolder.mMessage.setText(message.getMessage());
+                    //SentHolder.mMessage.setText(message.getMessage()+ message.getKey());
                 }else{
                     SentHolder.mMessage.setText(null);
                 }
@@ -384,6 +385,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 }
 
                 // update sent icon according to message's sent boolean
+                Log.d(TAG, " message status ="+ message.getStatus());
                 if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SEEN) && chat != null && null != chat.getActive() && chat.getActive() == 0){
                     // Show seen icon
                     SentHolder.mSentIcon.setImageResource(R.drawable.ic_seen_message_thick);
@@ -402,7 +404,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
 
     // CALLBACK to calculate the difference between the old item and the new item
-    public static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Message>() {
                 // User details may have changed if reloaded from the database,
                 // but ID is fixed.
@@ -559,7 +561,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         private CircleImageView mAvatar;
         ItemClickListener itemClickListener;
 
-        public ReceivedMessageHolder(View itemView) {
+        private ReceivedMessageHolder(View itemView) {
             super(itemView);
             //itemView = row;
 
@@ -607,10 +609,11 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     // Reveal the message
                     if(percent > 85){
                         if(getAdapterPosition() != RecyclerView.NO_POSITION){
-                            Log.d(TAG, "onRevealed onProgress: revealed message = "+message.getMessage()+ " key ="+ message.getKey());
 
                             // set message's reveal to true, to be remembered when scrolling, and to update the database when fragment stops
-                            message.setRevealed(true);
+                            if (message != null) {
+                                message.setRevealed(true);
+                            }
                             // Reveal the message
                             //mScratch.clear();
                             mScratch.setVisibility(View.GONE);

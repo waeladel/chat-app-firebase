@@ -1,9 +1,17 @@
-<vector android:height="24dp" android:viewportHeight="512"
-    android:viewportWidth="512" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#FF000000" android:pathData="M256.992,254.977m-248.742,0a248.742,248.742 0,1 1,497.484 0a248.742,248.742 0,1 1,-497.484 0"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M415.938,496.368c-6.317,3.799 -13.118,7.136 -20.1,10.062c11.174,0.249 20.479,-1.821 22.319,-11.459C417.428,495.449 416.689,495.916 415.938,496.368z"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M-323.5,354.5"/>
-    <path android:fillColor="#FFFFFF" android:fillType="evenOdd"
-        android:pathData="M245.312,46.563c97.814,-6.585 169.979,51.819 202.258,119.884c54.719,115.395 -13.764,236.402 -97.867,277.029c-37.087,17.914 -82.066,27.736 -135.383,17.822c-48.045,-8.941 -90.552,-36.883 -119.072,-69.662c-44.147,-50.74 -67.614,-139.547 -32.621,-220.33C90.706,106.478 152.863,52.787 245.312,46.563zM142.551,349.516c7.731,17.16 32.875,39.949 52.195,35.641c24.347,-5.43 18.03,-64.734 18.03,-64.734s-3.349,-98.191 -3.349,-124.813c0,-34.152 6.977,-83.326 -27.729,-69.663c-35.387,13.93 -55.617,58.851 -35.884,95.583c7.377,13.733 11.995,14.033 29.36,34.019C153.685,273.545 123.749,307.783 142.551,349.516zM234.682,147.11c0,0 -0.79,166.542 -0.79,211.087c0,28.127 29.62,25.717 29.62,-0.99c0,-39.389 1.251,-210.497 1.251,-210.497C264.764,117.969 234.682,116.373 234.682,147.11C234.682,147.11 234.682,116.373 234.682,147.11zM290.074,190.917c-2.551,7.888 1.814,127.894 1.814,127.894c0,12.793 26.003,13.99 26.003,-1.332l-1.587,-127.633C316.305,176.668 290.074,175.87 290.074,190.917zM346.438,274.99c0,12.289 23.569,12.289 23.569,-1.992c0,0 0.985,-33.742 0.327,-35.863c0,-13.348 -24.586,-13.33 -24.586,-0.17C345.749,236.965 346.438,261.074 346.438,274.99z"
-        android:strokeColor="#FFFFFF" android:strokeWidth="1"/>
+<vector
+    android:height="24dp"
+    android:viewportHeight="48"
+    android:viewportWidth="48"
+    android:width="24dp"
+    android:tint="?attr/colorControlNormal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M24,1C11.3,1 1,11.3 1,24s10.3,23 23,23s23,-10.3 23,-23S36.7,1 24,1zM24,43.5C12.7,43.5 4.5,35.3 4.5,24S12.7,4.5 24,4.5S43.5,12.7 43.5,24S35.3,43.5 24,43.5z"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M23.5,37L23.5,37c0.8,0 1.5,-0.7 1.5,-1.5v-24c0,-0.8 -0.7,-1.5 -1.5,-1.5h0c-0.8,0 -1.5,0.7 -1.5,1.5v24C22,36.3 22.7,37 23.5,37z"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M17.5,23.5C17.5,23.5 17.5,23.5 17.5,23.5C17.5,23.5 17.5,23.5 17.5,23.5C17.5,23.5 17.5,23.5 17.5,23.5z"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M29.5,31.5L29.5,31.5c0.8,0 1.5,-0.7 1.5,-1.5V18c0,-0.8 -0.7,-1.5 -1.5,-1.5h0c-0.8,0 -1.5,0.7 -1.5,1.5v12C28,30.8 28.7,31.5 29.5,31.5z"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M35.5,26.5L35.5,26.5c0.8,0 1.5,-0.7 1.5,-1.5v-2c0,-0.8 -0.7,-1.5 -1.5,-1.5l0,0c-0.8,0 -1.5,0.7 -1.5,1.5v2C34,25.8 34.7,26.5 35.5,26.5z"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M18.5,21"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M18.5,14.4"/>
+    <path android:fillAlpha="@dimen/my_icons_emphasis_medium" android:fillColor="@color/color_on_background" android:pathData="M19.5,11.5v24c0,1.1 -0.9,2 -2,2c-0.1,0 -0.1,0 -0.2,0c-3.2,-0.1 -5.8,-2.8 -5.8,-6c0,-3.3 2,-6 6,-8c0,0 0,0 0,0c0,0 0,0 0,0c-4,-2 -6,-4.7 -6,-8c0,-3.2 2.6,-5.9 5.8,-6c0.1,0 0.1,0 0.2,0C18.6,9.5 19.5,10.4 19.5,11.5z"/>
 </vector>

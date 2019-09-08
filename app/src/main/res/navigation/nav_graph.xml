@@ -29,6 +29,9 @@
         <action
             android:id="@+id/action_mainFragment_to_notificationsFragment"
             app:destination="@id/notificationsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/completeProfileFragment"
@@ -134,6 +137,10 @@
             android:id="@+id/action_notificationsFrag_to_messagesFrag"
             app:destination="@id/messagesFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.trackaty.chat.Fragments.SettingsFragment"
+        android:label="settings_fragment" />
 
 
 </navigation>

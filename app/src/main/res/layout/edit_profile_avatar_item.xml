@@ -28,7 +28,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/ic_user_account_grey_white"
+        app:srcCompat="@drawable/ic_round_account_filled_72"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_divider"
         tools:ignore="ContentDescription" />
@@ -67,10 +67,9 @@
             android:layout_height="100dp"
             android:contentDescription="@string/profile_image_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_user_account_grey_white"
-            android:tint="@color/transparent_edit_image"
-            app:civ_border_color="@color/colorAccent"
-            app:civ_border_width="2dp" />
+            app:srcCompat="@drawable/ic_round_account_filled_72"
+            android:tint="@color/transparent_edit_image"/>
+
 
 
         <ImageView
@@ -81,14 +80,14 @@
             android:layout_marginBottom="@dimen/small_margin"
             android:contentDescription="@string/add_image_button_description"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_add_a_photo_black_24dp" />
+            app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
 
         <ImageView
             android:id="@+id/progress_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/progress_animation"
+            app:srcCompat="@drawable/progress_animation"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 
@@ -99,7 +98,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/required_helper"
-        android:textColor="@color/OrangeRed"
+        android:textColor="@color/mtrl_on_surface_emphasis_medium"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/item_title"
         app:layout_constraintTop_toBottomOf="@+id/item_title" />

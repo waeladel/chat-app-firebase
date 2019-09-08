@@ -7,6 +7,7 @@
     <string name="title_chats">Chats</string>
     <string name="title_notifications">Notifications</string>
     <string name="menu_log_out">Log Out</string>
+    <string name="menu_settings">Settings</string>
     <string name="menu_action_profile">Profile</string>
     <string name="menu_invite">Invite Friends</string>
     <string name="menu_save">Save</string>
@@ -15,9 +16,9 @@
     <string name="popup_menu_block">Block</string>
     <string name="popup_menu_block_delete">Block and delete chat</string>
 
-    <string name="love_button_hint_love">Love</string>
-    <string name="love_button_hint_love_back">Love Back</string>
-    <string name="love_button_hint_unlove">Unlove</string>
+    <string name="love_button_hint_love">Like</string>
+    <string name="love_button_hint_love_back">Like Back</string>
+    <string name="love_button_hint_unlove">UnLike</string>
     <string name="message_button_hint">Message</string>
     <string name="request_button_hint">Reveal</string>
     <string name="request_button_cancel_hint">Cancel</string>
@@ -40,6 +41,7 @@
     <string name="see_more_button">See more</string>
     <string name="upload_button">Upload</string>
 
+    <string name="send_request_button">Send request</string>
     <string name="send_button">Send</string>
     <string name="save_button">Save</string>
     <string name="cancel_button">Cancel</string>
@@ -89,7 +91,7 @@
     <string name="user_biography_helper">Describe yourself</string>
 
     <string name="user_smoke_headline">Smoke</string>
-    <string name="user_water_pipe_headline">Shisha</string>
+    <string name="user_water_pipe_headline">Hookah</string>
     <string name="user_drugs_headline">Drugs</string>
     <string name="user_drink_headline">Drink</string>
     <string name="user_athlete_headline">Athlete</string>
@@ -170,7 +172,8 @@
     <string name="user_active_ago">Active %1$s</string>
 
     <!--<string name="user_request_dialog_title">Select contacts you want to see:</string>-->
-    <string name="user_request_dialog_hint">Send a request to see selected contacts:</string>
+    <!--<string name="user_request_dialog_hint">Send a request to see selected contacts:</string>-->
+    <string name="user_request_dialog_hint">Select contacts to reveal:</string>
     <string name="user_request_approve_dialog_hint">Select contacts you approve to reveal:</string>
     <string name="user_request_edit_dialog_hint">Edit revealed contacts:</string>
 
@@ -188,7 +191,7 @@
     <string name="user_confirm_dialog_negative">Cancel</string>
     <string name="confirm_dialog_positive_button">OK</string>
     <string name="chat_inactive_dialog_message">This conversation isn\'t active right now. You must wait until the recipient reactivate it.</string>
-    <string name="chat_blocked_dialog_message">Communication with this person is disabled.</string>
+    <string name="chat_blocked_dialog_message">Communication with this person is not allowed.</string>
     <string name="activate_chat_dialog_title">Keep conversation active for:</string>
     <!--<string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without the need to scratch it. Therefore, don\'t choose it unless you feel comfortable with this person.</string>-->
     <string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without scratching. Therefore, don\'t choose it unless you start to trust this person.</string>
@@ -217,6 +220,14 @@
     <string name="user_website_helper">Your website link</string>-->
 
     <string name="crop_activity_title">Crop</string>
+
+    <string name="settings_category_display">Display</string>
+    <string name="settings_category_notifications">Notifications</string>
+    <string name="settings_category_about">About</string>
+
+    <string name="settings_preference_title_night">Night mode</string>
+    <string name="settings_preference_title_ringtone">Notification sound</string>
+    <string name="settings_preference_title_version">Build version</string>
 
 
     <!--Images content Description-->
@@ -373,9 +384,16 @@
 
     <!-- activation time array -->
 
+    <!-- settings dark array -->
+    <string name="settings_display_light">Off</string>
+    <string name="settings_display_dark">On</string>
+    <string name="settings_display_battery">Set by Battery Saver</string>
+    <string name="settings_display_system">Use system default</string>
+    <!-- settings dark array -->
+
     <!-- values-->
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>
-    <string name="user_loved_by">Loved by %1$d person</string>
+    <string name="user_loved_by">Received %1$d likes</string>
     <string name="user_pickedup_by">Received %1$d pick-up lines</string>
     <string name="user_age_value">Age: %1$d</string>
     <string name="user_gender_value">Gender: %1$s</string>
@@ -388,7 +406,7 @@
     <string name="user_religion_value">Religion: %1$s</string>
     <string name="user_politics_value">Political Views: %1$s</string>
     <string name="user_smoke_value">Smoke: %1$s</string>
-    <string name="user_water_pipe_value">Shisha: %1$s</string>
+    <string name="user_water_pipe_value">Hookah: %1$s</string>
     <string name="user_drugs_value">Drugs: %1$s</string>
     <string name="user_drink_value">Drink: %1$s</string>
     <string name="user_athlete_value">Athlete: %1$s</string>
@@ -410,6 +428,7 @@
     <string name="display_image_title">Profile Photo</string>
     <string name="chats_frag_title">Chats</string>
     <string name="notifications_frag_title">Notifications</string>
+    <string name="settings_frag_title">Settings</string>
 
 
     <!-- countryText.setText(getString(R.string.country, country.getName()));-->
