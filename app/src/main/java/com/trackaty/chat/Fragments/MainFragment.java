@@ -590,16 +590,13 @@ public class MainFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case 1:
-                Log.d(TAG, "MenuItem search is clicked");
-                if(!isPermissionGranted()){
-                    requestPermission();
-                }else{
-                    startStopSearchService();
-                }
-                break;
-
+        if (id == 1) {
+            Log.d(TAG, "MenuItem search is clicked");
+            if (!isPermissionGranted()) {
+                requestPermission();
+            } else {
+                startStopSearchService();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -822,7 +819,10 @@ public class MainFragment extends Fragment {
         mNotification = new NotificationCompat.Builder(mActivityContext, VISIBILITY_CHANNEL_ID)
                 .setContentTitle(getString(R.string.notification_visibility_title))
                 .setContentText(getString(R.string.notification_visibility_body))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setColor(getResources().getColor(R.color.color_primary))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .build();

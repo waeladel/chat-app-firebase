@@ -57,7 +57,7 @@
         android:layout_marginBottom="8dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_visibility_black_24dp"
+        app:srcCompat="@drawable/ic_visibility_black_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

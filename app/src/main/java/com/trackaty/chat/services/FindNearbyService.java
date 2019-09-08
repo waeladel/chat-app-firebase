@@ -189,7 +189,10 @@ public class FindNearbyService extends Service {
         mNotification = new NotificationCompat.Builder(this, FIND_NEARBY_CHANNEL_ID)
                 .setContentTitle(getString(R.string.notification_nearby_title))
                 .setContentText(getString(R.string.notification_nearby_body))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setColor(getResources().getColor(R.color.color_primary))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .setContentIntent(pendingIntent)
                 .build();
 

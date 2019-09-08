@@ -247,8 +247,8 @@
     <string name="notification_message_title">New message</string>
     <string name="notification_request_sent_title">New reveal request</string>
     <string name="notification_request_approved_title">Request approved</string>
-    <string name="notification_nearby_title">Searching For Lovers</string>
-    <string name="notification_visibility_title">You Are Visible</string>
+    <string name="notification_nearby_title">Looking for love</string>
+    <string name="notification_visibility_title">You are visible</string>
 
     <!--<string name="notification_like_message">%1$s likes you</string>-->
     <string name="notification_like_body">%1$s likes you.</string>
