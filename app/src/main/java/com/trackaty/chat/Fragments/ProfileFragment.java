@@ -145,7 +145,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private Boolean isCancelLove;
 
     private ProfileViewModel mProfileViewModel;
-    private PopupMenu popupBlockMenu, popupUnrevealMenu; // To show a popup menu when block/ block & delete is selected
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -154,7 +153,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "onCreate");
         //show Menu. We don't open profile twice, but if the clicker is not the current opened user profile we must open his profile page
         setHasOptionsMenu(true);
 
@@ -184,6 +183,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d(TAG, "onCreate View");
         View fragView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         mSeeMoreButton =  fragView.findViewById(R.id.see_more_button);
@@ -230,32 +230,30 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             default:
                                 // There is no blocking relation
                                 //showBlockDialog(); // To confirm blocking or cancel
-                                if(popupBlockMenu == null){
-                                    // Create a popup Menu if null. To show when block is clicked
-                                    popupBlockMenu = new PopupMenu(mActivityContext, view);
-                                    popupBlockMenu.getMenu().add(Menu.NONE,0 ,0, R.string.popup_menu_block);
-                                    popupBlockMenu.getMenu().add(Menu.NONE,1 ,1,R.string.popup_menu_block_delete);
+                                // Create a popup Menu if null. To show when block is clicked
+                                PopupMenu popupBlockMenu = new PopupMenu(mActivityContext, view);
+                                popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_block);
+                                popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_block_delete);
 
-                                    popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                        @Override
-                                        public boolean onMenuItemClick(MenuItem item) {
-                                            switch (item.getItemId()){
-                                                case 0:
-                                                    Log.i(TAG, "onMenuItemClick. item block clicked ");
-                                                    //blockUser();
-                                                    showBlockDialog();
-                                                    return true;
-                                                case 1:
-                                                    Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
-                                                    //blockDelete();
-                                                    showBlockDeleteDialog();
-                                                    return true;
-                                                default:
-                                                    return false;
-                                            }
+                                popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        switch (item.getItemId()) {
+                                            case 0:
+                                                Log.i(TAG, "onMenuItemClick. item block clicked ");
+                                                //blockUser();
+                                                showBlockDialog();
+                                                return true;
+                                            case 1:
+                                                Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
+                                                //blockDelete();
+                                                showBlockDeleteDialog();
+                                                return true;
+                                            default:
+                                                return false;
                                         }
-                                    });
-                                }
+                                    }
+                                });
 
                                 popupBlockMenu.show();
                                 break;
@@ -334,44 +332,42 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             //Edit/ Un-reveal
                             // select to edit contacts or un-reveal all contacts
                             //showEditUnrevealDialog();
-                            if(popupBlockMenu == null){
-                                // Create a popup Menu if null. To show when block is clicked
-                                popupUnrevealMenu = new PopupMenu(mActivityContext, view);
-                                popupUnrevealMenu.getMenu().add(Menu.NONE,0 ,0, R.string.alert_dialog_edit);
-                                popupUnrevealMenu.getMenu().add(Menu.NONE,1 ,1, R.string.alert_dialog_unreveal);
+                            // Create a popup Menu if null. To show when block is clicked
+                            PopupMenu popupUnrevealMenu = new PopupMenu(mActivityContext, view);
+                            popupUnrevealMenu.getMenu().add(Menu.NONE, 0, 0, R.string.alert_dialog_edit);
+                            popupUnrevealMenu.getMenu().add(Menu.NONE, 1, 1, R.string.alert_dialog_unreveal);
 
-                                popupUnrevealMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                    @Override
-                                    public boolean onMenuItemClick(MenuItem item) {
-                                        switch (item.getItemId()){
-                                            case 0:
-                                                Log.i(TAG, "onMenuItemClick. item edit clicked ");
-                                                // edit clicked
-                                                Log.i(TAG, "edit clicked");
-                                                Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
-                                                //contactsMap.clear(); // clear all previous selected check boxes
-                                                //mOriginalRelationsMap.clear(); // clear all previous selected check boxes
-                                                mRelationsList = getRelationsList(mRelationsMap);
-                                                Log.d(TAG, "RevealButton clicked RelationsList size= "+mRelationsList.size());
+                            popupUnrevealMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case 0:
+                                            Log.i(TAG, "onMenuItemClick. item edit clicked ");
+                                            // edit clicked
+                                            Log.i(TAG, "edit clicked");
+                                            Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
+                                            //contactsMap.clear(); // clear all previous selected check boxes
+                                            //mOriginalRelationsMap.clear(); // clear all previous selected check boxes
+                                            mRelationsList = getRelationsList(mRelationsMap);
+                                            Log.d(TAG, "RevealButton clicked RelationsList size= " + mRelationsList.size());
 
-                                                for (int i = 0; i < mRelationsList.size(); i++) {
-                                                    Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey()+ " = "+ mRelationsList.get(i).getValue().getPublic());
-                                                }
-                                                showDialog(mRelationsList, mRelationStatus);
-                                                return true;
-                                            case 1:
-                                                Log.i(TAG, "onMenuItemClick. item unreveal clicked ");
-                                                // un-reveal but show confirmation dialog first
-                                                Log.i(TAG, "un-reveal clicked and show confirmation dialog");
-                                                //Show confirmation dialog
-                                                showDeleteRelationDialog();
-                                                return true;
-                                            default:
-                                                return false;
-                                        }
+                                            for (int i = 0; i < mRelationsList.size(); i++) {
+                                                Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey() + " = " + mRelationsList.get(i).getValue().getPublic());
+                                            }
+                                            showDialog(mRelationsList, mRelationStatus);
+                                            return true;
+                                        case 1:
+                                            Log.i(TAG, "onMenuItemClick. item unreveal clicked ");
+                                            // un-reveal but show confirmation dialog first
+                                            Log.i(TAG, "un-reveal clicked and show confirmation dialog");
+                                            //Show confirmation dialog
+                                            showDeleteRelationDialog();
+                                            return true;
+                                        default:
+                                            return false;
                                     }
-                                });
-                            }
+                                }
+                            });
 
                             popupUnrevealMenu.show();
                             break;
