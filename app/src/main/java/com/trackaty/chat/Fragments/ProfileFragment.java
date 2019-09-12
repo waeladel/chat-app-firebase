@@ -1071,7 +1071,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         // Check if it's null because it was blocked before or not
                         // if it was blocked it means current user is unblocking this user, we need to force default buttons colors
                         if (TextUtils.equals(mRelationStatus, RELATION_STATUS_BLOCKED)) {
-                            // Return to default text color when user cancel request or unreveal or unblock
+                            // Return to default text color when user unblock
                             //mLovedByHint.setTextColor(mFabDefaultTextColor);
                             //mMessageHint.setTextColor(mFabDefaultTextColor);
                             mBlockEditHint.setTextColor(mFabDefaultTextColor);
@@ -1079,8 +1079,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                         }
 
-                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_RECEIVER)) {
-                            // Return to default text color when user cancel request or unreveal or unblock
+                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_RECEIVER)
+                                || TextUtils.equals(mRelationStatus, RELATION_STATUS_FOLLOWED)
+                                || TextUtils.equals(mRelationStatus, RELATION_STATUS_STALKER)){
+                            // Return to default text color when user cancel request or unreveal
                             //mLovedByHint.setTextColor(mFabDefaultTextColor);
                             //mMessageHint.setTextColor(mFabDefaultTextColor);
                             //mBlockEditHint.setTextColor(mFabDefaultTextColor);
