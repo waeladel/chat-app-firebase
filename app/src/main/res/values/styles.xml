@@ -65,6 +65,14 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!--To change the text font of MaterialAlertDialog-->
+    <style name="MaterialAlertDialog.BodyTextStyle.MyTheme" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">@font/imprima</item>
+        <item name="android:textColor">@drawable/my_on_surface_emphasis_medium</item>
+        <item name="android:textSize">16sp</item>
+        <!--<item name="android:textAppearance">?attr/textAppearanceBody2</item>-->
+    </style>
+
     <style name="MenuTextAppearance.MyTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
         <item name="android:textColor">@color/Tomato</item>
     </style>
@@ -119,6 +127,7 @@
 
         <!--<item name="alertDialogStyle">@style/MaterialAlertDialog.MaterialComponents</item>-->
         <!--<item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.MyTheme.Body2</item>-->
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.BodyTextStyle.MyTheme</item>
         <item name="colorPrimary">?colorPrimaryVariant</item>
         <item name="android:backgroundDimAmount">@dimen/alert_dim_amount</item>
         <!--<item name="android:windowElevation" tools:targetApi="lollipop">@dimen/keyLine_2</item>-->
