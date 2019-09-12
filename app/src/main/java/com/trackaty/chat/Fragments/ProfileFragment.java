@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -153,6 +154,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //show Menu. We don't open profile twice, but if the clicker is not the current opened user profile we must open his profile page
+        setHasOptionsMenu(true);
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -457,6 +461,25 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         return fragView;
     }
 
+    //We don't open profile twice, but if the clicker is not the current opened user profile we must open his profile page
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_profile) {
+            Log.d(TAG, "MenuItem = 0");
+            //goToProfile
+            if (null != mUserId && !mUserId.equals(mCurrentUserId)) {
+                // it's not logged in user. It's another user
+                NavController navController = NavHostFragment.findNavController(this);
+                navController.navigate(R.id.profileFragment);
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     //Show request/approve dialog
     private void showDialog(ArrayList<Social> contactsList, String relationStatus) {
