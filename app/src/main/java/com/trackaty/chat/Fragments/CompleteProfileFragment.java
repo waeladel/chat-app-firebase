@@ -1,10 +1,12 @@
 package com.trackaty.chat.Fragments;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
@@ -49,6 +52,7 @@ import com.trackaty.chat.Adapters.EditProfileAdapter;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.FilesHelper;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.Sortbysection;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
@@ -62,6 +66,10 @@ import com.yanzhenjie.album.Album;
 import com.yanzhenjie.album.AlbumFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -116,8 +124,8 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     private  final static String IMAGE_HOLDER_POSITION = "position";
 
-    public static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
-    public static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
+    private static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
+    private static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
 
 
     //private User currentUser;
@@ -143,7 +151,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     private Parcelable savedRecyclerLayoutState;
     private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
-    private Context activityContext;
+    private Context mActivityContext;
     private Activity activity;
 
     private EditProfileViewModel mEditProfileViewModel;
@@ -167,6 +175,9 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     private Long birthInMillis;
     private NavController navController ;
     //val data: String = CompleteProfileFragmentArgs.fromBundle(arguments).data // data = "Any data"
+    // To write wave file on notifications folder
+    private File mOutputFile;
+    private FileOutputStream outStream;
 
     public CompleteProfileFragment() {
         // Required empty public constructor
@@ -184,7 +195,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         setHasOptionsMenu(true);
 
         // [initialize the adapter on oCreate to create it only once, not every onCreateView when user get back to this fragment]
-        mEditProfileAdapter = new EditProfileAdapter(activityContext
+        mEditProfileAdapter = new EditProfileAdapter(mActivityContext
                 , mProfileDataArrayList
                 , mAboutArrayList
                 , mWorkArrayList
@@ -197,6 +208,9 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
+
+        // Step 4: Set output file for notification audio
+        mOutputFile = FilesHelper.getOutputMediaFile(FilesHelper.MEDIA_TYPE_Audio);
 
         mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
 
@@ -283,7 +297,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         }*/
 
 
-        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
+        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
 
        /* .observe(this, new Observer<User>() {
@@ -328,7 +342,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        activityContext = context;
+        mActivityContext = context;
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
@@ -356,6 +370,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         if (id == MENU_ITEM_SAVE_ID) {
             Log.d(TAG, "MenuItem = SAVE");
             profileSave();
+            writeToExternal(); // write wav notification sound if it's not already exists
         }
 
         //noinspection SimplifiableIfStatement
@@ -396,7 +411,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     }*/
 
     private void restorePreviousState() {
-        mEditProfileAdapter = new EditProfileAdapter(activityContext
+        mEditProfileAdapter = new EditProfileAdapter(mActivityContext
                 , mProfileDataArrayList
                 , mAboutArrayList
                 , mWorkArrayList
@@ -410,17 +425,17 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         Log.d(TAG, "mWorkArrayList college 1="+mWorkArrayList.get(1).getValue());
         Log.d(TAG, "mWorkArrayList college 2="+mWorkArrayList.get(2).getValue());
 
-        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(activityContext));
+        mEditProfileRecycler.setLayoutManager(new LinearLayoutManager(mActivityContext));
         mEditProfileRecycler.setAdapter(mEditProfileAdapter);
         //restoreLayoutManagerPosition();
         mEditProfileAdapter.notifyDataSetChanged();
     }
 
-    private void restoreLayoutManagerPosition() {
+    /*private void restoreLayoutManagerPosition() {
         if (savedRecyclerLayoutState != null) {
             mEditProfileRecycler.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
         }
-    }
+    }*/
 
     private void showCurrentUser(User currentUser) {
 
@@ -478,7 +493,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                         String value;
                         // check if method is null
                         if (method.invoke(currentUser) != null){
-                            value = method.invoke(currentUser).toString();
+                            value = String.valueOf(method.invoke(currentUser));
                             Log.d(TAG, "DynamicMethod value= " +method.getName()+" = "+ value);
                             Log.d(TAG, "DynamicMethod ReturnType= " +method.getReturnType().getSimpleName());
                         }else{
@@ -768,7 +783,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
                     } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                         Exception error = avatarResult.getError();
-                        Toast.makeText(activityContext, error.toString(),
+                        Toast.makeText(mActivityContext, error.toString(),
                                 Toast.LENGTH_LONG).show();
                     }
                     break;
@@ -786,7 +801,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                         uploadImage(mCoverUri, "coverImage", position);
                     } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                         Exception error = coverResult.getError();
-                        Toast.makeText(activityContext, error.toString(),
+                        Toast.makeText(mActivityContext, error.toString(),
                                 Toast.LENGTH_LONG).show();
                     }
                     break;
@@ -969,8 +984,8 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     //.setMaxCropResultSize(600, 600)
                     .setMinCropResultSize(300,300)
                     .setRequestedSize(300,300)//resize
-                    .getIntent(activityContext);
-            //.start(activityContext, this);
+                    .getIntent(mActivityContext);
+            //.start(mActivityContext, this);
             //intent.putExtra(IMAGE_HOLDER_POSITION,position);
             Bundle mBundle = new Bundle();
             mBundle.putInt(IMAGE_HOLDER_POSITION,position);
@@ -990,8 +1005,8 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     //.setMaxCropResultSize(600, 600)
                     .setMinCropResultSize(300,300)
                     .setRequestedSize(600,300) //resize
-                    .getIntent(activityContext);
-            //.start(activityContext, this);
+                    .getIntent(mActivityContext);
+            //.start(mActivityContext, this);
             //intent.putExtra(IMAGE_HOLDER_POSITION,position);
             Bundle mBundle = new Bundle();
             mBundle.putInt(IMAGE_HOLDER_POSITION,position);
@@ -1283,6 +1298,59 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 });
     }
 
+    // If WRITE_EXTERNAL_STORAGE is granted, start writing wav file immediately, if not, ask for permission first
+    private boolean isPermissionGranted() {
+        Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED));
+        return ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        //return true;
+    }
+
+    // write notification sound to notification folder
+    private void writeToExternal(){
+
+        // return if we don't have permission or we couldn't create output file or the wav file already exists
+        if (!isPermissionGranted() || mOutputFile == null || mOutputFile.exists()) {
+            Log.i(TAG, "writeToExternal return");
+            return;
+        }
+        Log.i(TAG, "writeToExternal starts");
+        InputStream in = getResources().openRawResource(R.raw.basbes);
+        try {
+            outStream = new FileOutputStream(mOutputFile.getPath());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        byte[] buff = new byte[1024];
+        int read;
+
+        try {
+            while ((read = in.read(buff)) > 0) {
+                if (outStream != null) {
+                    Log.i(TAG, "mediaStorageDir not null. outStream = "+ outStream);
+                    outStream.write(buff, 0, read);
+                }else{
+                    Log.i(TAG, "mediaStorageDir is null. outStream = "+ outStream);
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (outStream != null) {
+                    outStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     // user interface to detect item click on the recycler adapter
     @Override
@@ -1301,9 +1369,9 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 //mEditProfileAdapter.notifyDataSetChanged();
                 DatePickerFragment datePicker;
                 if(null != mEditProfileViewModel.getUser().getBirthDate()){
-                    datePicker = DatePickerFragment.newInstance(activityContext, mEditProfileViewModel.getUser().getBirthDate());
+                    datePicker = DatePickerFragment.newInstance(mActivityContext, mEditProfileViewModel.getUser().getBirthDate());
                 }else{
-                    datePicker = new DatePickerFragment(activityContext);
+                    datePicker = new DatePickerFragment(mActivityContext);
                 }
                 if (getFragmentManager() != null) {
                     datePicker.setCallBack(ondate); //Set Call back to capture selected date

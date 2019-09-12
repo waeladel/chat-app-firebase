@@ -1,17 +1,22 @@
 package com.trackaty.chat.services;
 
 import android.app.PendingIntent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,6 +64,10 @@ public class MessagingService extends FirebaseMessagingService {
     private static final int REQUESTS_SENT_NOTIFICATION_ID = 4;
     private static final int REQUESTS_APPROVED_NOTIFICATION_ID = 5;
 
+    private static final String PREFERENCE_KEY_NIGHT = "night" ;
+    private static final String PREFERENCE_KEY_RINGTONE = "notification";
+    private static final String PREFERENCE_KEY_VERSION = "version";
+
     private Target mTarget;
     private ImageView mAvatarImageView;
     private PendingIntent pendingIntent;
@@ -69,6 +78,7 @@ public class MessagingService extends FirebaseMessagingService {
 
     final Set<Target> protectedFromGarbageCollectorTargets = new HashSet<>();
 
+    private SharedPreferences sharedPreferences;
 
     public MessagingService() {
         super();
@@ -87,6 +97,9 @@ public class MessagingService extends FirebaseMessagingService {
         notificationManager = NotificationManagerCompat.from(this);
 
         mAvatarImageView = new ImageView(this);
+
+        // Save the selected ringtone
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
     }
 
     @Override
@@ -240,6 +253,10 @@ public class MessagingService extends FirebaseMessagingService {
                 .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            builder.setSound(getCurrentRingtoneUri());
+        }
 
         // if Avater is not null, set it as a large icon
         if(avatar != null){
@@ -450,6 +467,13 @@ public class MessagingService extends FirebaseMessagingService {
             }
         });*/
 
+    }
+
+    // Returns ringtone url from settings property
+    @Nullable
+    private Uri getCurrentRingtoneUri() {
+        Log.d(TAG, "getCurrentRingtoneUri= "+ sharedPreferences.getString(PREFERENCE_KEY_RINGTONE, "android.resource://" + this.getPackageName() + "/" + R.raw.basbes));
+        return Uri.parse(sharedPreferences.getString(PREFERENCE_KEY_RINGTONE, "android.resource://" + this.getPackageName() + "/" + R.raw.basbes));
     }
 
 
