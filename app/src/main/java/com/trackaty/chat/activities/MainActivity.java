@@ -708,7 +708,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToProfile() {
-        navController.navigate(R.id.profileFragment);
+
+        if (null != navController.getCurrentDestination() && R.id.profileFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.profileFragment);
+        }
 
         /*if(user != null){
             Log.i(TAG, "UserId not null");
