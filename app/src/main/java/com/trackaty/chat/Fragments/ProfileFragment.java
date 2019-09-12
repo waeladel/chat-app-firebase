@@ -849,7 +849,25 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             }
         }
 
-        // display user data
+        // if user is not exist. if new user managed to open profile fragment without having a profile yet
+        if(null == mUserId){
+            Log.e(TAG,  "User is null");
+            // When user is null, avatar image will be empty, must display the place holder
+            mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
+
+            // Disable edit profile button
+            //mBlockEditButton.setClickable(false);
+            mBlockEditButton.setEnabled(false);
+            mBlockEditButton.setBackgroundTintList(ColorStateList.valueOf
+                    (getResources().getColor(R.color.disabled_button)));
+            mBlockEditHint.setEnabled(false);
+
+            // Disable moor button
+            mSeeMoreButton.setEnabled(false);
+
+        }
+
+        // display user data as it's not null
         if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
 
             mProfileViewModel.getUser(mUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
@@ -857,7 +875,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 public void onChanged(User user) {
                     if(user != null){
                         Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
-
                         mUser = user;
                         showCurrentUser();
                     }

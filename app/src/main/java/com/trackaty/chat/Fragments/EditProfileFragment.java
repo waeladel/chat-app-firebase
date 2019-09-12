@@ -483,7 +483,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                         String value;
                         // check if method is null
                         if (method.invoke(currentUser) != null){
-                            value = method.invoke(currentUser).toString();
+                            value = String.valueOf(method.invoke(currentUser));
                             Log.d(TAG, "DynamicMethod value= " +method.getName()+" = "+ value);
                             Log.d(TAG, "DynamicMethod ReturnType= " +method.getReturnType().getSimpleName());
                         }else{

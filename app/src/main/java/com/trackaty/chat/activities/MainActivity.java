@@ -18,6 +18,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import com.firebase.ui.auth.AuthUI;
@@ -37,6 +38,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
@@ -692,12 +694,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToCompleteProfile() {
 
-        //NavDirections direction = MainFragmentDirections.actionMainToCompleteProfile();
+        NavDirections direction = MainFragmentDirections.actionMainToCompleteProfile();
         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
         //check if we are on Main Fragment not on complete Profile already
         if (null != navController.getCurrentDestination() && R.id.mainFragment == navController.getCurrentDestination().getId()) {
-            navController.navigate(R.id.completeProfileFragment);
+            //navController.navigate(R.id.completeProfileFragment);
+            //Navigation.findNavController(this, R.id.host_fragment).navigate(direction);
+            // Must use direction to get the benefits of pop stack
+            navController.navigate(direction);
         }
 
     }
