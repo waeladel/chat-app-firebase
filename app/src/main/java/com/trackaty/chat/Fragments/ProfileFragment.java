@@ -271,7 +271,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         mLoveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(TAG, "LoveButton is clicked");
+                Log.i(TAG, "LoveButton is clicked. notificationType= "+ notificationType);
                 if (isCancelLove) {
                     //Current user loved this user before, lit's unlove
                     mProfileViewModel.cancelLove(mCurrentUserId, mUserId);
@@ -688,6 +688,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
             // Get user values
             if (null != mUser.getCoverImage()) {
+                mCover.setImageResource(R.drawable.ic_picture_gallery_white);
                 Picasso.get()
                         .load(mUser.getCoverImage())
                         .placeholder(R.mipmap.ic_picture_gallery_white_512px)
@@ -698,6 +699,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             }
 
             if (null != mUser.getAvatar()) {
+                mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
                 Picasso.get()
                         .load(mUser.getAvatar())
                         .placeholder(R.mipmap.ic_round_account_filled_72)
@@ -1171,6 +1173,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             case LIKE_TYPE_NOT_LOVED:
                                 // Statues = Disliked
                                 isCancelLove = false;
+                                // To make a like type when love button is clicked when there is no connection
+                                // without it the type will be empty when there is no connection
+                                notificationType = NOTIFICATION_TYPE_LIKE;
                                 mLovedByHint.setText(R.string.love_button_hint_love);
                                 mLoveButton.setImageResource(R.drawable.ic_favorite_border_black_24dp);
                                 mLovedByHint.setTextColor(mFabDefaultTextColor);

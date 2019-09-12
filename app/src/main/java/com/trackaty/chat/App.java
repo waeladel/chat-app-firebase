@@ -5,6 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -62,7 +64,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     public static final String VISIBILITY_CHANNEL_ID = "Visibility_id";
 
     private static final String PREFERENCE_KEY_NIGHT = "night" ;
-    private static final String PREFERENCE_KEY_RINGTONE = "ringtone";
+    private static final String PREFERENCE_KEY_RINGTONE = "notification";
     private static final String PREFERENCE_KEY_VERSION = "version";
 
     private static final String NIGHT_VALUE_LIGHT = "light";
@@ -71,6 +73,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     private static final String NIGHT_VALUE_SYSTEM = "system";
 
     private SharedPreferences sharedPreferences;
+    private AudioAttributes audioAttributes;
 
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
@@ -117,6 +120,8 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         String darkModeValue = sharedPreferences.getString(PREFERENCE_KEY_NIGHT, "");
 
+        Log.d(TAG, "darkMode = "+darkModeValue);
+
         switch (darkModeValue){
             case NIGHT_VALUE_LIGHT:
                 setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -132,7 +137,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                 break;
 
                 default:
-                    Log.i(TAG, "darkModeValue is not set yet");
+                    Log.i(TAG, "darkMode Value is not set yet");
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         // Set the default value to FOLLOW_SYSTEM because it's API 29 and above
                         setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -174,7 +179,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                     Log.d(TAG, "onAuthStateChanged:signed_in: user userId " + user.getUid());
                     isUserExist(user.getUid()); // if not start complete profile
                 } else {
-                    // User is signed out
+                    // User is signed outStream
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
             }
@@ -195,12 +200,23 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
             // Create the NotificationChannel, but only on API 26+ because
             // the NotificationChannel class is new and not in the support library
 
+            // Create audioAttributes for notification's sound
+            audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                    .build();
+
             NotificationChannel LikesChannel = new NotificationChannel(
                     LIKES_CHANNEL_ID,
                     getString(R.string.likes_notification_channel_name),
                     NotificationManager.IMPORTANCE_HIGH
             );
             LikesChannel.setDescription(getString(R.string.likes_notification_channel_description));
+            LikesChannel.setSound(Uri.parse("android.resource://" + this.getPackageName() +"/raw/basbes"), audioAttributes);
+            //LikesChannel.setSound(Uri.parse("content://media/internal/audio/media/23"), audioAttributes);
+            /*if(mOutputFile.exists()){
+                LikesChannel.setSound(Uri.parse(mOutputFile.getPath()), audioAttributes);
+            }*/
 
             NotificationChannel PickupsChannel = new NotificationChannel(
                     PICK_UPS_CHANNEL_ID,
@@ -208,6 +224,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                     NotificationManager.IMPORTANCE_HIGH
             );
             PickupsChannel.setDescription(getString(R.string.pickups_notification_channel_description));
+            PickupsChannel.setSound(Uri.parse("android.resource://" + this.getPackageName() +"/raw/basbes"), audioAttributes);
 
             NotificationChannel MessagesChannel = new NotificationChannel(
                     MESSAGES_CHANNEL_ID,
@@ -215,6 +232,8 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                     NotificationManager.IMPORTANCE_DEFAULT
             );
             MessagesChannel.setDescription(getString(R.string.messages_notification_channel_description));
+            MessagesChannel.setSound(Uri.parse("android.resource://" + this.getPackageName() +"/raw/basbes"), audioAttributes);
+
 
             NotificationChannel RevealChannel = new NotificationChannel(
                     REQUESTS_CHANNEL_ID,
@@ -222,6 +241,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                     NotificationManager.IMPORTANCE_HIGH
             );
             RevealChannel.setDescription(getString(R.string.reveal_notification_channel_description));
+            RevealChannel.setSound(Uri.parse("android.resource://" + this.getPackageName() +"/raw/basbes"), audioAttributes);
 
             NotificationChannel NearbyChannel = new NotificationChannel(
                     FIND_NEARBY_CHANNEL_ID,
@@ -285,7 +305,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
                     Log.i(TAG, "onDataChange dataSnapshot user exist");
                     //connectedRef.addValueEventListener(onlineListener);
                 } else {
-                    // User is null, error out
+                    // User is null, error outStream
                     Log.w(TAG, "User is null, no such user");
                     //completeProfile(currentUserId, currentUserName, currentUserEmail);
                     //completeProfile(mUser);

@@ -102,6 +102,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_like_body, name));
+                            Log.i(TAG, "getSenderName= "+notification.getSenderName());
                             setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_like_body);
@@ -113,6 +114,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         if(null != notification.getSenderName()){
                             String name = notification.getSenderName();
                             String wholeText = (App.getContext().getString(R.string.notification_like_back_body, name));
+                            Log.i(TAG, "getSenderName= "+notification.getSenderName());
                             setTextWithSpan(holder.mNotificationBody, wholeText, name, new android.text.style.StyleSpan(BOLD));
                         }else{
                             holder.mNotificationBody.setText(R.string.notification_default_like_body);

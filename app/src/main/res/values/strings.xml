@@ -56,7 +56,7 @@
     <string name="sign_in_cancelled">Sign in has been cancelled</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="unknown_error">Unknown error occurred</string>
-    <string name="google_play_services_error">Connection failed</string>
+    <string name="google_play_services_error">Connection to google play services failed</string>
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
@@ -267,6 +267,8 @@
     <string name="notification_default_request_sent_body">You received a new request.</string>
     <string name="notification_default_request_approved_body">Your request has been approved.</string>
 
+    <string name="notification_picker_title">notification\'s sound</string>
+    <string name="notification_picker_default_sound">System Default</string>
 
     <!--<string name="notification_like_channel_description">Receive likes from your stalkers</string>-->
     <string name="likes_notification_channel_name">Likes</string>

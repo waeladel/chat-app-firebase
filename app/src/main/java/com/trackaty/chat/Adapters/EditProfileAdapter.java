@@ -177,6 +177,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     imageHolder.frameLayout.setLayoutParams(layoutParams);*/
 
                 imageHolder.itemHeadline.setText(R.string.user_avatar_headline);
+                imageHolder.profileImage.setImageResource(R.drawable.ic_round_account_filled_72);
                 if (null != mProfileDataArrayList.get(position).getValue()) {
                     Picasso.get()
                             .load(mProfileDataArrayList.get(position).getValue())
@@ -185,14 +186,14 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             .into(imageHolder.profileImage);
                     imageHolder.profileImage.setVisibility(View.VISIBLE);
                     imageHolder.divider.setVisibility(View.INVISIBLE);
-                    imageHolder.icon.setImageResource(R.drawable.ic_round_account_filled_72);
 
+                    // Add black color filter
+                    // Move filter outside if statement to activate the black color even if avatar is null
+                    int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
+                    ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
+                    imageHolder.profileImage.setColorFilter(colorFilter);
                 }
-                // Add black color filter
-                // Move filter outside if statement to activate the black color even if avatar is null
-                int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
-                ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
-                imageHolder.profileImage.setColorFilter(colorFilter);
+
                     /*case "coverImage":
                     // set frame layout to MATCH_PARENT
                     layoutParams = imageHolder.frameLayout.getLayoutParams();
@@ -209,7 +210,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 .into(imageHolder.coverImage);
                         imageHolder.coverImage.setVisibility(View.VISIBLE);
                         imageHolder.profileImage.setVisibility(View.INVISIBLE);
-                        imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
+                        imageHolder.profileImage.setImageResource(R.drawable.ic_picture_gallery_white);
 
                     }
                     break;*/
@@ -254,7 +255,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         imageHolder.coverImage.setVisibility(View.INVISIBLE);
                         imageHolder.profileImage.setVisibility(View.VISIBLE);
                         imageHolder.divider.setVisibility(View.INVISIBLE);
-                        imageHolder.icon.setImageResource(R.drawable.ic_user_account_grey_white);
+                        imageHolder.profileImage.setImageResource(R.drawable.ic_user_account_grey_white);
 
                         // add black color filter
                         int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
@@ -270,6 +271,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     imageHolder.frameLayout.setLayoutParams(layoutParams);*/
 
                 imageHolder.itemHeadline.setText(R.string.user_cover_headline);
+                imageHolder.coverImage.setImageResource(R.drawable.ic_picture_gallery_white);
                 if (null != mProfileDataArrayList.get(position).getValue()) {
                     Picasso.get()
                             .load(mProfileDataArrayList.get(position).getValue())
@@ -277,13 +279,10 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             .error(R.drawable.ic_broken_image_512px)
                             .into(imageHolder.coverImage);
                     imageHolder.coverImage.setVisibility(View.VISIBLE);
-                    imageHolder.icon.setImageResource(R.drawable.ic_picture_gallery_white);
-
                         /*// add black color filter
                         int blackColor = context.getResources().getColor(R.color.transparent_edit_image);
                         ColorFilter colorFilter = new PorterDuffColorFilter(blackColor, PorterDuff.Mode.DARKEN);
                         imageHolder.coverImage.setColorFilter(colorFilter);*/
-
                 }
             }
 

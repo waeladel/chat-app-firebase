@@ -2,10 +2,16 @@ package com.trackaty.chat.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -14,12 +20,17 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.FilesHelper;
 import com.trackaty.chat.activities.MainActivity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+
+import static android.app.Activity.RESULT_OK;
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
@@ -28,7 +39,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     // click listener to pass click events to parent fragment
 
     private static final String PREFERENCE_KEY_NIGHT = "night" ;
-    private static final String PREFERENCE_KEY_RINGTONE = "ringtone";
+    private static final String PREFERENCE_KEY_RINGTONE = "notification";
     private static final String PREFERENCE_KEY_VERSION = "version";
 
     private static final String NIGHT_VALUE_LIGHT = "light";
@@ -36,11 +47,18 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String NIGHT_VALUE_BATTERY = "battery";
     private static final String NIGHT_VALUE_SYSTEM = "system";
 
-    private Preference versionPreference;
+    private static final int RINGTONE_PICKER_REQUEST_CODE = 164;
+
+    private Preference versionPreference, ringTonePreference;
     private ListPreference nightPreference;
 
     private Context mActivityContext;
     private Activity activity;
+    private SharedPreferences sharedPreferences;
+    private File mOutputFile;
+    private RingtoneManager ringtoneManager;
+
+    private static final String NOTIFICATION_SOUND_DEFAULT_NAME = "Basbes";
 
     public SettingsFragment() {
         // Empty constructor is required for DialogFragment
@@ -63,10 +81,54 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         Log.d(TAG,"onCreatePreferences");
         setPreferencesFromResource(R.xml.setting_preferences, rootKey);
 
+        // Step 4: Set output file for notification audio
+        mOutputFile = FilesHelper.getOutputMediaFile(FilesHelper.MEDIA_TYPE_Audio);
+
         // Display app version
         versionPreference = findPreference(PREFERENCE_KEY_VERSION);
         if (versionPreference != null && mActivityContext != null) {
             versionPreference.setSummary(getAppVersionName(mActivityContext));
+        }
+
+        //RingtoneManager instance
+        ringtoneManager = new RingtoneManager(activity);
+        ringtoneManager.setType(RingtoneManager.TYPE_NOTIFICATION);
+
+        // Display selected ringTone
+        ringTonePreference = findPreference(PREFERENCE_KEY_RINGTONE);
+        if (ringTonePreference != null && mActivityContext != null) {
+
+            // No need to summary for api above 26. on api > 26 we pick sound from settings page
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                // notification sound value is empty, never exist
+                if(null == sharedPreferences.getString(PREFERENCE_KEY_RINGTONE, null)){
+                    Log.d(TAG, "ringTonePreference is empty");
+                    // set summery to basbes. No need to change ringTonePreference value as we need it null
+                    // To use the raw file when sending a notification, as long as user didn't change it.
+                    ringTonePreference.setSummary(R.string.app_name);
+                }else{
+                    Log.d(TAG, "ringTonePreference exists");
+                    ringTonePreference.setSummary(getFileName(getCurrentRingtoneUri()));
+                }
+            }
+        }
+
+        if (ringTonePreference != null) {
+            ringTonePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        ringTonePicker();
+                    }else{
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, mActivityContext.getPackageName());
+                        startActivity(intent);
+                    }
+
+                    return true;
+                }
+            });
         }
 
         nightPreference = findPreference(PREFERENCE_KEY_NIGHT);
@@ -119,8 +181,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     return true;
                 }
             });
-        }else {// End of (if nightPreference != null)
-            Log.i(TAG, "darkModeValue is not set yet");
+        }else {// End of if nightPreference != null. Now what to do when nightPreference is null
+            Log.i(TAG, "darkMode value is not set yet");
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // Set the default value to FOLLOW_SYSTEM because it's API 29 and above
                 if(nightPreference.getValue()== null){
@@ -151,6 +213,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
         }
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivityContext /* Activity context */);
     }
 
     @Override
@@ -169,6 +233,24 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // check if the request code is same as what is passed  here it is 1
+        if (requestCode == RINGTONE_PICKER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            // Make sure the request was successful
+            Uri ringtoneUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+
+            Log.d(TAG, "selected sound= "+ ringtoneUri +" sound name= "+getFileName(ringtoneUri));
+
+            ringTonePreference.setSummary(getFileName(ringtoneUri));
+
+            // Save the selected ringtone
+            sharedPreferences.edit().putString(PREFERENCE_KEY_RINGTONE,String.valueOf(ringtoneUri)).apply();
+
+        }
+    }
 
     private String getAppVersionName(Context context) {
         try {
@@ -180,5 +262,60 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
+    private void ringTonePicker() {
+
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, R.string.notification_picker_title);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, getCurrentRingtoneUri());
+        //intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Uri.parse("android.resource://" + mActivityContext.getPackageName() + "/" + R.raw.basbes)); //my custom sound
+        //intent.putExtra(ringtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Uri.parse(mOutputFile.getPath()));
+        //intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + File.pathSeparator + File.separator + mActivityContext.getPackageName() + "/raw/" + "basbes"));
+
+        this.startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
+
+    }
+
+    // Returns ringtone url from settings property
+    @Nullable
+    private Uri getCurrentRingtoneUri() {
+        Log.d(TAG, "getCurrentRingtoneUri= "+ sharedPreferences.getString(PREFERENCE_KEY_RINGTONE, "android.resource://" + mActivityContext.getPackageName() + "/" + R.raw.basbes));
+        return Uri.parse(sharedPreferences.getString(PREFERENCE_KEY_RINGTONE, "android.resource://" + mActivityContext.getPackageName() + "/" + R.raw.basbes));
+    }
+
+    // To get the ringtone name from it's uri
+    private String getFileName(Uri uri) {
+        int ringtonePosition = ringtoneManager.getRingtonePosition(uri);
+        String result ;
+         if(ringtonePosition == -1){
+             result = mActivityContext.getResources().getString(R.string.notification_picker_default_sound);
+         }else{
+             Cursor cursor = ringtoneManager.getCursor();
+             cursor.moveToPosition(ringtonePosition);
+             result = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
+         }
+
+
+        /*if (TextUtils.equals(uri.getScheme(), "content")) {
+            try (Cursor cursor = mActivityContext.getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = 0;
+            if (result != null) {
+                cut = result.lastIndexOf('/');
+                if (cut != -1) {
+                    result = result.substring(cut + 1);
+                }
+            }
+        }*/
+        return result;
+    }
 
 }
