@@ -421,9 +421,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "MenuItem = 0");
                 goToProfile();
                 break;
-            case R.id.action_menu_invite:
+            /*case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 1  INVITE clicked ");
-                break;
+                break;*/
             case R.id.action_settings:
                 Log.d(TAG, "MenuItem = 2  settings clicked");
                 goToSettings();
@@ -452,10 +452,10 @@ public class MainActivity extends AppCompatActivity {
                 //finishAffinity();
                 //finish();
                 break;
-            case R.id.action_menu_home:
+            /*case R.id.action_menu_home:
                 Log.d(TAG, "MenuItem = 4  home clicked ");
                 goToMain();
-                break;
+                break;*/
             case android.R.id.home:
                 onBackPressed();
                 break;
