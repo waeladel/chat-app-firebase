@@ -50,6 +50,7 @@ public class UserRepository {
                 mCurrentUser.postValue(dataSnapshot.getValue(User.class));
             } else {
                 // User is null, error out
+                mCurrentUser.postValue(null); // return null to disable buttons when unsaved new user opened his profile
                 Log.w(TAG, "User is null, no such user");
             }
         }

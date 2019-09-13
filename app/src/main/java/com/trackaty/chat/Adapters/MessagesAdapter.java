@@ -386,10 +386,18 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
                 // update sent icon according to message's sent boolean
                 Log.d(TAG, " message status ="+ message.getStatus());
-                if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SEEN) && chat != null && null != chat.getActive() && chat.getActive() == 0){
-                    // Show seen icon
-                    SentHolder.mSentIcon.setImageResource(R.drawable.ic_seen_message_thick);
-
+                // if message is seen by receiver user
+                if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SEEN)){
+                    // If chat is active forever show seen icon.
+                    // user is not allowed to know message is seen or not, if this chat is not active forever
+                    if(chat != null && null != chat.getActive() && chat.getActive() == 0){
+                        // Show seen icon
+                        SentHolder.mSentIcon.setImageResource(R.drawable.ic_seen_message_thick);
+                    }else{
+                        // If chat is not active forever show sent icon
+                        SentHolder.mSentIcon.setImageResource(R.drawable.ic_sent_message_thick);
+                    }
+                    // if message is sent show send icon
                 } else if(null != message.getStatus() && message.getStatus().equals(Message_STATUS_SENT)){
                     // Show seen sent icon
                     SentHolder.mSentIcon.setImageResource(R.drawable.ic_sent_message_thick);

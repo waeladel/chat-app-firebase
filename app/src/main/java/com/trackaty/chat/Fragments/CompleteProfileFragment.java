@@ -7,6 +7,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -1313,7 +1314,9 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
             Log.i(TAG, "writeToExternal return");
             return;
         }
+
         Log.i(TAG, "writeToExternal starts");
+
         InputStream in = getResources().openRawResource(R.raw.basbes);
         try {
             outStream = new FileOutputStream(mOutputFile.getPath());
@@ -1349,6 +1352,19 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 e.printStackTrace();
             }
         }
+
+        // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.
+        final String mimeType = mActivityContext.getContentResolver().getType(Uri.fromFile(mOutputFile));
+        MediaScannerConnection.scanFile(
+                mActivityContext,
+                new String[]{mOutputFile.getAbsolutePath()},
+                new String[]{mimeType},
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.v(TAG, "file " + path + " was scanned successfully: " + uri);
+                    }
+                });
 
     }
 

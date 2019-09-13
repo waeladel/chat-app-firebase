@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ import com.trackaty.chat.models.Social;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RevealFragment extends DialogFragment implements ItemClickListener {
     private final static String TAG = RevealFragment.class.getSimpleName();
@@ -46,7 +48,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     private Activity activity;
 
     private static ItemClickListener itemClickListen;
-
+    private List<Boolean> checkedList = new ArrayList<>();
 
     public RevealFragment() {
         // Empty constructor is required for DialogFragment
@@ -123,18 +125,28 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
         View fragView = inflater.inflate(R.layout.reveal_request_dialog_fragment, container);
 
+        mSendButton =  fragView.findViewById(R.id.send_button);
+        mCancelButton =  fragView.findViewById(R.id.cancel_button);
+        mTitle =  fragView.findViewById(R.id.dialog_title);
+
         // get PrivateContactsList array from arguments
         if (getArguments() != null) {
             pramsContacts = getArguments().getParcelableArrayList(PRIVET_CONTACTS_KEY);
             if (pramsContacts != null) {
                 for (int i = 0; i < pramsContacts.size(); i++) {
-                    Log.i(TAG, "getArguments() PrivateContactsList sorted " + pramsContacts.get(i).getKey());
+                    Log.i(TAG, "getArguments() PrivateContactsList sorted " + pramsContacts.get(i).getKey() + " public= "+ privateContacts.get(i).getValue().getPublic());
+                    if(pramsContacts.get(i).getValue().getPublic()){
+                        Log.i(TAG, "this "+ pramsContacts.get(i).getKey()+ "item is selected");
+                        // Enable send button
+                        mSendButton.setEnabled(true);
+
+                        // Add to public item to checkedList
+                        checkedList.add(true);
+                    }
                 }
             }
 
-            mSendButton =  fragView.findViewById(R.id.send_button);
-            mCancelButton =  fragView.findViewById(R.id.cancel_button);
-            mTitle =  fragView.findViewById(R.id.dialog_title);
+
 
             // Adjust button text and dialog title according to relationship status
             switch (mRelationStatus){
@@ -219,6 +231,42 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
         if(itemClickListen != null && position != RecyclerView.NO_POSITION){
             itemClickListen.onClick(view, position, false);
+        }
+
+        if (view instanceof CheckBox) {
+            CheckBox checkBox = (CheckBox) view;
+            if (checkBox.isChecked()) {
+                Log.i(TAG, "onClick checkBox is checked. position= "+ position);
+                if (pramsContacts != null) {
+                    // Add to public item to checkedList
+                    checkedList.add( true);
+                    // Enable send button
+                    mSendButton.setEnabled(true);
+                }
+            }else{
+                Log.i(TAG, "onClick checkBox is unchecked. position= "+ position);
+                if (pramsContacts != null) {
+                    // remove from public item to checkedList
+                    if(!checkedList.isEmpty()){
+                        checkedList.remove(0);
+                    }
+
+                    for (int i = 0; i < checkedList.size(); i++) {
+                        Log.d(TAG, "onClick checkBox checkedList loop = "+ checkedList.size());
+                    }
+
+                    // Disable send button if there is no selected item
+                    if(checkedList.size() > 0){
+                        // Enable send button
+                        mSendButton.setEnabled(true);
+                    }else{
+                        // Disable send button
+                        mSendButton.setEnabled(false);
+                    }
+
+                }
+
+            }
         }
     }
 

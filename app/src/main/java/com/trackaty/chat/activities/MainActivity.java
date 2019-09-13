@@ -18,6 +18,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import com.firebase.ui.auth.AuthUI;
@@ -37,6 +38,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
@@ -438,9 +440,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "MenuItem = 0");
                 goToProfile();
                 break;
-            case R.id.action_menu_invite:
+            /*case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 1  INVITE clicked ");
-                break;
+                break;*/
             case R.id.action_settings:
                 Log.d(TAG, "MenuItem = 2  settings clicked");
                 goToSettings();
@@ -469,10 +471,10 @@ public class MainActivity extends AppCompatActivity {
                 //finishAffinity();
                 //finish();
                 break;
-            case R.id.action_menu_home:
+            /*case R.id.action_menu_home:
                 Log.d(TAG, "MenuItem = 4  home clicked ");
                 goToMain();
-                break;
+                break;*/
             case android.R.id.home:
                 onBackPressed();
                 break;
@@ -711,18 +713,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToCompleteProfile() {
 
-        //NavDirections direction = MainFragmentDirections.actionMainToCompleteProfile();
+        NavDirections direction = MainFragmentDirections.actionMainToCompleteProfile();
         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
         //check if we are on Main Fragment not on complete Profile already
         if (null != navController.getCurrentDestination() && R.id.mainFragment == navController.getCurrentDestination().getId()) {
-            navController.navigate(R.id.completeProfileFragment);
+            //navController.navigate(R.id.completeProfileFragment);
+            //Navigation.findNavController(this, R.id.host_fragment).navigate(direction);
+            // Must use direction to get the benefits of pop stack
+            navController.navigate(direction);
         }
 
     }
 
     private void goToProfile() {
-        navController.navigate(R.id.profileFragment);
+
+        if (null != navController.getCurrentDestination() && R.id.profileFragment != navController.getCurrentDestination().getId()) {
+            navController.navigate(R.id.profileFragment);
+        }
 
         /*if(user != null){
             Log.i(TAG, "UserId not null");

@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -144,7 +145,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private Boolean isCancelLove;
 
     private ProfileViewModel mProfileViewModel;
-    private PopupMenu popupBlockMenu, popupUnrevealMenu; // To show a popup menu when block/ block & delete is selected
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -153,6 +153,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
+        //show Menu. We don't open profile twice, but if the clicker is not the current opened user profile we must open his profile page
+        setHasOptionsMenu(true);
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -180,6 +183,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d(TAG, "onCreate View");
         View fragView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         mSeeMoreButton =  fragView.findViewById(R.id.see_more_button);
@@ -226,32 +230,30 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             default:
                                 // There is no blocking relation
                                 //showBlockDialog(); // To confirm blocking or cancel
-                                if(popupBlockMenu == null){
-                                    // Create a popup Menu if null. To show when block is clicked
-                                    popupBlockMenu = new PopupMenu(mActivityContext, view);
-                                    popupBlockMenu.getMenu().add(Menu.NONE,0 ,0, R.string.popup_menu_block);
-                                    popupBlockMenu.getMenu().add(Menu.NONE,1 ,1,R.string.popup_menu_block_delete);
+                                // Create a popup Menu if null. To show when block is clicked
+                                PopupMenu popupBlockMenu = new PopupMenu(mActivityContext, view);
+                                popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_block);
+                                popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_block_delete);
 
-                                    popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                        @Override
-                                        public boolean onMenuItemClick(MenuItem item) {
-                                            switch (item.getItemId()){
-                                                case 0:
-                                                    Log.i(TAG, "onMenuItemClick. item block clicked ");
-                                                    //blockUser();
-                                                    showBlockDialog();
-                                                    return true;
-                                                case 1:
-                                                    Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
-                                                    //blockDelete();
-                                                    showBlockDeleteDialog();
-                                                    return true;
-                                                default:
-                                                    return false;
-                                            }
+                                popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        switch (item.getItemId()) {
+                                            case 0:
+                                                Log.i(TAG, "onMenuItemClick. item block clicked ");
+                                                //blockUser();
+                                                showBlockDialog();
+                                                return true;
+                                            case 1:
+                                                Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
+                                                //blockDelete();
+                                                showBlockDeleteDialog();
+                                                return true;
+                                            default:
+                                                return false;
                                         }
-                                    });
-                                }
+                                    }
+                                });
 
                                 popupBlockMenu.show();
                                 break;
@@ -330,44 +332,42 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             //Edit/ Un-reveal
                             // select to edit contacts or un-reveal all contacts
                             //showEditUnrevealDialog();
-                            if(popupBlockMenu == null){
-                                // Create a popup Menu if null. To show when block is clicked
-                                popupUnrevealMenu = new PopupMenu(mActivityContext, view);
-                                popupUnrevealMenu.getMenu().add(Menu.NONE,0 ,0, R.string.alert_dialog_edit);
-                                popupUnrevealMenu.getMenu().add(Menu.NONE,1 ,1, R.string.alert_dialog_unreveal);
+                            // Create a popup Menu if null. To show when block is clicked
+                            PopupMenu popupUnrevealMenu = new PopupMenu(mActivityContext, view);
+                            popupUnrevealMenu.getMenu().add(Menu.NONE, 0, 0, R.string.alert_dialog_edit);
+                            popupUnrevealMenu.getMenu().add(Menu.NONE, 1, 1, R.string.alert_dialog_unreveal);
 
-                                popupUnrevealMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                    @Override
-                                    public boolean onMenuItemClick(MenuItem item) {
-                                        switch (item.getItemId()){
-                                            case 0:
-                                                Log.i(TAG, "onMenuItemClick. item edit clicked ");
-                                                // edit clicked
-                                                Log.i(TAG, "edit clicked");
-                                                Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
-                                                //contactsMap.clear(); // clear all previous selected check boxes
-                                                //mOriginalRelationsMap.clear(); // clear all previous selected check boxes
-                                                mRelationsList = getRelationsList(mRelationsMap);
-                                                Log.d(TAG, "RevealButton clicked RelationsList size= "+mRelationsList.size());
+                            popupUnrevealMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case 0:
+                                            Log.i(TAG, "onMenuItemClick. item edit clicked ");
+                                            // edit clicked
+                                            Log.i(TAG, "edit clicked");
+                                            Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
+                                            //contactsMap.clear(); // clear all previous selected check boxes
+                                            //mOriginalRelationsMap.clear(); // clear all previous selected check boxes
+                                            mRelationsList = getRelationsList(mRelationsMap);
+                                            Log.d(TAG, "RevealButton clicked RelationsList size= " + mRelationsList.size());
 
-                                                for (int i = 0; i < mRelationsList.size(); i++) {
-                                                    Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey()+ " = "+ mRelationsList.get(i).getValue().getPublic());
-                                                }
-                                                showDialog(mRelationsList, mRelationStatus);
-                                                return true;
-                                            case 1:
-                                                Log.i(TAG, "onMenuItemClick. item unreveal clicked ");
-                                                // un-reveal but show confirmation dialog first
-                                                Log.i(TAG, "un-reveal clicked and show confirmation dialog");
-                                                //Show confirmation dialog
-                                                showDeleteRelationDialog();
-                                                return true;
-                                            default:
-                                                return false;
-                                        }
+                                            for (int i = 0; i < mRelationsList.size(); i++) {
+                                                Log.i(TAG, "mRelationsList = " + mRelationsList.get(i).getKey() + " = " + mRelationsList.get(i).getValue().getPublic());
+                                            }
+                                            showDialog(mRelationsList, mRelationStatus);
+                                            return true;
+                                        case 1:
+                                            Log.i(TAG, "onMenuItemClick. item unreveal clicked ");
+                                            // un-reveal but show confirmation dialog first
+                                            Log.i(TAG, "un-reveal clicked and show confirmation dialog");
+                                            //Show confirmation dialog
+                                            showDeleteRelationDialog();
+                                            return true;
+                                        default:
+                                            return false;
                                     }
-                                });
-                            }
+                                }
+                            });
 
                             popupUnrevealMenu.show();
                             break;
@@ -457,6 +457,25 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         return fragView;
     }
 
+    //We don't open profile twice, but if the clicker is not the current opened user profile we must open his profile page
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_profile) {
+            Log.d(TAG, "MenuItem = 0");
+            //goToProfile
+            if (null != mUserId && !mUserId.equals(mCurrentUserId)) {
+                // it's not logged in user. It's another user
+                NavController navController = NavHostFragment.findNavController(this);
+                navController.navigate(R.id.profileFragment);
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     //Show request/approve dialog
     private void showDialog(ArrayList<Social> contactsList, String relationStatus) {
@@ -849,7 +868,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             }
         }
 
-        // display user data
+        // display user data as it's not null
         if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
 
             mProfileViewModel.getUser(mUserId).observe(getViewLifecycleOwner(), new Observer<User>() {
@@ -857,7 +876,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 public void onChanged(User user) {
                     if(user != null){
                         Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
-
                         mUser = user;
                         showCurrentUser();
                     }
@@ -872,6 +890,28 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         Log.d(TAG,  "onChanged user name= " + user.getName() + " hashcode= "+ hashCode());
                         mUser = user;
                         showCurrentUser();
+                    }else{
+                        // if user is not exist. if new user managed to open profile fragment without having a profile yet
+                        Log.e(TAG,  "User is null");
+                        // When user is null, avatar image will be empty, must display the place holder
+                        mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
+
+                        // Disable edit profile button
+                        //mBlockEditButton.setClickable(false);
+                        mBlockEditButton.setEnabled(false);
+                        mBlockEditButton.setBackgroundTintList(ColorStateList.valueOf
+                                (getResources().getColor(R.color.disabled_button)));
+                        mBlockEditHint.setEnabled(false);
+
+                        // Disable more button
+                        mSeeMoreButton.setEnabled(false);
+
+                        // Disable avatar and cover clicks
+                        mAvatar.setClickable(false);
+                        mAvatar.setEnabled(false);
+
+                        mCover.setClickable(false);
+                        mCover.setEnabled(false);
                     }
                 }
             });
@@ -1031,7 +1071,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         // Check if it's null because it was blocked before or not
                         // if it was blocked it means current user is unblocking this user, we need to force default buttons colors
                         if (TextUtils.equals(mRelationStatus, RELATION_STATUS_BLOCKED)) {
-                            // Return to default text color when user cancel request or unreveal or unblock
+                            // Return to default text color when user unblock
                             //mLovedByHint.setTextColor(mFabDefaultTextColor);
                             //mMessageHint.setTextColor(mFabDefaultTextColor);
                             mBlockEditHint.setTextColor(mFabDefaultTextColor);
@@ -1039,8 +1079,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
                         }
 
-                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_RECEIVER)) {
-                            // Return to default text color when user cancel request or unreveal or unblock
+                        if (TextUtils.equals(mRelationStatus, RELATION_STATUS_RECEIVER)
+                                || TextUtils.equals(mRelationStatus, RELATION_STATUS_FOLLOWED)
+                                || TextUtils.equals(mRelationStatus, RELATION_STATUS_STALKER)){
+                            // Return to default text color when user cancel request or unreveal
                             //mLovedByHint.setTextColor(mFabDefaultTextColor);
                             //mMessageHint.setTextColor(mFabDefaultTextColor);
                             //mBlockEditHint.setTextColor(mFabDefaultTextColor);

@@ -170,7 +170,7 @@ public class FilesHelper {
 
         }else if(type == MEDIA_TYPE_Audio) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "basbes.wav");
+                    "basbes.ogg");
         }else{
             return null;
         }
