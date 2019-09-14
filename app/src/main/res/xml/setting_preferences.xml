@@ -3,6 +3,19 @@
 
 
     <PreferenceCategory
+        app:key="visible_category"
+        app:title="@string/settings_category_visible">
+
+        <SwitchPreference
+            app:key="visible"
+            app:title="@string/settings_preference_title_visible"
+            app:summary="@string/settings_preference_summery_visible"
+            app:defaultValue="false"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:key="display_category"
         app:title="@string/settings_category_display">
 

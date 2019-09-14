@@ -57,7 +57,7 @@ public class ChatInactiveAlertFragment extends DialogFragment  {
         // created options to select from
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
         //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setCancelable(true);
         alertDialogBuilder.setTitle(getString(R.string.chat_inactive_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.chat_inactive_dialog_message);

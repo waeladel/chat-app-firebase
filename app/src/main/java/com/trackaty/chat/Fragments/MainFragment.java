@@ -107,8 +107,9 @@ public class MainFragment extends Fragment {
     private CountDownTimer mSearchingTimer; // Timer for closing search service when finished
     private long mTimeLiftInMillis; // remaining time in milliseconds
 
-    private static final String SEARCH_END_TIME_KEY = "Search end time"; // Key for save EndTime to SharedPreferences
-    private static final String BATTERY_ALERT_SHOWING_TIMES_KEY = "Showing battery alert times"; // Key for number of showing battery optimization dialog
+    private static final String PREFERENCE_SEARCH_END_TIME_KEY = "SearchEnd"; // Key for save EndTime to SharedPreferences
+    private static final String PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY = "batteryAlert"; // Key for number of showing battery optimization dialog
+    private static final String PREFERENCE_KEY_VISIBLE = "visible" ;
 
     private final static int SEARCHING_PERIOD = 10*60*1000; //1*60*1000;
     private final static int NOTIFICATION_PENDING_INTENT_REQUEST_CODE = 55; // For visibility notification
@@ -271,9 +272,7 @@ public class MainFragment extends Fragment {
 
                     // Stop visibility alarm when log out
                     //startStopAlarm(); // start the alarm if it's null, stop it if already started
-                    //toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
                     stopAlarm();
-                    toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
 
                     // clear mUser object in case user will log in with another account
                     if(mCurrentUser != null ){
@@ -372,12 +371,11 @@ public class MainFragment extends Fragment {
         View fragView = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Radar view
-        mRadarView = (RadarView) fragView.findViewById(R.id.radar);
-        mVisibilityButton = (FloatingActionButton) fragView.findViewById(R.id.visibility_fab);
-        mTimerText = (TextView) fragView.findViewById(R.id.timerText);
+        mRadarView =  fragView.findViewById(R.id.radar);
+        mTimerText =  fragView.findViewById(R.id.timerText);
 
         // Initiate the RecyclerView
-        mUsersRecycler = (RecyclerView) fragView.findViewById(R.id.users_recycler);
+        mUsersRecycler = fragView.findViewById(R.id.users_recycler);
         mUsersRecycler.setHasFixedSize(true);
         mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mUsersRecycler.setLayoutManager(mLinearLayoutManager);
@@ -475,32 +473,6 @@ public class MainFragment extends Fragment {
             Log.d(TAG, "users are the deffrent");
         }*/
 
-       // A button to make current user visible to others
-        mVisibilityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i(TAG, "mVisibilityButton is clicked");
-                if(mCurrentUser == null){
-                    // Get current user. User to send sound id extra to alarm receiver
-                    viewModel.getUserOnce(viewModel.getCurrentUserId(), new FirebaseUserCallback() {
-                        @Override
-                        public void onCallback(User user) {
-                            if (user != null){
-                                Log.d(TAG , "VisibilityButton clicked: getUserOnce Callback: getSoundId= "+user.getSoundId()+ " userName= "+ user.getName() + " userId= "+ user.getKey());
-                                mCurrentUser = user;
-                            }
-                        }
-                    });
-                    return;
-                }
-                if(mCurrentUser.getSoundId()== 0){
-                    return;
-                }
-                startStopAlarm(); // start the alarm if it's null, stop it if already started
-                toggleVisibleUI(); // update the FAB icon when FAB is clicked, also we update it onStart
-            }
-        });
-
         return fragView;
     }
 
@@ -522,12 +494,14 @@ public class MainFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.d(TAG, "fragment state = onActivityCreated");
-        if(((MainActivity)getActivity())!= null){
+        if((getActivity())!= null){
             ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
-            actionbar.setTitle(R.string.main_frag_title);
-            actionbar.setDisplayHomeAsUpEnabled(false);
-            actionbar.setHomeButtonEnabled(false);
-            actionbar.setDisplayShowCustomEnabled(false);
+            if (actionbar != null) {
+                actionbar.setTitle(R.string.main_frag_title);
+                actionbar.setDisplayHomeAsUpEnabled(false);
+                actionbar.setHomeButtonEnabled(false);
+                actionbar.setDisplayShowCustomEnabled(false);
+            }
         }
 
         if(viewModel.getCurrentUserId() != null){
@@ -558,7 +532,6 @@ public class MainFragment extends Fragment {
 
         // Update searching UI (radar & timer) on onStart
         toggleSearchingUI();
-        toggleVisibleUI();
     }
 
     @Override
@@ -639,7 +612,7 @@ public class MainFragment extends Fragment {
 
     //Show a dialog to select whether to edit or un-reveal
     private void showPermissionRationaleDialog() {
-        PermissionAlertFragment PermissionRationaleDialog = PermissionAlertFragment.newInstance();
+        PermissionAlertFragment PermissionRationaleDialog = PermissionAlertFragment.newInstance(mActivityContext);
         PermissionRationaleDialog.show(fragmentManager, PERMISSION_RATIONALE_FRAGMENT);
         Log.i(TAG, "showPermissionRationaleDialog: permission AlertFragment show clicked ");
     }
@@ -682,7 +655,7 @@ public class MainFragment extends Fragment {
 
         // Save EndTime on SharedPreferences
         long now = System.currentTimeMillis();
-        mSharedPreferences.edit().putLong(SEARCH_END_TIME_KEY, SEARCHING_PERIOD + now).apply();
+        mSharedPreferences.edit().putLong(PREFERENCE_SEARCH_END_TIME_KEY, SEARCHING_PERIOD + now).apply();
     }
 
 
@@ -696,35 +669,17 @@ public class MainFragment extends Fragment {
         mRadarView.setVisibility(View.GONE);
     }
 
-    // Update FAb icon according to the alarm status
-    private void toggleVisibleUI() {
-        if(isAlarmExist()){
-            Log.d(TAG , "toggleVisibleUI: Alarm already exist.");
-            /*mVisibilityButton.setEnabled(true);
-            mVisibilityButton.setClickable(true);
-            mVisibilityButton.setBackgroundTintList(mVisibilityButton.getBackgroundTintList());*/
-            mVisibilityButton.setImageResource(R.drawable.ic_aries_symbol);
-        }else{
-            Log.d(TAG , "toggleVisibleUI: Alarm not exist.");
-            /*mVisibilityButton.setEnabled(false);
-            mVisibilityButton.setClickable(true);
-            mVisibilityButton.setBackgroundTintList(ColorStateList.valueOf
-                    (getResources().getColor(R.color.disabled_button)));*/
-            mVisibilityButton.setImageResource(R.drawable.album_abc_spinner_white);
-        }
-    }
-
     // Start or stop the alarm when Visibility is clicked
     private void startStopAlarm() {
         if (isAlarmExist()) {
             stopAlarm();
         } else {
             if(!isDozeWhiteList()){ // check if the app is already exempted from battery optimization
-                int batteryAlertShowTimes = mSharedPreferences.getInt(BATTERY_ALERT_SHOWING_TIMES_KEY, 0);
+                int batteryAlertShowTimes = mSharedPreferences.getInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, 0);
                 if(batteryAlertShowTimes < 3){
                     // show the dialog only if it wasn't shown 3 times before
                     showBatteryDialog();
-                    mSharedPreferences.edit().putInt(BATTERY_ALERT_SHOWING_TIMES_KEY, batteryAlertShowTimes+1).apply();
+                    mSharedPreferences.edit().putInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, batteryAlertShowTimes+1).apply();
                 }
             }
             setAlarm();
@@ -782,17 +737,20 @@ public class MainFragment extends Fragment {
             pendingIntent.cancel();
         }
         cancelNotification();
+
+        // update sharedPreferences so settings fragment know about it if alarm stops due to logout
+        mSharedPreferences.edit().putBoolean(PREFERENCE_KEY_VISIBLE, false).apply();
     }
 
     private boolean isDozeWhiteList() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             String packageName = activity.getPackageName();
             PowerManager pm = (PowerManager) activity.getSystemService(POWER_SERVICE);
-            if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            if (pm != null) {
                 // is exempt from power optimization
-                return true;
-            }else{
                 // Not exempt from power optimization
+                return pm.isIgnoringBatteryOptimizations(packageName);
+            }else{
                 return false;
             }
         }else{
@@ -803,7 +761,7 @@ public class MainFragment extends Fragment {
 
     //Show a dialog to confirm blocking user
     private void showBatteryDialog() {
-        BatteryAlertFragment batteryFragment = BatteryAlertFragment.newInstance();
+        BatteryAlertFragment batteryFragment = BatteryAlertFragment.newInstance(mActivityContext);
         if (getFragmentManager() != null) {
             fragmentManager = getFragmentManager();
             batteryFragment.show(fragmentManager, BATTERY_ALERT_FRAGMENT);
@@ -839,21 +797,17 @@ public class MainFragment extends Fragment {
     // Get Request Permissions Result
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case RESULT_REQUEST_RECORD_AUDIO: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the task you need to do.
-                    Log.i(TAG, "onRequestPermissionsResult permission was granted");
-                    startStopSearchService();
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Log.i(TAG, "onRequestPermissionsResult permission denied");
-                }
-                return;
-
+        if (requestCode == RESULT_REQUEST_RECORD_AUDIO) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // permission was granted, yay! Do the task you need to do.
+                Log.i(TAG, "onRequestPermissionsResult permission was granted");
+                startStopSearchService();
+            } else {
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+                Log.i(TAG, "onRequestPermissionsResult permission denied");
             }
         }
     }
@@ -900,7 +854,7 @@ public class MainFragment extends Fragment {
         mTimerText.setVisibility(View.VISIBLE); // make TimerText visible
 
         long now = System.currentTimeMillis();
-        mTimeLiftInMillis = mSharedPreferences.getLong(SEARCH_END_TIME_KEY, SEARCHING_PERIOD) - now;
+        mTimeLiftInMillis = mSharedPreferences.getLong(PREFERENCE_SEARCH_END_TIME_KEY, SEARCHING_PERIOD) - now;
         mSearchingTimer = new CountDownTimer( mTimeLiftInMillis,1000) {
             @Override
             public void onTick(long millisUntilFinished) {

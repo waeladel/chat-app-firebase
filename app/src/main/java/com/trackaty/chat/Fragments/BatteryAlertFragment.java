@@ -1,7 +1,7 @@
 package com.trackaty.chat.Fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -10,21 +10,23 @@ import android.provider.Settings;
 
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.R;
 
 public class BatteryAlertFragment extends DialogFragment  {
     private final static String TAG = BatteryAlertFragment.class.getSimpleName();
+    private Context context;
 
-
-    public BatteryAlertFragment() {
+    private BatteryAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static BatteryAlertFragment newInstance() {
+    public static BatteryAlertFragment newInstance(Context context) {
 
-        BatteryAlertFragment fragment = new BatteryAlertFragment();
+        BatteryAlertFragment fragment = new BatteryAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -38,7 +40,7 @@ public class BatteryAlertFragment extends DialogFragment  {
 
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
         // AlertDialog.Builder to create the dialog wihtouht custum xml layout
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));
         alertDialogBuilder.setMessage(R.string.battery_optimization_dialog_body);
 

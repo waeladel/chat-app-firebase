@@ -2,7 +2,6 @@ package com.trackaty.chat.Fragments;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +11,7 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.trackaty.chat.R;
 
 public class PermissionAlertFragment extends DialogFragment  {
@@ -21,22 +21,24 @@ public class PermissionAlertFragment extends DialogFragment  {
 
     private Context mActivityContext;
     private Activity activity;
+    private Context context;
 
     // click listener to pass click events to parent fragment
     //private static ItemClickListener itemClickListen;
 
-    public PermissionAlertFragment() {
+    private PermissionAlertFragment(Context context) {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
         // Use `newInstance` instead as shown below
+        this.context = context;
     }
 
-    public static PermissionAlertFragment newInstance() {
+    public static PermissionAlertFragment newInstance(Context context) {
 
         // instantiate click listener to pass click events to parent fragment
         //itemClickListen = itemClickListener;
 
-        PermissionAlertFragment fragment = new PermissionAlertFragment();
+        PermissionAlertFragment fragment = new PermissionAlertFragment(context);
         Bundle args = new Bundle();
         //args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
         fragment.setArguments(args);
@@ -57,7 +59,7 @@ public class PermissionAlertFragment extends DialogFragment  {
 
         // created options to select from
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         alertDialogBuilder.setTitle(getString(R.string.audio_permission_dialog_title));
         alertDialogBuilder.setMessage(R.string.audio_permission_dialog_message);
         alertDialogBuilder.setPositiveButton(R.string.confirm_dialog_positive_button,  new DialogInterface.OnClickListener() {
