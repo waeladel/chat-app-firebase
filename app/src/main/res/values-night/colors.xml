@@ -39,6 +39,8 @@
     <color name="color_on_primary">#000000</color>
 
     <!--<color name="transparent_read_items">#705c648e</color>-->
+    <color name="color_radar_dimmed_background">#B31f1d25</color>
+    <color name="color_radar_circle">#70C9CC</color>
 
     <color name="color_highlighted_item">#2E73707a</color>
     <color name="color_chat_notification_circle">#E6E48E</color> <!--F7F57E 6edde6 f082d8 -->

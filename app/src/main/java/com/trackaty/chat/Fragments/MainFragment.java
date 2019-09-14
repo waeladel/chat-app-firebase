@@ -30,6 +30,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -91,6 +92,7 @@ public class MainFragment extends Fragment {
 
     private UsersViewModel viewModel;
     private RadarView mRadarView;
+    private ConstraintLayout mRadarLayout;
     private TextView mTimerText;
 
     private FloatingActionButton mVisibilityButton; // button to make your self visible to others
@@ -373,6 +375,7 @@ public class MainFragment extends Fragment {
         // Radar view
         mRadarView =  fragView.findViewById(R.id.radar);
         mTimerText =  fragView.findViewById(R.id.timerText);
+        mRadarLayout =  fragView.findViewById(R.id.radar_layout);
 
         // Initiate the RecyclerView
         mUsersRecycler = fragView.findViewById(R.id.users_recycler);
@@ -500,14 +503,26 @@ public class MainFragment extends Fragment {
                 actionbar.setTitle(R.string.main_frag_title);
                 actionbar.setDisplayHomeAsUpEnabled(false);
                 actionbar.setHomeButtonEnabled(false);
-                actionbar.setDisplayShowCustomEnabled(false);
+                actionbar.setDisplayShowCustomEnabled(true);
             }
+
+            // No need to put countdown on the toolbar
+            /*LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View actionBarView = inflater.inflate(R.layout.find_toolbar, null);
+            if (actionbar != null) {
+                actionbar.setCustomView(actionBarView);
+            }
+
+
+            //mTimer = new Timer();
+            // custom action bar items to add receiver's avatar and name //
+            mTimerText =  actionBarView.findViewById(R.id.last_seen);*/
         }
 
         if(viewModel.getCurrentUserId() != null){
             initiateObserveSearch(viewModel.getCurrentUserId());
         }
-        //animalViewModel.getAnimals()?.observe(this, Observer(animalAdapter::submitList))
+
     }
 
     /*@Override
@@ -547,7 +562,7 @@ public class MainFragment extends Fragment {
         // Stop searching UI (radar & timer) on onStart
         CancelTimer();
         mRadarView.stop();
-        mRadarView.setVisibility(View.GONE);
+        mRadarLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -621,11 +636,11 @@ public class MainFragment extends Fragment {
     private void toggleSearchingUI() {
         if(isMyServiceRunning(FindNearbyService.class)){
             mRadarView.start();
-            mRadarView.setVisibility(View.VISIBLE);
+            mRadarLayout.setVisibility(View.VISIBLE);
             StartTimer();
         }else{
             mRadarView.stop();
-            mRadarView.setVisibility(View.GONE);
+            mRadarLayout.setVisibility(View.GONE);
             CancelTimer();
         }
     }
@@ -651,7 +666,7 @@ public class MainFragment extends Fragment {
         //serviceIntent.putExtra("userID",mSendText.getText().toString());
         activity.startService(serviceIntent);
         mRadarView.start(); // Start Radar spinning
-        mRadarView.setVisibility(View.VISIBLE);
+        mRadarLayout.setVisibility(View.VISIBLE);
 
         // Save EndTime on SharedPreferences
         long now = System.currentTimeMillis();
@@ -666,7 +681,7 @@ public class MainFragment extends Fragment {
         serviceIntent = new Intent(activity, FindNearbyService.class);
         activity.stopService(serviceIntent);
         mRadarView.stop(); // Stop Radar spinning
-        mRadarView.setVisibility(View.GONE);
+        mRadarLayout.setVisibility(View.GONE);
     }
 
     // Start or stop the alarm when Visibility is clicked
