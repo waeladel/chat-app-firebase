@@ -767,8 +767,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if((getActivity())!= null){
-            ActionBar actionbar = ((MainActivity)getActivity()).getSupportActionBar();
+        if ((getActivity()) != null) {
+            ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
             if (actionbar != null) {
                 actionbar.setTitle(null);
                 actionbar.setDisplayHomeAsUpEnabled(true);
@@ -777,56 +777,40 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             }
 
 
-            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View actionBarView = inflater.inflate(R.layout.messages_toolbar, null);
+            /*LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View actionbarCustomView  = inflater.inflate(R.layout.messages_toolbar, null);*/
             if (actionbar != null) {
-                actionbar.setCustomView(actionBarView);
-            }
+                actionbar.setCustomView(R.layout.messages_toolbar);
+                View actionbarCustomView = actionbar.getCustomView();
 
+                // custom action bar items to add receiver's avatar and name //
+                //View actionbarCustomView = actionbar.getCustomView();
+                mUserName = actionbarCustomView.findViewById(R.id.user_name);
+                mUserName.setVisibility(View.INVISIBLE); // make it invisible till data arrives
+                mLastSeen = actionbarCustomView.findViewById(R.id.last_seen);
+                mLastSeen.setVisibility(View.INVISIBLE); // make it invisible till data arrives
+                mUserPhoto = actionbarCustomView.findViewById(R.id.user_image);
 
-            //mTimer = new Timer();
-            // custom action bar items to add receiver's avatar and name //
-            mUserName =  actionBarView.findViewById(R.id.user_name);
-            mLastSeen =  actionBarView.findViewById(R.id.last_seen);
-            mUserPhoto =  actionBarView.findViewById(R.id.user_image);
+                // Open user profile with custom actionBar is clicked //
+                actionbarCustomView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        Log.i(TAG, "user avatar or name clicked. mChatUser getKey()= " + mChatUser.getKey());
+                        NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey());
 
-            // get Current User Id and object from main ViewModel
+                        //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
 
-            // update the CurrentUserId whenever it changes due to log out
-            /*mMainViewModel.getCurrentUserId().observe(this, new Observer<String>() {
-                @Override
-                public void onChanged(final String userId) {
-                    Log.d(TAG, "onChanged user userId= "+userId);
-                    mCurrentUserId = userId;
-                    // join mCurrentUserId and mChatUserId to generate a chat Key
-                    if(mChatId == null){
-                        // Chat ID is not passed from MainFragment, we need to create
-                        mChatId = getJoinedKeys(mCurrentUserId , mChatUserId);
+                        //check if we are on Main Fragment not on complete Profile already
+                        //Navigation.findNavController(view).navigate(ProfileDirection);
+
+                        //Navigation.findNavController(activity, R.id.host_fragment).navigate(ProfileDirection);
+                        navController.navigate(ProfileDirection);
+
                     }
-                    Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mChatUserId= " + mChatUserId);
-                }
-            });*/ // End init  mMessagesViewModel getChatUser//
-
-            // Open user profile with custom actionBar is clicked //
-            actionBarView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //mListener.onTextViewNameClick(view, getAdapterPosition());
-                    Log.i(TAG, "user avatar or name clicked. mChatUser getKey()= "+mChatUser.getKey());
-                    NavDirections ProfileDirection = MessagesFragmentDirections.actionMessagesFragToProfileFrag(mChatUser.getKey());
-
-                    //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
-
-                    //check if we are on Main Fragment not on complete Profile already
-                    //Navigation.findNavController(view).navigate(ProfileDirection);
-
-                    //Navigation.findNavController(activity, R.id.host_fragment).navigate(ProfileDirection);
-                    navController.navigate(ProfileDirection);
-
-                }
-            });
-
-    }
+                });
+            }
+        }
 
         // Get chat before getting chat user, to know if chat is blocked or not
         mMessagesViewModel.getChat(mChatId).observe(getViewLifecycleOwner(), new Observer<Chat>() {
@@ -834,7 +818,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onChanged(Chat chat) {
                 mChat = chat;// to get chat even if null, it helps to detect blocked chat
                 if (chat != null){
-                    Log.d(TAG, "onChanged chat active = "+ chat.getActive());
+                    Log.d(TAG, "onChanged chat is not null. active = "+ chat.getActive());
                     if (null != mChat.getActive()) {
                         // End timestamp is needed to restart the countdown on fragment start
                         mActiveEndTime = mChat.getActive();
@@ -842,49 +826,50 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                         // check if chat is blocked or not active forever
                         if (mActiveEndTime == -1) {
                             //Chat is blocked, hide last active time and avatar
-                            mUserPhoto.setImageResource(R.drawable.ic_round_account_filled_72);
+                            Log.d(TAG, "onChanged chat user is blocked, hide last active time and avatar");
+                            mUserPhoto.setImageResource(R.drawable.ic_round_account_filled_emphasis_high_72);
                             mLastSeen.setVisibility(View.GONE);
                         }else{
                             //Chat is not blocked, show avatar
-                            if (mChatUser != null && null != mChatUser.getAvatar()) {
-                                Picasso.get()
-                                        .load(mChatUser.getAvatar())
-                                        .placeholder(R.mipmap.ic_round_account_filled_72)
-                                        .error(R.drawable.ic_round_broken_image_72px)
-                                        .into(mUserPhoto);
-                            }
+                            Log.d(TAG, "onChanged chat user is not blocked, show avatar");
+                            // Display user avatar
+                            showAvatar();
                             // check if chat active forever
                             if (mActiveEndTime == 0) {
                                 // display Last online countdown timer, as chat is active forever
+                                Log.d(TAG, "onChanged chat is active forever, display Last online");
                                 mLastSeen.setVisibility(View.VISIBLE);
                             } else {
                                  //Chat is not active forever, hide last active time
+                                Log.d(TAG, "onChanged chat is not active forever, hide last active time");
                                 mLastSeen.setVisibility(View.GONE);
                             }
                         }
                     }else{// chat.active is null. it's first time to chat, hide last seen online
+                        Log.d(TAG, "onChanged chat active is null. it's first time to chat, hide last seen online");
                         mLastSeen.setVisibility(View.GONE);
+                        // Display user avatar
+                        showAvatar();
                     }
-
-                    // pass chat to MessagesAdapter to get active end time
-                    mMessagesAdapter.setChat(mChat);
-
-                    // Display the time left till deactivate the conversation
-                    ShowRemainingTime(mChat);
 
                 }else{// Chat is null, which is probably deleted after unblock happens to start fresh
                     // hide Last online countdown timer, as chat is null which means it's not active forever
+                    Log.d(TAG, "onChanged chat is null, which is probably deleted after unblock happens");
                     mLastSeen.setVisibility(View.GONE);
                     // display chatUser avatar again, as chat user is not blocked anymore
-                    if (mChatUser != null && null != mChatUser.getAvatar()) {
-                        Picasso.get()
-                                .load(mChatUser.getAvatar())
-                                .placeholder(R.mipmap.ic_round_account_filled_72)
-                                .error(R.drawable.ic_round_broken_image_72px)
-                                .into(mUserPhoto);
-                    }
-
+                    showAvatar();
                 }
+
+                // Wait till we get getActive then show user name
+                // if user name is displayed before getting active time, name text will move to toolbar center if active time visibility is GONE
+                mUserName.setVisibility(View.VISIBLE);
+
+                // pass chat to MessagesAdapter to get active end time which is used to hide messages
+                mMessagesAdapter.setChat(mChat);
+
+                // Display the time left till deactivate the conversation
+                // Update time weather chat is null or not. To remove "conversation disabled" message when unblocking a user
+                ShowRemainingTime(mChat);
             }
         });
 
@@ -944,17 +929,12 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                     if(mActiveEndTime != null && mActiveEndTime == -1){
                         //Chat is blocked, return so that we don't display avatar
                         //CancelLastOnlineTimer();
+                        // To display placeholder if user is blocked
+                        mUserPhoto.setImageResource(R.drawable.ic_round_account_filled_emphasis_high_72);
                         return;
                     }
-                    // Get user values
-                    if (null != mChatUser.getAvatar()) {
-                        Picasso.get()
-                                .load(mChatUser.getAvatar())
-                                .placeholder(R.mipmap.ic_round_account_filled_72)
-                                .error(R.drawable.ic_round_broken_image_72px)
-                                .into(mUserPhoto);
-                    }
-
+                    // Display user avatar
+                    showAvatar();
                 }
             });
         }
@@ -991,6 +971,23 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 }
             });*/
 
+    }
+
+    // To Display avatar if exists or a placeholder
+    private void showAvatar() {
+        Log.d(TAG, "showAvatar starts");
+        if(mChatUser != null){
+            if (null != mChatUser.getAvatar()) {
+                Picasso.get()
+                        .load(mChatUser.getAvatar())
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
+                        .into(mUserPhoto);
+            }else{
+                // To display placeholder if user has no avatar
+                mUserPhoto.setImageResource(R.drawable.ic_round_account_filled_emphasis_high_72);
+            }
+        }
     }
 
     // A countdown timer to update last online time every minute
