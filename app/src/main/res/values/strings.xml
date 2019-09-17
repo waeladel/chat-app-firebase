@@ -380,8 +380,8 @@
 
     <!-- values-->
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>
-    <string name="user_loved_by">Received %1$d likes</string>
-    <string name="user_pickedup_by">Received %1$d pick-up lines</string>
+    <!--<string name="user_loved_by">Received %1$d likes</string>
+    <string name="user_pickedup_by">Received %1$d pick-up lines</string>-->
     <string name="user_age_value">Age: %1$d</string>
     <string name="user_gender_value">Gender: %1$s</string>
     <string name="user_country_value">Nationality: %1$s</string>

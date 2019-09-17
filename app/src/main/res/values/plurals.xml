@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="user_loved_by">
+        <item quantity="zero">Received %1$d likes</item>
+        <item quantity="one">Received %1$d like</item>
+        <item quantity="two">Received %1$d likes</item>
+        <item quantity="few">Received %1$d likes</item>
+        <item quantity="many">Received %1$d likes</item>
+        <item quantity="other">Received %1$d likes</item>
+    </plurals>
+
+    <plurals name="user_picked_up_by">
+        <item quantity="zero">Received %1$d pick-up lines</item>
+        <item quantity="one">Received %1$d pick-up line</item>
+        <item quantity="two">Received %1$d pick-up lines</item>
+        <item quantity="few">Received %1$d pick-up lines</item>
+        <item quantity="many">Received %1$d pick-up lines</item>
+        <item quantity="other">Received %1$d pick-up lines</item>
+    </plurals>
+</resources>

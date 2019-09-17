@@ -1170,7 +1170,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     if (aLong != null){
                         Log.d(TAG, "onChanged PickUp counts= "+aLong);
                         //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
-                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                        mPickUpValue.setText(getResources().getQuantityString(R.plurals.user_picked_up_by, aLong.intValue(),aLong.intValue()));
                     }
 
                 }
@@ -1183,7 +1183,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     Log.d(TAG, "onChanged love counts= "+aLong + " hashcode= "+ hashCode());
                     if (aLong != null){
                         Log.d(TAG, "onChanged love counts= "+aLong);
-                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                        mLovedByValue.setText(getResources().getQuantityString(R.plurals.user_loved_by, aLong.intValue(),aLong.intValue()));
                     }
 
                 }
@@ -1239,7 +1239,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     if (aLong != null){
                         Log.d(TAG, "onChanged PickUp counts= "+aLong);
                         //mPickUpValue.setText(getString(R.string.user_loved_by, aLong));
-                        mPickUpValue.setText(getString(R.string.user_pickedup_by, aLong));
+                        mPickUpValue.setText(getResources().getQuantityString(R.plurals.user_picked_up_by, aLong.intValue(),aLong.intValue()));
                     }
 
                 }
@@ -1252,7 +1252,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     Log.d(TAG, "onChanged love counts= "+aLong);
                     if (aLong != null){
                         Log.d(TAG, "onChanged love counts= "+aLong);
-                        mLovedByValue.setText(getString(R.string.user_loved_by, aLong));
+                        mLovedByValue.setText(getResources().getQuantityString(R.plurals.user_loved_by, aLong.intValue(),aLong.intValue()));
                     }
 
                 }
