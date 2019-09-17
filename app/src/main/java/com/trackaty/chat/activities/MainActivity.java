@@ -335,9 +335,9 @@ public class MainActivity extends AppCompatActivity {
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
                         notificationsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
                         notificationsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
-
-
                         notificationsBadge.setNumber(count.intValue());
+                        // To show badge again if it was invisible due to being 0
+                        notificationsBadge.setVisible(true);
                         // Display cut icon when notifications' count is more than 0
                         bottomNavigation.getMenu().getItem(2).setIcon(R.drawable.ic_notifications_outline_cut);
                     }else{
@@ -372,6 +372,8 @@ public class MainActivity extends AppCompatActivity {
                         chatsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
                         chatsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
                         chatsBadge.setNumber(count.intValue());
+                        // To show badge again if it was invisible due to being 0
+                        chatsBadge.setVisible(true);
 
                         // Display cut icon when chats count is more than 0
                         bottomNavigation.getMenu().getItem(1).setIcon(R.drawable.ic_chat_outline_cut);
