@@ -253,10 +253,18 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 // click listener using interface
                 // user name text value
                 if (null != message.getMessage()) {
-                    ReceivedHolder.mMessage.setText(message.getMessage());
+                    // Message can't be empty because scratch view width will crash the app if it's width is < 0
+                    if(!message.getMessage().isEmpty()){
+                        // Only display message text if it's not empty
+                        ReceivedHolder.mMessage.setText(message.getMessage());
+                    }else{
+                        // if message is empty we must display empty space to have a width for scratch view
+                        ReceivedHolder.mMessage.setText(" ");
+                    }
                     //ReceivedHolder.mScratch.setText(message.getMessage()+ message.getKey());
                 }else{
-                    ReceivedHolder.mMessage.setText(null);
+                    // if message is null (not set) we must display empty space to have a width for scratch view
+                    ReceivedHolder.mMessage.setText(" ");
                     //ReceivedHolder.mScratch.setText(null);
                 }
 
