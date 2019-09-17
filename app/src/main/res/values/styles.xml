@@ -29,18 +29,18 @@
     </style>
 
     <!-- To change the text of menu items (not used)-->
-    <style name="PopupMenuTextAppearance" parent="TextAppearance.AppCompat.Menu">
+    <!--<style name="PopupMenuTextAppearance" parent="TextAppearance.AppCompat.Menu">
         <item name="android:textColor">?attr/colorOnBackground</item>
-    </style>
+    </style>-->
 
     <!--(not used)-->
-    <style name="ContextMenuStyle.MyTheme" parent="Widget.MaterialComponents.PopupMenu.ContextMenu">
-        <!--Your custom shape here-->
+   <!-- <style name="ContextMenuStyle.MyTheme" parent="Widget.MaterialComponents.PopupMenu.ContextMenu">
+        &lt;!&ndash;Your custom shape here&ndash;&gt;
         <item name="android:textColorPrimary">@color/color_secondary</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">50sp</item>
         <item name="android:popupBackground">@android:color/white</item>
-    </style>
+    </style>-->
 
     <!-- To make the Surface toolbar primary not surface, it has better shadow than Surface toolbar (for dark theme)-->
     <style name="ToolbarStyle.Surface.MyTheme" parent="Widget.MaterialComponents.Toolbar.Primary">
@@ -73,17 +73,17 @@
         <!--<item name="android:textAppearance">?attr/textAppearanceBody2</item>-->
     </style>
 
-    <style name="MenuTextAppearance.MyTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+    <!--<style name="MenuTextAppearance.MyTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
         <item name="android:textColor">@color/Tomato</item>
-    </style>
+    </style>-->
 
-    <style name="TextAppearance.MyTheme.Card" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <!--<style name="TextAppearance.MyTheme.Card" parent="TextAppearance.MaterialComponents.Subtitle1">
         <item name="android:textColor">@color/Tomato</item>
-    </style>
+    </style>-->
 
-    <style name="textViewStyle.MyTheme" parent="Theme.MaterialComponents.NoActionBar">
+    <!--<style name="textViewStyle.MyTheme" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:textAppearanceInverse">@color/color_on_background</item>
-    </style>
+    </style>-->
 
     <!--to make Edit text OutlinedBox-->
     <style name="EditTextStyle.MyTheme" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -145,10 +145,10 @@
     </style>
 
     <!--A style for all textViews. to reduce alpha of all texts (not used)-->
-    <style name="TextView.MyTheme" parent="Widget.MaterialComponents.TextView">
-        <!--Reduce text opacity for the entire app-->
-        <!--<item name="android:alpha">.8</item>-->
-    </style>
+    <!--<style name="TextView.MyTheme" parent="Widget.MaterialComponents.TextView">
+        &lt;!&ndash;Reduce text opacity for the entire app&ndash;&gt;
+        &lt;!&ndash;<item name="android:alpha">.8</item>&ndash;&gt;
+    </style>-->
 
     <!-- Define your custom dialog theme here extending from base -->
     <style name="DialogTheme.MyTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">

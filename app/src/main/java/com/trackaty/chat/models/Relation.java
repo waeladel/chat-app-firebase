@@ -1,8 +1,5 @@
 package com.trackaty.chat.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
@@ -20,7 +17,7 @@ public class Relation {
     private Map<String, Boolean> contacts = new HashMap<>();
 
     // startedAt: firebase.database.ServerValue.TIMESTAMP
-    //private Date joined;// anotation to put server timestamp
+    //private Date joined;// annotation to put server timestamp
 
     public Relation() {
         created = ServerValue.TIMESTAMP;

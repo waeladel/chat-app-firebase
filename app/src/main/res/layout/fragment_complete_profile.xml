@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.CompleteProfileFragment">
+    tools:context=".fragments.CompleteProfileFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:id="@+id/wael"
+        android:id="@+id/recover_bassword_message"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/fui_confirm_recovery_body" />

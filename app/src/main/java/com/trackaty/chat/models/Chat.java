@@ -9,7 +9,6 @@ import com.google.firebase.database.ServerValue;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @IgnoreExtraProperties
 public class Chat {
@@ -135,7 +134,6 @@ public class Chat {
                 //getLastSentLong()== chat1.getLastSentLong();
                 //getLastSentLong() == 0 ? chat1.getLastSentLong() == 0 :
 
-                //sdflong.compareTo(sdfchat1long) ;
                 //(active == chat.active) &&
                 //members == chat1.members || (members!=null && members.equals(chat1.members)));
                 //members.equals(chat.members);

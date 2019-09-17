@@ -2,25 +2,24 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.DataSources.MessagesDataFactory;
-import com.trackaty.chat.DataSources.MessagesListRepository;
-import com.trackaty.chat.DataSources.MessagesRepository;
-import com.trackaty.chat.Interface.FirebaseMessageCallback;
-import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.Message;
-import com.trackaty.chat.models.User;
-
-import java.util.Timer;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.paging.ItemKeyedDataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.trackaty.chat.dataSources.MessagesDataFactory;
+import com.trackaty.chat.dataSources.MessagesListRepository;
+import com.trackaty.chat.dataSources.MessagesRepository;
+import com.trackaty.chat.interfaces.FirebaseMessageCallback;
+import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.Message;
+import com.trackaty.chat.models.User;
+
+import java.util.Timer;
 
 public class MessagesViewModel extends ViewModel {
 
@@ -120,7 +119,7 @@ public class MessagesViewModel extends ViewModel {
 
     }
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         //MessagesListRepository.setScrollDirection(scrollDirection);
         MessagesListRepository.setScrollDirection(scrollDirection, lastVisibleItem);

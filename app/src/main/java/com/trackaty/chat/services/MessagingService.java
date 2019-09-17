@@ -258,7 +258,7 @@ public class MessagingService extends FirebaseMessagingService {
             builder.setSound(getCurrentRingtoneUri());
         }
 
-        // if Avater is not null, set it as a large icon
+        // if Avatar is not null, set it as a large icon
         if(avatar != null){
             final Handler uiHandler = new Handler(Looper.getMainLooper());
             uiHandler.post(new Runnable() {

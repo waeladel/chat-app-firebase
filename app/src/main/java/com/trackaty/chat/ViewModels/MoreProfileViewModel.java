@@ -2,8 +2,8 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.trackaty.chat.DataSources.RelationRepository;
-import com.trackaty.chat.DataSources.UserRepository;
+import com.trackaty.chat.dataSources.RelationRepository;
+import com.trackaty.chat.dataSources.UserRepository;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
 

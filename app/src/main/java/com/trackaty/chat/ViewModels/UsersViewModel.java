@@ -8,8 +8,8 @@ import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
 import com.google.firebase.database.DatabaseReference;
-import com.trackaty.chat.DataSources.UsersDataFactory;
-import com.trackaty.chat.DataSources.UsersRepository;
+import com.trackaty.chat.dataSources.UsersDataFactory;
+import com.trackaty.chat.dataSources.UsersRepository;
 import com.trackaty.chat.models.User;
 
 public class UsersViewModel extends ViewModel {
@@ -64,7 +64,7 @@ public class UsersViewModel extends ViewModel {
         return new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
     }*/
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         //MessagesListRepository.setScrollDirection(scrollDirection);
         usersDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);

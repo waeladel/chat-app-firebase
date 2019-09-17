@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.MessagesFragment">
+    tools:context=".fragments.MessagesFragment">
 
    <!--<FrameLayout
         android:id="@+id/frameLayout"
@@ -45,6 +45,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:padding="4dp"
         android:text="@string/message_active_default_timer"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

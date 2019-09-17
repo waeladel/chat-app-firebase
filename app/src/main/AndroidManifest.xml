@@ -54,7 +54,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
-                <data android:scheme="chatapp"
+                <data android:scheme="basbes"
                     android:host="home.com"
                     android:pathPrefix="/users"
                     />

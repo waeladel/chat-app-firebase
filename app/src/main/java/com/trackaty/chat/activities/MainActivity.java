@@ -38,7 +38,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.trackaty.chat.Fragments.MainFragmentDirections;
+import com.trackaty.chat.fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
@@ -463,10 +463,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            return true;
-        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -583,7 +579,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response == null) {
                     // User pressed back button
                     //Toast.makeText(MainActivity.this, getString(R.string.sign_in_cancelled), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Sign in has been cancelled:" + response);
+                    Log.d(TAG, "Sign in has been cancelled. response is null");
                     if(!isFirstloaded){
                         finish();
                     }
@@ -673,7 +669,7 @@ public class MainActivity extends AppCompatActivity {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
                     //goToCompleteProfile(currentUserName, currentUserEmail);
-                    // Make all presence references null, Incase user logout from existing account
+                    // Make all presence references null, In case user logout from existing account
                     // then creates a new account that is not exist on the database yet.
                     myConnectionsRef = null;
                     lastOnlineRef  = null;

@@ -24,7 +24,7 @@
     <!--medium and large. Each component size group can be themed by overriding the Material -->
     <!--Components attributes ?shapeAppearanceSmallComponent, ?shapeAppearanceMediumComponent -->
     <!--and ?shapeAppearanceLargeComponent in your app's theme. Those attributes are already -->
-    <!--defined as default stylesoverridden for you in themes.xml and point to the styles in -->
+    <!--defined as default styles overridden for you in themes.xml and point to the styles in -->
     <!--this file.-->
 
     <!--Experiment with ShapeAppearance properties such as cornerFamily (either ‘cut’ or -->
@@ -56,10 +56,10 @@
     </style>
 
     <!--Shape Appearance for large components like side and bottom navigation drawers-->
-    <style name="ShapeAppearance.MyTheme.DialogComponent" parent="">
-        <!--Your custom shape here-->
+    <!--<style name="ShapeAppearance.MyTheme.DialogComponent" parent="">
+        &lt;!&ndash;Your custom shape here&ndash;&gt;
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20dp</item>
-    </style>
+    </style>-->
 
 </resources>

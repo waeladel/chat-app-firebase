@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="8dp"
-    tools:context=".Fragments.MessagesFragment">
+    tools:context=".fragments.MessagesFragment">
 
     <TextView
         android:id="@+id/dialog_title"
@@ -22,9 +21,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- A horizontal line between the chatbox and RecyclerView -->
+    <!-- A horizontal line between the chatBox and RecyclerView -->
 
-    <!-- <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- <androidx.constraintLayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
