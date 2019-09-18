@@ -34,7 +34,7 @@ public class RelationRepository {
     private DatabaseReference mNotificationsRef;
 
     private MutableLiveData<Relation> mRelation;
-    private MutableLiveData<Long> mlikesResult;
+    private MutableLiveData<Long> mLikesResult;
     private MutableLiveData<Long> mPickUpCount;
     private MutableLiveData<String> likeStatus;
 
@@ -99,10 +99,10 @@ public class RelationRepository {
                 Log.d(TAG, "getLikesCount dataSnapshot key: "
                         + dataSnapshot.getKey()+" Listener = "+ mLikesCounterListener+ " count= "+dataSnapshot.getChildrenCount());
                 //mRelation = dataSnapshot.getValue(User.class);
-                mlikesResult.postValue(dataSnapshot.getChildrenCount());
+                mLikesResult.postValue(dataSnapshot.getChildrenCount());
             } else {
                 // User is null, error out
-                mlikesResult.postValue(0L);
+                mLikesResult.postValue(0L);
                 Log.w(TAG, "getLikesCount  is null, no data exist");
             }
         }
@@ -238,7 +238,7 @@ public class RelationRepository {
         //usersList = new ArrayList<>();
         //entireUsersList = new ArrayList<>();
         mRelation = new MutableLiveData<>();
-        mlikesResult  = new MutableLiveData<>();
+        mLikesResult = new MutableLiveData<>();
         mPickUpCount = new MutableLiveData<>();
         likeStatus = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
@@ -368,7 +368,7 @@ public class RelationRepository {
         for (int i = 0; i < mListenersList.size(); i++) {
             Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
-        return mlikesResult;
+        return mLikesResult;
     }
 
     // Get relation if any between current user and selected user
@@ -415,7 +415,7 @@ public class RelationRepository {
             Log.d(TAG, "mama getLoveCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
 
-        Log.d(TAG, "wello likeStatus= "+ likeStatus.getValue());
+        Log.d(TAG, "likeStatus= "+ likeStatus.getValue());
 
         return likeStatus;
     }

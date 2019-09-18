@@ -47,7 +47,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     private Context mActivityContext;
     private Activity activity;
 
-    private static ItemClickListener itemClickListen;
+    private static ItemClickListener sItemClickListen;
     private List<Boolean> checkedList = new ArrayList<>();
 
     public RevealFragment() {
@@ -58,7 +58,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
     public static RevealFragment newInstance(ArrayList<Social> pContacts, ItemClickListener itemClickListener) {
         privateContacts = pContacts;
-        itemClickListen = itemClickListener;
+        sItemClickListen = itemClickListener;
 
 
         for (int i = 0; i < privateContacts.size(); i++) {
@@ -173,8 +173,8 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
             mSendButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(itemClickListen != null){
-                        itemClickListen.onClick(view, 1, false);
+                    if(sItemClickListen != null){
+                        sItemClickListen.onClick(view, 1, false);
                     }
                 }
             });
@@ -182,8 +182,8 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
             mCancelButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(itemClickListen != null){
-                        itemClickListen.onClick(view, 0, false);
+                    if(sItemClickListen != null){
+                        sItemClickListen.onClick(view, 0, false);
                     }
                     //dismiss();
                 }
@@ -199,8 +199,8 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         }
 
         // R.layout.dialog_color_picker is the custom layout of my dialog
-        //WindowManager.LayoutParams wmlp = getDialog().getWindow().getAttributes();
-        //wmlp.gravity = Gravity.LEFT;
+        //WindowManager.LayoutParams windowManagerLayout = getDialog().getWindow().getAttributes();
+        //windowManagerLayout.gravity = Gravity.LEFT;
 
         return fragView;
     }
@@ -229,8 +229,8 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     public void onClick(View view, int position, boolean isLongClick) {
         Log.i(TAG, "onClick view= " + view.getTag()+ " position= " +position);
 
-        if(itemClickListen != null && position != RecyclerView.NO_POSITION){
-            itemClickListen.onClick(view, position, false);
+        if(sItemClickListen != null && position != RecyclerView.NO_POSITION){
+            sItemClickListen.onClick(view, position, false);
         }
 
         if (view instanceof CheckBox) {
@@ -272,7 +272,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
     // needed only if i want the listener to be inside the adapter
         public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListen = itemClickListener;
+            sItemClickListen = itemClickListener;
         }
 
 }

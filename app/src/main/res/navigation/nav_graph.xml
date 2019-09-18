@@ -24,7 +24,7 @@
             android:id="@+id/action_mainFrag_to_messagesFrag"
             app:destination="@id/messagesFragment" />
         <action
-            android:id="@+id/action_mainFragt_to_chatsFrag"
+            android:id="@+id/action_mainFrag_to_chatsFrag"
             app:destination="@+id/chatsFragment" />
         <action
             android:id="@+id/action_mainFragment_to_notificationsFragment"
@@ -61,8 +61,8 @@
             app:destination="@id/messagesFragment" />
         <deepLink
             android:id="@+id/deepLink"
-            app:uri="chatapp://home/users/{userId}"/>
-        <!--app:uri="www.chatapp.com/users/{userId}"-->
+            app:uri="basbes://home/users/{userId}"/>
+        <!--app:uri="www.basbes.com/users/{userId}"-->
     </fragment>
     <fragment
         android:id="@+id/moreProfileFragment"

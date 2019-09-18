@@ -89,7 +89,7 @@ public class ChatsRepository {
 
                 if(chatsList.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getAfter  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                    Log.d(TAG, "mama getAfter  List.size= " +  chatsList.size()+ " last key= "+chatsList.get(chatsList.size()-1).getKey());
                     Collections.reverse(chatsList);
                     getLoadAfterCallback().onResult(chatsList);
 
@@ -156,7 +156,7 @@ public class ChatsRepository {
 
                 if(chatsList.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getBefore  List.size= " +  chatsList.size()+ " lastkey= "+chatsList.get(chatsList.size()-1).getKey());
+                    Log.d(TAG, "mama getBefore  List.size= " +  chatsList.size()+ " last key= "+chatsList.get(chatsList.size()-1).getKey());
                     Collections.reverse(chatsList);
                     getLoadBeforeCallback().onResult(chatsList);
                     totalItemsList.addAll(chatsList); // add items to totalItems ArrayList to be used to get the initial key position
@@ -189,7 +189,7 @@ public class ChatsRepository {
         // use received chatKey to create a database ref
         mChatsRef = mDatabaseRef.child("userChats").child(userKey);
         isFirstLoaded = true;
-        Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded= " + isFirstLoaded);
+        Log.d(TAG, "mama mDatabaseRef init");
         // call back to invalidate data
         this.invalidatedCallback = onInvalidatedCallback;
 
@@ -269,7 +269,7 @@ public class ChatsRepository {
                             }
 
                             chatsList.add(chat);
-                            Log.d(TAG, "mama getItems = " + chat.getLastMessage() + " getSnapshotKey= " + snapshot.getKey());
+                            //Log.d(TAG, "mama getItems = " + chat.getLastMessage() + " getSnapshotKey= " + snapshot.getKey());
 
                         }
 
@@ -280,7 +280,7 @@ public class ChatsRepository {
                             // Add chats to totalItemsList ArrayList to be used to get the initial key position
                             totalItemsList.addAll(chatsList);
                             printTotalItems("Initial");
-                            Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " lastkey= " + chatsList.get(chatsList.size() - 1).getKey());
+                            Log.d(TAG, "mama getMessages  List.size= " + chatsList.size() + " last key= " + chatsList.get(chatsList.size() - 1).getKey());
                         }
 
                     } else {
@@ -314,7 +314,7 @@ public class ChatsRepository {
             };
 
         if (initialKey == null) {// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getChatss initialKey= " + initialKey);
+            Log.d(TAG, "mama getChats initialKey= " + initialKey);
             isInitialKey = false;
             chatsQuery = mChatsRef
                     .orderByChild("lastSent")//limitToLast to start from the last (page size) items
@@ -322,7 +322,7 @@ public class ChatsRepository {
 
 
         } else {// not the first load. Key is the last seen key
-            Log.d(TAG, "mama getChatss initialKey= " + initialKey);
+            Log.d(TAG, "mama getChats initialKey= " + initialKey);
             isInitialKey = true;
             switch (mScrollDirection){
                 // No need to detected reaching to bottom

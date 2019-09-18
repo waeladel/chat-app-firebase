@@ -367,7 +367,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         // Initiate the RecyclerView
         mMessagesRecycler =  fragView.findViewById(R.id.messages_recycler);
         mMessagesRecycler.setHasFixedSize(true);
-        /* setStackFromEnd is usefuall to start stacking recycler from it's last
+        /* setStackFromEnd is useful to start stacking recycler from it's last
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
         mLinearLayoutManager.setStackFromEnd(true);*/
         mLinearLayoutManager = new LinearLayoutManager(mActivityContext);
@@ -408,7 +408,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 Log.d(TAG, "onScrollStateChanged newState= "+newState);
-                // set scrolling direction. it's needed for the initialkey
+                // set scrolling direction. it's needed for the initial key
                 /*if(scrollDirectionY != 0){
                     mMessagesViewModel.setScrollDirection(scrollDirectionY);
                 }*/
@@ -418,7 +418,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 Log.d(TAG, "onScrolled dx= "+dx +" dy= "+dy);
-                // set scrolling direction. it's needed for the initialkey
+                // set scrolling direction. it's needed for the initial key
                 //scrollDirectionY = dy;
                 //mMessagesViewModel.setScrollDirection(dy);
 
@@ -648,7 +648,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         Message message1 = new Message();
 
         message1.setRevealed(true);
-        message1.setMessage("wello");
+        message1.setMessage("Name");
         message1.setStatus("seen");
 
         Message message2 = new Message();
@@ -660,7 +660,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         if(message1.equals(message2)){
             Log.d(TAG, "messages are the same");
         }else{
-            Log.d(TAG, "messages are the deffrent");
+            Log.d(TAG, "messages are the different");
         }*/
         navController = NavHostFragment.findNavController(this);
 
@@ -1578,7 +1578,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         @Override
         protected void onPreExecute() {
             // Getting reference to the TextView tv_counter of the layout activity_main
-            mLastSeen.setText("wello");
+            mLastSeen.setText("Name");
 
         }
 

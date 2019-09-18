@@ -105,7 +105,7 @@ public class UsersRepository {
 
                 if(usersList.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getAfter  List.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getKey());
+                    Log.d(TAG, "mama getAfter  List.size= " +  usersList.size()+ " last key= "+usersList.get(usersList.size()-1).getKey());
                     Collections.reverse(usersList);
                     getLoadAfterCallback().onResult(usersList);
 
@@ -162,7 +162,7 @@ public class UsersRepository {
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     Long created= (Long) snapshot.child("created").getValue();
-                    Log.d(TAG, "getBefore dataSnapshot loop wello= " +  snapshot.getKey()+ " created= "+created);
+                    Log.d(TAG, "getBefore dataSnapshot loop= " +  snapshot.getKey()+ " created= "+created);
                     User user = snapshot.getValue(User.class);
                     if (user != null) {
                         user.setKey(snapshot.getKey());
@@ -174,7 +174,7 @@ public class UsersRepository {
 
                 if(usersList.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getBefore  List.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getKey());
+                    Log.d(TAG, "mama getBefore  List.size= " +  usersList.size()+ " last key= "+usersList.get(usersList.size()-1).getKey());
                     Collections.reverse(usersList);
                     getLoadBeforeCallback().onResult(usersList);
                     totalItemsList.addAll(usersList); // add items to totalItems ArrayList to be used to get the initial key position
@@ -318,7 +318,7 @@ public class UsersRepository {
                         // Add chats to totalItemsList ArrayList to be used to get the initial key position
                         totalItemsList.addAll(usersList);
                         printTotalItems("Initial");
-                        Log.d(TAG, "mama getUsersLists  List.size= " +  usersList.size()+ " lastkey= "+usersList.get(usersList.size()-1).getKey());
+                        Log.d(TAG, "mama getUsersLists  List.size= " +  usersList.size()+ " last key= "+usersList.get(usersList.size()-1).getKey());
                     }
                 } else {
                     // no data

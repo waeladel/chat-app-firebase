@@ -2,16 +2,15 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.DataSources.NotificationsDataFactory;
-import com.trackaty.chat.DataSources.NotificationsRepository;
-import com.trackaty.chat.models.DatabaseNotification;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.trackaty.chat.DataSources.NotificationsDataFactory;
+import com.trackaty.chat.models.DatabaseNotification;
 
 public class NotificationsViewModel extends ViewModel {
 
@@ -67,7 +66,7 @@ public class NotificationsViewModel extends ViewModel {
         return itemPagedList ;
     }
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         //MessagesListRepository.setScrollDirection(scrollDirection);
         mDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);

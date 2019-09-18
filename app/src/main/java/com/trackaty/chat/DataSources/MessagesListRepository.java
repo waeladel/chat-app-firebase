@@ -3,7 +3,11 @@ package com.trackaty.chat.DataSources;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnSuccessListener;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.ItemKeyedDataSource;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -21,11 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.ItemKeyedDataSource;
 
 public class MessagesListRepository {
 
@@ -138,7 +137,7 @@ public class MessagesListRepository {
                 if(messagesList.size() != 0){
                     //callback.onResult(messagesList);
                     getLoadAfterCallback().onResult(messagesList);
-                    Log.d(TAG, "mama getMessagesAfter  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+                    Log.d(TAG, "mama getMessagesAfter  List.size= " +  messagesList.size()+ " last key= "+messagesList.get(messagesList.size()-1).getKey());
                 }
             } else {
                 // no data
@@ -211,7 +210,7 @@ public class MessagesListRepository {
                 if(messagesList.size() != 0){
                     //callback.onResult(messagesList);
                     getLoadBeforeCallback().onResult(messagesList);
-                    Log.d(TAG, "mama getMessagesBefore  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey());
+                    Log.d(TAG, "mama getMessagesBefore  List.size= " +  messagesList.size()+ " last key= "+messagesList.get(messagesList.size()-1).getKey());
 
                     // Create a reversed list to add messages to the beginning of totalItemsList
                     List<Message> reversedList = new ArrayList<>(messagesList);
@@ -426,7 +425,7 @@ public class MessagesListRepository {
                                     int i = 0;
                                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                                         if(null != getInitialKey() && getInitialKey().equals(snapshot.getKey())){
-                                            Log.d(TAG, "mama getMessages InitialKey posetion= "+ (i-1)+ " totalCount= "+totalCount);
+                                            Log.d(TAG, "mama getMessages InitialKey position= "+ (i-1)+ " totalCount= "+totalCount);
                                             callback.onResult(messagesList, (i-1), totalCount);
                                             break;
                                         }else{
@@ -460,7 +459,7 @@ public class MessagesListRepository {
                         }*/
 
                         callback.onResult(messagesList);
-                        Log.d(TAG, "mama getMessages  List.size= " +  messagesList.size()+ " lastkey= "+messagesList.get(messagesList.size()-1).getKey() + " getInitialKey= "+ getInitialKey() );
+                        Log.d(TAG, "mama getMessages  List.size= " +  messagesList.size()+ " last key= "+messagesList.get(messagesList.size()-1).getKey() + " getInitialKey= "+ getInitialKey() );
                     }
                 } else {
                     // no data
@@ -479,7 +478,7 @@ public class MessagesListRepository {
         };
 
         if (initialKey == null) {// if it's loaded for the first time. Key is null
-            Log.d(TAG, "mama getMessages initialKey= " + initialKey);
+            Log.d(TAG, "mama getMessages initialKey is null");
             messagesQuery = mMessagesRef.orderByKey()//limitToLast to start from the last (page size) items
                     .limitToLast(size);
 
@@ -538,7 +537,7 @@ public class MessagesListRepository {
     public void getMessagesAfter(final String key, final int size,
                          @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
 
-        Log.i(TAG, "wael getMessagesAfter initiated. AfterKey= " +  key);
+        Log.i(TAG, "getMessagesAfter initiated. AfterKey= " +  key);
         isAfterFirstLoaded = true;
         //this.afterKey = key;
         Query afterMessagesQuery;
@@ -557,7 +556,7 @@ public class MessagesListRepository {
     public void getMessagesBefore(final String key, final int size,
                               @NonNull final ItemKeyedDataSource.LoadCallback<Message> callback){
 
-        Log.i(TAG, "wael getMessagesBefore initiated. BeforeKey= " +  key);
+        Log.i(TAG, "getMessagesBefore initiated. BeforeKey= " +  key);
 
         isBeforeFirstLoaded = true;
         //this.beforeKey = key;

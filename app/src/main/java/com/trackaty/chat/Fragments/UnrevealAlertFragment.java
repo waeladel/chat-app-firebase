@@ -27,7 +27,7 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
     private Activity activity;
 
     // click listener to pass click events to parent fragment
-    private static ItemClickListener itemClickListen;
+    private static ItemClickListener sItemClickListen;
 
     public UnrevealAlertFragment() {
         // Empty constructor is required for DialogFragment
@@ -38,7 +38,7 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
     public static UnrevealAlertFragment newInstance(ItemClickListener itemClickListener) {
 
         // instantiate click listener to pass click events to parent fragment
-        itemClickListen = itemClickListener;
+        sItemClickListen = itemClickListener;
 
         UnrevealAlertFragment fragment = new UnrevealAlertFragment();
         Bundle args = new Bundle();
@@ -106,8 +106,8 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
                     /*ItemClickListener  listener = (ItemClickListener ) getTargetFragment();
                     ItemClickListener  listener = (EditNameDialogListener) getActivity();
                     listener.onClick(getView(),3,false);*/
-                    if(itemClickListen != null){
-                        itemClickListen.onClick(null, 3, false);
+                    if(sItemClickListen != null){
+                        sItemClickListen.onClick(null, 3, false);
                     }
                 }
                 // if second option is selected, trigger confirmation dialog then un-reveal
@@ -116,9 +116,9 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
                     /*ItemClickListener  listener = (ItemClickListener ) getTargetFragment();
                     ItemClickListener  listener = (EditNameDialogListener) getActivity();
                     listener.onClick(getView(),4,false);*/
-                    if(itemClickListen != null){
+                    if(sItemClickListen != null){
                         //Show confirmation dialog first
-                        itemClickListen.onClick(null, 5, false);
+                        sItemClickListen.onClick(null, 5, false);
                     }
 
                 }
@@ -149,14 +149,14 @@ public class UnrevealAlertFragment extends DialogFragment implements ItemClickLi
     public void onClick(View view, int position, boolean isLongClick) {
         Log.i(TAG, "onClick view= " + view.getTag()+ " position= " +position);
 
-        if(itemClickListen != null && position != RecyclerView.NO_POSITION){
-            itemClickListen.onClick(view, position, false);
+        if(sItemClickListen != null && position != RecyclerView.NO_POSITION){
+            sItemClickListen.onClick(view, position, false);
         }
     }
 
     // needed only if i want the listener to be inside the adapter
         public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListen = itemClickListener;
+            sItemClickListen = itemClickListener;
         }
 
 }

@@ -112,7 +112,7 @@ public class UsersViewModel extends ViewModel {
         return new LivePagedListBuilder<>(usersDataSourceFactory, config).build();
     }*/
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         //MessagesListRepository.setScrollDirection(scrollDirection);
         usersDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);

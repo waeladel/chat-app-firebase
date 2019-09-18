@@ -54,7 +54,7 @@ import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.FilesHelper;
 import com.trackaty.chat.Utils.SortSocial;
-import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.Utils.SortBySection;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
@@ -362,10 +362,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
             writeToExternal(); // write wav notification sound if it's not already exists
         }
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            return true;
-        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -441,10 +437,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                         Log.d(TAG, "mProfileDataArrayList sorted get size" + mProfileDataArrayList.size());
 
                         // sort ArrayList into sections then notify the adapter
-                        Collections.sort(mProfileDataArrayList, new Sortbysection());
-                        Collections.sort(mAboutArrayList, new Sortbysection());
-                        Collections.sort(mWorkArrayList, new Sortbysection());
-                        Collections.sort(mHabitsArrayList, new Sortbysection());
+                        Collections.sort(mProfileDataArrayList, new SortBySection());
+                        Collections.sort(mAboutArrayList, new SortBySection());
+                        Collections.sort(mWorkArrayList, new SortBySection());
+                        Collections.sort(mHabitsArrayList, new SortBySection());
                         Collections.sort(mSocialArrayList, new SortSocial());
 
 
@@ -630,7 +626,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             }
 
                                 if(!mIsSocialAdded){
-                                    Log.d(TAG, "mIsSocialAdded=" + mIsSocialAdded);
+                                    Log.d(TAG, "mIsSocialAdded is false");
                                     Profile socialData = new Profile(SECTION_SOCIAL_HEADLINE, "",SECTION_SOCIAL, SECTION_SOCIAL);
                                     mProfileDataArrayList.add(socialData);
                                 }
@@ -653,7 +649,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             }
 
                                 if(!mIsWorkAdded){
-                                    Log.d(TAG, "mIsAboutAdded=" + mIsWorkAdded);
+                                    Log.d(TAG, "mIsAboutAdded is false");
                                     Profile aboutSectionData = new Profile(SECTION_WORK_HEADLINE, "",SECTION_WORK, SECTION_WORK);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
@@ -685,7 +681,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 }
 
                                 if(!mIsAboutAdded){
-                                    Log.d(TAG, "mIsAboutAdded=" + mIsAboutAdded);
+                                    Log.d(TAG, "mIsAboutAdded is false");
                                     Profile aboutSectionData = new Profile(SECTION_ABOUT_HEADLINE, "",SECTION_ABOUT, SECTION_ABOUT);
                                     mProfileDataArrayList.add(aboutSectionData);
                                 }
@@ -730,7 +726,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                                 }
 
                                 if(!mIsHabitsAdded){
-                                    Log.d(TAG, "mIsAboutAdded=" + mIsHabitsAdded);
+                                    Log.d(TAG, "mIsAboutAdded is false");
                                     Profile habitsSectionData = new Profile(SECTION_HABITS_HEADLINE, "",SECTION_HABITS, SECTION_HABITS);
                                     mProfileDataArrayList.add(habitsSectionData);
                                 }
@@ -757,7 +753,10 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "requestCode ="+ requestCode);
         if (data != null) {
-            int position = data.getExtras().getInt(IMAGE_HOLDER_POSITION,0);
+            int position = 0;
+            if(null != data.getExtras()){
+                position = data.getExtras().getInt(IMAGE_HOLDER_POSITION,0);
+            }
             switch (requestCode){
                 case CROP_IMAGE_AVATAR_REQUEST_CODE:
                     Log.d(TAG, "AVATAR_CROP_PICTURE requestCode= "+ requestCode);
@@ -891,7 +890,9 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                 @Override
                 public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                     if (!task.isSuccessful()) {
-                        throw task.getException();
+                        if(null != task.getException()){
+                            throw task.getException();
+                        }
                     }
                     // Continue with the task to get the download URL
                     return finalUserRef.getDownloadUrl();
@@ -1321,7 +1322,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                     Log.i(TAG, "mediaStorageDir not null. outStream = "+ outStream);
                     outStream.write(buff, 0, read);
                 }else{
-                    Log.i(TAG, "mediaStorageDir is null. outStream = "+ outStream);
+                    Log.i(TAG, "mediaStorageDir is null");
                 }
 
             }

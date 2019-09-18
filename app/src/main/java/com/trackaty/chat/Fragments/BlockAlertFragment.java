@@ -46,7 +46,7 @@ public class BlockAlertFragment extends DialogFragment implements ItemClickListe
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         //CharSequence options[] = new CharSequence[]{getString(R.string.alert_dialog_edit), getString(R.string.alert_dialog_unreveal)};
-        // AlertDialog.Builder to create the dialog wihtouht custum xml layout
+        // AlertDialog.Builder to create the dialog without custom xml layout
         //AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(context);
         //alertDialogBuilder.setTitle(getString(R.string.edit_unreveal_alert_dialog_title));

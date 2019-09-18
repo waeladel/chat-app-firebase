@@ -9,7 +9,6 @@
     <string name="menu_log_out">Log Out</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_action_profile">Profile</string>
-    <string name="menu_invite">Invite Friends</string>
     <string name="menu_save">Save</string>
     <string name="menu_search">Search</string>
 
@@ -26,7 +25,6 @@
     <string name="request_button_unreveal_hint">Unreveal</string>
     <string name="alert_dialog_edit">Edit revealed contacts</string>
     <string name="alert_dialog_unreveal">Unreveal my contacts</string>
-    <string name="alert_dialog_block">Block this user</string>
     <string name="edit_unreveal_alert_dialog_title">Select Options:</string>
     <string name="audio_permission_dialog_title">Microphone is needed</string>
     <string name="audio_permission_dialog_message">This app uses your microphone to detect nearby devices. The mic is only used while you are searching for the person you target. We don\'t listen to your conversations during the searching process, just waiting for periodical ultrasonic pairing code.</string>
@@ -42,21 +40,14 @@
     <string name="upload_button">Upload</string>
 
     <string name="send_request_button">Send request</string>
-    <string name="send_button">Send</string>
     <string name="save_button">Save</string>
     <string name="cancel_button">Cancel</string>
     <string name="user_social_private_button">Private contact</string>
-
-
-
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
 
     <!--toast and error messages -->
     <string name="sign_in_cancelled">Sign in has been cancelled</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="unknown_error">Unknown error occurred</string>
-    <string name="google_play_services_error">Connection to google play services failed</string>
     <string name="upload_image_error">Sorry, couldn\'t upload your image.</string>
     <string name="download_image_error">Sorry, couldn\'t download your image.</string>
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
@@ -72,24 +63,19 @@
 
     <!--hints and titles-->
     <string name="user_statistics_headline">Statistics</string>
-    <string name="sent_invitations_fmt" formatted="false">Sent %d invitations</string>
     <string name="about_user_headline">About</string>
     <string name="user_relationship_headline">Relationship</string>
     <string name="user_interested_in_headline">Interested in</string>
     <string name="user_gender_headline">Gender</string>
     <string name="user_horoscope_headline">Horoscope</string>
-    <string name="user_age_headline">Age</string>
     <string name="user_birthday_headline">Birth date</string>
     <string name="user_work_school_headline">Work and education</string>
     <string name="user_habits_hobbies_headline">Habits and hobbies</string>
     <string name="user_social_headline">Social and contacts</string>
-    <string name="user_body_decorations_headline">Body decorations</string>
     <string name="user_avatar_headline">Profile Picture</string>
     <string name="user_cover_headline">Cover Picture</string>
     <string name="user_name_hint">Name</string>
-    <string name="user_name_helper">What is your name?</string>
     <string name="user_biography_hint">Biography</string>
-    <string name="user_biography_helper">Describe yourself</string>
 
     <string name="user_smoke_headline">Smoke</string>
     <string name="user_water_pipe_headline">Hookah</string>
@@ -240,11 +226,8 @@
     <string name="add_image_button_description">Add Profile picture</string>
     <string name="expand_button_description">Expand button</string>
     <string name="original_profile_image_description">Profile Image</string>
-    <string name="loading_animation">Loading animation</string>
     <string name="send_text_icon">Send message</string>
     <string name="message_sent_icon">Message sent icon</string>
-    <string name="chat_icon">Chats icon</string>
-
     <!--Notifications-->
     <string name="notification_like_title">New like</string>
     <string name="notification_pick_up_title">New pick-up line</string>

@@ -231,15 +231,15 @@ public class ActivateChatAlertFragment extends DialogFragment implements ItemCli
 
     }
 
-    @Override
+    /*@Override
     public void onResume() {
         super.onResume();
-       /* ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+       *//* ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);*/
+        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);*//*
 
-    }
+    }*/
 
     @Override
     public void onClick(View view, int position, boolean isLongClick) {

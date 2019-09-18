@@ -345,9 +345,9 @@ public class MainActivity extends AppCompatActivity {
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
                         notificationsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
                         notificationsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
-
-
                         notificationsBadge.setNumber(count.intValue());
+                        // To show badge again if it was invisible due to being 0
+                        notificationsBadge.setVisible(true);
                         // Display cut icon when notifications' count is more than 0
                         bottomNavigation.getMenu().getItem(2).setIcon(R.drawable.ic_notifications_outline_cut);
                     }else{
@@ -382,6 +382,8 @@ public class MainActivity extends AppCompatActivity {
                         chatsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
                         chatsBadge.setBadgeTextColor(getResources().getColor(R.color.color_on_primary));
                         chatsBadge.setNumber(count.intValue());
+                        // To show badge again if it was invisible due to being 0
+                        chatsBadge.setVisible(true);
 
                         // Display cut icon when chats count is more than 0
                         bottomNavigation.getMenu().getItem(1).setIcon(R.drawable.ic_chat_outline_cut);
@@ -480,10 +482,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            return true;
-        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -600,7 +598,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response == null) {
                     // User pressed back button
                     //Toast.makeText(MainActivity.this, getString(R.string.sign_in_cancelled), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Sign in has been cancelled:" + response);
+                    Log.d(TAG, "Sign in has been cancelled. response is null");
                     if(!isFirstloaded){
                         finish();
                     }
@@ -690,7 +688,7 @@ public class MainActivity extends AppCompatActivity {
                     // User is null, error out
                     Log.w(TAG, "User is null, no such user");
                     //goToCompleteProfile(currentUserName, currentUserEmail);
-                    // Make all presence references null, Incase user logout from existing account
+                    // Make all presence references null, In case user logout from existing account
                     // then creates a new account that is not exist on the database yet.
                     myConnectionsRef = null;
                     lastOnlineRef  = null;

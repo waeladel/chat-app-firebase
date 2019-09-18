@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.kaleidofoundry.core.util;
 package com.trackaty.chat.Utils;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,21 +26,10 @@ import java.util.GregorianCalendar;
  */
 public abstract class DateHelper {
 
-    /**
-     * @param birthdate
-     * @return Age from the current date
-     */
     public static int getAge(final Date birthdate) {
         return getAge(Calendar.getInstance().getTime(), birthdate);
     }
 
-    /**
-     * Calculating birthDate from a current date
-     *
-     * @param current
-     * @param birthdate
-     * @return Age from the current (arg) date
-     */
     public static int getAge(final Date current, final Date birthdate) {
 
         if (birthdate == null) {

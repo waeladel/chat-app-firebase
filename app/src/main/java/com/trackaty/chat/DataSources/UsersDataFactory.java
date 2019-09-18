@@ -17,7 +17,7 @@ public class UsersDataFactory extends DataSource.Factory<Long, User>{
         usersDataSource = new UsersDataSource();
     }
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         /*MessagesListRepository.setScrollDirection(scrollDirection);
         this.scrollDirection = scrollDirection;

@@ -1,37 +1,28 @@
 package com.trackaty.chat.Adapters;
 
-import android.content.Context;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Profile;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+public class ProfileSocialAdapter extends RecyclerView.Adapter<ProfileSocialAdapter.ViewHolder> {
 
-import static com.trackaty.chat.Utils.StringUtils.setMaxLength;
-
-public class ProfileSocailAdapter extends RecyclerView.Adapter<ProfileSocailAdapter.ViewHolder> {
-
-    private final static String TAG = ProfileSocailAdapter.class.getSimpleName();
+    private final static String TAG = ProfileSocialAdapter.class.getSimpleName();
 
 
     public ArrayList<Profile> socialArrayList;
 
 
-    public ProfileSocailAdapter( ArrayList<Profile> socialArrayList){
+    public ProfileSocialAdapter(ArrayList<Profile> socialArrayList){
         this.socialArrayList = socialArrayList;
     }
 

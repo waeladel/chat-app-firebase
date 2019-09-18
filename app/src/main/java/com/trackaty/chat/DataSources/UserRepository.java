@@ -30,7 +30,7 @@ public class UserRepository {
     private MutableLiveData<User> mCurrentUser;
     private MutableLiveData<User> mUser;
     private MutableLiveData<User> mSingleValueUser;
-    private MutableLiveData<Long> mChatsCount, mNotifictionsCount;
+    private MutableLiveData<Long> mChatsCount, mNotificationsCount;
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
@@ -97,10 +97,10 @@ public class UserRepository {
                 Log.d(TAG, "getNotificationsCount dataSnapshot key: "
                         + dataSnapshot.getKey()+ " count= "+dataSnapshot.getChildrenCount()+" Listener = "+notificationsCountListener);
                 //mCurrentUser = dataSnapshot.getValue(User.class);
-                mNotifictionsCount.postValue(dataSnapshot.getChildrenCount());
+                mNotificationsCount.postValue(dataSnapshot.getChildrenCount());
             } else {
                 // User is null, error out
-                mNotifictionsCount.postValue(0L);
+                mNotificationsCount.postValue(0L);
                 Log.w(TAG, "User is null, no such user");
             }
         }
@@ -124,7 +124,7 @@ public class UserRepository {
         mUser = new MutableLiveData<>();
         mSingleValueUser = new MutableLiveData<>();
         mChatsCount = new MutableLiveData<>();
-        mNotifictionsCount = new MutableLiveData<>();
+        mNotificationsCount = new MutableLiveData<>();
         //mListenersMap =  new HashMap<>();
         /*if(mListenersList == null && mListenersList.size() == 0){
             mListenersList = new ArrayList<>();
@@ -321,7 +321,7 @@ public class UserRepository {
         for (int i = 0; i < mListenersList.size(); i++) {
             Log.d(TAG, "getChatsCount loop throw Listeners ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
         }
-        return mNotifictionsCount;
+        return mNotificationsCount;
     }
 
 

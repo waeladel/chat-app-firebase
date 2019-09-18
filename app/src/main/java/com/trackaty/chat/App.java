@@ -20,7 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
-//import androidx.multidex.MultiDexApplication;
+//import androidx.multiDex.MultiDexApplication;
 
 
 /**

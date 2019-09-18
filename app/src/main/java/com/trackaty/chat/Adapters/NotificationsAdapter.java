@@ -40,7 +40,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
     private final static String TAG = NotificationsAdapter.class.getSimpleName();
 
-    private FirebaseUser firebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseUser firebaseCurrentUser ;
     private String currentUserId ;
 
     public Context context;
@@ -317,7 +317,7 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                 DatabaseNotification notification = getItem(getAdapterPosition());
                 if(notification != null){
                     notification.setClicked(true); // set clicked notification to true
-                    mNotificationsRef.child(notification.getKey()).child("clicked").setValue(true);// update clicked feiled on database
+                    mNotificationsRef.child(notification.getKey()).child("clicked").setValue(true);// update clicked field on database
 
                     // to open sender profile when notification type is not a message or pick-up
                     NavDirections ProfileDirection = NotificationsFragmentDirections.actionNotificationsFragToProfileFrag(notification.getSenderId());

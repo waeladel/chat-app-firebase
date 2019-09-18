@@ -119,7 +119,7 @@ public class MessagesRepository {
         mMessagesRef = mDatabaseRef.child("messages");
         mChatRef = mDatabaseRef.child("chats");
         isFirstLoaded = true;
-        Log.d(TAG, "mama MessagesRepository init. isFirstLoaded= " + isFirstLoaded);
+        Log.d(TAG, "mama MessagesRepository init. isFirstLoaded is true");
         mUser = new MutableLiveData<>();
         mCurrentUser = new MutableLiveData<>();
         mSenderId = new MutableLiveData<>();

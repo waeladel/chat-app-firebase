@@ -1,9 +1,8 @@
 package com.trackaty.chat.DataSources;
 
-import com.trackaty.chat.models.Chat;
-import com.trackaty.chat.models.DatabaseNotification;
-
 import androidx.paging.DataSource;
+
+import com.trackaty.chat.models.DatabaseNotification;
 
 public class NotificationsDataFactory extends DataSource.Factory<Long, DatabaseNotification>{
 
@@ -27,7 +26,7 @@ public class NotificationsDataFactory extends DataSource.Factory<Long, DatabaseN
         this.mUserKey = userKey;
     }*/
 
-    // Set scroll direction and last visible item which is used to get initialkey's position
+    // Set scroll direction and last visible item which is used to get initial key's position
     public void setScrollDirection(int scrollDirection, int lastVisibleItem) {
         /*MessagesListRepository.setScrollDirection(scrollDirection);
         this.scrollDirection = scrollDirection;

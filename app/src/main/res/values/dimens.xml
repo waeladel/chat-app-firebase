@@ -1,36 +1,17 @@
 <resources>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-
-    <dimen name="fab_margin">16dp</dimen>
-    <dimen name="small_text_size">10sp</dimen>
     <dimen name="small_icon">18dp</dimen>
     <dimen name="small_avatar">36dp</dimen>
     <dimen name="medium_avatar">72dp</dimen>
     <dimen name="button_padding">16dp</dimen>
     <dimen name="small_margin">4dp</dimen>
 
-    <dimen name="keyLine_0">2dp</dimen>
-    <dimen name="keyLine_1">4dp</dimen>
-    <dimen name="keyLine_2">8dp</dimen>
-    <dimen name="keyLine_4">16dp</dimen>
-    <dimen name="keyLine_5">24dp</dimen>
-
-    <dimen name="component_label_horizontal_margin">@dimen/keyLine_4</dimen>
-
-    <dimen name="elevation_default_top_app_bar">4dp</dimen>
-
     <!--Emphasis modifiers for "on" colors-->
     <dimen name="alpha_emphasis_high">@dimen/mtrl_emphasis_high_type</dimen>
     <dimen name="alpha_emphasis_medium">@dimen/mtrl_emphasis_medium</dimen>
     <dimen name="alpha_emphasis_disabled">@dimen/mtrl_emphasis_disabled</dimen>
 
-    <dimen name="elevation_0">0dp</dimen>
-    <dimen name="elevation_bottom_nav">8dp</dimen>
-    <dimen name="elevation_message_input">12dp</dimen>
-    <dimen name="elevation_message_text">8dp</dimen>
 
     <dimen name="alert_dim_amount">0.60</dimen>
 
@@ -41,7 +22,6 @@
     <!-- Medium emphasis of 60% - 0.6 is the same for type and icon. -->
     <item name="my_emphasis_medium" format="float" type="dimen">0.54</item>
     <!-- Disabled emphasis of 38% - 0.38 is the same for type and icon. -->
-    <item name="my_emphasis_disabled" format="float" type="dimen">0.38</item>
 
     <item name="my_icons_emphasis_medium" format="float" type="dimen">0.6</item>
 

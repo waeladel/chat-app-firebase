@@ -2,6 +2,11 @@ package com.trackaty.chat.DataSources;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.ItemKeyedDataSource;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -16,11 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.ItemKeyedDataSource;
 
 public class NotificationsRepository {
 
@@ -109,7 +109,7 @@ public class NotificationsRepository {
 
                 if(list.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getAfter  List.size= " +  list.size()+ " lastkey= "+list.get(list.size()-1).getKey());
+                    Log.d(TAG, "mama getAfter  List.size= " +  list.size()+ " last key= "+list.get(list.size()-1).getKey());
                     Collections.reverse(list);
                     getLoadAfterCallback().onResult(list);
 
@@ -194,7 +194,7 @@ public class NotificationsRepository {
 
                 if(list.size() != 0){
                     //callback.onResult(messagesList);
-                    Log.d(TAG, "mama getBefore  List.size= " +  list.size()+ " lastkey= "+list.get(list.size()-1).getKey());
+                    Log.d(TAG, "mama getBefore  List.size= " +  list.size()+ " last key= "+list.get(list.size()-1).getKey());
                     Collections.reverse(list);
                     getLoadBeforeCallback().onResult(list);
                     totalItemsList.addAll(list); // add items to totalItems ArrayList to be used to get the initial key position
@@ -228,7 +228,7 @@ public class NotificationsRepository {
 
         mNotificationsRef = mDatabaseRef.child("notifications").child("alerts").child(userKey);
         isFirstLoaded = true;
-        Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded= " + isFirstLoaded + " userKey= "+userKey);
+        Log.d(TAG, "mama mDatabaseRef init. isFirstLoaded is true. userKey= "+userKey);
         // call back to invalidate data
         this.invalidatedCallback = onInvalidatedCallback;
 
@@ -318,7 +318,7 @@ public class NotificationsRepository {
                             }
 
                             list.add(notification);
-                            Log.d(TAG, "mama getItems = " + notification.getSentLong() + " getSnapshotKey= " + snapshot.getKey());
+                            //Log.d(TAG, "mama getItems = " + notification.getSentLong() + " getSnapshotKey= " + snapshot.getKey());
 
                         }
 
@@ -336,7 +336,7 @@ public class NotificationsRepository {
                             // Add messages to totalItemsList ArrayList to be used to get the initial key position
                             totalItemsList.addAll(list);
                             printTotalItems("Initial");
-                            Log.d(TAG, "mama getMessages  List.size= " + list.size() + " lastkey= " + list.get(list.size() - 1).getKey());
+                            Log.d(TAG, "mama getMessages  List.size= " + list.size() + " last key= " + list.get(list.size() - 1).getKey());
                         }
 
                     } else {

@@ -294,7 +294,7 @@ public class NotificationsFragment extends Fragment{
             /*// Create members Hash list, it's better to loop throw  selected members
             ChatMember mCurrentUser1 = new ChatMember();
             mCurrentUser1.setKey("Hcs4JY1zMJgF1cZsTY9R4xI670R2");
-            mCurrentUser1.setName("Wello");
+            mCurrentUser1.setName("Name");
             //mCurrentUser1.setAvatar("https://firebasestorage.googleapis.com/v0/b/chat-94dea.appspot.com/o/images%2FHcs4JY1zMJgF1cZsTY9R4xI670R2%2Favatar.jpg?alt=media&token=582f0928-366f-4967-bc11-ea660971f2d7");
             mCurrentUser1.setSaw(true);
 
@@ -314,7 +314,7 @@ public class NotificationsFragment extends Fragment{
             // Create members Hash list, it's better to loop throw  selected members
             ChatMember mCurrentUser2 = new ChatMember();
             mCurrentUser2.setKey("Hcs4JY1zMJgF1cZsTY9R4xI670R2");
-            mCurrentUser2.setName("Wello");
+            mCurrentUser2.setName("Name");
             //mCurrentUser2.setAvatar("https://firebasestorage.googleapis.com/v0/b/chat-94dea.appspot.com/o/images%2FHcs4JY1zMJgF1cZsTY9R4xI670R2%2Favatar.jpg?alt=media&token=582f0928-366f-4967-bc11-ea660971f2d7");
             mCurrentUser2.setSaw(true);
 
@@ -331,10 +331,10 @@ public class NotificationsFragment extends Fragment{
             //members2.put(mChatUser2.getKey(), mChatUser2);
 
             // Test chat equale method
-            String lastMessage = "wello last message";
+            String lastMessage = "last message";
             String senderId = mCurrentUser1.getKey();
             Chat chat1 = new Chat();
-            chat1.setLastMessage("dddd");
+            chat1.setLastMessage("last message");
             chat1.setSender(senderId);
             chat1.setMembers(members1);
             Long currentTime = System.currentTimeMillis();
@@ -350,7 +350,7 @@ public class NotificationsFragment extends Fragment{
                             if(chat1.equals(chat2)){
                                 Log.d(TAG, "chats are the same" );
                             }else{
-                                Log.d(TAG, "chats are deffrent");
+                                Log.d(TAG, "chats are different");
                             }
                         }
                     },

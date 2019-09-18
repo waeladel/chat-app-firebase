@@ -326,7 +326,6 @@ public class MainFragment extends Fragment {
                     // Create new Thread to loop until items.size() is greater than 0
                     new Thread(new Runnable() {
                         int sleepCounter = 0;
-
                         @Override
                         public void run() {
                             try {
@@ -449,31 +448,31 @@ public class MainFragment extends Fragment {
         /*Object timestamp = System.currentTimeMillis();
         // just a test to compare two objects
         User user1 = new User();
-        user1.setAvatar("wello");
-        user1.setName("wello");
-        user1.setBiography("wello");
-        user1.setRelationship("wello");
-        user1.setInterestedIn("wello");
-        user1.setGender("wello");
+        user1.setAvatar("Name");
+        user1.setName("Name");
+        user1.setBiography("Name");
+        user1.setRelationship("Name");
+        user1.setInterestedIn("Name");
+        user1.setGender("Name");
         user1.setBirthDate(30L);
-        user1.setHoroscope("wello");
+        user1.setHoroscope("Name");
         user1.setCreated(timestamp);
 
         User user2 = new User();
-        user2.setAvatar("wello");
-        user2.setName("wello");
-        user2.setBiography("wello");
-        user2.setRelationship("wello");
-        user2.setInterestedIn("wello");
-        user2.setGender("wello");
+        user2.setAvatar("Name");
+        user2.setName("Name");
+        user2.setBiography("Name");
+        user2.setRelationship("Name");
+        user2.setInterestedIn("Name");
+        user2.setGender("Name");
         user2.setBirthDate(30L);
-        user2.setHoroscope("wello");
+        user2.setHoroscope("Name");
         user2.setCreated(timestamp);
 
         if(user1.equals(user2)){
             Log.d(TAG, "users are the same");
         }else{
-            Log.d(TAG, "users are the deffrent");
+            Log.d(TAG, "users are the different");
         }*/
 
         return fragView;
@@ -503,7 +502,7 @@ public class MainFragment extends Fragment {
                 actionbar.setTitle(R.string.main_frag_title);
                 actionbar.setDisplayHomeAsUpEnabled(false);
                 actionbar.setHomeButtonEnabled(false);
-                actionbar.setDisplayShowCustomEnabled(true);
+                actionbar.setDisplayShowCustomEnabled(false);
             }
 
             // No need to put countdown on the toolbar
@@ -524,19 +523,6 @@ public class MainFragment extends Fragment {
         }
 
     }
-
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        if (mBound) {
-            // Call a method from the LocalService.
-            // However, if this call were something that might hang, then this request should
-            // occur in a separate thread to avoid slowing down the activity performance.
-            mTimeLiftInMillis = mService.getTimeLift();
-            UpdateTimerText(mTimeLiftInMillis);
-        }
-
-    }*/
 
     @Override
     public void onStart() {

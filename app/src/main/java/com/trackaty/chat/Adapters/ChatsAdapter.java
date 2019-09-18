@@ -38,7 +38,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
     private final static String TAG = ChatsAdapter.class.getSimpleName();
 
-    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseUser currentFirebaseUser ;
     private String currentUserId ;
 
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
@@ -55,9 +55,9 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
         this.fragment = fragment;
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(currentUser != null){
-            currentUserId = currentUser.getUid();
+        currentFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentFirebaseUser != null){
+            currentUserId = currentFirebaseUser.getUid();
         }
     }
 
@@ -100,9 +100,9 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                 final List<ChatMember> membersList = new ArrayList<>();
                 for (Object o : chat.getMembers().entrySet()) {
                     Map.Entry pair = (Map.Entry) o;
-                    Log.d(TAG, "mama Chats getMember = " + pair.getKey() + " = " + pair.getValue() + currentUser.getUid());
+                    Log.d(TAG, "mama Chats getMember = " + pair.getKey() + " = " + pair.getValue() + currentFirebaseUser.getUid());
 
-                    if (!currentUser.getUid().equals(pair.getKey())) {
+                    if (!currentFirebaseUser.getUid().equals(pair.getKey())) {
                         ChatMember user = chat.getMembers().get(String.valueOf(pair.getKey()));
                         if (user != null) {
                             user.setKey(String.valueOf(pair.getKey()));
@@ -154,7 +154,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                             //-1 entire row is clicked
                             if (view.getId() == R.id.user_image) { // only avatar is clicked
                                 Log.i(TAG, "user avatar clicked= " + view.getId());
-                                Log.i(TAG, "user avatar currenUserId= " + currentUserId + " userId " + membersList.get(0).getKey());
+                                Log.i(TAG, "user avatar currentUserId= " + currentUserId + " userId " + membersList.get(0).getKey());
                                 NavDirections ProfileDirection = ChatsFragmentDirections.actionChatsFragmentToProfileFragment(membersList.get(0).getKey());
                                 Navigation.findNavController(view).navigate(ProfileDirection);
                             } else {

@@ -95,7 +95,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String EDIT_UNREVEAL_FRAGMENT = "EditFragment";
     private  static final String CONFIRM_DELETE_RELATION_ALERT_FRAGMENT = "DeleteRelationAlertFragment";
     private  static final String CONFIRM_BLOCK_ALERT_FRAGMENT = "BlockFragment"; // Tag for confirm block alert fragment
-    private  static final String CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT = "BlockDeleteFragment"; // Tag for confirm block and delte alert fragment
+    private  static final String CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT = "BlockDeleteFragment"; // Tag for confirm block and delete alert fragment
 
 
     // DatabaseNotification's types
@@ -134,7 +134,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     // Map to hold user selections results
     private Map<String, Boolean> mRelationsMap ;
-    // MAp to hold the original requests va;ues in case user canel and wen need to start all over again
+    // MAp to hold the original requests values in case user cancel and we need to start all over again
     private Map<String, Boolean> mOriginalRelationsMap ;
 
     private Relation mRelations;
@@ -379,7 +379,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             break;
                         default:
                             // Show request dialog
-                            contactsMap.clear(); // clear all previous selected check boxs
+                            contactsMap.clear(); // clear all previous selected check boxes
                             Log.d(TAG, "send reveal request");
                             mPrivateContactsList = getPrivateContacts();
 

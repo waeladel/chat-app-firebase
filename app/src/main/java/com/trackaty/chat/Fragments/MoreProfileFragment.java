@@ -28,7 +28,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.trackaty.chat.Adapters.ProfileAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.Utils.Sortbysection;
+import com.trackaty.chat.Utils.SortBySection;
 import com.trackaty.chat.ViewModels.MoreProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Profile;
@@ -145,7 +145,7 @@ public class MoreProfileFragment extends Fragment implements ItemClickListener {
             Log.d(TAG, "mUserArrayList sorted get size" + mUserArrayList.size());
 
             // sort ArrayList into sections then notify the adapter
-            Collections.sort(mUserArrayList, new Sortbysection());
+            Collections.sort(mUserArrayList, new SortBySection());
 
             for (int i = 0; i < mUserArrayList.size(); i++) {
                 Log.i(TAG, "mUserArrayList sorted" + mUserArrayList.get(i).getKey());

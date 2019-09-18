@@ -1,13 +1,12 @@
 package com.trackaty.chat.DataSources;
 
-import com.trackaty.chat.models.Message;
-import com.trackaty.chat.models.User;
-
 import androidx.paging.DataSource;
+
+import com.trackaty.chat.models.Message;
 
 public class MessagesDataFactory extends DataSource.Factory<String, Message>{
 
-    public static String mChatKey;
+    private String mChatKey;
     private MessagesDataSource messagesDataSource;
 
     // receive chatKey on the constructor
