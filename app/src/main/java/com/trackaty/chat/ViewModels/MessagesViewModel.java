@@ -11,10 +11,10 @@ import androidx.paging.PagedList;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.dataSources.MessagesDataFactory;
-import com.trackaty.chat.dataSources.MessagesListRepository;
-import com.trackaty.chat.dataSources.MessagesRepository;
-import com.trackaty.chat.interfaces.FirebaseMessageCallback;
+import com.trackaty.chat.DataSources.MessagesDataFactory;
+import com.trackaty.chat.DataSources.MessagesListRepository;
+import com.trackaty.chat.DataSources.MessagesRepository;
+import com.trackaty.chat.Interface.FirebaseMessageCallback;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.Message;
 import com.trackaty.chat.models.User;

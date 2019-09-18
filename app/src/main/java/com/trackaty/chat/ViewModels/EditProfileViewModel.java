@@ -2,8 +2,8 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.trackaty.chat.dataSources.UserRepository;
-import com.trackaty.chat.interfaces.FirebaseUserCallback;
+import com.trackaty.chat.DataSources.UserRepository;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.User;
 
 import androidx.lifecycle.ViewModel;

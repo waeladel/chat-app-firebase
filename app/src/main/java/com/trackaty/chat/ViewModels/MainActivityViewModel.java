@@ -2,7 +2,7 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
-import com.trackaty.chat.dataSources.UserRepository;
+import com.trackaty.chat.DataSources.UserRepository;
 import com.trackaty.chat.models.User;
 
 import androidx.lifecycle.MutableLiveData;

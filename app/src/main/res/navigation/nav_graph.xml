@@ -6,7 +6,7 @@
     app:startDestination="@id/mainFragment">
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.trackaty.chat.fragments.MainFragment"
+        android:name="com.trackaty.chat.Fragments.MainFragment"
         android:label="fragment_main"
         tools:layout="@layout/fragment_main" >
         <action
@@ -35,12 +35,12 @@
     </fragment>
     <fragment
         android:id="@+id/completeProfileFragment"
-        android:name="com.trackaty.chat.fragments.CompleteProfileFragment"
+        android:name="com.trackaty.chat.Fragments.CompleteProfileFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_complete_profile"/>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.trackaty.chat.fragments.ProfileFragment"
+        android:name="com.trackaty.chat.Fragments.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
         <action
@@ -66,7 +66,7 @@
     </fragment>
     <fragment
         android:id="@+id/moreProfileFragment"
-        android:name="com.trackaty.chat.fragments.MoreProfileFragment"
+        android:name="com.trackaty.chat.Fragments.MoreProfileFragment"
         android:label="fragment_more_profile"
         tools:layout="@layout/fragment_more_profile" >
         <argument
@@ -76,12 +76,12 @@
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="com.trackaty.chat.fragments.EditProfileFragment"
+        android:name="com.trackaty.chat.Fragments.EditProfileFragment"
         android:label="fragment_edit_profile"
         tools:layout="@layout/fragment_edit_profile" />
     <fragment
         android:id="@+id/displayImageFragment"
-        android:name="com.trackaty.chat.fragments.DisplayImageFragment"
+        android:name="com.trackaty.chat.Fragments.DisplayImageFragment"
         android:label="fragment_display_image"
         tools:layout="@layout/fragment_display_image" >
         <argument
@@ -93,7 +93,7 @@
     </fragment>
     <fragment
         android:id="@+id/messagesFragment"
-        android:name="com.trackaty.chat.fragments.MessagesFragment"
+        android:name="com.trackaty.chat.Fragments.MessagesFragment"
         android:label="messages_fragment"
         tools:layout="@layout/messages_fragment" >
         <action
@@ -114,7 +114,7 @@
     </fragment>
     <fragment
         android:id="@+id/chatsFragment"
-        android:name="com.trackaty.chat.fragments.ChatsFragment"
+        android:name="com.trackaty.chat.Fragments.ChatsFragment"
         android:label="chats_fragment"
         tools:layout="@layout/chats_fragment" >
         <action
@@ -127,7 +127,7 @@
     </fragment>
     <fragment
         android:id="@+id/notificationsFragment"
-        android:name="com.trackaty.chat.fragments.NotificationsFragment"
+        android:name="com.trackaty.chat.Fragments.NotificationsFragment"
         android:label="fragment_notification"
         tools:layout="@layout/fragment_notification" >
         <action
@@ -139,7 +139,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.trackaty.chat.fragments.SettingsFragment"
+        android:name="com.trackaty.chat.Fragments.SettingsFragment"
         android:label="settings_fragment" />
 
 

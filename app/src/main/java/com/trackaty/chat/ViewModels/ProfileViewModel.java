@@ -5,9 +5,9 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.trackaty.chat.dataSources.RelationRepository;
-import com.trackaty.chat.dataSources.UserRepository;
-import com.trackaty.chat.interfaces.FirebaseUserCallback;
+import com.trackaty.chat.DataSources.RelationRepository;
+import com.trackaty.chat.DataSources.UserRepository;
+import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
 

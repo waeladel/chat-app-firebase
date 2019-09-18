@@ -9,8 +9,8 @@ import androidx.paging.PagedList;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.dataSources.ChatsDataFactory;
-import com.trackaty.chat.dataSources.ChatsRepository;
+import com.trackaty.chat.DataSources.ChatsDataFactory;
+import com.trackaty.chat.DataSources.ChatsRepository;
 import com.trackaty.chat.models.Chat;
 
 public class ChatsViewModel extends ViewModel {

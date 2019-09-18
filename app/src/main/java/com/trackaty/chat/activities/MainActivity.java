@@ -38,7 +38,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.trackaty.chat.fragments.MainFragmentDirections;
+import com.trackaty.chat.Fragments.MainFragmentDirections;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;

@@ -9,7 +9,7 @@ import androidx.paging.PagedList;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.trackaty.chat.dataSources.NotificationsDataFactory;
+import com.trackaty.chat.DataSources.NotificationsDataFactory;
 import com.trackaty.chat.models.DatabaseNotification;
 
 public class NotificationsViewModel extends ViewModel {
