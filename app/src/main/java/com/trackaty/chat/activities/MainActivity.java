@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
                         .setLogo(R.mipmap.ic_launcher)      // Set logo drawable
                         .setAlwaysShowSignInMethodScreen(true)
                         .setTheme(R.style.Background_FirebaseUI)      // Set theme
-                        .setTosAndPrivacyPolicyUrls("https://sites.google.com/view/pray-4-mo/home","https://sites.google.com/view/pray-4-mo/home")
+                        .setTosAndPrivacyPolicyUrls("https://sites.google.com/view/basbes/terms-of-service","https://sites.google.com/view/basbes/privacy-policy")
                         .build(),
                 RC_SIGN_IN);
 
