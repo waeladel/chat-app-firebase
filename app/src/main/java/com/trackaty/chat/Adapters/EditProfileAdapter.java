@@ -790,8 +790,12 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
 
-                        expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
-                        expandableHolder.expandableRecycler.setAdapter(aboutAdapter);
+                        // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
+                        //// the transient data will be lost when expandableHolder is created again when we scroll up then down
+                        if(null == expandableHolder.expandableRecycler.getAdapter()){
+                            expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
+                            expandableHolder.expandableRecycler.setAdapter(aboutAdapter);
+                        }
                         //viewHolder.setIsRecyclable(false);
                         //viewHolder.expandableLayout.setInRecyclerView(true);
                         /*viewHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
@@ -817,8 +821,12 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
 
-                        expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
-                        expandableHolder.expandableRecycler.setAdapter(workAdapter);
+                        // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
+                        //// the transient data will be lost when expandableHolder is created again when we scroll up then down
+                        if(null == expandableHolder.expandableRecycler.getAdapter()){
+                            expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
+                            expandableHolder.expandableRecycler.setAdapter(workAdapter);
+                        }
                         //viewHolder.setIsRecyclable(false);
                         //viewHolder.expandableLayout.setInRecyclerView(true);
                         /*viewHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
@@ -844,8 +852,12 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
 
-                        expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
-                        expandableHolder.expandableRecycler.setAdapter(habitsAdapter);
+                        // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
+                        //// the transient data will be lost when expandableHolder is created again when we scroll up then down
+                        if(null == expandableHolder.expandableRecycler.getAdapter()){
+                            expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
+                            expandableHolder.expandableRecycler.setAdapter(habitsAdapter);
+                        }
                         //viewHolder.setIsRecyclable(false);
                         //viewHolder.expandableLayout.setInRecyclerView(true);
                         /*viewHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
@@ -864,14 +876,20 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     if(null != mProfileDataArrayList.get(position).getValue()){
                         expandableHolder.sectionHeadline.setText(R.string.user_social_headline);
                         //expandableHolder.expandableLayout.collapse();
-
+                        Log.d(TAG, "set social adapter. expandableHolder.expandableRecycler= "+expandableHolder.expandableRecycler.getAdapter());
                         //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
                         expandableHolder.expandableRecycler.setHasFixedSize(true);
 
-                        expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
-                        expandableHolder.expandableRecycler.setAdapter(socialAdapter);
+                        // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
+                        //// the transient data will be lost when expandableHolder is created again when we scroll up then down
+                        if(null == expandableHolder.expandableRecycler.getAdapter()){
+                            expandableHolder.expandableRecycler.setLayoutManager(new LinearLayoutManager(context));
+                            expandableHolder.expandableRecycler.setAdapter(socialAdapter);
+                        }
+
+
                         //viewHolder.setIsRecyclable(false);
                         //viewHolder.expandableLayout.setInRecyclerView(true);
                         /*viewHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
@@ -901,16 +919,55 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             expandableHolder.expandableLayout.setListener(new  ExpandableLayoutListenerAdapter() {
                 @Override
                 public void onPreOpen() {
-                    Log.i(TAG, "expandableLayout onOpened "+expandableHolder.expandableLayout.getClosePosition());
+                    Log.i(TAG, "expandableLayout onPreOpen "+expandableHolder.expandableLayout.getClosePosition());
                     toggleRotation(expandableHolder.expandButton, 0f, 180f).start();
                     expandableHolder.expandableLayout.setExpanded(true);
+                    if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_SOCIAL_HEADLINE)){
+                        // Disable textChange listener when Layout is not opened.
+                        // If not disabled it will override transient data when expand with random data from recycled text fields
+                        socialAdapter.setListeningTextChange(false);
+                    }else if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_HABITS_HEADLINE)){
+                        habitsAdapter.setListeningTextChange(false);
+                    }
+
+                }
+
+                @Override
+                public void onOpened() {
+                    Log.i(TAG, "expandableLayout onOpened "+expandableHolder.expandableLayout.getClosePosition());
+                    // Enable textChange listener when Layout is opened to get the new input data.
+                    if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_SOCIAL_HEADLINE)){
+                        socialAdapter.setListeningTextChange(true);
+                    }else if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_HABITS_HEADLINE)){
+                        habitsAdapter.setListeningTextChange(true);
+                    }
+
                 }
 
                 @Override
                 public void onPreClose() {
-                    Log.i(TAG, "expandableLayout onClosed "+expandableHolder.expandableLayout.getClosePosition());
+                    Log.i(TAG, "expandableLayout onPreClose "+expandableHolder.expandableLayout.getClosePosition());
                     toggleRotation(expandableHolder.expandButton, 180f, 0f).start();
                     expandableHolder.expandableLayout.setExpanded(false);
+                    // Disable textChange listener when Layout is not opened.
+                    // If not disabled it will override transient data when expand with random data from recycled text fields
+                    if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_SOCIAL_HEADLINE)){
+                        socialAdapter.setListeningTextChange(false);
+                    }else if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_HABITS_HEADLINE)){
+                        habitsAdapter.setListeningTextChange(false);
+                    }
+                }
+
+                @Override
+                public void onClosed() {
+                    Log.i(TAG, "expandableLayout onClosed "+expandableHolder.expandableLayout.getClosePosition());
+                    // Disable textChange listener when Layout is not opened.
+                    // If not disabled it will override transient data when expand with random data from recycled text fields
+                    if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_SOCIAL_HEADLINE)){
+                        socialAdapter.setListeningTextChange(false);
+                    }else if(TextUtils.equals(mProfileDataArrayList.get(position).getKey(), SECTION_HABITS_HEADLINE)){
+                        habitsAdapter.setListeningTextChange(false);
+                    }
                 }
             });
 
@@ -918,14 +975,15 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             expandableHolder.setItemClickListener(new ItemClickListener() {
                 @Override
                 public void onClick(View view, int position, boolean isLongClick) {
-                    Log.i(TAG, "expandToggle id clicked= ");
+                    Log.i(TAG, "expandableLayout expandToggle clicked= position= "+position);
+                    Log.i(TAG, "expandableLayout onToggle "+expandableHolder.expandableLayout.getCurrentPosition());
                     expandableHolder.expandableLayout.toggle();
-                    for (Social social : socialArrayList) {
+                    /*for (Social social : socialArrayList) {
                         System.out.println(social);
                         if(social != null && null != social.getValue()){
                             Log.d(TAG, "socialArrayList loop= " +social.getKey()+" url= "+social.getValue().getUrl());
                         }
-                    }
+                    }*/
                 }
             });
 

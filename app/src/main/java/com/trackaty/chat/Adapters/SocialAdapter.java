@@ -45,6 +45,8 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
     Map<String, SocialObj> socialMap = new HashMap<>();
 
+    private boolean isListeningTextChange;
+
     public SocialAdapter(Fragment fragmentContext, ArrayList<Social> socialArrayList){
         this.socialArrayList = socialArrayList;
         this.fragmentContext = fragmentContext;
@@ -322,6 +324,19 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
         //return  10;
     }
 
+    // Only enable textChange listener when Layout is opened to get the new input data.
+    // And we have to disable textChange listener when Layout is not opened.
+    // If not disabled it will override transient data when expand with random data from recycled text fields
+    public void setListeningTextChange(boolean isListeningTextChange) {
+        this.isListeningTextChange = isListeningTextChange;
+        Log.d(TAG, "isListeningTextChange ="+isListeningTextChange);
+
+    }
+    public boolean isListeningTextChange() {
+        Log.d(TAG, "isListeningTextChange ="+isListeningTextChange);
+        return  isListeningTextChange;
+    }
+
     /// ViewHolder for trips list /////
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -353,33 +368,43 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
                 @Override
                 public void afterTextChanged(Editable editable) {
                     Log.d(TAG, "Editable = "+ editable.toString()+ " position= "+getAdapterPosition()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                    if(TextUtils.isEmpty(String.valueOf(editable).trim())){
-                        //socialArrayList.get(getAdapterPosition()).setValue(null);
-                        // set EditProfileViewModel.user as null
-                        setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
-                        //setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
-                    }else{
-                        //contactsArrayList.get(getAdapterPosition()).setValue(editable.toString());
-                        //SocialObj socialObj= new SocialObj();
-                        socialObj.setUrl(editable.toString());
-                        // get selected spinner position
-                        switch (spinnerValue.getSelectedItemPosition()){
-                            case 0:
-                                Log.d(TAG, "afterTextChanged spinner item 0 is selected");
-                                socialObj.setPublic(true);
-                                break;
-                            case 1:
-                                Log.d(TAG, "afterTextChanged spinner item 1 is selected");
-                                socialObj.setPublic(false);
-                                break;
-                        }
 
-                        //socialMap.put("facebook", socialObj);
-                        Log.d(TAG, "afterTextChanged socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                        //socialArrayList.get(getAdapterPosition()).setValue(socialObj);
-                        // set EditProfileViewModel.user values
-                        setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), socialObj);
+                    // Don't update any thing unless the layout is expanded
+                    // If not disabled it will override transient data when expanded with random data from recycled text fields
+                    if(isListeningTextChange){
+                        if(TextUtils.isEmpty(String.valueOf(editable).trim())){
+                            Log.d(TAG, "afterTextChanged socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey()+ " Position= "+getAdapterPosition());
+                            // Update the socialArrayList to keep the data transient when layout expands again
+                            socialArrayList.get(getAdapterPosition()).setValue(null);
+                            // Update user's social to keep data transient in configuration changes
+                            // set EditProfileViewModel.user as null
+                            setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
+
+                        }else{
+                            //contactsArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                            //SocialObj socialObj= new SocialObj();
+                            socialObj.setUrl(editable.toString());
+                            // get selected spinner position
+                            switch (spinnerValue.getSelectedItemPosition()){
+                                case 0:
+                                    Log.d(TAG, "afterTextChanged spinner item 0 is selected");
+                                    socialObj.setPublic(true);
+                                    break;
+                                case 1:
+                                    Log.d(TAG, "afterTextChanged spinner item 1 is selected");
+                                    socialObj.setPublic(false);
+                                    break;
+                            }
+
+                            //socialMap.put("facebook", socialObj);
+                            Log.d(TAG, "afterTextChanged socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey()+ " Position= "+getAdapterPosition());
+                            // Update the socialArrayList to keep the data transient when layout expands again
+                            socialArrayList.get(getAdapterPosition()).setValue(socialObj);
+                            // Update user's social to keep data transient in configuration changes
+                            setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), socialObj);
+                        }
                     }
+
                 }
             });
 
@@ -387,39 +412,55 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
 
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int selectedItemPosition, long id) {
-                    // your code here for onItemSelected
-                    switch (selectedItemPosition){ // display sorting option selected from shared preference
-                        case 0:
-                            //contactsArrayList.get(getAdapterPosition()).setValue(true);
+                    // Don't update any thing unless the layout is expanded
+                    // If not disabled it will override transient data when expanded with random data from recycled data
+                    if(isListeningTextChange){
+                        // your code here for onItemSelected
+                        switch (selectedItemPosition){ // display sorting option selected from shared preference
+                            case 0:
+                                //contactsArrayList.get(getAdapterPosition()).setValue(true);
 
                             /*socialPrivacy.setPublic(true);
                             socialMap.put("social", socialPrivacy);*/
-                            if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
-                                socialArrayList.get(getAdapterPosition()).setValue(null);
-                                setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
-                            }else{
-                                socialObj.setPublic(true);
-                                socialObj.setUrl(String.valueOf(itemValue.getText()));
-                            }
+                                if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
+                                    socialArrayList.get(getAdapterPosition()).setValue(null);
+                                    setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
+                                }else{
+                                    socialObj.setPublic(true);
+                                    socialObj.setUrl(String.valueOf(itemValue.getText()));
 
-                            Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                            //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
-                            Log.d(TAG, "spinner item 0 is selected= " );
-                            break;
-                        case 1:
-                            //contactsArrayList.get(getAdapterPosition()).setPublic(false);
+                                    // Update the socialArrayList to keep the data transient when layout expands again
+                                    socialArrayList.get(getAdapterPosition()).setValue(socialObj);
+                                    // Update user's social to keep data transient in configuration changes
+                                    setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), socialObj);
+                                }
+
+                                Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
+                                //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
+                                Log.d(TAG, "spinner item 0 is selected= " );
+                                break;
+                            case 1:
+                                //contactsArrayList.get(getAdapterPosition()).setPublic(false);
                             /*socialPrivacy.setPublic(false);
                             socialMap.put("social", socialPrivacy);*/
-                            if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
-                                socialArrayList.get(getAdapterPosition()).setValue(null);
-                            }else{
-                                socialObj.setPublic(false);
-                                socialObj.setUrl(String.valueOf(itemValue.getText()));
-                            }
-                            Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
-                            //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
-                            Log.d(TAG, "spinner item 1 is selected= " );
-                            break;
+                                if(TextUtils.isEmpty(String.valueOf(itemValue.getText()).trim())){
+                                    socialArrayList.get(getAdapterPosition()).setValue(null);
+                                    setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), null);
+                                }else{
+                                    socialObj.setPublic(false);
+                                    socialObj.setUrl(String.valueOf(itemValue.getText()));
+
+                                    // Update the socialArrayList to keep the data transient when layout expands again
+                                    socialArrayList.get(getAdapterPosition()).setValue(socialObj);
+                                    // Update user's social to keep data transient in configuration changes
+                                    setUserSocial(socialArrayList.get(getAdapterPosition()).getKey(), socialObj);
+                                }
+                                Log.d(TAG, "spinner socialObj url= "+socialObj.getUrl()+ " socialObj public= "+socialObj.getPublic()+" key= "+socialArrayList.get(getAdapterPosition()).getKey());
+                                //contactsArrayList.get(getAdapterPosition()).setValue(socialObj);
+                                Log.d(TAG, "spinner item 1 is selected= " );
+                                break;
+                        }
+
                     }
 
                 }
