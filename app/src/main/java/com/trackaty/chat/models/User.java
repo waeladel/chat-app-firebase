@@ -77,7 +77,7 @@ public class User {
     //private Date joined;// anotation to put server timestamp
 
     public User() {
-        this.created = ServerValue.TIMESTAMP;
+        //this.created = ServerValue.TIMESTAMP;
     }
 
 
