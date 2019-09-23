@@ -42,6 +42,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
@@ -1271,6 +1272,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
             return;
         }
 
+        mEditProfileViewModel.getUser().setCreated(ServerValue.TIMESTAMP);
         mUserRef.setValue(mEditProfileViewModel.getUser()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
