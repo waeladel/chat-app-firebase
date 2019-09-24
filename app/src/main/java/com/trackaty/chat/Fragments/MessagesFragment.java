@@ -712,6 +712,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         // Update all revealed messages on fragment's stop
         if(mMessagesAdapter != null){
+
             // Get revealed list from the adapter
             List<Message> revealedList = mMessagesAdapter.getRevealedList();
 
@@ -719,10 +720,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 Log.d(TAG, "revealedList message= "+revealedList.get(i).getMessage() + " key= "+revealedList.get(i).getKey());
                 updateMap.put(revealedList.get(i).getKey()+"/revealed", true);
             }
-        }
 
-        // Update all messages status on fragment's stop
-        if(mMessagesAdapter != null){
             // Get revealed list from the adapter
             List<Message> statusList = mMessagesAdapter.getStatusList();
             //mMessagesAdapter.getCurrentList();
@@ -732,7 +730,16 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 updateMap.put(statusList.get(i).getKey()+"/status", statusList.get(i).getStatus());
             }
 
-        }
+            // Get broken avatars list from the adapter
+            List<Message> brokenAvatarsList = mMessagesAdapter.getBrokenAvatarsList();
+            //mMessagesAdapter.getCurrentList();
+
+            for (int i = 0; i < brokenAvatarsList.size(); i++) {
+                Log.d(TAG, "brokenAvatarsList message= "+brokenAvatarsList.get(i).getMessage() + " key= "+brokenAvatarsList.get(i).getKey() + " avatar= "+brokenAvatarsList.get(i).getSenderAvatar());
+                updateMap.put(brokenAvatarsList.get(i).getKey()+"/senderAvatar", brokenAvatarsList.get(i).getSenderAvatar());
+            }
+
+        }// End of if mMessagesAdapter is not null
 
         mMessagesRef.child(mChatId).updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -740,6 +747,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 // onSuccess clear the list to start all over
                 mMessagesAdapter.clearStatusList();
                 mMessagesAdapter.clearRevealedList();
+                mMessagesAdapter.clearBrokenAvatarsList();
             }
         });
 

@@ -43,9 +43,11 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.king.view.radarview.RadarView;
 import com.trackaty.chat.Adapters.UsersAdapter;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
@@ -57,6 +59,9 @@ import com.trackaty.chat.receivers.SoundIdAlarm;
 import com.trackaty.chat.services.FindNearbyService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -127,7 +132,7 @@ public class MainFragment extends Fragment {
     private SharedPreferences mSharedPreferences; // So save EndTime in SharedPreferences
 
     private FirebaseUser mFirebaseCurrentUser;
-    //private String mCurrentUserId;
+    private String mCurrentUserId;
     private User mCurrentUser;
 
     //initialize the FirebaseAuth instance
@@ -549,6 +554,38 @@ public class MainFragment extends Fragment {
         CancelTimer();
         mRadarView.stop();
         mRadarLayout.setVisibility(View.GONE);
+
+        // Create a map for all messages need to be updated
+        Map<String, Object> updateMap = new HashMap<>();
+
+        // Update all revealed messages on fragment's stop
+        if(mUsersAdapter != null){
+            // Get revealed list from the adapter
+            List<User> brokenAvatarsList = mUsersAdapter.getBrokenAvatarsList();
+
+            for (int i = 0; i < brokenAvatarsList.size(); i++) {
+                Log.d(TAG, "brokenAvatarsList url= "+brokenAvatarsList.get(i).getAvatar() + " key= "+brokenAvatarsList.get(i).getKey());
+                updateMap.put(brokenAvatarsList.get(i).getKey()+"/avatar", brokenAvatarsList.get(i).getAvatar());
+            }
+        }
+
+        if(updateMap.size() > 0 && mCurrentUserId != null){
+            Log.d(TAG, "brokenAvatarsList url = updateMap.size= "+updateMap.size() +" mCurrentUserId="+mCurrentUserId  );
+            // update senderAvatar to the new uri
+            DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference mUserRef = mDatabaseRef.child("users"); // Should be search instead of users
+            //DatabaseReference mUserRef = mDatabaseRef.child("search").child(mCurrentUserId);
+            mUserRef.updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // onSuccess clear the list to start all over
+                    Log.d(TAG, "brokenAvatarsList url = onSuccess ");
+                    mUsersAdapter.clearBrokenAvatarsList();
+                }
+            });
+
+        }
+
     }
 
     @Override

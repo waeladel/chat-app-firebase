@@ -1,6 +1,7 @@
 package com.trackaty.chat.Adapters;
 
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,8 @@ import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -25,10 +28,12 @@ import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
 import com.trackaty.chat.models.ChatMember;
+import com.trackaty.chat.models.DatabaseNotification;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +53,9 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
     private StorageReference mStorageRef;
 
+    // A not static array list for all notifications sender avatar to update the broken avatars when fragment stops
+    private List<ChatMember> brokenAvatarsList;// = new ArrayList<>();
+
     private Fragment fragment;
     public ChatsAdapter(Fragment fragment) {
         super(DIFF_CALLBACK);
@@ -59,6 +67,19 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
         if(currentFirebaseUser != null){
             currentUserId = currentFirebaseUser.getUid();
         }
+
+        // Only create the static list if it's null
+        if(brokenAvatarsList == null){
+            brokenAvatarsList = new ArrayList<>();
+            Log.d(TAG, "brokenAvatarsList is null. new ArrayList is created= " + brokenAvatarsList.size());
+        }/*else{
+            Log.d(TAG, "brokenAvatarsList is not null. size=  "+ brokenAvatarsList.size());
+            if(brokenAvatarsList.size() >0){
+                // Clear the list to start all over
+                brokenAvatarsList.clear();
+                Log.d(TAG, "brokenAvatarsList is cleared. size=  "+ brokenAvatarsList.size());
+            }
+        }*/
     }
 
     @NonNull
@@ -201,7 +222,17 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                     .load(membersList.get(0).getAvatar())
                                     .placeholder(R.mipmap.ic_round_account_filled_72)
                                     .error(R.drawable.ic_round_broken_image_72px)
-                                    .into(holder.mAvatar);
+                                    .into(holder.mAvatar , new com.squareup.picasso.Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    // loading avatar succeeded, do nothing
+                                }
+                                @Override
+                                public void onError(Exception e) {
+                                    // loading avatar failed, lets try to get the avatar from storage instead of database link
+                                    loadStorageImage(chat.getKey(), membersList.get(0), holder.mAvatar);
+                                }
+                            });
                         }else{
                             // end of user avatar
                             holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
@@ -242,6 +273,44 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
 
         }
 
+    }
+
+    private void loadStorageImage(String key, ChatMember chatMember, CircleImageView avatar) {
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        Log.d(TAG, "chatMember id= "+chatMember.getKey());
+        mStorageRef.child("images/"+chatMember.getKey() +"/"+ AVATAR_THUMBNAIL_NAME ).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                // Got the download URL for 'users/me/profile.png'
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
+                        .into(avatar);
+                //updateAvatarUri(key, uri);
+                // Add updated notification to brokenAvatarsList. the list will be used to update broken avatars when fragment stops
+                chatMember.setAvatar(String.valueOf(uri));
+                chatMember.setName(key); // We use name as to store the chatId value. it's bad for logic but it's a quick fix
+                brokenAvatarsList.add(chatMember);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                avatar.setImageResource(R.drawable.ic_round_account_filled_72);
+            }
+        });
+
+    }
+
+
+    public List<ChatMember> getBrokenAvatarsList(){
+        return brokenAvatarsList;
+    }
+
+    // clear sent messages list after updating the database
+    public void clearBrokenAvatarsList(){
+        brokenAvatarsList.clear();
     }
 
     // CALLBACK to calculate the difference between the old item and the new item
