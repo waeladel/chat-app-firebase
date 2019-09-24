@@ -100,8 +100,6 @@ public class MainFragment extends Fragment {
     private ConstraintLayout mRadarLayout;
     private TextView mTimerText;
 
-    private FloatingActionButton mVisibilityButton; // button to make your self visible to others
-
     private AlarmManager alarmManager;
     private Intent alarmIntent;
     private PendingIntent pendingIntent;
@@ -184,6 +182,7 @@ public class MainFragment extends Fragment {
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
         // Current user id is used to know if it's the first log in or not
         // if first login, we will initiate observing the page list, if not, we will just update the user id to invalidate
         viewModel.setCurrentUserId(mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null);
@@ -570,10 +569,10 @@ public class MainFragment extends Fragment {
         }
 
         if(updateMap.size() > 0 && mCurrentUserId != null){
-            Log.d(TAG, "brokenAvatarsList url = updateMap.size= "+updateMap.size() +" mCurrentUserId="+mCurrentUserId  );
+            Log.d(TAG, "brokenAvatarsList url = updateMap.size= "+updateMap.size() +" mCurrentUserId="+mCurrentUserId);
             // update senderAvatar to the new uri
             DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-            DatabaseReference mUserRef = mDatabaseRef.child("users"); // Should be search instead of users
+            DatabaseReference mUserRef = mDatabaseRef.child("search").child(mCurrentUserId); // Should be search instead of users
             //DatabaseReference mUserRef = mDatabaseRef.child("search").child(mCurrentUserId);
             mUserRef.updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
