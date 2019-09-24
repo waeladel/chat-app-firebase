@@ -20,16 +20,23 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.Adapters.ChatsAdapter;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.ChatsViewModel;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
+import com.trackaty.chat.models.ChatMember;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ChatsFragment extends Fragment{
 
@@ -247,6 +254,45 @@ public class ChatsFragment extends Fragment{
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+
+        // Create a map for all messages need to be updated
+        Map<String, Object> updateMap = new HashMap<>();
+
+        // Update all revealed messages on fragment's stop
+        if (mChatsAdapter != null) {
+            // Get revealed list from the adapter
+            List<ChatMember> brokenAvatarsList = mChatsAdapter.getBrokenAvatarsList();
+
+
+            // We use name as to store the chatId value
+            for (int i = 0; i < brokenAvatarsList.size(); i++) {
+                Log.d(TAG, "brokenAvatarsList url= " + brokenAvatarsList.get(i).getAvatar() + " key= " + brokenAvatarsList.get(i).getKey() + "name= " + brokenAvatarsList.get(i).getName());
+                updateMap.put(brokenAvatarsList.get(i).getName() + "/members/" + brokenAvatarsList.get(i).getKey() + "/avatar", brokenAvatarsList.get(i).getAvatar());
+            }
+
+
+            if (updateMap.size() > 0 && mCurrentUserId != null) {
+                Log.d(TAG, "brokenAvatarsList url = updateMap.size= " + updateMap.size() + " mCurrentUserId=" + mCurrentUserId);
+                // update senderAvatar to the new uri
+                DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+                DatabaseReference mChatsRef = mDatabaseRef.child("userChats").child(mCurrentUserId);
+                //mNotificationsRef.child(key).child("senderAvatar").setValue(String.valueOf(uri));
+                mChatsRef.updateChildren(updateMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // onSuccess clear the list to start all over
+                        Log.d(TAG, "brokenAvatarsList url . onSuccess ");
+                        //mChatsAdapter.clearBrokenAvatarsList();
+                    }
+                });
+            }
         }
     }
 

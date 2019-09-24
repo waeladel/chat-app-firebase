@@ -68,12 +68,15 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     private String chatKey; // the chat key
     private Chat chat; // the chat object
 
-    // An array list for all revealed messages to update the database when fragment stops
+    // A static array list for all revealed messages to update the database when fragment stops
     private static List<Message> totalRevealedList;// = new ArrayList<>();
 
-    // An array list for all messages status to update the database when fragment stops
+    // A static array list for all messages status to update the database when fragment stops
     private static List<Message> totalStatusList;// = new ArrayList<>();
     //private PagedList<Message> itemsList;
+
+    // A not static for all notifications sender avatar to update the broken avatars when fragment stops
+    private List<Message> brokenAvatarsList;// = new ArrayList<>();
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -111,6 +114,19 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 Log.d(TAG, "totalStatusList is cleared. size=  "+ totalStatusList.size());
             }
         }
+
+        // Only create the static list if it's null
+        if(brokenAvatarsList == null){
+            brokenAvatarsList = new ArrayList<>();
+            Log.d(TAG, "brokenAvatarsList is null. new ArrayList is created= " + brokenAvatarsList.size());
+        }/*else{
+            Log.d(TAG, "brokenAvatarsList is not null. size=  "+ brokenAvatarsList.size());
+            if(brokenAvatarsList.size() >0){
+                // Clear the list to start all over
+                brokenAvatarsList.clear();
+                Log.d(TAG, "brokenAvatarsList is cleared. size=  "+ brokenAvatarsList.size());
+            }
+        }*/
 
     }
 
@@ -272,24 +288,21 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     // [START create_storage_reference]
                     //ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_user_account_grey_white);
                     //mStorageRef.child("images/"+message.getSenderId()+"/"+ AVATAR_THUMBNAIL_NAME).getFile()
-
-                    mStorageRef.child("images/"+message.getSenderId()+"/"+ AVATAR_THUMBNAIL_NAME).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // Got the download URL for 'users/me/profile.png'
-                            Picasso.get()
-                                    .load(uri)
-                                    .placeholder(R.mipmap.ic_round_account_filled_72)
-                                    .error(R.drawable.ic_round_broken_image_72px)
-                                    .into(ReceivedHolder.mAvatar);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle any errors
-                            ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
-                        }
-                    });
+                    Picasso.get()
+                            .load(message.getSenderAvatar())
+                            .placeholder(R.mipmap.ic_round_account_filled_72)
+                            .error(R.drawable.ic_round_broken_image_72px)
+                            .into(ReceivedHolder.mAvatar , new com.squareup.picasso.Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    // loading avatar succeeded, do nothing
+                                }
+                                @Override
+                                public void onError(Exception e) {
+                                    // loading avatar failed, lets try to get the avatar from storage instead of database link
+                                    loadStorageImage(message, ReceivedHolder.mAvatar);
+                                }
+                            });
                 }else{
                     // Handle if getSenderId() is null
                     ReceivedHolder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
@@ -416,6 +429,40 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             }
         }
 
+    }
+
+    private void loadStorageImage(Message message, CircleImageView avatar) {
+
+        mStorageRef.child("images/"+message.getSenderId() +"/"+ AVATAR_THUMBNAIL_NAME ).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                // Got the download URL for 'users/me/profile.png'
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
+                        .into(avatar);
+                //updateAvatarUri(key, uri);
+                // Add updated notification to brokenAvatarsList. the list will be used to update broken avatars when fragment stops
+                message.setSenderAvatar(String.valueOf(uri));
+                brokenAvatarsList.add(message);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                avatar.setImageResource(R.drawable.ic_round_account_filled_72);
+            }
+        });
+    }
+
+    public List<Message> getBrokenAvatarsList(){
+        return brokenAvatarsList;
+    }
+
+    // clear sent messages list after updating the database
+    public void clearBrokenAvatarsList(){
+        brokenAvatarsList.clear();
     }
 
 

@@ -1,6 +1,7 @@
 package com.trackaty.chat.Adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -21,16 +23,24 @@ import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.App;
 import com.trackaty.chat.Fragments.NotificationsFragmentDirections;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.DatabaseNotification;
+import com.yanzhenjie.album.widget.photoview.PhotoViewAttacher;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -45,6 +55,8 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
     public Context context;
 
+    private static final String AVATAR_ORIGINAL_NAME = "original_avatar.jpg";
+    private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
     private static final String AVATAR_THUMBNAIL_NAME = "avatar.jpg";
     private static final String COVER_THUMBNAIL_NAME = "cover.jpg";
     private static final int VIEW_TYPE_MESSAGE_SENT = 1;
@@ -63,6 +75,9 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
     private Fragment fragment;
 
+    // A not static array list for all notifications sender avatar to update the broken avatars when fragment stops
+    private List<DatabaseNotification> brokenAvatarsList;// = new ArrayList<>();
+
     public NotificationsAdapter(Fragment fragment) {
         super(DIFF_CALLBACK);
 
@@ -76,7 +91,18 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
             mNotificationsRef = mDatabaseRef.child("notifications").child("alerts").child(currentUserId);
         }
 
-
+        // Only create the static list if it's null
+        if(brokenAvatarsList == null){
+            brokenAvatarsList = new ArrayList<>();
+            Log.d(TAG, "brokenAvatarsList is null. new ArrayList is created= " + brokenAvatarsList.size());
+        }/*else{
+            Log.d(TAG, "brokenAvatarsList is not null. size=  "+ brokenAvatarsList.size());
+            if(brokenAvatarsList.size() >0){
+                // Clear the list to start all over
+                brokenAvatarsList.clear();
+                Log.d(TAG, "brokenAvatarsList is cleared. size=  "+ brokenAvatarsList.size());
+            }
+        }*/
 
     }
 
@@ -197,7 +223,17 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                         .load(avatarUrl)
                         .placeholder(R.mipmap.ic_round_account_filled_72)
                         .error(R.drawable.ic_round_broken_image_72px)
-                        .into(holder.mAvatar);
+                        .into(holder.mAvatar , new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                // loading avatar succeeded, do nothing
+                            }
+                            @Override
+                            public void onError(Exception e) {
+                                // loading avatar failed, lets try to get the avatar from storage instead of database link
+                                loadStorageImage(notification, holder.mAvatar);
+                            }
+                        });
             }else{
                 // Handle if getSenderId() is null
                 holder.mAvatar.setImageResource(R.drawable.ic_round_account_filled_72);
@@ -218,6 +254,51 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
 
     }
+
+    private void loadStorageImage(DatabaseNotification notification, CircleImageView avatar) {
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        storageRef.child("images/"+notification.getSenderId() +"/"+ AVATAR_THUMBNAIL_NAME ).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                // Got the download URL for 'users/me/profile.png'
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(R.mipmap.ic_round_account_filled_72)
+                        .error(R.drawable.ic_round_broken_image_72px)
+                        .into(avatar);
+                //updateAvatarUri(key, uri);
+                // Add updated notification to brokenAvatarsList. the list will be used to update broken avatars when fragment stops
+                notification.setSenderAvatar(String.valueOf(uri));
+                brokenAvatarsList.add(notification);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                avatar.setImageResource(R.drawable.ic_round_account_filled_72);
+            }
+        });
+
+    }
+
+    /*private void updateAvatarUri(String key, Uri uri) {
+        if(mNotificationsRef != null){
+            //DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+            //mNotificationsRef = mDatabaseRef.child("notifications").child("alerts").child(currentUserId);
+            mNotificationsRef.child(key).child("senderAvatar").setValue(String.valueOf(uri)); // update senderAvatar to the new uri
+        }
+
+    }*/
+
+    public List<DatabaseNotification> getBrokenAvatarsList(){
+        return brokenAvatarsList;
+    }
+
+    // clear sent messages list after updating the database
+    public void clearBrokenAvatarsList(){
+        brokenAvatarsList.clear();
+    }
+
 
     private void setTextWithSpan(TextView textView, String wholeText, String spanText, StyleSpan style) {
 
