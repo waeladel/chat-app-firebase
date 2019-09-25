@@ -19,6 +19,12 @@ android {
         versionName "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
+        // To store secret keys
+        // should correspond to key/value pairs inside the file
+        buildConfigField("String", "CHIRP_APP_KEY", keystoreProperties['CHIRP_APP_KEY'])
+        buildConfigField("String", "CHIRP_APP_SECRET", keystoreProperties['CHIRP_APP_SECRET'])
+        buildConfigField("String", "CHIRP_APP_CONFIG", keystoreProperties['CHIRP_APP_CONFIG'])
     }
 
     signingConfigs {
