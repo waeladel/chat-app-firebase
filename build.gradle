@@ -4,6 +4,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
@@ -19,6 +20,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://maven.fabric.io/public' } // To resolve the Twitter SDK
         maven { url "https://jitpack.io" }
         maven { url "https://maven.chirp.io/release" }
     }
