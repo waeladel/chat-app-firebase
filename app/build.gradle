@@ -14,8 +14,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 3
-        versionName "0.0.3"
+        versionCode 4
+        versionName "0.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"
@@ -51,6 +51,7 @@ android {
             // R8 configuration files.
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            debuggable true
         }
         debug {
             debuggable true
@@ -77,7 +78,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.google.firebase:firebase-core:17.2.0'
     implementation 'com.google.firebase:firebase-database:19.1.0'
-    implementation 'com.google.firebase:firebase-auth:19.0.0'
+    implementation 'com.google.firebase:firebase-auth:19.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.0'
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
     implementation 'com.google.firebase:firebase-analytics:17.2.0'
@@ -131,7 +132,9 @@ dependencies {
     implementation 'com.facebook.android:facebook-android-sdk:5.5.1'
 
     // Required only if Twitter login support is required. Find the latest Twitter SDK releases here: https://goo.gl/E5wZvQ
-    //implementation 'com.twitter.sdk.android:twitter-core:3.1.1'
+    implementation 'com.twitter.sdk.android:twitter-core:3.1.1'
+    //implementation 'com.twitter.sdk.android:twitter:3.1.1'
+
 
 }
 
