@@ -517,21 +517,24 @@ public class UsersRepository {
     //removeListeners is static so it can be triggered when ViewModel is onCleared
     public static void removeListeners(){
 
-        for (int i = 0; i < mListenersList.size(); i++) {
-            //Log.d(TAG, "removed Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
-            //Log.d(TAG, "removed Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
-            Log.d(TAG, "removed Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
+        if(mListenersList != null){ // mListenersList is null when user cancel login via a provider. Can't invoke List.size() on a null object
+            for (int i = 0; i < mListenersList.size(); i++) {
+                //Log.d(TAG, "removed Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());
+                //Log.d(TAG, "removed Listeners Query= "+ mListenersList.get(i).getQuery()+ " Listener= "+ mListenersList.get(i).getListener());
+                Log.d(TAG, "removed Listeners Query or Ref= "+ mListenersList.get(i).getQueryOrRef()+ " Listener= "+ mListenersList.get(i).getListener());
 
-            if(null != mListenersList.get(i).getListener()){
-                mListenersList.get(i).getQueryOrRef().removeEventListener(mListenersList.get(i).getListener());
-            }
+                if(null != mListenersList.get(i).getListener()){
+                    mListenersList.get(i).getQueryOrRef().removeEventListener(mListenersList.get(i).getListener());
+                }
             /*if(null != mListenersList.get(i).getReference()){
                 mListenersList.get(i).getReference().removeEventListener(mListenersList.get(i).getListener());
             }else if(null != mListenersList.get(i).getQuery()){
                 mListenersList.get(i).getQuery().removeEventListener(mListenersList.get(i).getListener());
             }*/
+            }
+            mListenersList.clear();
         }
-        mListenersList.clear();
+
     }
 
     public void printListeners(){
