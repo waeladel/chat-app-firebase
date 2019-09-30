@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: "androidx.navigation.safeargs"
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -14,8 +15,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 4
-        versionName "0.0.4"
+        versionCode 5
+        versionName "0.0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"
@@ -78,12 +79,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:17.2.0'
     implementation 'com.google.firebase:firebase-database:19.1.0'
     implementation 'com.google.firebase:firebase-auth:19.1.0'
-    implementation 'com.firebaseui:firebase-ui-auth:4.3.0'
+    implementation 'com.firebaseui:firebase-ui-auth:6.0.2'
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
     implementation 'com.google.firebase:firebase-analytics:17.2.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.firebase:firebase-storage:19.0.1'
+    implementation 'com.google.firebase:firebase-storage:19.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:core:1.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -131,10 +132,9 @@ dependencies {
     implementation 'com.facebook.android:facebook-android-sdk:5.5.1'
 
     // Required only if Twitter login support is required. Find the latest Twitter SDK releases here: https://goo.gl/E5wZvQ
-    implementation 'com.twitter.sdk.android:twitter-core:3.1.1'
+    implementation ("com.twitter.sdk.android:twitter-core:3.1.1@aar") { transitive = true }
     //implementation 'com.twitter.sdk.android:twitter:3.1.1'
 
 
 }
 
-apply plugin: 'com.google.gms.google-services'

@@ -2,6 +2,7 @@ package com.trackaty.chat.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -552,14 +553,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void initiateLogin() {
 
-        // Choose authentication providers
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.FacebookBuilder().build(),
-                new AuthUI.IdpConfig.TwitterBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build()
+        List<AuthUI.IdpConfig> providers;
+        // Keep twitter only if api is 21 or above
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            // Choose authentication providers
+            providers = Arrays.asList(
+                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                    new AuthUI.IdpConfig.TwitterBuilder().build(),
+                    new AuthUI.IdpConfig.GoogleBuilder().build());
 
-        );
+        }else{
+            // remove twitter  if api below 21
+            // Choose authentication providers
+            providers = Arrays.asList(
+                    new AuthUI.IdpConfig.EmailBuilder().build(),
+                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                    new AuthUI.IdpConfig.GoogleBuilder().build());
+        }
+
+
+
         // Create and launch sign-in intent
         startActivityForResult(
                 AuthUI.getInstance()
@@ -605,6 +619,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                Log.d(TAG, "response error = :" + response.getError().getErrorCode());
                 if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Log.d(TAG, "No internet connection:" + response);
 
