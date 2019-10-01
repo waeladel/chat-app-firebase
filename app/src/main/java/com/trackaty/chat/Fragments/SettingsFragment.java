@@ -216,6 +216,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                                             Log.d(TAG, "switch is checked. value= " + newValue);
                                             if(mCurrentUser.getSoundId()!= 0){
                                                 startAlarm(); // start the alarm .
+                                            }else{
+                                                Log.d(TAG , "current user doesn't have a sound id");
+                                                Toast.makeText(mActivityContext, R.string.no_sound_id_found_error,
+                                                        Toast.LENGTH_LONG).show();
                                             }
                                         }else{
                                             // stop the alarm if already started

@@ -27,7 +27,7 @@
     <string name="alert_dialog_unreveal">Unreveal my contacts</string>
     <string name="edit_unreveal_alert_dialog_title">Select Options:</string>
     <string name="audio_permission_dialog_title">Microphone is needed</string>
-    <string name="audio_permission_dialog_message">This app uses your microphone to detect nearby devices. The mic is only used while you are searching for the person you target. We don\'t listen to your conversations during the searching process, just waiting for periodical ultrasonic pairing code.</string>
+    <string name="audio_permission_dialog_message">This app uses your microphone to detect nearby devices. The mic is only used while you are searching for the person you target. We don\'t listen to your conversations during the searching process, just waiting for a periodical ultrasonic pairing key.</string>
     <string name="chat_inactive_alert_dialog_title">Conversation Is Inactive</string>
     <string name="chat_blocked_alert_dialog_title">Conversation Disabled</string>
 
@@ -53,6 +53,7 @@
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
     <string name="empty_profile_avatar_error">Profile picture can\'t be blank.</string>
     <string name="empty_profile_name_error">You must enter your name.</string>
+    <string name="no_sound_id_found_error">We couldn\'t find your ultrasonic pairing key, try to create a new account.</string>
 
     <string name="send_message_error">Sorry, couldn\'t send your message.</string>
     <string name="send_request_error">Sorry, couldn\'t send your request.</string>
