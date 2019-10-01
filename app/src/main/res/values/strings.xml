@@ -53,7 +53,7 @@
     <string name="update_profile_error">Sorry, couldn\'t update your profile.</string>
     <string name="empty_profile_avatar_error">Profile picture can\'t be blank.</string>
     <string name="empty_profile_name_error">You must enter your name.</string>
-    <string name="no_sound_id_found_error">We couldn\'t find your ultrasonic pairing key, try to create a new account.</string>
+    <string name="no_sound_id_found_error">We couldn\'t fetch your ultrasonic pairing key. Make sure you have internet connection</string>
 
     <string name="send_message_error">Sorry, couldn\'t send your message.</string>
     <string name="send_request_error">Sorry, couldn\'t send your request.</string>

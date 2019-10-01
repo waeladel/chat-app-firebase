@@ -78,6 +78,7 @@ public class User {
     //private Date joined;// anotation to put server timestamp
 
     public User() {
+        // Default constructor required for calls to DataSnapshot.getValue(User.class)
         //this.created = ServerValue.TIMESTAMP;
     }
 

@@ -98,9 +98,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef, mUsersRef;
-    private User mCurrentUser;
+    //private User mCurrentUser;
     private FirebaseUser mFirebaseCurrentUser;
     private String mCurrentUserId;
+    private User mCurrentUser;
 
     private static final String NOTIFICATION_SOUND_DEFAULT_NAME = "Basbes";
 
@@ -109,6 +110,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private PendingIntent pendingIntent;
     private NotificationManagerCompat notificationManager;
     private Notification mNotification;
+
 
     public SettingsFragment() {
         // Empty constructor is required for DialogFragment
@@ -142,6 +144,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // [START declare_database_ref]
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUsersRef = mDatabaseRef.child("users");
+        mUsersRef.keepSynced(true); // without it, the new written data of visible user(sound id) can't be fetched at the fist time.
 
         // Create alarm manager and Intent to be used when user set the visibility alarm
         alarmManager  =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
@@ -202,9 +205,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     Log.d(TAG, "Pending Preference value is: " + newValue);
                     // get current user sound id to pass it to the alarm
                     if(mCurrentUserId != null){
-                        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                        ValueEventListener userListener = new ValueEventListener() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     // Get user value
                                     Log.d(TAG, "getUser dataSnapshot key: " + dataSnapshot.getKey());
@@ -213,7 +217,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                                         mCurrentUser.setKey(dataSnapshot.getKey());
                                         // Create an alarm with current sound id if switch is checked
                                         if(newValue.equals(true)){
-                                            Log.d(TAG, "switch is checked. value= " + newValue);
+                                            Log.d(TAG, "switch is checked. value= " + newValue + " name = "+ mCurrentUser.getName() + " sound id = "+ mCurrentUser.getSoundId());
                                             if(mCurrentUser.getSoundId()!= 0){
                                                 startAlarm(); // start the alarm .
                                             }else{
@@ -233,12 +237,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                             }
 
                             @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                            public void onCancelled(DatabaseError databaseError) {
                                 // Getting Post failed, log a message
-                                Log.w(TAG, "get current user:onCancelled", databaseError.toException());
+                                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                                // ...
                             }
-                        });
-
+                        };
+                        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(userListener);
                         return true; // to change the preference value
 
                     }else{

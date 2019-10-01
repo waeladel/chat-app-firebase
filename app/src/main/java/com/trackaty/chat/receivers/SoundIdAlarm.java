@@ -290,7 +290,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         // Schedule a task to run every 60 seconds with no initial delay.
         Log.i(TAG , "maxPayload= "+ chirp.maxPayloadLength());
-        Log.i(TAG , "sending Payload= ");
+        Log.i(TAG , "sending Payload");
         //chirpConnect.setVolume(0.1f);
 
         ChirpError error = chirp.send(payload);

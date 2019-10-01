@@ -311,6 +311,7 @@ public class FindNearbyService extends Service {
 
     private void getUser(int soundID) {
         Query query = mUsersRef.orderByChild("soundId").equalTo(soundID).limitToFirst(1);
+        query.keepSynced(true); // without it, the data of found user doesn't update at the fist time.
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -320,7 +321,7 @@ public class FindNearbyService extends Service {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         User user = snapshot.getValue(User.class);
                         if (user != null) {
-                            Log.d(TAG, "User exist. user key= "+snapshot.getKey());
+                            Log.d(TAG, "User exist. user key= "+snapshot.getKey() + " name= "+ user.getName() + " bio="+ user.getBiography());
                             if(!TextUtils.equals(mCurrentUserId, snapshot.getKey())){
                                 // It's not current logged on user, add it to the results list
                                 user.setKey(snapshot.getKey());
