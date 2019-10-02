@@ -18,9 +18,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 
-import io.chirp.connect.ChirpConnect;
-import io.chirp.connect.interfaces.ConnectEventListener;
-import io.chirp.connect.models.ChirpError;
+import io.chirp.chirpsdk.ChirpSDK;
+import io.chirp.chirpsdk.models.ChirpError;
+import io.chirp.chirpsdk.interfaces.ChirpEventListener;
 
 public class SoundIdAlarm extends BroadcastReceiver {
 
@@ -36,7 +36,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
     String CHIRP_APP_SECRET = BuildConfig.CHIRP_APP_SECRET;
     String CHIRP_APP_CONFIG = BuildConfig.CHIRP_APP_CONFIG;
 
-    private ChirpConnect chirp;
+    private ChirpSDK chirp;
 
     private AlarmManager alarmManager;
     private Intent alarmIntent;
@@ -48,9 +48,9 @@ public class SoundIdAlarm extends BroadcastReceiver {
     private static final String USER_ID_KEY = "userId";
     final Handler handler = new Handler();
     // A listener for sound id
-    ConnectEventListener chirpEventListener = new ConnectEventListener() {
+    ChirpEventListener  chirpEventListener = new ChirpEventListener () {
         @Override
-        public void onSent(@NotNull byte[] bytes, int i) {
+        public void onSent(@NotNull byte[] payload, int channel) {
             Log.d(TAG, "onSent");
             handler.postDelayed(new Runnable() {
                 @Override
@@ -68,7 +68,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         // After we received a sound Id
         @Override
-        public void onReceived(@Nullable byte[] bytes, int i) {
+        public void onReceived(@Nullable byte[] data, int channel) {
             Log.d(TAG, "onReceived");
         }
 
@@ -124,7 +124,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
         alarmManager =  (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         scheduleNextAlarm(context, alarmManager);
 
-        chirp = new ChirpConnect(context, CHIRP_APP_KEY, CHIRP_APP_SECRET);
+        chirp = new ChirpSDK(context, CHIRP_APP_KEY, CHIRP_APP_SECRET);
 
         ChirpError error = chirp.setConfig(CHIRP_APP_CONFIG);
         if (error.getCode() == 0) {

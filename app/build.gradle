@@ -15,8 +15,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 5
-        versionName "0.0.5"
+        versionCode 6
+        versionName "0.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"
@@ -126,7 +126,7 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
     implementation 'com.king.view:radarview:1.0.2'
-    implementation "io.chirp:chirpsdk:3.9.5"
+    implementation "io.chirp:chirpsdk:3.10.0"
 
     // Required only if Facebook login support is required. Find the latest Facebook SDK releases here: https://goo.gl/Ce5L94
     implementation 'com.facebook.android:facebook-android-sdk:5.5.1'

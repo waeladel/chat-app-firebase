@@ -38,9 +38,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.chirp.connect.ChirpConnect;
-import io.chirp.connect.interfaces.ConnectEventListener;
-import io.chirp.connect.models.ChirpError;
+import io.chirp.chirpsdk.ChirpSDK;
+import io.chirp.chirpsdk.models.ChirpError;
+import io.chirp.chirpsdk.interfaces.ChirpEventListener;
 
 import static com.trackaty.chat.App.FIND_NEARBY_CHANNEL_ID;
 
@@ -71,7 +71,7 @@ public class FindNearbyService extends Service {
     private static final int VISIBILITY_NOTIFICATION_ID = 7;
 
     private Notification mNotification;
-    private ChirpConnect chirp;
+    private ChirpSDK chirp;
     private CountDownTimer mSearchingTimer; // A timer to stop service when finished
     private long mTimeLiftInMillis;// Remaining time till the search ends
 
@@ -87,7 +87,7 @@ public class FindNearbyService extends Service {
     String CHIRP_APP_CONFIG = BuildConfig.CHIRP_APP_CONFIG;
 
     // A listener for sound id
-    ConnectEventListener chirpEventListener = new ConnectEventListener() {
+    ChirpEventListener chirpEventListener = new ChirpEventListener() {
         @Override
         public void onSent(@NotNull byte[] bytes, int i) {
 
@@ -100,13 +100,13 @@ public class FindNearbyService extends Service {
 
         // After we received a sound Id
         @Override
-        public void onReceived(@Nullable byte[] bytes, int i) {
-            if (bytes != null && bytes.length > 0) {
+        public void onReceived(@Nullable byte[] data, int channel) {
+            if (data != null && data.length > 0) {
                 //String identifier = new String(bytes);
-                receivedSoundID = bytesToInt(bytes); // get soundId from received bytes
+                receivedSoundID = bytesToInt(data); // get soundId from received bytes
                 // get user from it's sound id, if there is no blocking relation, update search results
                 getUser(receivedSoundID);
-                Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+bytes.length);
+                Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+data.length);
             } else {
                 Log.e(TAG, "ChirpError: Decode failed");
             }
@@ -150,7 +150,7 @@ public class FindNearbyService extends Service {
         }
 
         // Create new chirp instance
-        chirp = new ChirpConnect(this, CHIRP_APP_KEY, CHIRP_APP_SECRET);
+        chirp = new ChirpSDK(this, CHIRP_APP_KEY, CHIRP_APP_SECRET);
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -223,7 +223,6 @@ public class FindNearbyService extends Service {
         ChirpError error = chirp.stop();
         if (error.getCode() > 0) {
             Log.e(TAG, error.getMessage());
-            return;
         }
     }
 
@@ -234,7 +233,6 @@ public class FindNearbyService extends Service {
         ChirpError error = chirp.start(false, true);
         if (error.getCode() > 0) {
             Log.e("ChirpError: ", error.getMessage());
-            return;
         }else{
             Log.d(TAG, "chirp started. lets start timer");
             chirp.setListener(chirpEventListener);
