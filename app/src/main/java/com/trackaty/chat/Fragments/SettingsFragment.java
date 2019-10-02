@@ -224,6 +224,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                                                 Log.d(TAG , "current user doesn't have a sound id");
                                                 Toast.makeText(mActivityContext, R.string.no_sound_id_found_error,
                                                         Toast.LENGTH_LONG).show();
+                                                visiblePreference.setChecked(false);
                                             }
                                         }else{
                                             // stop the alarm if already started
