@@ -12,6 +12,18 @@
             app:summary="@string/settings_preference_summery_visible"
             app:defaultValue="false"
             />
+        <SwitchPreference
+            app:key="speaker"
+            app:title="@string/settings_preference_title_speaker"
+            app:summary="@string/settings_preference_summery_speaker"
+            app:defaultValue="false"
+            app:icon="@drawable/ic_speaker_volume_up"
+            />
+        <SeekBarPreference
+            app:key="volume"
+            app:title="@string/settings_preference_title_volume"
+            app:summary="@string/settings_preference_summery_volume"/>
+
 
     </PreferenceCategory>
 

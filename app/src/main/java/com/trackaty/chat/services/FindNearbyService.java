@@ -3,15 +3,22 @@ package com.trackaty.chat.services;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,12 +31,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.App;
 import com.trackaty.chat.BuildConfig;
 import com.trackaty.chat.Interface.FirebaseRelationCallback;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Relation;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.receivers.MicMuteChangedReceiver;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +62,7 @@ public class FindNearbyService extends Service {
     private FirebaseUser mFirebaseCurrentUser;
     private String mCurrentUserId; //get current to get uid
     private int receivedSoundID;
+    private App mApplication;
     // Binder given to clients
     //private final IBinder binder = new LocalBinder();
     // Random number generator
@@ -70,6 +80,9 @@ public class FindNearbyService extends Service {
     private static final int FIND_NOTIFICATION_ID = 6;
     private static final int VISIBILITY_NOTIFICATION_ID = 7;
 
+    private static final String SHOW_MUTED_MIC = "showMutedMic"; // to show muted mic alert fragment
+    private static final String ALERT_MESSAGE_EXTRA_KEY = "AudioChangeKey";
+
     private Notification mNotification;
     private ChirpSDK chirp;
     private CountDownTimer mSearchingTimer; // A timer to stop service when finished
@@ -86,11 +99,18 @@ public class FindNearbyService extends Service {
     String CHIRP_APP_SECRET = BuildConfig.CHIRP_APP_SECRET;
     String CHIRP_APP_CONFIG = BuildConfig.CHIRP_APP_CONFIG;
 
+    // To listen to mic mute changes
+    private IntentFilter mMuteChangedIntentFilter;
+    private MicMuteChangedReceiver mMicMuteChangedReceiver;
+    private AudioManager mAudioManager;
+
+    private int checkMicMuteWindow = 0; // to listen for mic mute on api < 28 P
+
     // A listener for sound id
     ChirpEventListener chirpEventListener = new ChirpEventListener() {
         @Override
-        public void onSent(@NotNull byte[] bytes, int i) {
-
+        public void onSent(byte[] data, int channel) {
+            Log.v("ChirpSDK", "Sent data");
         }
 
         @Override
@@ -113,18 +133,18 @@ public class FindNearbyService extends Service {
         }
 
         @Override
-        public void onReceiving(int i) {
-
+        public void onReceiving(int channel) {
+            Log.v("ChirpSDK", "Receiving data...");
         }
 
         @Override
-        public void onStateChanged(int i, int i1) {
-
+        public void onStateChanged(int oldState, int newState) {
+            Log.v("onStateChanged", " oldState= "+oldState + " newState="+ newState);
         }
 
         @Override
-        public void onSystemVolumeChanged(float v, float v1) {
-
+        public void onSystemVolumeChanged(float oldVolume, float newVolume) {
+            Log.v("ChirpSDK", "Volume changed from: " + oldVolume +" to: " + newVolume);
         }
     };
 
@@ -149,6 +169,33 @@ public class FindNearbyService extends Service {
             return;
         }
 
+        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mApplication = ((App)this.getApplicationContext());
+        // To listen to mic mute changes
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mMuteChangedIntentFilter = new IntentFilter(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED);
+            mMicMuteChangedReceiver = new MicMuteChangedReceiver(){
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    super.onReceive(context, intent);
+                    Log.d(TAG, "AudioManager microphone mute onReceive");
+
+                    if (AudioManager.ACTION_MICROPHONE_MUTE_CHANGED.equals(intent.getAction())) {
+                        Log.d(TAG, "AudioManager microphone mute changed");
+                        // To check if mic is muted or not
+                        if(mAudioManager != null && mAudioManager.isMicrophoneMute()) {
+                            sendAlertMessage();
+                            // Stop timer and service
+                            notifyUi();
+                            stopSelf();
+                        }
+                    }
+                }
+            };
+
+            // register the receiver listen for mic mute changes
+            registerReceiver(mMicMuteChangedReceiver,mMuteChangedIntentFilter);
+        }
         // Create new chirp instance
         chirp = new ChirpSDK(this, CHIRP_APP_KEY, CHIRP_APP_SECRET);
 
@@ -163,7 +210,6 @@ public class FindNearbyService extends Service {
 
         notificationManager = NotificationManagerCompat.from(this);
         mTimeLiftInMillis = SEARCHING_PERIOD;
-
     }
 
     @Override
@@ -214,6 +260,11 @@ public class FindNearbyService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // unregister Mic Mute Changed Receiver
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            unregisterReceiver(mMicMuteChangedReceiver);
+        }
     }
 
     public void stopSdk() {
@@ -256,12 +307,29 @@ public class FindNearbyService extends Service {
             public void onTick(long millisUntilFinished) {
                 //Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
                 //mTimeLiftInMillis = millisUntilFinished;
+                // Only user this method if api is less than 28. We already listen to ACTION_MICROPHONE_MUTE_CHANGED in API >= 28
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                    checkMicMuteWindow ++; // increase the check window to check every 10 seconds
+                    if(checkMicMuteWindow >= 10){
+                        // To check if mic is muted or not
+                        Log.d(TAG, "10 seconds passed, lets check if mic is muted or not. checkMicMuteWindow= "+checkMicMuteWindow);
+                        if(mAudioManager != null && mAudioManager.isMicrophoneMute()) {
+                            sendAlertMessage();
+                            // Stop timer and service
+                            notifyUi();
+                            stopSelf();
+                        }
+
+                        checkMicMuteWindow = 0; // reset the counter to start checking again when it reaches 10 seconds
+                    }
+                }
             }
 
             @Override
             public void onFinish() {
                 Log.d(TAG, "mRemainingTimer onFinish.");
                 CancelTimer();
+                notifyUi();
                 stopSelf();
             }
         }.start();
@@ -305,6 +373,25 @@ public class FindNearbyService extends Service {
                 ((bytes[3] & 0xFF) << 0 );*/
 
         return ByteBuffer.wrap(bytes).getInt();
+    }
+
+    private void notifyUi() {
+        Log.d(TAG, "Broadcasting message");
+        Intent intent = new Intent("com.basbes.dating.serviceStopped");
+        // You can also include some extra data.
+        intent.putExtra("isServiceStopped", true);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void sendAlertMessage() {
+        if(mApplication.isInForeground){
+            // App is in foreground, show dialog instead of toast
+            Intent intent = new Intent("com.basbes.dating.audioChanged");
+            intent.putExtra(ALERT_MESSAGE_EXTRA_KEY, SHOW_MUTED_MIC);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }else{
+            Toast.makeText(this, R.string.mic_muted_toast, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void getUser(int soundID) {

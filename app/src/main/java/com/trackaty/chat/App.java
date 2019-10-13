@@ -75,6 +75,7 @@ public class App extends MultiDexApplication { // had to enable MultiDex after a
     private SharedPreferences sharedPreferences;
     private AudioAttributes audioAttributes;
 
+    public boolean isInForeground = false; // to check if app is open or not from alarm broadcast receiver
    /* private ValueEventListener onlineListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot snapshot) {

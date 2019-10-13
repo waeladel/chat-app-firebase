@@ -7,10 +7,13 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -39,6 +42,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,10 +55,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.king.view.radarview.RadarView;
 import com.trackaty.chat.Adapters.UsersAdapter;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.UsersViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.receivers.MicMuteChangedReceiver;
 import com.trackaty.chat.receivers.SoundIdAlarm;
 import com.trackaty.chat.services.FindNearbyService;
 
@@ -65,6 +71,7 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.POWER_SERVICE;
 import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
 
@@ -143,6 +150,15 @@ public class MainFragment extends Fragment {
     private static final int REACHED_THE_BOTTOM = -2;
     private static int mScrollDirection;
     private static int mLastVisibleItem;
+    private AudioManager mAudioManager; // To check if mic is muted or not
+   /* // To listen to mic mute changes
+    private IntentFilter mMuteChangedIntentFilter;
+    private MicMuteChangedReceiver mMicMuteChangedReceiver;
+    private int checkMicMuteWindow = 0; // to listen for mic mute on api < 28 P*/
+
+    //Fragments tags
+    private  static final String MUTED_MIC_ALERT_FRAGMENT_TAG = "MutedMicFragment"; // Tag for confirm block and delete alert fragment
+
 
     public MainFragment() {
         // Required empty public constructor
@@ -168,6 +184,46 @@ public class MainFragment extends Fragment {
         setHasOptionsMenu(true); // To add search menu item programmatically
 
         fragmentManager = getFragmentManager();
+
+        /*// To listen to mic mute changes
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mMuteChangedIntentFilter = new IntentFilter(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED);
+            mMicMuteChangedReceiver = new MicMuteChangedReceiver(){
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    super.onReceive(context, intent);
+                    if (AudioManager.ACTION_MICROPHONE_MUTE_CHANGED.equals(intent.getAction())) {
+                        Log.d(TAG, "AudioManager microphone mute changed");
+                        // To check if mic is muted or not
+                        AudioManager mAudioManager = (AudioManager) context.getSystemService(AUDIO_SERVICE);
+                        if(mAudioManager != null && mAudioManager.isMicrophoneMute()){
+                            // Stop alarm and radar view
+                            mRadarView.stop();
+                            mRadarLayout.setVisibility(View.GONE);
+                            CancelTimer();
+                            *//*if (isMyServiceRunning(FindNearbyService.class)) {
+                                showMutedMicDialog();
+                            }*//*
+                        }
+                    }
+                }
+            };
+        }*/
+
+        /*{
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                super.onReceive(context, intent);
+                if (AudioManager.ACTION_MICROPHONE_MUTE_CHANGED.equals(intent.getAction())) {
+                    Log.d(TAG, "AudioManager microphone mute changed");
+                    // To check if mic is muted or not
+                    AudioManager mAudioManager = (AudioManager) context.getSystemService(AUDIO_SERVICE);
+                    //if(mAudioManager != null && mAudioManager.isMicrophoneMute()){
+                    Toast.makeText(context, R.string.mic_muted_error ,Toast.LENGTH_LONG).show();
+                    // Stop alarm and radar view
+                }
+            }
+        };*/
 
         // prepare the Adapter
         mUserArrayList  = new ArrayList<>();
@@ -537,6 +593,20 @@ public class MainFragment extends Fragment {
 
         // Update searching UI (radar & timer) on onStart
         toggleSearchingUI();
+
+        /*// Register mic mute change Receiver
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mActivityContext.registerReceiver(mMicMuteChangedReceiver,mMuteChangedIntentFilter);
+        }*/
+        /*MicMuteChangedReceiver mMicMuteChangedReceiver = new MicMuteChangedReceiver();
+        mMicMuteChangedReceiver.registerReceiver(this);*/
+
+        // pass reference to interface from onCreate()
+        // Register to receive messages.
+        // We are registering an observer (mServiceReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(mActivityContext).registerReceiver(mServiceReceiver,
+                new IntentFilter("com.basbes.dating.serviceStopped"));
     }
 
     @Override
@@ -585,6 +655,13 @@ public class MainFragment extends Fragment {
 
         }
 
+        /*// unregister Mic Mute Changed Receiver
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mActivityContext.unregisterReceiver(mMicMuteChangedReceiver);
+        }*/
+
+        // Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(mActivityContext).unregisterReceiver(mServiceReceiver);
     }
 
     @Override
@@ -673,10 +750,25 @@ public class MainFragment extends Fragment {
             Log.d(TAG, "startStopSearchService: is Service running true= "+isMyServiceRunning(FindNearbyService.class));
             stopMyService(FindNearbyService.class);
             CancelTimer();
+
+            // unregister Mic Mute Changed Receiver
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                mActivityContext.unregisterReceiver(mMicMuteChangedReceiver);
+            }*/
         } else {
             Log.d(TAG, "startStopSearchService: is Service running false= "+isMyServiceRunning(FindNearbyService.class));
-            startMyService(FindNearbyService.class);
-            StartTimer();
+            if(!isMicMuted()){
+                Log.d(TAG , "Microphone is not Muted. lets start search service");
+                startMyService(FindNearbyService.class);
+                StartTimer();
+
+                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    mActivityContext.registerReceiver(mMicMuteChangedReceiver,mMuteChangedIntentFilter);
+                }*/
+            }else{
+                Log.d(TAG , "Microphone is Muted. show dialog to enable user to choose");
+                showMutedMicDialog();
+            }
         }
     }
 
@@ -895,9 +987,29 @@ public class MainFragment extends Fragment {
         mSearchingTimer = new CountDownTimer( mTimeLiftInMillis,1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
+                //Log.d(TAG, "onTick.  millisUntilFinished= "+ millisUntilFinished);
                 mTimeLiftInMillis = millisUntilFinished;
                 UpdateTimerText(mTimeLiftInMillis);// Update timer text on every tick
+
+                /*// Only user this method if api is less than 28
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                    checkMicMuteWindow ++; // increase the check window to check every 10 seconds
+                    if(checkMicMuteWindow >= 10){
+                        // To check if mic is muted or not
+                        Log.d(TAG, "10 seconds passed, lets check if mic is muted or not. checkMicMuteWindow= "+checkMicMuteWindow);
+                        if(mAudioManager != null && mAudioManager.isMicrophoneMute()) {
+                            // Stop alarm and radar view
+                            mRadarView.stop();
+                            mRadarLayout.setVisibility(View.GONE);
+                            CancelTimer();
+                            *//*if (isMyServiceRunning(FindNearbyService.class)) {
+                                showMutedMicDialog();
+                            }*//*
+                        }
+
+                        checkMicMuteWindow = 0; // reset the counter to start checking again when it reaches 10 seconds
+                    }
+                }*/
             }
 
             @Override
@@ -929,9 +1041,66 @@ public class MainFragment extends Fragment {
 
         // formatted timer text
         String formattedTimeLeft = String.format(Locale.getDefault(),"%02d:%02d", minutes,seconds );
-        Log.d(TAG, "UpdateActiveTimeText: hms= "+ formattedTimeLeft);
+        //Log.d(TAG, "UpdateActiveTimeText: hms= "+ formattedTimeLeft);
         //mRemainingTimeText.setText(formattedTimeLeft);
         mTimerText.setText(formattedTimeLeft);
     }
 
+    private boolean isMicMuted() {
+        // to check if microphone is muted before starts search service
+        mAudioManager = (AudioManager) mActivityContext.getSystemService(AUDIO_SERVICE);
+        if(mAudioManager != null){
+            Log.d(TAG, "AudioManager isMicrophoneMute =" + mAudioManager.isMicrophoneMute());
+            return mAudioManager.isMicrophoneMute();
+        }else{
+            return false;
+        }
+    }
+
+    //Show a dialog to allow user to enable his microphone
+    private void showMutedMicDialog() {
+        MutedMicAlertFragment mutedMicAlertFragment = MutedMicAlertFragment.newInstance(mActivityContext);
+        if (getFragmentManager() != null) {
+            fragmentManager = getFragmentManager();
+            mutedMicAlertFragment.show(fragmentManager, MUTED_MIC_ALERT_FRAGMENT_TAG);
+            Log.i(TAG, "mutedMicAlertFragment show clicked ");
+        }
+    }
+
+    /*@Override
+    public void onClick(View view, int position, boolean isLongClick) {
+        Log.d(TAG, "onClick view= " + view + " position= " + position);
+        if (position == 1) { // Enable microphone is clicked
+            // to check if microphone is muted before starts search service
+            if (mAudioManager != null && mAudioManager.isMicrophoneMute()) {
+                Log.d(TAG, "AudioManager is Microphone Muted=" + mAudioManager.isMicrophoneMute());
+                mAudioManager.setMicrophoneMute(false);
+                Log.d(TAG , "Microphone is not Muted. lets start search service");
+                startMyService(FindNearbyService.class);
+                StartTimer();
+            }
+        }
+    }*/
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private BroadcastReceiver mServiceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            if (intent != null && "com.basbes.dating.serviceStopped".equals(intent.getAction())){
+                Log.d(TAG, "Got message: serviceStopped");
+                if(mAudioManager != null && mAudioManager.isMicrophoneMute()){
+                    // Stop alarm and radar view
+                    mRadarView.stop();
+                    mRadarLayout.setVisibility(View.GONE);
+                    CancelTimer();
+                    /*if (isMyServiceRunning(FindNearbyService.class)) {
+                       showMutedMicDialog();
+                    }*/
+                }
+            }
+        }
+    };
 }
+

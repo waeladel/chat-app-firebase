@@ -4,16 +4,21 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioDeviceInfo;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -27,11 +32,13 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavDeepLinkBuilder;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,6 +48,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.trackaty.chat.BuildConfig;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.FilesHelper;
 import com.trackaty.chat.activities.MainActivity;
@@ -51,7 +59,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
+import io.chirp.chirpsdk.ChirpSDK;
+import io.chirp.chirpsdk.helpers.SettingsContentObserver;
+import io.chirp.chirpsdk.interfaces.SettingsContentObserverReady;
+
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.POWER_SERVICE;
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
@@ -62,6 +75,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     // click listener to pass click events to parent fragment
 
     private static final String PREFERENCE_KEY_VISIBLE = "visible" ;
+    private static final String PREFERENCE_KEY_SPEAKER = "speaker";
+    private static final String PREFERENCE_KEY_VOLUME = "volume";
     private static final String PREFERENCE_KEY_NIGHT = "night" ;
     private static final String PREFERENCE_KEY_RINGTONE = "notification";
     private static final String PREFERENCE_KEY_VERSION = "version";
@@ -88,7 +103,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     private Preference versionPreference, ringTonePreference;
     private ListPreference nightPreference;
-    private SwitchPreference visiblePreference;
+    private SwitchPreference visiblePreference, speakerPreference;
+    private SeekBarPreference volumePreference; 
 
     private Context mActivityContext;
     private Activity activity;
@@ -110,7 +126,16 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private PendingIntent pendingIntent;
     private NotificationManagerCompat notificationManager;
     private Notification mNotification;
+    private static final String PREFERENCE_KEY_HEADSET_SHOWN = "headsetShownKey" ; // to check if headset alert fragment was shown or not from alarm broadcast receiver
+    private static final String PREFERENCE_KEY_SPEAKER_ON_SHOWN = "SpeakerOnShownKey"; // to check if turn on speaker alert fragment was shown or not from alarm broadcast receiver
+    private static final String PREFERENCE_KEY_VOLUME_SHOWN = "volumeShownKey"; // to check if increase volume fragment was shown or not from alarm broadcast receiver
 
+    private AudioManager mAudioManager; // to control speaker
+    //Get chirp secret keys from the keystore
+    String CHIRP_APP_KEY = BuildConfig.CHIRP_APP_KEY;
+    String CHIRP_APP_SECRET = BuildConfig.CHIRP_APP_SECRET;
+    String CHIRP_APP_CONFIG = BuildConfig.CHIRP_APP_CONFIG;
+    private ChirpSDK chirp;
 
     public SettingsFragment() {
         // Empty constructor is required for DialogFragment
@@ -149,6 +174,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // Create alarm manager and Intent to be used when user set the visibility alarm
         alarmManager  =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
         alarmIntent  = new Intent(activity, SoundIdAlarm.class);
+
+        // to control speaker
+        mAudioManager = (AudioManager) mActivityContext.getSystemService(AUDIO_SERVICE);
+
+        // to control system volume
+        SettingsContentObserver settingsContentObserver = new SettingsContentObserver(mActivityContext, new Handler(), new Handler());
+        chirp = new ChirpSDK(mActivityContext, CHIRP_APP_KEY, CHIRP_APP_SECRET, settingsContentObserver);
 
         // Display app version
         versionPreference = findPreference(PREFERENCE_KEY_VERSION);
@@ -256,6 +288,53 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             });
         }
 
+        speakerPreference = findPreference(PREFERENCE_KEY_SPEAKER);
+        if(speakerPreference != null){
+            speakerPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.d(TAG, "Pending Preference value is: " + newValue);
+                    if(isHeadsetOn(mAudioManager) || (mAudioManager.getMode()== AudioManager.MODE_IN_CALL)||(mAudioManager.getMode()== AudioManager.MODE_IN_COMMUNICATION)){
+                        // all conditions are met, proceed with toggle speaker on or of
+                        if(newValue.equals(true)){
+                            if(!mAudioManager.isSpeakerphoneOn()){
+                                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                                mAudioManager.setSpeakerphoneOn(true);
+                                speakerPreference.setIcon(R.drawable.ic_speaker_volume_up_active);
+                            }
+                        }else{
+                            if(mAudioManager.isSpeakerphoneOn()){
+                                //mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                                mAudioManager.setSpeakerphoneOn(false);
+                                speakerPreference.setIcon(R.drawable.ic_speaker_volume_up);
+                            }
+                        }
+                        return true; // to change the preference value
+                    }else{
+                        // you can't change speaker settings, you are not in a call or have plugged headset
+                        Log.d(TAG , "you can't change speaker settings, you are not in a call or have plugged headset");
+                        Toast.makeText(mActivityContext, R.string.cannot_toggle_speaker_toast, Toast.LENGTH_LONG).show();
+                        return false; // don't change the preference value
+                    }
+                }
+            });
+        }
+        volumePreference = findPreference(PREFERENCE_KEY_VOLUME);
+        if(volumePreference != null){
+            volumePreference.setShowSeekBarValue(true);
+            volumePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    float val = (Float.parseFloat(String.valueOf(newValue)))/100;
+                    Log.d(TAG, "Pending Preference value is: " + val);
+                    chirp.setSystemVolume(val);
+                    return true; // to change the preference value
+                }
+            });
+
+        }
+
+
         nightPreference = findPreference(PREFERENCE_KEY_NIGHT);
         if (nightPreference != null ) {
             // include "user system default" on android q API 29 and above
@@ -357,6 +436,52 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 actionbar.setDisplayShowCustomEnabled(false);
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+        if(speakerPreference != null) {
+            if (mAudioManager.isSpeakerphoneOn()) {
+                //sharedPreferences.edit().putBoolean(PREFERENCE_KEY_SPEAKER,true).apply();
+                Log.d(TAG, "Speakerphone is On: setting default value to true");
+                speakerPreference.setChecked(true);
+
+            } else {
+                //sharedPreferences.edit().putBoolean(PREFERENCE_KEY_SPEAKER,false).apply();
+                Log.d(TAG, "Speakerphone is off: setting default value to false");
+                speakerPreference.setChecked(false);
+            }
+        }
+
+        if(volumePreference != null) {
+            float val = chirp.getSystemVolume()*100;
+            Log.d(TAG, "float val= "+val);
+            volumePreference.setValue((int)(Math.round(val)));
+            //Log.d(TAG, "get float val= "+volumePreference.getValue());
+        }
+
+        if(visiblePreference != null){
+            if(isAlarmExist()){
+                visiblePreference.setChecked(true);
+            }else{
+                visiblePreference.setChecked(false);
+            }
+        }
+
+        // Register to receive messages.
+        // We are registering an observer (mServiceReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(mActivityContext).registerReceiver(mMutedDeviceReceiver,
+                new IntentFilter("com.basbes.dating.deviceMuted"));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(mActivityContext).unregisterReceiver(mMutedDeviceReceiver);
     }
 
     @Override
@@ -510,6 +635,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             pendingIntent.cancel();
         }
         cancelNotification();
+        // To show the alert message again
+        sharedPreferences.edit().putBoolean(PREFERENCE_KEY_HEADSET_SHOWN,false).apply();
+        // To not show the alert message of toast over and over again
+        sharedPreferences.edit().putBoolean(PREFERENCE_KEY_SPEAKER_ON_SHOWN,false).apply();
+        // To not show the alert message of toast over and over again
+        sharedPreferences.edit().putBoolean(PREFERENCE_KEY_VOLUME_SHOWN,false).apply();
     }
 
     // check if user had whiteList this app and exempted it from doze mode
@@ -538,6 +669,31 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             batteryFragment.show(fragmentManager, BATTERY_ALERT_FRAGMENT);
             Log.i(TAG, "BatteryAlertFragment show clicked ");
         }
+    }
+
+    // To check if headset is connected or not on
+    private boolean isHeadsetOn(AudioManager am) {
+        if (am == null)
+            return false;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn();
+        } else {
+            AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+
+            for (int i = 0; i < devices.length; i++) {
+                AudioDeviceInfo device = devices[i];
+
+                if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
+                        || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
     }
 
     // Create Ongoing notification when alarm is set
@@ -570,5 +726,17 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private void cancelNotification() {
         notificationManager.cancel(VISIBILITY_NOTIFICATION_ID);
     }
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "com.basbes.dating.deviceMutedChanged" is broadcasted.
+    private BroadcastReceiver mMutedDeviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            if (intent != null && "com.basbes.dating.deviceMuted".equals(intent.getAction())){
+                visiblePreference.setChecked(false);
+            }
+        }
+    };
 
 }

@@ -60,8 +60,12 @@
     <string name="activate_chat_error">Sorry, couldn\'t activate you conversation, check your internet connection</string>
 
     <string name="user_visible_error">Sorry, couldn\'t change your visibility.</string>
-
-
+    <string name="mic_muted_toast">Mic is mute; Basbes can\'t search.</string>
+    <string name="headset_plugged_toast">Basbes: unplug headset for max range, or at least don\'t wear it.</string>
+    <string name="turn_speaker_on_toast">Basbes: turn speaker on to maximize visibility range.</string>
+    <string name="increase_volume_toast">Basbes: increase volume to maximize visibility range.</string>
+    <string name="cannot_toggle_speaker_toast">You don\'t have any calls or plugged headset.</string>
+    <string name="muted_device_toast">Please disable total silence mode.</string>
     <!--hints and titles-->
     <string name="user_statistics_headline">Statistics</string>
     <string name="about_user_headline">About</string>
@@ -181,6 +185,13 @@
     <string name="chat_inactive_dialog_message">This conversation isn\'t active right now. You must wait until the recipient reactivate it.</string>
     <string name="chat_blocked_dialog_message">Communication with this person is not allowed.</string>
     <string name="activate_chat_dialog_title">Keep conversation active for:</string>
+    <string name="muted_mic_dialog_message">You can\'t find nearby users while your microphone is muted. Would you like to unmute it?</string>
+    <string name="plugged_headset_dialog_message">Headset is plugged. To maximize visibility range you must unplug it or at least do not wear it. Would you like to route audio output to the speaker?</string>
+    <string name="speaker_dialog_message">You have a call in progress, would you like to turn the speaker on to maximize visibility range?</string>
+    <string name="volume_dialog_message">Volume is too low, would you like to maximize it to achieve a wider visibility range?</string>
+
+
+
     <!--<string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without the need to scratch it. Therefore, don\'t choose it unless you feel comfortable with this person.</string>-->
     <string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without scratching. Therefore, don\'t choose it unless you start to trust this person.</string>
     <string name="message_active_default_timer">00:00:00</string>
@@ -215,11 +226,15 @@
     <string name="settings_category_about">About</string>
 
     <string name="settings_preference_title_visible">Visible to others</string>
+    <string name="settings_preference_title_speaker">Speaker</string>
+    <string name="settings_preference_title_volume">Volume</string>
     <string name="settings_preference_title_night">Night mode</string>
     <string name="settings_preference_title_ringtone">Notification sound</string>
     <string name="settings_preference_title_version">Build version</string>
 
     <string name="settings_preference_summery_visible">If disabled, other nearby devices can not discover you. Only enable this option when needed as it consumes battery.</string>
+    <string name="settings_preference_summery_speaker">Turn the speaker on if you have a call in progress, VoIP call, audio chat, or your headset is plugged.</string>
+    <string name="settings_preference_summery_volume">Increase the volume to be discoverable in a wider range. Maximum Volume covers about 12 meters.</string>
 
     <!--Images content Description-->
     <string name="cover_image_description">Your cover image</string>
@@ -235,7 +250,7 @@
     <string name="notification_message_title">New message</string>
     <string name="notification_request_sent_title">New reveal request</string>
     <string name="notification_request_approved_title">Request approved</string>
-    <string name="notification_nearby_title">Looking for love</string>
+    <string name="notification_nearby_title">Looking for your crush</string>
     <string name="notification_visibility_title">You are visible</string>
 
     <!--<string name="notification_like_message">%1$s likes you</string>-->
@@ -246,7 +261,7 @@
     <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
     <string name="notification_request_approved_body">%1$s approved your reveal request.</string>
     <string name="notification_nearby_body">Searching for nearby devices is currently active</string>
-    <string name="notification_visibility_body">You are currently visible to nearby potential lovers</string>
+    <string name="notification_visibility_body">You are currently discoverable by others</string>
 
 
     <string name="notification_default_like_body">You received a new like.</string>
@@ -271,7 +286,7 @@
     <string name="messages_notification_channel_description">Get notifications when you have a new message.</string>
     <string name="reveal_notification_channel_description">Get notifications when people send you requests to reveal your private contacts.</string>
     <string name="nearby_notification_channel_description">Display a notification indicates that you are currently searching for a person you target.</string>
-    <string name="visibility_notification_channel_description">Display a notification indicates that you are currently visible to others.</string>
+    <string name="visibility_notification_channel_description">Display a notification indicates that you are currently discoverable by others.</string>
 
 
 

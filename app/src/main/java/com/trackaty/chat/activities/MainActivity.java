@@ -1,6 +1,11 @@
 package com.trackaty.chat.activities;
 
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,8 +20,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.NavDirections;
@@ -39,10 +46,17 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.trackaty.chat.App;
+import com.trackaty.chat.Fragments.HeadsetAlertFragment;
 import com.trackaty.chat.Fragments.MainFragmentDirections;
+import com.trackaty.chat.Fragments.MutedMicAlertFragment;
+import com.trackaty.chat.Fragments.SpeakerAlertFragment;
+import com.trackaty.chat.Fragments.VolumeAlertFragment;
 import com.trackaty.chat.R;
 import com.trackaty.chat.ViewModels.MainActivityViewModel;
 import com.trackaty.chat.models.User;
+import com.trackaty.chat.receivers.HeadsetPluggedReceiver;
+import com.trackaty.chat.receivers.MutedDeviceReceiver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -96,6 +110,29 @@ public class MainActivity extends AppCompatActivity {
     private  static final String PERMISSION_RATIONALE_FRAGMENT = "permissionFragment";
     private Intent serviceIntent;
 
+    // To listen to mic mute changes
+    private IntentFilter mHeadsetIntentFilter, mMutedDeviceIntentFilter;
+    private HeadsetPluggedReceiver mHeadsetPluggedReceiver;
+
+    // To listen to muted device changes
+    private MutedDeviceReceiver mMutedDeviceReceiver;
+
+    private  static final int HEADSET_STATE_PLUGGED = 1;
+    private  static final int HEADSET_STATE_UNPLUGGED = 0;
+
+    private static final String PREFERENCE_KEY_HEADSET_SHOWN = "headsetShownKey" ; // to check if headset alert fragment was shown or not from alarm broadcast receiver
+    private static final String PREFERENCE_KEY_SPEAKER_ON_SHOWN = "SpeakerOnShownKey"; // to check if turn on speaker alert fragment was shown or not from alarm broadcast receiver
+    private static final String PREFERENCE_KEY_VOLUME_SHOWN = "volumeShownKey"; // to check if increase volume fragment was shown or not from alarm broadcast receiver
+    private static final String SHOW_MUTED_MIC = "showMutedMic"; // to show muted mic alert fragment
+    private static final String ALERT_MESSAGE_EXTRA_KEY = "AudioChangeKey";
+
+    private FragmentManager fragmentManager;
+
+    //Fragments tags
+    private  static final String HEADSET_ALERT_FRAGMENT_TAG = "HeadsetAlertFragmentTag"; // Tag for headset plugged alert dialog
+    private  static final String SPEAKER_ALERT_FRAGMENT_TAG = "SpeakerOnFragmentTag"; // Tag for headset plugged alert dialog
+    private  static final String VOLUME_ALERT_FRAGMENT_TAG = "VolumeAlertFragmentTag"; // Tag for headset plugged alert dialog
+    private  static final String MUTED_MIC_ALERT_FRAGMENT_TAG = "MutedMicFragment"; // Tag for confirm block and delete alert fragment
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -327,7 +364,20 @@ public class MainActivity extends AppCompatActivity {
             initiateObserveChatCount(currentUserId);
             initiateObserveNotificationCount(currentUserId);
         }*/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mHeadsetIntentFilter = new IntentFilter(AudioManager.ACTION_HEADSET_PLUG);
+            mHeadsetPluggedReceiver = new HeadsetPluggedReceiver();
 
+            // register the receiver listen for mic mute changes
+            registerReceiver(mHeadsetPluggedReceiver, mHeadsetIntentFilter);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mMutedDeviceIntentFilter = new IntentFilter(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
+            mMutedDeviceReceiver = new MutedDeviceReceiver();
+            // register the receiver listen for mic mute changes
+            registerReceiver(mMutedDeviceReceiver, mMutedDeviceIntentFilter);
+        }
     }//End of onCreate
 
     // start observation for Notifications count
@@ -486,19 +536,40 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
         if(isFirstloaded){ // only add the Listener when loaded for the first time
             mAuth.addAuthStateListener(mAuthListener);
-            Log.d(TAG, "onStart mAuthListener added");
+            Log.d(TAG, "MainActivity onStart mAuthListener added");
         }
         Log.d(TAG, "MainActivity onStart");
         Log.d(TAG, "mAuthListener="+ mAuthListener);
 
         //add Listener for destination changes
         navController.addOnDestinationChangedListener(mDestinationListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "MainActivity onResume");
+        // Register to receive messages.
+        // We are registering an observer (mServiceReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(this).registerReceiver(mAudioAlertsReceiver,
+                new IntentFilter("com.basbes.dating.audioChanged"));
+        ((App) getApplication()).isInForeground = true; // is used to check if app is closed from alarm broadcast receiver
+    }
+
+    @Override
+    public void onPause () {
+        super.onPause ();
+        Log.d(TAG, "MainActivity onPause");
+
+        // Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mAudioAlertsReceiver);
+        ((App) getApplication()).isInForeground = false; // is used to check if app is closed from alarm broadcast receiver
     }
 
     @Override
@@ -522,13 +593,6 @@ public class MainActivity extends AppCompatActivity {
             //remove the Listener for destination changes
             navController.removeOnDestinationChangedListener(mDestinationListener);
         }
-
-    }
-
-    @Override
-    public void onPause () {
-        super.onPause ();
-        Log.d(TAG, "MainActivity onPause");
     }
 
     @Override
@@ -539,6 +603,14 @@ public class MainActivity extends AppCompatActivity {
             // Remove onlineListener
             connectedRef.removeEventListener(onlineListener);
             Log.d(TAG, "Remove connectedRef onlineListener");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            unregisterReceiver(mHeadsetPluggedReceiver);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            unregisterReceiver(mMutedDeviceReceiver);
         }
     }
 
@@ -821,6 +893,77 @@ public class MainActivity extends AppCompatActivity {
         //Navigation.findNavController(this, R.id.host_fragment).navigate(R.id.mainFragment);
         if (null != navController.getCurrentDestination() && R.id.notificationsFragment != navController.getCurrentDestination().getId()) {
             navController.navigate(R.id.notificationsFragment);
+        }
+    }
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private BroadcastReceiver mAudioAlertsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            if (intent != null && "com.basbes.dating.audioChanged".equals(intent.getAction())){
+                //get the attached bundle from the intent
+                Bundle extras = intent.getExtras();
+                if(extras != null){
+                    switch (extras.getString(ALERT_MESSAGE_EXTRA_KEY, " ")){
+                        case PREFERENCE_KEY_HEADSET_SHOWN :
+                            Log.d(TAG, "Show headset alert dialog");
+                            showAudioAlertDialog(PREFERENCE_KEY_HEADSET_SHOWN);
+                            break;
+                        case PREFERENCE_KEY_SPEAKER_ON_SHOWN:
+                            Log.d(TAG, "Show loud speaker alert dialog");
+                            showAudioAlertDialog(PREFERENCE_KEY_SPEAKER_ON_SHOWN );
+                            break;
+                        case PREFERENCE_KEY_VOLUME_SHOWN:
+                            Log.d(TAG, "Show volume increase alert dialog");
+                            showAudioAlertDialog(PREFERENCE_KEY_VOLUME_SHOWN);
+                            break;
+                        case SHOW_MUTED_MIC:
+                            Log.d(TAG, "Show volume increase alert dialog");
+                            showAudioAlertDialog(SHOW_MUTED_MIC);
+                            break;
+                    }
+
+                }
+            }
+        }
+    };
+
+    private void showAudioAlertDialog(String dialogType) {
+        switch (dialogType){
+            case PREFERENCE_KEY_HEADSET_SHOWN:
+                Log.d(TAG, "headset alert dialog is showing");
+                HeadsetAlertFragment HeadsetDialogFragment = HeadsetAlertFragment.newInstance(this);
+                if (getFragmentManager() != null) {
+                    fragmentManager = getSupportFragmentManager();
+                    HeadsetDialogFragment.show(fragmentManager, HEADSET_ALERT_FRAGMENT_TAG);
+                }
+                break;
+            case PREFERENCE_KEY_SPEAKER_ON_SHOWN:
+                Log.d(TAG, "loud speaker alert dialog is showing");
+                SpeakerAlertFragment SpeakerDialogFragment = SpeakerAlertFragment.newInstance(this);
+                if (getFragmentManager() != null) {
+                    fragmentManager = getSupportFragmentManager();
+                    SpeakerDialogFragment.show(fragmentManager, SPEAKER_ALERT_FRAGMENT_TAG);
+                }
+                break;
+            case PREFERENCE_KEY_VOLUME_SHOWN:
+                Log.d(TAG, "volume increase alert dialog is showing");
+                VolumeAlertFragment volumeDialogFragment = VolumeAlertFragment.newInstance(this);
+                if (getFragmentManager() != null) {
+                    fragmentManager = getSupportFragmentManager();
+                    volumeDialogFragment.show(fragmentManager, VOLUME_ALERT_FRAGMENT_TAG);
+                }
+                break;
+            case SHOW_MUTED_MIC:
+                MutedMicAlertFragment mutedMicAlertFragment = MutedMicAlertFragment.newInstance(this);
+                if (getFragmentManager() != null) {
+                    fragmentManager = getSupportFragmentManager();
+                    mutedMicAlertFragment.show(fragmentManager, MUTED_MIC_ALERT_FRAGMENT_TAG);
+                    Log.i(TAG, "mutedMicAlertFragment show clicked ");
+                }
+                break;
         }
     }
 
