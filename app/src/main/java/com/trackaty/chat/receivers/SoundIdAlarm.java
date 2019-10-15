@@ -1,12 +1,10 @@
 package com.trackaty.chat.receivers;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -28,6 +26,8 @@ import com.trackaty.chat.R;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import io.chirp.chirpsdk.ChirpSDK;
 import io.chirp.chirpsdk.interfaces.SettingsContentObserverReady;
@@ -55,7 +55,8 @@ public class SoundIdAlarm extends BroadcastReceiver {
     private AlarmManager alarmManager;
     private Intent alarmIntent;
     private PendingIntent pendingIntent;
-    private final static int ALARM_INTERVAL = 60*1000;
+    private static int mRandomAlarmInterval ;//= 60- 120 *1000;
+    private static int mRandomChannel ;// 1-8;
     private static final int REQUEST_CODE_ALARM = 13;
 
     private static final String USER_SOUND_ID_KEY = "userSoundId";
@@ -195,6 +196,16 @@ public class SoundIdAlarm extends BroadcastReceiver {
         //stringPayload = userID.getBytes(Charset.forName("UTF-8"));
         payload = intToBytes(mCurrentSoundId);
 
+        // create random alarm interval between 60 - 120
+        Random alarmRandom = new Random();
+        mRandomAlarmInterval = (alarmRandom.nextInt(61) + 60) *1000;
+        Log.d(TAG, "randomInteger. mRandomAlarmInterval= "+ mRandomAlarmInterval);
+
+        // create random channel id between 1 - 8
+        Random channelRandom = new Random();
+        mRandomChannel = channelRandom.nextInt(8) + 1;
+        Log.d(TAG, "mRandomChannel= "+ mRandomChannel);
+
         // To schedule the next alarm, this is better than repeating alarm in case of one of the alarms was delayed
         alarmManager =  (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         scheduleNextAlarm(alarmManager);
@@ -278,6 +289,14 @@ public class SoundIdAlarm extends BroadcastReceiver {
                 ChirpError error = chirp.setConfig(CHIRP_APP_CONFIG);
                 if (error.getCode() == 0) {
                     Log.v(TAG, "ChirpSDK Configured ChirpSDK");
+                    Log.v(TAG, "ChirpSDK get ChannelCount= "+ chirp.getChannelCount());
+
+                    // Set the random channel before starting the SDK
+                    ChirpError channelError = chirp.setTransmissionChannel(mRandomChannel);
+                    if (channelError.getCode() > 0) {
+                        Log.e(TAG, "ChirpError. ChannelError"+ channelError.getMessage());
+                    }
+                    Log.d(TAG, "getTransmissionChannel= "+chirp.getTransmissionChannel());
                     startSDK();
                 } else {
                     Log.e(TAG, "ChirpSDK setConfig ChirpError: "+ error.getMessage());
@@ -308,12 +327,6 @@ public class SoundIdAlarm extends BroadcastReceiver {
                 closeSDK();
             }
         });
-
-        pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK  , " chirptest:mywakelocktag");
-
-        // acquire the lock
-        wl.acquire(10 *1000L *//*10 minutes*//*);
 
         // you can do the processing here.
         userID = intent.getStringExtra("userID");
@@ -501,7 +514,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
         Log.v(TAG, "ChirpSDK mOriginalSystemVolume = "+mOriginalSystemVolume);
         chirp.setSystemVolume(mOriginalSystemVolume);
 
-        Log.i(TAG, "chirpConnect stopped and closed and wakelock is released" );
+        Log.i(TAG, "chirpConnect stopped" );
     }
 
     // To check if headset is connected or not on
@@ -630,10 +643,10 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime()+ALARM_INTERVAL-SystemClock.elapsedRealtime()%1000, pendingIntent);
+                    SystemClock.elapsedRealtime()+mRandomAlarmInterval-SystemClock.elapsedRealtime()%1000, pendingIntent);
         }else{
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime()+ALARM_INTERVAL-SystemClock.elapsedRealtime()%1000 , pendingIntent);
+                    SystemClock.elapsedRealtime()+mRandomAlarmInterval-SystemClock.elapsedRealtime()%1000 , pendingIntent);
         }
 
     }

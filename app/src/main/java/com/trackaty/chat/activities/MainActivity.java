@@ -560,6 +560,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mAudioAlertsReceiver,
                 new IntentFilter("com.basbes.dating.audioChanged"));
         ((App) getApplication()).isInForeground = true; // is used to check if app is closed from alarm broadcast receiver
+        //isFeatureAvailable(PackageManager.FEATURE_AUDIO_OUTPUT);
     }
 
     @Override
@@ -966,5 +967,21 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
+    /*public final boolean isFeatureAvailable(String feature) {
+        final PackageManager packageManager = getPackageManager();
+        Log.d(TAG, "FeatureInfo dose it have mic? "+packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE));
+        Log.d(TAG, "FeatureInfo dose it have touchscreen? "+packageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN));
+        Log.d(TAG, "FeatureInfo dose it have fake touch? "+packageManager.hasSystemFeature(PackageManager.FEATURE_FAKETOUCH));
+
+        final FeatureInfo[] featuresList = packageManager.getSystemAvailableFeatures();
+        for (FeatureInfo f : featuresList) {
+            Log.i(TAG, "FeatureInfo =  "+f.name);
+            if (f.name != null && f.name.equals(feature)) {
+                return true;
+            }
+        }
+        return false;
+    }*/
 
 }

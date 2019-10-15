@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -126,9 +125,9 @@ public class FindNearbyService extends Service {
                 receivedSoundID = bytesToInt(data); // get soundId from received bytes
                 // get user from it's sound id, if there is no blocking relation, update search results
                 getUser(receivedSoundID);
-                Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+data.length);
+                Log.d(TAG , "onReceived= " + receivedSoundID + " bytes length ="+data.length + " channel= "+ channel);
             } else {
-                Log.e(TAG, "ChirpError: Decode failed");
+                Log.e(TAG, "onReceived= ChirpError: Decode failed");
             }
         }
 
@@ -312,7 +311,7 @@ public class FindNearbyService extends Service {
                     checkMicMuteWindow ++; // increase the check window to check every 10 seconds
                     if(checkMicMuteWindow >= 10){
                         // To check if mic is muted or not
-                        Log.d(TAG, "10 seconds passed, lets check if mic is muted or not. checkMicMuteWindow= "+checkMicMuteWindow);
+                        //Log.d(TAG, "10 seconds passed, lets check if mic is muted or not. checkMicMuteWindow= "+checkMicMuteWindow);
                         if(mAudioManager != null && mAudioManager.isMicrophoneMute()) {
                             sendAlertMessage();
                             // Stop timer and service
