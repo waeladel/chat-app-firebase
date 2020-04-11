@@ -290,6 +290,20 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         speakerPreference = findPreference(PREFERENCE_KEY_SPEAKER);
         if(speakerPreference != null){
+            // Set the initial icon
+            if(mAudioManager.isSpeakerphoneOn()){
+                // Only display icon if there is room
+                if(speakerPreference.isIconSpaceReserved()){
+                    speakerPreference.setIcon(R.drawable.ic_speaker_volume_up_active);
+                }
+            }else{
+                // Only display icon if there is room
+                if(speakerPreference.isIconSpaceReserved()){
+                    speakerPreference.setIcon(R.drawable.ic_speaker_volume_up);
+                }
+            }
+
+            Log.d(TAG, "isIconSpaceReserved: " + speakerPreference.isIconSpaceReserved());
             speakerPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -300,13 +314,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                             if(!mAudioManager.isSpeakerphoneOn()){
                                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                                 mAudioManager.setSpeakerphoneOn(true);
-                                speakerPreference.setIcon(R.drawable.ic_speaker_volume_up_active);
+                                // Only display icon if there is room
+                                if(speakerPreference.isIconSpaceReserved()){
+                                    speakerPreference.setIcon(R.drawable.ic_speaker_volume_up_active);
+                                }
+
+
                             }
                         }else{
                             if(mAudioManager.isSpeakerphoneOn()){
                                 //mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                                 mAudioManager.setSpeakerphoneOn(false);
-                                speakerPreference.setIcon(R.drawable.ic_speaker_volume_up);
+                                // Only display icon if there is room
+                                if(speakerPreference.isIconSpaceReserved()){
+                                    speakerPreference.setIcon(R.drawable.ic_speaker_volume_up);
+                                }
                             }
                         }
                         return true; // to change the preference value

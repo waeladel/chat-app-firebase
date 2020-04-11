@@ -577,14 +577,14 @@ public class User {
         User user = (User) o;
         return
                 TextUtils.equals(avatar, user.avatar) &&
-                TextUtils.equals(name, user.name) &&
-                TextUtils.equals(biography, user.biography) &&
-                TextUtils.equals(relationship, user.relationship) &&
-                TextUtils.equals(interestedIn, user.interestedIn) &&
-                TextUtils.equals(gender, user.gender) &&
-                TextUtils.equals(horoscope, user.horoscope) &&
-                (birthDate == user.birthDate || (birthDate!= null && birthDate.equals(user.birthDate))) &&
-                (created == user.created || (created!=null && created.equals(user.created)));
+                        TextUtils.equals(name, user.name) &&
+                        TextUtils.equals(biography, user.biography) &&
+                        TextUtils.equals(relationship, user.relationship) &&
+                        TextUtils.equals(interestedIn, user.interestedIn) &&
+                        TextUtils.equals(gender, user.gender) &&
+                        TextUtils.equals(horoscope, user.horoscope) &&
+                        (birthDate == user.birthDate || (birthDate!= null && birthDate.equals(user.birthDate))) &&
+                        (created == user.created || (created!=null && created.equals(user.created)));
     }
 
     @Override
