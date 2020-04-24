@@ -161,7 +161,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
 
-        if(getArguments() != null) {
+        if(getArguments() != null && getArguments().containsKey("userId")) {
             //mCurrentUserId = ProfileFragmentArgs.fromBundle(getArguments()).getCurrentUserId();//logged in user
             mUserId = ProfileFragmentArgs.fromBundle(getArguments()).getUserId(); // any user
             //mUser = ProfileFragmentArgs.fromBundle(getArguments()).getUser();// any user

@@ -71,8 +71,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //implementation 'androidx.multidex:multidex:2.0.1' // multiDex support for min SdkVersion above 20
-    implementation 'com.android.support:multidex:1.0.3' // multiDex support for SdkVersion 20
+    implementation 'androidx.multidex:multidex:2.0.1' // multiDex support for min SdkVersion above 20
+    //implementation 'com.android.support:multidex:1.0.3' // multiDex support for SdkVersion 20
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0-alpha09'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
@@ -105,7 +105,7 @@ dependencies {
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
 
     implementation 'top.zibin:Luban:1.0.8' // for compressing original image
-    implementation 'io.reactivex:rxandroid:1.2.1' // for compressing original image
+    implementation 'io.reactivex:rxandroid:1.2.1' // RxJava for compressing original image
 
 
     implementation 'androidx.paging:paging-runtime:2.1.0' //Add the paging library
@@ -118,7 +118,7 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     implementation "androidx.lifecycle:lifecycle-common-java8:2.1.0"
 
-    implementation "androidx.preference:preference:1.1.0" // For settings preference
+    implementation "androidx.preference:preference:1.1.1" // For settings preference
 
     //implementation 'org.awaitility:awaitility:3.1.6'
     //implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView

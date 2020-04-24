@@ -380,8 +380,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         // resize content when clicking in edit text
         //adjustPan effects all input fields UI (Spinners, avatar and expandable layout) on edit and complete profile
-        activity.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        /*activity.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
         /*activity.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
 
@@ -675,8 +675,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         if (context instanceof Activity){// check if fragmentContext is an activity
             activity =(Activity) context;
-            /*// Push up content when clicking in edit text
-            activity.getWindow().setSoftInputMode(
+            // Push up content when clicking in edit text
+            /*activity.getWindow().setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);*/
         }
     }

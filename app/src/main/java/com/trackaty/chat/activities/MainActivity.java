@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -234,6 +235,13 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigation.setSelectedItemId(R.id.navigation_notifications);
                 }else{
                     bottomNavigation.setVisibility(View.GONE);
+                }
+
+                // To only pan window in message fragment without effecting edit and complete profile
+                if(R.id.messagesFragment == destination.getId()){
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                }else{
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
                 }
             }
         });
@@ -692,8 +700,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                Log.d(TAG, "response error = :" + response.getError().getErrorCode());
-                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                if (ErrorCodes.NO_NETWORK == response.getError().getErrorCode()) {
                     Log.d(TAG, "No internet connection:" + response);
 
                     Toast.makeText(MainActivity.this, getString(R.string.no_internet_connection),

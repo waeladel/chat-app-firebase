@@ -234,7 +234,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     }else{
                         Log.d(TAG,  "no user exist. user is null");
                         // We can't display fields unless there is a user object,
-                        // lets create a fake user to use it's fields to get dynamic methods working
+                        // lets create a temp user to use it's fields to get dynamic methods working
                         User tempUser = new User();
                         tempUser.setKey(currentUserId);
                         mEditProfileViewModel.setUser(tempUser);
@@ -1288,7 +1288,6 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     }*/
                     navController.navigateUp();
                 }
-
 
             }
         })
