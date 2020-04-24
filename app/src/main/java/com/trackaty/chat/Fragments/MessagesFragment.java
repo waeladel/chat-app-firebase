@@ -385,7 +385,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         /*activity.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);*/
 
-        // Listen for Edit text Touch event, to scroll down when focused
+        /*// Listen for Edit text Touch event, to scroll down when focused
         mMessage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -398,8 +398,27 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 }
                 return false;
             }
+        });*/
+
+        // Listen for Edit text Touch event, to scroll down when focused
+        mMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: Action was UP");
+                scrollToBottom();
+            }
         });
 
+        // Listen for Edit text OnFocusChange, to scroll down when focused (first time click)
+        mMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    Log.d(TAG, "onFocusChange:  Action was UP");
+                    scrollToBottom();
+                }
+            }
+        });
 
 
         // Listen for scroll events
