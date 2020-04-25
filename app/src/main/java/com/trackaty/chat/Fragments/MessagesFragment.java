@@ -95,6 +95,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private Boolean isGroup;
     private Boolean isSender;
     private Boolean isHitBottom;// = false;
+    private boolean isAdjustPan;
 
     private Context mActivityContext;
     private Activity activity;
@@ -403,6 +404,15 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Action was UP");
+                // Set soft input to pan if items is > 3 and if never set before
+                if(!isAdjustPan){
+                    if ((getActivity()) != null) {
+                        if(mMessagesAdapter.getItemCount() > 3){
+                            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                            isAdjustPan = true;
+                        }
+                    }
+                }
                 scrollToBottom();
             }
         });
@@ -413,6 +423,13 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     Log.d(TAG, "onFocusChange:  Action was UP");
+                    // Set soft input to pan if items is > 3
+                    if ((getActivity()) != null) {
+                        if(mMessagesAdapter.getItemCount() > 3){
+                            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                            isAdjustPan = true;
+                        }
+                    }
                     scrollToBottom();
                 }
             }

@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // To only pan window in message fragment without effecting edit and complete profile
                 if(R.id.messagesFragment == destination.getId()){
-                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                    //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
                 }else{
                     getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
                 }
