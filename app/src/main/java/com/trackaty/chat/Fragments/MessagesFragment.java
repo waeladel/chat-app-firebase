@@ -82,8 +82,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private MessagesAdapter mMessagesAdapter;
     private  LinearLayoutManager mLinearLayoutManager;
 
-    private FragmentManager fragmentManager;// = getFragmentManager();
-
     private  static final String CHAT_INACTIVE_FRAGMENT = "InactiveFragment";
     private  static final String ACTIVATE_CHAT_FRAGMENT = "ActivateFragment";
     private  static final String BLOCKED_CHAT_FRAGMENT = "BlockedChatFragment";
@@ -1553,9 +1551,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show inactive alert dialog
     private void showChatInactiveDialog() {
         ChatInactiveAlertFragment chatInactiveFragment = ChatInactiveAlertFragment.newInstance(mActivityContext);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            chatInactiveFragment.show(fragmentManager, CHAT_INACTIVE_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            chatInactiveFragment.show(getParentFragmentManager(), CHAT_INACTIVE_FRAGMENT);
             Log.i(TAG, "edit/chatInactiveFragment show clicked ");
         }
     }
@@ -1563,9 +1560,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show blocked alert dialog
     private void showChatBlockedDialog() {
         ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance(mActivityContext);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            chatBlockedAlert.show(fragmentManager, BLOCKED_CHAT_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            chatBlockedAlert.show(getParentFragmentManager(), BLOCKED_CHAT_FRAGMENT);
             Log.i(TAG, "chatBlockedAlert show clicked ");
         }
     }
@@ -1573,10 +1569,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show a dialog to select whether to edit or un-reveal
     private void showChatActivateDialog(String mChatId) {
         ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId, this);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
+        if (getParentFragmentManager() != null) {
             //chatActivateFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DatePickerMyTheme);
-            chatActivateFragment.show(fragmentManager, ACTIVATE_CHAT_FRAGMENT);
+            chatActivateFragment.show(getParentFragmentManager(), ACTIVATE_CHAT_FRAGMENT);
             Log.i(TAG, "edit/chatActivateFragment show clicked ");
         }
     }

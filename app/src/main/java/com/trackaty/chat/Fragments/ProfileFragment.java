@@ -116,7 +116,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private ColorStateList mFabDefaultColor; // To rest FAB's default color
     private ColorStateList mFabDefaultTextColor; // To rest the hint's default color of FAB buttons
 
-    private FragmentManager fragmentManager;// = getFragmentManager();
     private RevealFragment requestFragment;
 
     // [START declare_database_ref]
@@ -171,8 +170,6 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-
-        fragmentManager = getFragmentManager(); // To show alerts fragments
 
         // instantiate a new user relations to use it for reveal requests
         mRelations = new Relation();
@@ -481,9 +478,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private void showDialog(ArrayList<Social> contactsList, String relationStatus) {
         requestFragment = RevealFragment.newInstance(contactsList, this);
         requestFragment.setRelationStatus(relationStatus);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            requestFragment.show(fragmentManager, REQUEST_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            requestFragment.show(getParentFragmentManager(), REQUEST_FRAGMENT);
             Log.i(TAG, "revealRequest show clicked ");
         }
     }
@@ -491,9 +487,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show confirmation dialog before deleting relations
     private void showDeleteRelationDialog() {
         DeleteRelationAlertFragment deleteAlertFragment = DeleteRelationAlertFragment.newInstance(mActivityContext, this);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            deleteAlertFragment.show(fragmentManager, CONFIRM_DELETE_RELATION_ALERT_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            deleteAlertFragment.show(getParentFragmentManager(), CONFIRM_DELETE_RELATION_ALERT_FRAGMENT);
             Log.i(TAG, "confirmationFragment show clicked");
         }
     }
@@ -501,9 +496,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show a dialog to select whether to edit or un-reveal
     /*private void showEditUnrevealDialog() {
         UnrevealAlertFragment editUnrevealFragment = UnrevealAlertFragment.newInstance(this);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            editUnrevealFragment.show(fragmentManager, EDIT_UNREVEAL_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            editUnrevealFragment.show(getParentFragmentManager(), EDIT_UNREVEAL_FRAGMENT);
             Log.i(TAG, "edit/UnrevealFragment show clicked ");
         }
     }*/
@@ -511,9 +505,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show a dialog to confirm blocking user
     private void showBlockDialog() {
         BlockAlertFragment blockFragment = BlockAlertFragment.newInstance(mActivityContext,this);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            blockFragment.show(fragmentManager, CONFIRM_BLOCK_ALERT_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            blockFragment.show(getParentFragmentManager(), CONFIRM_BLOCK_ALERT_FRAGMENT);
             Log.i(TAG, "blockFragment show clicked ");
         }
     }
@@ -521,9 +514,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show a dialog to confirm blocking user and delete his conversation with us (current user)
     private void showBlockDeleteDialog() {
         BlockDeleteAlertFragment blockDeleteFragment = BlockDeleteAlertFragment.newInstance(mActivityContext, this);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
-            blockDeleteFragment.show(fragmentManager, CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
+        if (getParentFragmentManager() != null) {
+            blockDeleteFragment.show(getParentFragmentManager(), CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
             Log.i(TAG, "blockDeleteFragment show clicked ");
         }
     }
