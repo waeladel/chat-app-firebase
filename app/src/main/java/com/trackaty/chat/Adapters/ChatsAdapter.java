@@ -136,10 +136,10 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                         ChatMember currentMember = chat.getMembers().get(String.valueOf(pair.getKey()));
                         if (currentMember != null) {
                             currentMember.setKey(String.valueOf(pair.getKey()));
-                            // Check if current user saw this chat or not
-                            if(!currentMember.isSaw()){
+                            // Check if current user read this chat or not
+                            if(!currentMember.isRead()){
                                 // Bold text
-                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
+                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isRead= "+ currentMember.isRead() + " message= "+ chat.getLastMessage() );
                                 holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
                                 holder.mLastMessage.setTextColor(fragment.getResources().getColor(R.color.color_on_surface_emphasis_high));
                                 /*holder.mLastMessage.setTextAppearance(App.getContext(), R.style.TextAppearance_MyTheme_Headline5);
@@ -150,7 +150,7 @@ public class ChatsAdapter extends PagedListAdapter<Chat, ChatsAdapter.ViewHolder
                                 //holder.row.setBackgroundResource(R.color.color_highlighted_item);
                             }else{
                                 // Normal text
-                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isSaw= "+ currentMember.isSaw() + " message= "+ chat.getLastMessage() );
+                                Log.d(TAG, "currentMember=" + currentMember.getName() + " isRead= "+ currentMember.isRead() + " message= "+ chat.getLastMessage() );
                                 holder.mLastMessage.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                                 holder.mLastMessage.setTextColor(fragment.getResources().getColor(R.color.color_on_surface_emphasis_medium));
                                 //holder.mLastMessage.setTextAppearance(App.getContext(), R.style.TextAppearance_MyTheme_Body2);
