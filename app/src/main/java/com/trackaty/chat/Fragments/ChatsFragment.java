@@ -73,9 +73,7 @@ public class ChatsFragment extends Fragment{
         Log.d(TAG, "chats onCreate");
 
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(mFirebaseCurrentUser != null){
-            mCurrentUserId = mFirebaseCurrentUser.getUid();
-        }
+        mCurrentUserId = mFirebaseCurrentUser != null ? mFirebaseCurrentUser.getUid() : null;
 
         // prepare the Adapter in onCreate to use only one Adapter
         mChatsArrayList = new ArrayList<>();

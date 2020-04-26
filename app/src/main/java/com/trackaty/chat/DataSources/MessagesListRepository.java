@@ -404,8 +404,8 @@ public class MessagesListRepository {
                     // Update seen messages
                     if(updateMap.size() > 0){
                         // Update chats member saw
-                        updateMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
-                        updateMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/saw/" , true);
+                        updateMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
+                        updateMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
 
                        /* // Update seen chats count
                         updateMap.put("/counts/" + currentUserId + "/chats/" + chatKey, null);*/
