@@ -26,7 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -211,7 +211,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
         // Step 4: Set output file for notification audio
         mOutputFile = FilesHelper.getOutputMediaFile(FilesHelper.MEDIA_TYPE_Audio);
 
-        mEditProfileViewModel = ViewModelProviders.of(this).get(EditProfileViewModel.class);
+        mEditProfileViewModel = new ViewModelProvider(this).get(EditProfileViewModel.class);
 
         /*currentUser = mEditProfileViewModel.getUserOnce(currentUserId);
         showCurrentUser(currentUser);*/

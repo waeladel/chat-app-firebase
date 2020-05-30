@@ -41,7 +41,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -234,7 +234,7 @@ public class MainFragment extends Fragment {
         alarmIntent  = new Intent(activity, SoundIdAlarm.class);
 
         // Initiate viewModel for this fragment instance
-        viewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
+        viewModel = new ViewModelProvider(this).get(UsersViewModel.class);
 
         //Get current logged in user
         mFirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();

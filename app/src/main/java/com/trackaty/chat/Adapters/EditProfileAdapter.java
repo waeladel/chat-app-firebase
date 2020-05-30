@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -118,7 +118,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         socialAdapter = new SocialAdapter (mFragment, socialArrayList);
 
         // get EditProfileViewModel to access user object
-        mEditProfileViewModel = ViewModelProviders.of(mFragment).get(EditProfileViewModel.class);
+        mEditProfileViewModel = new ViewModelProvider(mFragment).get(EditProfileViewModel.class);
     }
 
 

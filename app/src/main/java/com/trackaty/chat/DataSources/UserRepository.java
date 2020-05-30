@@ -232,9 +232,9 @@ public class UserRepository {
 
     public MutableLiveData<Long> getChatsCount(String userId){
 
-        // order by members/userKey/saw get only false results
+        // order by members/userKey/read get only false results
         Query chatsQuery = mChatsRef.child(userId)
-                .orderByChild("members/"+userId+"/saw").equalTo(false);
+                .orderByChild("members/"+userId+"/read").equalTo(false);
 
         Log.d(TAG, "getChatsCount initiated: " + userId+ " chatsQuery= "+chatsQuery);
 
@@ -279,7 +279,7 @@ public class UserRepository {
 
     public MutableLiveData<Long> getNotificationsCount(String userId){
 
-        // order by members/userKey/saw get only false results
+        // order by members/userKey/read get only false results
         Query query = mNotificationsRef.child(userId)
                 .orderByChild("seen").equalTo(false);
 

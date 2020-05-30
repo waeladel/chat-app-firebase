@@ -13,7 +13,7 @@ import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -52,7 +52,7 @@ public class SocialAdapter extends RecyclerView.Adapter<SocialAdapter.ViewHolder
         this.fragmentContext = fragmentContext;
         //socialObj = new SocialObj();
         // get EditProfileViewModel to access user object
-        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
+        mEditProfileViewModel = new ViewModelProvider(fragmentContext).get(EditProfileViewModel.class);
 
     }
 

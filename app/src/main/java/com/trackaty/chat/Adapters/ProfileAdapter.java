@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,7 +60,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
         // get relations with selected user if any
-        mMoreProfileViewModel = ViewModelProviders.of(fragmentContext).get(MoreProfileViewModel.class);
+        mMoreProfileViewModel = new ViewModelProvider(fragmentContext).get(MoreProfileViewModel.class);
         // get relations with selected user if any
         mMoreProfileViewModel.getRelation(currentUserId, userID).observe(fragmentContext, new Observer<Relation>() {
             @Override

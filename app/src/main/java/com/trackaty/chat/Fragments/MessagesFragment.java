@@ -25,7 +25,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -185,7 +184,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         // start init  mMessagesViewModel here after mCurrentUserId is received//
         // extend mMessagesViewModel to pass Chat Key value and chat user key //
-        mMessagesViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+        mMessagesViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

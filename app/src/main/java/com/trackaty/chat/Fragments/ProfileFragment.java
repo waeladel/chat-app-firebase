@@ -25,7 +25,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -167,7 +167,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             Log.d(TAG, "mCurrentUserId= " + mCurrentUserId + " mUserId= " + mUserId );
         }
 
-        mProfileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
+        mProfileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 

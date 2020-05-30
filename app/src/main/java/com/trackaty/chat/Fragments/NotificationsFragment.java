@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -101,7 +100,7 @@ public class NotificationsFragment extends Fragment{
         // Create ViewModel in onCreate to use only one ViewModel and observer
         // So we don't recreate the observer when user comeback to active ViewModel
         //mViewModel = ViewModelProviders.of(this).get(NotificationsViewModel.class);
-        mViewModel = ViewModelProviders.of(this,  new ViewModelProvider.Factory() {
+        mViewModel = new ViewModelProvider(this,  new ViewModelProvider.Factory() {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

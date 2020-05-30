@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.host_fragment);
 
         // update CurrentUserId for all observer fragments
-        mMainViewModel = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
+        mMainViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
 
         // update CurrentUserId for all observer fragments
         //mMainViewModel.updateCurrentUserId(currentUserId);

@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.trackaty.chat.R;
@@ -37,7 +37,7 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
         this.fragmentContext = fragmentContext; // To use it as observer
 
         // get EditProfileViewModel to access user object
-        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
+        mEditProfileViewModel = new ViewModelProvider(fragmentContext).get(EditProfileViewModel.class);
 
     }
 

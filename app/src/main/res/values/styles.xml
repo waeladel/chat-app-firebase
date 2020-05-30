@@ -45,7 +45,7 @@
     <!-- To make the Surface toolbar primary not surface, it has better shadow than Surface toolbar (for dark theme)-->
     <style name="ToolbarStyle.Surface.MyTheme" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="android:background">@color/color_surface_24_elevation</item>
-        <item name="titleTextColor">@color/mtrl_on_surface_emphasis_high_type</item>
+        <item name="titleTextColor">@color/material_on_surface_emphasis_high_type</item>
         <!--<item name="colorControlNormal">?colorOnPrimary</item>
         <item name="actionMenuTextColor">?colorOnPrimary</item>
         <item name="android:actionMenuTextColor">@color/color_on_primary</item>-->

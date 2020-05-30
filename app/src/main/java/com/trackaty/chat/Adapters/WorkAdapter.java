@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -45,7 +45,7 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
         this.fragmentContext = fragmentContext; // To use it as observer
 
         // get EditProfileViewModel to access user object
-        mEditProfileViewModel = ViewModelProviders.of(fragmentContext).get(EditProfileViewModel.class);
+        mEditProfileViewModel = new ViewModelProvider(fragmentContext).get(EditProfileViewModel.class);
     }
 
     @NonNull
