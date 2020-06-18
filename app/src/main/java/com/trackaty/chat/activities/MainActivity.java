@@ -398,8 +398,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onChanged(Long count) {
                     Log.d(TAG, "getNotificationsCount onChanged notifications count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
+                    notificationsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_notifications); //showBadge() show badge over chats menu item
                     if(count != null && count != 0){
-                        notificationsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_notifications); //showBadge() show badge over chats menu item
                         notificationsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
                         notificationsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));
@@ -434,8 +434,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onChanged(Long count) {
                     Log.d(TAG, "getChatsCount onChanged chats count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
+                    chatsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_chats); // showBadge() show badge over chats menu item
                     if(count != null && count != 0){
-                        chatsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_chats); // showBadge() show badge over chats menu item
                         chatsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
                         chatsBadge.setBackgroundColor(getResources().getColor(R.color.color_primary));

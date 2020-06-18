@@ -607,14 +607,15 @@ public class RelationRepository {
         // update chat to null, to delete the chat room and start fresh
         childUpdates.put("/chats/" + chatId ,null);
 
-        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
+        mDatabaseRef.updateChildren(childUpdates);
+        /*.addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 // Write was successful!
                 Log.i(TAG, "block onSuccess");
                 // ...
             }
-        });
+        });*/
     }
 
     public void removeListeners(){
