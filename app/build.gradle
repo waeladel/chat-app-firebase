@@ -3,7 +3,7 @@ apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     // Load keystore
     def keystorePropertiesFile = rootProject.file("keystore.properties");
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.basbes.dating"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 30
         multiDexEnabled true // Enabling multiDex support.
         versionCode 10
         versionName "0.1.0"
@@ -62,7 +62,7 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
-    buildToolsVersion = '29.0.2'
+    buildToolsVersion = '30.0.2'
     /*compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -73,34 +73,35 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.multidex:multidex:2.0.1' // multiDex support for min SdkVersion above 20
     //implementation 'com.android.support:multidex:1.0.3' // multiDex support for SdkVersion 20
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.2.0-beta01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0-alpha02'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     //implementation 'com.google.firebase:firebase-core:17.4.2'
-    implementation 'com.google.firebase:firebase-database:19.3.0'
-    implementation 'com.google.firebase:firebase-auth:19.3.1'
+    implementation 'com.google.firebase:firebase-database:19.5.0'
+    implementation 'com.google.firebase:firebase-auth:19.4.0'
     implementation 'com.firebaseui:firebase-ui-auth:6.0.2'
-    implementation 'com.google.firebase:firebase-messaging:20.2.0'
-    implementation 'com.google.firebase:firebase-analytics:17.4.2'
+    implementation 'com.google.firebase:firebase-messaging:20.3.0'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.firebase:firebase-storage:19.1.1'
+    implementation 'com.google.firebase:firebase-storage:19.2.0'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:core:1.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test:core:1.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    implementation "androidx.navigation:navigation-fragment:2.3.0-beta01"
-    implementation "androidx.navigation:navigation-ui:2.3.0-beta01"
+    implementation "androidx.navigation:navigation-fragment:2.3.0"
+    implementation "androidx.navigation:navigation-ui:2.3.0"
     //implementation 'androidx.recyclerview:recyclerview:1.0.0'// use -ktx for Kotlin
     //implementation 'androidx.cardview:cardview:1.0.0'
 
     implementation 'com.squareup.picasso:picasso:2.71828'//picasso for loading images
     implementation 'com.github.aakira:expandable-layout:1.6.0@aar' // for Expandable Layout
 
-    implementation 'com.yanzhenjie:album:2.0.2' //for gallery and camera
+    implementation 'com.yanzhenjie:album:2.1.3' //for gallery and camera. update from 2.0.2
+    implementation 'com.zhihu.android:matisse:0.5.3-beta3' // matisse for gallery and camera.
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
 
     implementation 'top.zibin:Luban:1.0.8' // for compressing original image
@@ -109,9 +110,9 @@ dependencies {
 
     implementation 'androidx.paging:paging-runtime:2.1.2' //Add the paging library
     //implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0' // ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.3.0-alpha03" // ViewModel
-    implementation "androidx.lifecycle:lifecycle-livedata:2.3.0-alpha03" // LiveData
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.0-alpha03" // Saved state module for ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.3.0-alpha07" // ViewModel
+    implementation "androidx.lifecycle:lifecycle-livedata:2.3.0-alpha07" // LiveData
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.0-alpha07" // Saved state module for ViewModel
     //implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version" // alternatively - LifeCycles only
 
     //annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.0.0" // For Kotlin use kapt instead of annotationProcessor
@@ -127,7 +128,7 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
     implementation 'com.king.view:radarview:1.0.2'
-    implementation "io.chirp:chirpsdk:3.10.0"
+    implementation "io.chirp:chirpsdk:3.10.+"
 
     // Required only if Facebook login support is required. Find the latest Facebook SDK releases here: https://goo.gl/Ce5L94
     implementation 'com.facebook.android:facebook-android-sdk:5.5.1'

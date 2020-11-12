@@ -1380,7 +1380,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
             // Update MESSAGE notifications
             //notificationKey = mNotificationsRef.child(mChatUserId).push().getKey();
-            notificationKey = mCurrentUserId + NOTIFICATION_TYPE_MESSAGE;
+            notificationKey = mCurrentUserId;
             //DatabaseNotification notification = new DatabaseNotification(getContext().getString(R.string.notification_like_title), getContext().getString(R.string.notification_like_message, name), "like", currentUserId, name, avatar);
             databaseNotification = new DatabaseNotification(NOTIFICATION_TYPE_MESSAGE, mCurrentUserId, mCurrentUser.getName(), mCurrentUser.getAvatar(), mChatId);
             notificationValues = databaseNotification.toMap();
@@ -1567,8 +1567,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show inactive alert dialog
     private void showChatInactiveDialog() {
         ChatInactiveAlertFragment chatInactiveFragment = ChatInactiveAlertFragment.newInstance(mActivityContext);
-        if (getParentFragmentManager() != null) {
-            chatInactiveFragment.show(getParentFragmentManager(), CHAT_INACTIVE_FRAGMENT);
+        if (getChildFragmentManager() != null) {
+            chatInactiveFragment.show(getChildFragmentManager(), CHAT_INACTIVE_FRAGMENT);
             Log.i(TAG, "edit/chatInactiveFragment show clicked ");
         }
     }
@@ -1576,8 +1576,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show blocked alert dialog
     private void showChatBlockedDialog() {
         ChatBlockedAlertFragment chatBlockedAlert = ChatBlockedAlertFragment.newInstance(mActivityContext);
-        if (getParentFragmentManager() != null) {
-            chatBlockedAlert.show(getParentFragmentManager(), BLOCKED_CHAT_FRAGMENT);
+        if (getChildFragmentManager() != null) {
+            chatBlockedAlert.show(getChildFragmentManager(), BLOCKED_CHAT_FRAGMENT);
             Log.i(TAG, "chatBlockedAlert show clicked ");
         }
     }
@@ -1585,9 +1585,9 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     //Show a dialog to select whether to edit or un-reveal
     private void showChatActivateDialog(String mChatId) {
         ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId, this);
-        if (getParentFragmentManager() != null) {
+        if (getChildFragmentManager() != null) {
             //chatActivateFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DatePickerMyTheme);
-            chatActivateFragment.show(getParentFragmentManager(), ACTIVATE_CHAT_FRAGMENT);
+            chatActivateFragment.show(getChildFragmentManager(), ACTIVATE_CHAT_FRAGMENT);
             Log.i(TAG, "edit/chatActivateFragment show clicked ");
         }
     }

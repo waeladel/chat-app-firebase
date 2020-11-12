@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -25,8 +26,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -51,10 +54,13 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
+import com.trackaty.chat.BuildConfig;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.FilesHelper;
+import com.trackaty.chat.Utils.MediaLoader;
+import com.trackaty.chat.Utils.MyPicassoEngine;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.SortBySection;
 import com.trackaty.chat.ViewModels.EditProfileViewModel;
@@ -65,7 +71,11 @@ import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
 import com.yanzhenjie.album.Action;
 import com.yanzhenjie.album.Album;
+import com.yanzhenjie.album.AlbumConfig;
 import com.yanzhenjie.album.AlbumFile;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,6 +88,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 
 import top.zibin.luban.Luban;
 import top.zibin.luban.OnCompressListener;
@@ -126,8 +137,10 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     private  final static String IMAGE_HOLDER_POSITION = "position";
 
-    private static final int CROP_IMAGE_AVATAR_REQUEST_CODE = 103;
-    private static final int CROP_IMAGE_COVER_REQUEST_CODE = 104;
+    private static final int SELECT_AVATAR_REQUEST_CODE = 102;
+    private static final int SELECT_COVER_REQUEST_CODE = 103;
+    private static final int CROP_IMAGE_REQUEST_CODE = 104;
+    private static final int REQUEST_STORAGE_PERMISSIONS_CODE = 124;
 
 
     //private User currentUser;
@@ -155,6 +168,8 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     private Context mActivityContext;
     private Activity activity;
+    private FragmentManager mFragmentManager;
+    private  static final String PERMISSION_RATIONALE_FRAGMENT = "storagePermissionFragment";
 
     private EditProfileViewModel mEditProfileViewModel;
 
@@ -191,6 +206,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mFragmentManager = getChildFragmentManager(); // Needed to open the rational dialog
         // Retain this fragment across configuration changes.
         //setRetainInstance(true);
         //show Menu
@@ -770,40 +786,53 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 position = data.getExtras().getInt(IMAGE_HOLDER_POSITION,0);
             }
             switch (requestCode){
-                case CROP_IMAGE_AVATAR_REQUEST_CODE:
-                    Log.d(TAG, "AVATAR_CROP_PICTURE requestCode= "+ requestCode);
-                    Log.d(TAG, "AVATAR_CROP_PICTURE position= "+ position);
-                    CropImage.ActivityResult avatarResult = CropImage.getActivityResult(data);
+                case SELECT_AVATAR_REQUEST_CODE:
+                    // An avatar photo is selected
+                    Log.d(TAG, "SELECT_AVATAR requestCode= "+ requestCode);
+                    Log.d(TAG, "SELECT_AVATAR position= "+ position);
                     if (resultCode == RESULT_OK) {
-                        mAvatarOriginalUri = avatarResult.getOriginalUri();
-                        mAvatarUri = avatarResult.getUri();
-                        compressImage(mAvatarOriginalUri,"original avatar" ,position);
-                        uploadImage(mAvatarUri, "avatar", position);
-                        Log.d(TAG, "mAvatarOriginalUri = "+ mAvatarOriginalUri);
-                        Log.d(TAG, "mAvatarUri = "+ mAvatarUri);
-
-                    } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                        Exception error = avatarResult.getError();
-                        Toast.makeText(mActivityContext, error.toString(),
-                                Toast.LENGTH_LONG).show();
+                        List<Uri> selectedAvatars = Matisse.obtainResult(data);;
+                        cropImage(selectedAvatars.get(0), 0);
                     }
                     break;
-                case CROP_IMAGE_COVER_REQUEST_CODE:
-                    Log.d(TAG, "COVER CROP_PICTURE requestCode= "+ requestCode);
-                    Log.d(TAG, "COVER CROP_PICTURE position= "+ position);
-                    CropImage.ActivityResult coverResult = CropImage.getActivityResult(data);
+                case SELECT_COVER_REQUEST_CODE:
+                    // A cover photo is selected
+                    Log.d(TAG, "SELECT_COVER requestCode= "+ requestCode);
+                    Log.d(TAG, "SELECT_COVER position= "+ position);
                     if (resultCode == RESULT_OK) {
-                        mCoverOriginalUri = coverResult.getOriginalUri();
-                        mCoverUri = coverResult.getUri();
-                        Log.d(TAG, "mCoverOriginalUri = "+ mCoverOriginalUri);
-                        Log.d(TAG, "mCoverUri = "+ mCoverUri);
-                        //uploadImage(mCoverUri, "coverImage", position);
-                        compressImage(mCoverOriginalUri,"original cover" ,position);
-                        uploadImage(mCoverUri, "coverImage", position);
+                        List<Uri> selectedCovers = Matisse.obtainResult(data);
+                        cropImage(selectedCovers.get(0), 1);
+                    }
+                    break;
+                case CROP_IMAGE_REQUEST_CODE:
+                    // A cropped photo is saved
+                    Log.d(TAG, "CROP_PICTURE requestCode= "+ requestCode);
+                    Log.d(TAG, "CROP_PICTURE position= "+ position);
+                    CropImage.ActivityResult imageResult = CropImage.getActivityResult(data);
+                    if (resultCode == RESULT_OK) {
+                        if(position == 0){
+                            // it's avatar image
+                            mAvatarOriginalUri = imageResult.getOriginalUri();
+                            mAvatarUri = imageResult.getUri();
+                            Log.d(TAG, "mAvatarOriginalUri = "+ mAvatarOriginalUri);
+                            Log.d(TAG, "mAvatarUri = "+ mAvatarUri);
+                            compressImage(mAvatarOriginalUri,"original avatar" ,position);
+                            uploadImage(mAvatarUri, "avatar", position);
+                        }else{
+                            // it's cover image
+                            mCoverOriginalUri = imageResult.getOriginalUri();
+                            mCoverUri = imageResult.getUri();
+                            Log.d(TAG, "mCoverOriginalUri = "+ mCoverOriginalUri);
+                            Log.d(TAG, "mCoverUri = "+ mCoverUri);
+                            //uploadImage(mCoverUri, "coverImage", position);
+                            compressImage(mCoverOriginalUri,"original cover" ,position);
+                            uploadImage(mCoverUri, "coverImage", position);
+                        }
                     } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                        Exception error = coverResult.getError();
+                        Exception error = imageResult.getError();
                         Toast.makeText(mActivityContext, error.toString(),
                                 Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "mAvatarUri crop error= "+ error.toString());
                     }
                     break;
             }
@@ -940,8 +969,80 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         }
     }
 
-    private void selectMedia(final boolean isAvatar, final int position) {
-        Album.image(this) // Image and video mix options.
+    private void selectMedia(final int position) {
+        // Different ‎ request code for avatar than cover to know which is which in the onActivityResult
+        int selectMediaRequestCode;
+        if (position == 0) { // it's avatar
+            selectMediaRequestCode = SELECT_AVATAR_REQUEST_CODE;
+        } else {  // it's cover
+            selectMediaRequestCode = SELECT_COVER_REQUEST_CODE;
+        }
+
+        //Don't enable capturing photos by camera without the permission
+        if(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+            // Enable camera
+            Matisse.from(this)
+                    .choose(MimeType.ofImage(), false)
+                    .theme(R.style.Matisse_Dracula)
+                    .countable(false)
+                    .maxSelectable(1)
+                    .capture(true)
+                    //.captureStrategy(new CaptureStrategy(true, BuildConfig.APPLICATION_ID +".fileprovider", "Basbes"))
+                    .captureStrategy(new CaptureStrategy(false, BuildConfig.APPLICATION_ID +".fileprovider"))
+                    .showSingleMediaType(true)
+                    //.addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                    //.gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.album_item_height))
+                    .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                    .thumbnailScale(0.85f)
+                    .imageEngine(new MyPicassoEngine())
+                    .showPreview(true) // Default is `true`
+                    .autoHideToolbarOnSingleTap(true)
+                    .forResult(selectMediaRequestCode);
+        }else{
+            // Disable camera
+            Matisse.from(this)
+                    .choose(MimeType.ofImage(), false)
+                    .theme(R.style.Matisse_Dracula)
+                    .countable(false)
+                    .maxSelectable(1)
+                    .showSingleMediaType(true)
+                    //.addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                    //.gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.album_item_height))
+                    .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                    .thumbnailScale(0.85f)
+                    .imageEngine(new MyPicassoEngine())
+                    .showPreview(true) // Default is `true`
+                    .autoHideToolbarOnSingleTap(true)
+                    .forResult(selectMediaRequestCode);
+        }
+            /*Album.image(this) // Image and video mix options.
+                    .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
+                    //.requestCode(200) // The request code will be returned in the listener.
+                    .columnCount(2) // The number of columns in the page list.
+                    //.selectCount(1)  // Choose up to a few images.
+                    .camera(true) // Whether the camera appears in the Item.
+                    .onResult(new Action<ArrayList<AlbumFile>>() {
+                        @Override
+                        public void onAction(@NonNull ArrayList<AlbumFile> result) {
+                            // accept the result.
+                            mMediaFiles = result;
+                            AlbumFile albumFile = mMediaFiles.get(0);
+                            Uri MediaUri = Uri.parse(albumFile.getPath()) ;
+
+                            Log.d(TAG, "MediaType= " +albumFile.getMediaType());
+                            Log.d(TAG, "MediaUri= " +MediaUri);
+
+                            cropImage(MediaUri, position);
+                        }
+                    })
+                    .onCancel(new Action<String>() {
+                        @Override
+                        public void onAction(@NonNull String result) {
+                            // The user canceled the operation
+                        }
+                    }).start();
+
+        /*Album.image(this) // Image and video mix options.
                 .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
                 .requestCode(200) // The request code will be returned in the listener.
                 .columnCount(2) // The number of columns in the page list.
@@ -964,18 +1065,20 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 .onCancel(new Action<String>() {
                     @Override
                     public void onAction(int requestCode, @NonNull String result) {
-                        // The user canceled the operation.
+                        // The user canceled the operation
                     }
                 })
-                .start();
-
+                .start();*/
     }
 
 
 
-    private void cropImage(Uri mediaUri, boolean isAvatar, int position) {
-        if(isAvatar){
-            Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+    private void cropImage(Uri mediaUri, int position) {
+        Intent intent;
+        if(position == 0){
+            // Let's crop an avatar
+            //Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+            intent = CropImage.activity(mediaUri) // Matisse albums users content not file url
                     //.setGuidelines(CropImageView.Guidelines.ON)
                     .setAllowRotation(true)
                     .setAutoZoomEnabled(true)
@@ -989,16 +1092,11 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     .setRequestedSize(300,300)//resize
                     .getIntent(mActivityContext);
             //.start(mActivityContext, this);
-            //intent.putExtra(IMAGE_HOLDER_POSITION,position);
-            Bundle mBundle = new Bundle();
-            mBundle.putInt(IMAGE_HOLDER_POSITION,position);
-            intent.putExtras(mBundle);
-
-            this.startActivityForResult(intent, CROP_IMAGE_AVATAR_REQUEST_CODE );
 
         }else{
-
-            Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+            // Let's crop a cover
+            //Intent intent = CropImage.activity(Uri.fromFile(new File(mediaUri.toString())))
+            intent = CropImage.activity(mediaUri) // Matisse albums users content not file url
                     //.setGuidelines(CropImageView.Guidelines.ON)
                     .setAllowRotation(true)
                     .setAutoZoomEnabled(true)
@@ -1010,14 +1108,15 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     .setRequestedSize(600,300) //resize
                     .getIntent(mActivityContext);
             //.start(mActivityContext, this);
-            //intent.putExtra(IMAGE_HOLDER_POSITION,position);
-            Bundle mBundle = new Bundle();
-            mBundle.putInt(IMAGE_HOLDER_POSITION,position);
-            intent.putExtras(mBundle);
-            this.startActivityForResult(intent, CROP_IMAGE_COVER_REQUEST_CODE);
         }
 
         Log.d(TAG, "cropImage starts" +mediaUri);
+        //intent.putExtra(IMAGE_HOLDER_POSITION,position);
+        Bundle mBundle = new Bundle();
+        mBundle.putInt(IMAGE_HOLDER_POSITION,position);
+        intent.putExtras(mBundle);
+
+        this.startActivityForResult(intent, CROP_IMAGE_REQUEST_CODE);
     }
 
     private void profileSave() {
@@ -1301,18 +1400,81 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 });
     }
 
-    // If WRITE_EXTERNAL_STORAGE is granted, start writing wav file immediately, if not, ask for permission first
-    private boolean isPermissionGranted() {
-        Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED));
-        return ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    // If Storage and camera permissions are granted return true so that we stop asking for permissions
+    private boolean isAllPermissionGranted() {
+        Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED));
+
+        return (ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
         //return true;
+    }
+
+    // If WRITE_EXTERNAL_STORAGE is granted, start writing wav file immediately, if not, ask for permission first
+    private boolean isWritePermissionGranted() {
+        return (ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void requestPermission() {
+        // Permission is not granted
+        // Should we show an explanation?
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+            Log.i(TAG, "requestPermission: permission should show Rationale");
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+            showPermissionRationaleDialog();
+        } else {
+            // No explanation needed; request the permission
+            Log.i(TAG, "requestPermission: No explanation needed; request the permission");
+            // using requestPermissions(new String[] instead of ActivityCompat.requestPermissions(this, new String[] to get onRequestPermissionsResult in the fragment
+            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+        }
+
+    }
+
+    private void showPermissionRationaleDialog() {
+        CameraPermissionAlertFragment permissionRationaleDialog = CameraPermissionAlertFragment.newInstance(mActivityContext, this);
+        permissionRationaleDialog.show(mFragmentManager, PERMISSION_RATIONALE_FRAGMENT);
+        Log.i(TAG, "showPermissionRationaleDialog: permission AlertFragment show clicked ");
+    }
+
+    // Get Request Permissions Result
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult we got a permissions result");
+        if (requestCode == REQUEST_STORAGE_PERMISSIONS_CODE) {
+            // If request is cancelled, the result arrays are empty.
+            // Camera permission is not a must, we can proceed with reading photos from gallery
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED ) {
+                // permission was granted, yay! Do the task you need to do.
+                Log.i(TAG, "onRequestPermissionsResult permission was granted");
+                if(mEditProfileViewModel.isSelectAvatarClicked()){
+                    selectMedia(0);
+                }else{
+                    selectMedia(1);
+                }
+            } else {
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+                Log.i(TAG, "onRequestPermissionsResult permission denied");
+            }
+        }
     }
 
     // write notification sound to notification folder
     private void writeToExternal(){
 
         // return if we don't have permission or we couldn't create output file or the wav file already exists
-        if (!isPermissionGranted() || mOutputFile == null || mOutputFile.exists()) {
+        if (!isWritePermissionGranted() || mOutputFile == null || mOutputFile.exists()) {
             Log.i(TAG, "writeToExternal return");
             return;
         }
@@ -1374,14 +1536,32 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "item clicked fragment= " + position);
+        if(view == null && position == 6){
+            // OK button of the permission dialog is clicked, lets ask for permissions
+            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+            return;
+
+        }
         switch (mProfileDataArrayList.get(position).getKey()) {
             case "avatar":
                 Log.d(TAG, "avatar item clicked= " + position);
-                selectMedia(true, position);
+                mEditProfileViewModel.setSelectAvatarClicked(true);
+                if (!isAllPermissionGranted()) {
+                    requestPermission();
+                }else{
+                    selectMedia(position);
+                }
                 break;
             case "coverImage":
                 Log.d(TAG, "coverImage item clicked= " + position);
-                selectMedia(false, position);
+                mEditProfileViewModel.setSelectAvatarClicked(false);
+                if (!isAllPermissionGranted()) {
+                    requestPermission();
+                }else{
+                    selectMedia(position);
+                }
                 break;
             case "birthDate":
                 //mEditProfileAdapter.notifyDataSetChanged();
@@ -1391,9 +1571,9 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                 }else{
                     datePicker = new DatePickerFragment(mActivityContext);
                 }
-                if (getFragmentManager() != null) {
+                if (getChildFragmentManager() != null) {
                     datePicker.setCallBack(ondate); //Set Call back to capture selected date
-                    datePicker.show(getFragmentManager(),"date picker");
+                    datePicker.show(getChildFragmentManager(),"date picker");
                     Log.i(TAG, "datePicker show clicked ");
                 }
                 break;

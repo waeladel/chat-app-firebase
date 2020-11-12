@@ -15,6 +15,7 @@ public class EditProfileViewModel extends ViewModel {
 
     private UserRepository mUserRepository;
     private User user;
+    private boolean isSelectAvatarClicked;
 
     public User getUser() {
         return user;
@@ -22,6 +23,14 @@ public class EditProfileViewModel extends ViewModel {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isSelectAvatarClicked() {
+        return isSelectAvatarClicked;
+    }
+
+    public void setSelectAvatarClicked(boolean avatar) {
+        isSelectAvatarClicked = avatar;
     }
 
     public EditProfileViewModel() {

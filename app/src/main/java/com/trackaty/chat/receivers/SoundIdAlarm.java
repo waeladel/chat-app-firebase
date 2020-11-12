@@ -198,12 +198,14 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         // create random alarm interval between 60 - 120
         Random alarmRandom = new Random();
-        mRandomAlarmInterval = (alarmRandom.nextInt(61) + 60) *1000;
+        //mRandomAlarmInterval = (alarmRandom.nextInt(61) + 60) *1000;
+        mRandomAlarmInterval =  60*1000;
         Log.d(TAG, "randomInteger. mRandomAlarmInterval= "+ mRandomAlarmInterval);
 
         // create random channel id between 1 - 8
         Random channelRandom = new Random();
-        mRandomChannel = channelRandom.nextInt(8) + 1;
+        //mRandomChannel = channelRandom.nextInt(8) ; // from 0 - 7
+        mRandomChannel = 0;
         Log.d(TAG, "mRandomChannel= "+ mRandomChannel);
 
         // To schedule the next alarm, this is better than repeating alarm in case of one of the alarms was delayed

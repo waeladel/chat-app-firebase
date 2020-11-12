@@ -182,6 +182,8 @@
     <string name="user_confirm_blocking_dialog">Block</string>
     <string name="user_confirm_dialog_negative">Cancel</string>
     <string name="confirm_dialog_positive_button">OK</string>
+    <string name="storage_permission_dialog_title">Camera and storage permissions</string>
+    <string name="storage_permission_dialog_message">The app needs access to your storage to fitch photos from your gallery. Also, if you want to take a picture you must grant us access to your camera.</string>
     <string name="chat_inactive_dialog_message">This conversation isn\'t active right now. You must wait until the recipient reactivate it.</string>
     <string name="chat_blocked_dialog_message">Communication with this person is not allowed.</string>
     <string name="activate_chat_dialog_title">Keep conversation active for:</string>
@@ -257,7 +259,7 @@
     <string name="notification_like_body">%1$s likes you.</string>
     <string name="notification_like_back_body">%1$s liked you back.</string>
     <string name="notification_pick_up_body">%1$s started a new conversation with you.</string>
-    <string name="notification_message_body">%1$s send you a new message.</string>
+    <string name="notification_message_body">%1$s sent you a new message.</string>
     <string name="notification_request_sent_body">%1$s requests to see your private contacts</string>
     <string name="notification_request_approved_body">%1$s approved your reveal request.</string>
     <string name="notification_nearby_body">Searching for nearby devices is currently active</string>
@@ -283,7 +285,7 @@
 
     <string name="likes_notification_channel_description">Get notifications about likes from nearby people.</string>
     <string name="pickups_notification_channel_description">Get notifications about pick-up lines from nearby people.</string>
-    <string name="messages_notification_channel_description">Get notifications when you have a new message.</string>
+    <string name="messages_notification_channel_description">Get notifications when you receive a new message.</string>
     <string name="reveal_notification_channel_description">Get notifications when people send you requests to reveal your private contacts.</string>
     <string name="nearby_notification_channel_description">Display a notification indicates that you are currently searching for a person you target.</string>
     <string name="visibility_notification_channel_description">Display a notification indicates that you are currently discoverable by others.</string>

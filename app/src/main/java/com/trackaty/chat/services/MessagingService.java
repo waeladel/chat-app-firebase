@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -191,7 +192,11 @@ public class MessagingService extends FirebaseMessagingService {
                 case NOTIFICATION_TYPE_MESSAGE:
                     Log.d(TAG, "Notification type = " + NOTIFICATION_TYPE_MESSAGE);
                     messageTitle = getString(R.string.notification_message_title);
-                    messageBody = getString(R.string.notification_message_body, name);
+                    if(TextUtils.isEmpty(name)){
+                        messageBody = getString(R.string.notification_default_message_body);
+                    }else{
+                        messageBody = getString(R.string.notification_message_body, name);
+                    }
 
                     bundle.clear();
                     bundle.putString("chatId", destinationId);

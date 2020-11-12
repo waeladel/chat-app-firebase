@@ -183,7 +183,7 @@ public class MainFragment extends Fragment {
 
         setHasOptionsMenu(true); // To add search menu item programmatically
 
-        fragmentManager = getFragmentManager();
+        fragmentManager = getChildFragmentManager();
 
         /*// To listen to mic mute changes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -891,8 +891,8 @@ public class MainFragment extends Fragment {
     //Show a dialog to confirm blocking user
     private void showBatteryDialog() {
         BatteryAlertFragment batteryFragment = BatteryAlertFragment.newInstance(mActivityContext);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
+        if (getChildFragmentManager() != null) {
+            fragmentManager = getChildFragmentManager();
             batteryFragment.show(fragmentManager, BATTERY_ALERT_FRAGMENT);
             Log.i(TAG, "blockFragment show clicked ");
         }
@@ -1015,7 +1015,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onFinish() {
                 Log.d(TAG, "mRemainingTimer onFinish.");
-                // End searvice and UI when timer finishes
+                // End service and UI when timer finishes
                 CancelTimer();
                 stopMyService(FindNearbyService.class);
             }
@@ -1060,8 +1060,8 @@ public class MainFragment extends Fragment {
     //Show a dialog to allow user to enable his microphone
     private void showMutedMicDialog() {
         MutedMicAlertFragment mutedMicAlertFragment = MutedMicAlertFragment.newInstance(mActivityContext);
-        if (getFragmentManager() != null) {
-            fragmentManager = getFragmentManager();
+        if (getChildFragmentManager() != null) {
+            fragmentManager = getChildFragmentManager();
             mutedMicAlertFragment.show(fragmentManager, MUTED_MIC_ALERT_FRAGMENT_TAG);
             Log.i(TAG, "mutedMicAlertFragment show clicked ");
         }

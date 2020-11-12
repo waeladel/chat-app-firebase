@@ -276,7 +276,7 @@ public class MessagesRepository {
         return mSenderId;
     }*/
 
-    public MutableLiveData<Chat> getChat(String chatId){
+    public MutableLiveData<Chat>getChat(String chatId){
 
         DatabaseReference chatRef = mChatRef.child(chatId);
         //final MutableLiveData<User> mCurrentUser = new MutableLiveData<>();

@@ -88,6 +88,7 @@
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MyTheme.MediumComponent</item>
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.MyTheme.LargeComponent</item>
 
+
         <!--Component styles-->
         <item name="textInputStyle">@style/EditTextStyle.MyTheme</item>
         <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.OutlinedButton</item>
