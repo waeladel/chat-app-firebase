@@ -49,6 +49,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.iceteck.silicompressorr.SiliCompressor;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
@@ -57,7 +58,6 @@ import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.FilesHelper;
-import com.trackaty.chat.Utils.MediaLoader;
 import com.trackaty.chat.Utils.MyPicassoEngine;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.SortBySection;
@@ -67,13 +67,10 @@ import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
-import com.yanzhenjie.album.Album;
-import com.yanzhenjie.album.AlbumConfig;
 import com.yanzhenjie.album.AlbumFile;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -86,10 +83,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-
-import top.zibin.luban.Luban;
-import top.zibin.luban.OnCompressListener;
-
 import static android.app.Activity.RESULT_OK;
 import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
 
@@ -132,6 +125,8 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
 
     private  final static String IMAGE_HOLDER_POSITION = "position";
+    private static final String APP_AUTHORITY = BuildConfig.APPLICATION_ID +".fileprovider";
+
 
 
     private static final int SELECT_AVATAR_REQUEST_CODE = 102;
@@ -830,10 +825,39 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private void compressImage(final Uri imageUri, final String type, final int position) {
         if (null != imageUri && null != imageUri.getPath()) {
-            File imageFile = new File(imageUri.getPath());
-            Luban.get(getContext())
+            //File imageFile = new File(imageUri.getPath());
+            String filePath = SiliCompressor.with(mActivityContext).compress(imageUri.toString(), mActivityContext.getCacheDir());
+            //Uri compressedImageUri = Uri.fromFile(new File(filePath));
+            uploadImage(Uri.parse(filePath), type, position);
+            /*Luban.compress(imageFile, mActivityContext.getCacheDir())
+                    .putGear(Luban.FIRST_GEAR)
+                    .launch(new OnCompressListener() {
+                        @Override
+                        public void onStart() {
+                            Log.i(TAG, "compress :onStart= ");
+                        }
+
+                        @Override
+                        public void onSuccess(File file) {
+                            Log.i("TAG", file.getAbsolutePath());
+                            //mImageViews.get(0).setImageURI(Uri.fromFile(file));
+                            Log.d(TAG, "compress: Uri.fromFil = " +  Uri.fromFile(file).toString());
+                            Log.d(TAG, "compress: Uri.parse = " +  Uri.parse("content://media"+ file.getAbsolutePath()).toString());
+                            Uri compressImageUri  = Uri.parse("content://media"+ file.getAbsolutePath());
+                            uploadImage(compressImageUri, type, position);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "compress :onError= " + e);
+                            uploadImage(imageUri, type, position);
+                        }
+                    });*/
+
+            /*Luban.with(getContext())
                     .load(imageFile)                     // pass image to be compressed
-                    .putGear(Luban.THIRD_GEAR)      // set compression level, defaults to 3
+                    .putGear(3)      // set compression level, defaults to 3
                     .setCompressListener(new OnCompressListener() { // Set up return
 
                         @Override
@@ -845,9 +869,17 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                         @Override
                         public void onSuccess(File file) {
                             //Called when compression finishes successfully, provides compressed image
-                            Log.d(TAG, "compress :onSuccess= " + file.getPath());
-                            Uri compressImageUri = Uri.fromFile(file);
-                            uploadImage(compressImageUri, type, position);
+                            Log.d(TAG, "compress :onSuccess. file path= " + file.getAbsolutePath());
+                            Log.d(TAG, "compress :onSuccess. file exists? " + file.exists());
+                            //Uri compressImageUri  = Uri.fromFile(file);
+                            // Open a specific media item using ParcelFileDescriptor.
+                            ContentResolver resolver = mActivityContext.getContentResolver();
+                            String readOnlyMode = "r";
+                            Log.d(TAG, "compress: Uri.fromFil = " +  Uri.fromFile(file).toString());
+                            Log.d(TAG, "compress: Uri.parse = " +  Uri.parse("content://media"+ file.getAbsolutePath()).toString());
+                            Uri compressImageUri  = Uri.parse("content://media"+ file.getAbsolutePath());
+                            uploadImage(file, type, position);
+
                         }
 
                         @Override
@@ -857,7 +889,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                             uploadImage(imageUri, type, position);
 
                         }
-                    }).launch();    // Start compression
+                    }).launch();    // Start compression*/
         }
 
     }
@@ -978,7 +1010,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
                     .maxSelectable(1)
                     .capture(true)
                     //.captureStrategy(new CaptureStrategy(true, BuildConfig.APPLICATION_ID +".fileprovider", "Basbes"))
-                    .captureStrategy(new CaptureStrategy(false, BuildConfig.APPLICATION_ID +".fileprovider"))
+                    .captureStrategy(new CaptureStrategy(false, APP_AUTHORITY))
                     .showSingleMediaType(true)
                     //.addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                     //.gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.album_item_height))

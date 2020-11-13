@@ -51,6 +51,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.iceteck.silicompressorr.SiliCompressor;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.trackaty.chat.Adapters.EditProfileAdapter;
@@ -89,9 +90,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-
-import top.zibin.luban.Luban;
-import top.zibin.luban.OnCompressListener;
 
 import static android.app.Activity.RESULT_OK;
 import static com.trackaty.chat.Utils.MenuHelper.menuIconWithText;
@@ -136,6 +134,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     private static final String COVER_ORIGINAL_NAME = "original_cover.jpg";
 
     private  final static String IMAGE_HOLDER_POSITION = "position";
+    private static final String APP_AUTHORITY = BuildConfig.APPLICATION_ID +".fileprovider";
 
     private static final int SELECT_AVATAR_REQUEST_CODE = 102;
     private static final int SELECT_COVER_REQUEST_CODE = 103;
@@ -842,10 +841,13 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     private void compressImage(final Uri imageUri, final String type, final int position) {
         if (null != imageUri && null != imageUri.getPath()) {
-            File imageFile = new File(imageUri.getPath());
-            Luban.get(getContext())
+            //File imageFile = new File(imageUri.getPath());
+            String filePath = SiliCompressor.with(mActivityContext).compress(imageUri.toString(), mActivityContext.getCacheDir());
+            //Uri compressedImageUri = Uri.fromFile(new File(filePath));
+            uploadImage(Uri.parse(filePath), type, position);
+            /*Luban.get(getContext())
                     .load(imageFile)                     // pass image to be compressed
-                    .putGear(Luban.THIRD_GEAR)      // set compression level, defaults to 3
+                    .putGear(3)      // set compression level, defaults to 3
                     .setCompressListener(new OnCompressListener() { // Set up return
 
                         @Override
@@ -868,7 +870,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                             uploadImage(imageUri, type, position);
 
                         }
-                    }).launch();    // Start compression
+                    }).launch();    // Start compression*/
         }
     }
 
@@ -988,7 +990,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
                     .maxSelectable(1)
                     .capture(true)
                     //.captureStrategy(new CaptureStrategy(true, BuildConfig.APPLICATION_ID +".fileprovider", "Basbes"))
-                    .captureStrategy(new CaptureStrategy(false, BuildConfig.APPLICATION_ID +".fileprovider"))
+                    .captureStrategy(new CaptureStrategy(false, APP_AUTHORITY))
                     .showSingleMediaType(true)
                     //.addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                     //.gridExpectedSize(getResources().getDimensionPixelSize(R.dimen.album_item_height))
