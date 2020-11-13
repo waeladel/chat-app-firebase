@@ -37,7 +37,6 @@ import com.trackaty.chat.Fragments.NotificationsFragmentDirections;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.DatabaseNotification;
-import com.yanzhenjie.album.widget.photoview.PhotoViewAttacher;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -67,7 +67,6 @@ import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
-import com.yanzhenjie.album.AlbumFile;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
@@ -178,8 +177,6 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
 
     private StorageReference mStorageRef;
     private StorageReference mImagesRef;
-
-    private ArrayList<AlbumFile> mMediaFiles;
 
     private Long birthInMillis;
     private NavController navController ;

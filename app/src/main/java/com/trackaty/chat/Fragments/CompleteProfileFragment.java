@@ -60,7 +60,6 @@ import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.Utils.FilesHelper;
-import com.trackaty.chat.Utils.MediaLoader;
 import com.trackaty.chat.Utils.MyPicassoEngine;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.Utils.SortBySection;
@@ -70,10 +69,6 @@ import com.trackaty.chat.models.Profile;
 import com.trackaty.chat.models.Social;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.models.Variables;
-import com.yanzhenjie.album.Action;
-import com.yanzhenjie.album.Album;
-import com.yanzhenjie.album.AlbumConfig;
-import com.yanzhenjie.album.AlbumFile;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
@@ -185,8 +180,6 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     private StorageReference mStorageRef;
     private StorageReference mImagesRef;
-
-    private ArrayList<AlbumFile> mMediaFiles;
 
     private Long birthInMillis;
     private NavController navController ;

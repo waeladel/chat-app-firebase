@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -24,7 +25,6 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
 import com.trackaty.chat.activities.MainActivity;
-import com.yanzhenjie.album.widget.photoview.PhotoViewAttacher;
 
 
 /**
@@ -37,8 +37,9 @@ public class DisplayImageFragment extends Fragment {
     private StorageReference mStorageRef,mImagesRef, mUserRef ;
     private Context activityContext;
     private Activity activity;
-    private ImageView  photoView , loadingIcon;
-    private PhotoViewAttacher mAttacher;
+    private ImageView loadingIcon;
+    private PhotoView photoView;
+    //private PhotoViewAttacher mAttacher;
 
     public DisplayImageFragment() {
         // Required empty public constructor
@@ -72,13 +73,13 @@ public class DisplayImageFragment extends Fragment {
                         .into(photoView, new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
-                                //do Photo Attacher when picture is loaded successfully
                                 loadingIcon.setVisibility(View.GONE);
-                                if(mAttacher!=null){
+                                //do Photo Attacher when picture is loaded successfully
+                                /*if(mAttacher!=null){
                                     mAttacher.update();
                                 }else{
                                     mAttacher = new PhotoViewAttacher(photoView);
-                                }
+                                }*/
                             }
                             @Override
                             public void onError(Exception e) {

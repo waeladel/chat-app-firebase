@@ -5,9 +5,8 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.trackaty.chat.R;
-import com.yanzhenjie.album.AlbumFile;
-import com.yanzhenjie.album.AlbumLoader;
 
+/*
 public class MediaLoader implements AlbumLoader {
 
     @Override
@@ -23,4 +22,4 @@ public class MediaLoader implements AlbumLoader {
                 .error(R.drawable.ic_broken_image_512px)
                 .into(imageView);
     }
-}
+}*/
