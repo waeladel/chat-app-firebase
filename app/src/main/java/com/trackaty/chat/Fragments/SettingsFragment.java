@@ -159,7 +159,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.setting_preferences, rootKey);
 
         // Step 4: Set output file for notification audio
-        mOutputFile = FilesHelper.getOutputMediaFile(FilesHelper.MEDIA_TYPE_Audio);
+        mOutputFile = FilesHelper.getOutputMediaFile(mActivityContext, FilesHelper.MEDIA_TYPE_Audio);
 
 
         //Get current logged in user

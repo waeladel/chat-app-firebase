@@ -2,10 +2,21 @@ package com.trackaty.chat.Utils;
 
 
 import android.annotation.TargetApi;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
+import android.database.Cursor;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.content.FileProvider;
+
+import com.trackaty.chat.Fragments.EditProfileFragment;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -20,6 +31,7 @@ public class FilesHelper {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     public static final int MEDIA_TYPE_Audio = 3;
+    private final static String TAG = FilesHelper.class.getSimpleName();
 
 
     /**
@@ -138,22 +150,28 @@ public class FilesHelper {
      * @param type Media type. Can be video or image.
      * @return A file object pointing to the newly created file.
      */
-    public  static File getOutputMediaFile(int type){
+    public  static File getOutputMediaFile(Context context, int type){
+        Log.d(TAG, "getOutputMediaFile started");
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
         if (!Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)) {
+            Log.d(TAG, "getExternalStorageState doesn't exist ");
             return  null;
         }
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_NOTIFICATIONS).getAbsolutePath());
-        // This location works best if you want the created images to be shared
+        // This location works best if you want the created media to be shared
         // between applications and persist after your app has been uninstalled.
+        //mediaStorageDir = new File(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI +File.separator+Environment.DIRECTORY_NOTIFICATIONS);
+
+        // If files not meant to be shared with other apps, store them in your package-specific directories
+        // Files will be deleted after your app has been uninstalled.
+        File mediaStorageDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS).getAbsolutePath());
+
 
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()){
             if (! mediaStorageDir.mkdirs()) {
-                Log.d("mediaStorageDir", "failed to create directory");
+                Log.d(TAG, "failed to create directory");
                 return null;
             }
         }
@@ -176,6 +194,49 @@ public class FilesHelper {
         }
 
         return mediaFile;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    public static Uri isFileExist(Context context, String fileName){
+
+        String[] projection = {MediaStore.MediaColumns._ID, // Contract class constant for the _ID column name
+                MediaStore.MediaColumns.DISPLAY_NAME, // Contract class constant for the "Display name" column name
+                MediaStore.MediaColumns.RELATIVE_PATH, // Contract class constant for the "Relative path" column name
+                MediaStore.MediaColumns.DATE_MODIFIED // Contract class constant for the "Date modified" column name
+        };
+
+        String selection = MediaStore.MediaColumns.RELATIVE_PATH + "='" + Environment.DIRECTORY_NOTIFICATIONS + File.separator + "' AND "
+                + MediaStore.MediaColumns.DISPLAY_NAME+"='" + fileName + "'";
+
+        ContentResolver resolver = context.getContentResolver();
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), projection, selection , null, null);
+
+        if (cursor != null) {
+            Log.d(TAG, "cursor is not null");
+            if(cursor.getCount()>0){
+                Log.d(TAG, "cursor is not 0");
+                if (cursor.moveToFirst()) {
+                    String filePath = cursor.getString(0);
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
+                    String displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME) );
+                    String relativePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.RELATIVE_PATH) );
+                    long z = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED) );
+
+                    return ContentUris.withAppendedId(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),  id);
+
+                } else {
+                    // Uri was ok but no entry found.
+                }
+
+            }else{
+                // content Uri was invalid or some other error occurred
+            }
+            cursor.close();
+        } else {
+            // content Uri was invalid or some other error occurred
+        }
+
+        return null;
     }
 
 }

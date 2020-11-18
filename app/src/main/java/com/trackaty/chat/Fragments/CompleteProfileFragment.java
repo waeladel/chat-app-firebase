@@ -4,14 +4,19 @@ package com.trackaty.chat.Fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +83,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -186,7 +192,8 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     //val data: String = CompleteProfileFragmentArgs.fromBundle(arguments).data // data = "Any data"
     // To write wave file on notifications folder
     private File mOutputFile;
-    private FileOutputStream outStream;
+    //private FileOutputStream outStream;
+    private OutputStream outStream;
 
     public CompleteProfileFragment() {
         // Required empty public constructor
@@ -220,7 +227,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
         currentUserId = mFirebaseCurrentUser!= null ? mFirebaseCurrentUser.getUid() : null;
 
         // Step 4: Set output file for notification audio
-        mOutputFile = FilesHelper.getOutputMediaFile(FilesHelper.MEDIA_TYPE_Audio);
+        mOutputFile = FilesHelper.getOutputMediaFile(mActivityContext, FilesHelper.MEDIA_TYPE_Audio);
 
         mEditProfileViewModel = new ViewModelProvider(this).get(EditProfileViewModel.class);
 
@@ -1467,18 +1474,69 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     // write notification sound to notification folder
     private void writeToExternal(){
+        // Check first if the file exist before writing it
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // return if the file already exists. I must use this function beacuase in Q we are saving to public notification collection not mOutputFile path
+            if(FilesHelper.isFileExist(mActivityContext, mOutputFile.getName()) != null){
+                // file already exist
+                Log.i(TAG, "writeToExternal return");
+                return;
+            }
+        }else{
+            // return if we don't have permission or we couldn't create output file or the wav file already exists
+            if (!isWritePermissionGranted() || mOutputFile == null || mOutputFile.exists()) {
+                // file already exist
+                Log.i(TAG, "writeToExternal return");
+                return;
+            }
+        }
 
-        // return if we don't have permission or we couldn't create output file or the wav file already exists
-        if (!isWritePermissionGranted() || mOutputFile == null || mOutputFile.exists()) {
-            Log.i(TAG, "writeToExternal return");
+        InputStream in = getResources().openRawResource(R.raw.basbes);
+        Uri collection;
+        ContentResolver resolver = mActivityContext.getContentResolver();
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Audio.Media.DISPLAY_NAME, mOutputFile.getName());
+        values.put(MediaStore.Audio.Media.TITLE, "Basbes"); // Important to have a title in notifications list @api<=29
+        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/ogg");
+        values.put(MediaStore.Audio.Media.IS_RINGTONE, false);
+        values.put(MediaStore.Audio.Media.IS_NOTIFICATION, true); // To only appear in notifications list
+        values.put(MediaStore.Audio.Media.IS_ALARM, false);
+        values.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            collection =  MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY); // added in @api<=29 to get the primary external storage
+            //collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            //collection = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI+ File.separator+ Environment.DIRECTORY_NOTIFICATIONS);
+
+            // To specify a location instead of the default music directory in external
+            values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_NOTIFICATIONS);
+            //collection = MediaStore.Audio.Media.getContentUriForPath(mOutputFile.getAbsolutePath());
+
+            //values.put(MediaStore.MediaColumns.DATA, mOutputFile.getAbsolutePath()); // It crashes without the data column
+        }else{
+            //collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
+            //collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            //collection = MediaStore.Audio.Media.getContentUri(String.valueOf(mActivityContext.getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS)));
+            // To get the location of the created outputFile
+            collection = MediaStore.Audio.Media.getContentUriForPath(mOutputFile.getAbsolutePath());
+            values.put(MediaStore.MediaColumns.DATA, mOutputFile.getAbsolutePath()); // It crashes without the data column
+        }
+
+        if (collection == null) {
+            Log.i(TAG, "writeToExternal collection is null. return");
             return;
         }
 
-        Log.i(TAG, "writeToExternal starts");
+        Uri itemUri = resolver.insert(collection, values);
+        if (itemUri == null) {
+            Log.i(TAG, "writeToExternal itemUri is null. itemUri= "+ itemUri);
+            return;
+        }
 
-        InputStream in = getResources().openRawResource(R.raw.basbes);
         try {
-            outStream = new FileOutputStream(mOutputFile.getPath());
+            outStream = resolver.openOutputStream(itemUri);
+            //outStream = new FileOutputStream(mOutputFile.getPath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -1512,18 +1570,19 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
             }
         }
 
+        // No need to rescan newly added file, media store update the index when we insert.
         // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.
-        final String mimeType = mActivityContext.getContentResolver().getType(Uri.fromFile(mOutputFile));
+        /*final String mimeType = mActivityContext.getContentResolver().getType(Uri.fromFile(mOutputFile));
         MediaScannerConnection.scanFile(
                 mActivityContext,
-                new String[]{mOutputFile.getAbsolutePath()},
+                new String[]{Environment.DIRECTORY_NOTIFICATIONS},
                 new String[]{mimeType},
                 new MediaScannerConnection.OnScanCompletedListener() {
                     @Override
                     public void onScanCompleted(String path, Uri uri) {
                         Log.v(TAG, "file " + path + " was scanned successfully: " + uri);
                     }
-                });
+                });*/
 
     }
 
