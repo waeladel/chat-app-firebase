@@ -106,7 +106,6 @@ dependencies {
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4' // for compressing original image
     implementation 'com.github.chrisbanes:PhotoView:2.0.0' // to zoom avatar and cover images
 
-
     implementation 'androidx.paging:paging-runtime:2.1.2' //Add the paging library
     //implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0' // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.3.0-alpha07" // ViewModel

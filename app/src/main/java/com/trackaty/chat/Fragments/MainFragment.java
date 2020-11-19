@@ -80,7 +80,7 @@ import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
  * Use the {@link MainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements ItemClickListener{
 
     private final static String TAG = MainFragment.class.getSimpleName();
 
@@ -720,13 +720,15 @@ public class MainFragment extends Fragment {
         } else {
             // No explanation needed; request the permission
             Log.i(TAG, "requestPermission: No explanation needed; request the permission");
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            // Use this requestPermissions(new String[] to receive the result on fragment instead of the activity
+            requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
         }
     }
 
     //Show a dialog to select whether to edit or un-reveal
     private void showPermissionRationaleDialog() {
-        PermissionAlertFragment PermissionRationaleDialog = PermissionAlertFragment.newInstance(mActivityContext);
+        PermissionAlertFragment PermissionRationaleDialog = PermissionAlertFragment.newInstance(mActivityContext, this);
         PermissionRationaleDialog.show(fragmentManager, PERMISSION_RATIONALE_FRAGMENT);
         Log.i(TAG, "showPermissionRationaleDialog: permission AlertFragment show clicked ");
     }
@@ -1067,10 +1069,10 @@ public class MainFragment extends Fragment {
         }
     }
 
-    /*@Override
+    @Override
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "onClick view= " + view + " position= " + position);
-        if (position == 1) { // Enable microphone is clicked
+        /*if (position == 2) { // Enable microphone is clicked
             // to check if microphone is muted before starts search service
             if (mAudioManager != null && mAudioManager.isMicrophoneMute()) {
                 Log.d(TAG, "AudioManager is Microphone Muted=" + mAudioManager.isMicrophoneMute());
@@ -1079,8 +1081,14 @@ public class MainFragment extends Fragment {
                 startMyService(FindNearbyService.class);
                 StartTimer();
             }
+        }*/
+        if (position == 1) { // Grant microphone permision
+            Log.d(TAG, "item clicked position= " + position + " View= "+view);
+            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            // Use this requestPermissions(new String[] to receive the result on fragment instead of the activity
+            requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
         }
-    }*/
+    }
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.

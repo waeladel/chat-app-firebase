@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 
 public class PermissionAlertFragment extends DialogFragment  {
@@ -22,6 +23,8 @@ public class PermissionAlertFragment extends DialogFragment  {
     private Context mActivityContext;
     private Activity activity;
     private Context context;
+    // click listener to pass click events to parent fragment
+    private static ItemClickListener sItemClickListen;
 
     // click listener to pass click events to parent fragment
     //private static ItemClickListener itemClickListen;
@@ -33,10 +36,10 @@ public class PermissionAlertFragment extends DialogFragment  {
         this.context = context;
     }
 
-    public static PermissionAlertFragment newInstance(Context context) {
+    public static PermissionAlertFragment newInstance(Context context , ItemClickListener itemClickListener) {
 
         // instantiate click listener to pass click events to parent fragment
-        //itemClickListen = itemClickListener;
+        sItemClickListen = itemClickListener;
 
         PermissionAlertFragment fragment = new PermissionAlertFragment(context);
         Bundle args = new Bundle();
@@ -67,7 +70,11 @@ public class PermissionAlertFragment extends DialogFragment  {
             public void onClick(DialogInterface dialog, int which) {
                 // on success
                 Log.i(TAG, "onClick on success: request Permissions");
-                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+                //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+                // We will request permission from fragment to recieve the result on fragment
+                if(sItemClickListen != null){
+                    sItemClickListen.onClick(null, 1, false);
+                }
             }
         });
 

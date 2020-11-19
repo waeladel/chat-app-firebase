@@ -829,7 +829,7 @@ public class EditProfileFragment extends Fragment implements ItemClickListener{
     private void compressImage(final Uri imageUri, final String type, final int position) {
         if (null != imageUri && null != imageUri.getPath()) {
             //File imageFile = new File(imageUri.getPath());
-            String filePath = SiliCompressor.with(mActivityContext).compress(imageUri.toString(), mActivityContext.getFilesDir());
+            String filePath = SiliCompressor.with(mActivityContext).compress(imageUri.toString(), mActivityContext.getCacheDir());
             //Uri compressedImageUri = FileProvider.getUriForFile(mActivityContext, APP_AUTHORITY, new File(filePath));
             Log.d(TAG, "compress: filePath = " +  filePath);
 
