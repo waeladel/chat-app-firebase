@@ -24,7 +24,7 @@
         name="my_external_video"
         path="Movies" />
     <!--files in the root of your app's external storage area. getExternalFilesDir()-->
-    <files-path
+    <external-files-path
         name="my_external_notifications"
         path="Notifications"/>
     <!--files in the root of your app's external storage area. getExternalFilesDir()-->
