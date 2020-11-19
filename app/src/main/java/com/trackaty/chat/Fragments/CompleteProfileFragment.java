@@ -1422,21 +1422,39 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     private void requestPermission() {
         // Permission is not granted
         // Should we show an explanation?
-        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE) ||
-                ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-                ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
-            Log.i(TAG, "requestPermission: permission should show Rationale");
-            // Show an explanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
-            showPermissionRationaleDialog();
-        } else {
-            // No explanation needed; request the permission
-            Log.i(TAG, "requestPermission: No explanation needed; request the permission");
-            // using requestPermissions(new String[] instead of ActivityCompat.requestPermissions(this, new String[] to get onRequestPermissionsResult in the fragment
-            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // API level 29 Android 10 and higher
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+                Log.i(TAG, "requestPermission: permission should show Rationale");
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                showPermissionRationaleDialog();
+            } else {
+                // No explanation needed; request the permission
+                Log.i(TAG, "requestPermission: No explanation needed; request the permission");
+                // using requestPermissions(new String[] instead of ActivityCompat.requestPermissions(this, new String[] to get onRequestPermissionsResult in the fragment
+                requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                        Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+            }
+        }else{
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)) {
+                Log.i(TAG, "requestPermission: permission should show Rationale");
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                showPermissionRationaleDialog();
+            } else {
+                // No explanation needed; request the permission
+                Log.i(TAG, "requestPermission: No explanation needed; request the permission");
+                // using requestPermissions(new String[] instead of ActivityCompat.requestPermissions(this, new String[] to get onRequestPermissionsResult in the fragment
+                requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+            }
         }
 
     }
@@ -1455,8 +1473,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
             // If request is cancelled, the result arrays are empty.
             // Camera permission is not a must, we can proceed with reading photos from gallery
             if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                    grantResults[1] == PackageManager.PERMISSION_GRANTED ) {
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // permission was granted, yay! Do the task you need to do.
                 Log.i(TAG, "onRequestPermissionsResult permission was granted");
                 if(mEditProfileViewModel.isSelectAvatarClicked()){
@@ -1591,11 +1608,19 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     public void onClick(View view, int position, boolean isLongClick) {
         Log.d(TAG, "item clicked fragment= " + position);
         if(view == null && position == 6){
-            // OK button of the permission dialog is clicked, lets ask for permissions
-            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
-            return;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // API level 29 Android 10 and higher
+                // OK button of the permission dialog is clicked, lets ask for permissions
+                requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                        Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+            }else{
+                // OK button of the permission dialog is clicked, lets ask for permissions
+                requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE ,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA}, REQUEST_STORAGE_PERMISSIONS_CODE);
+            }
+
+            return; // No need to check other clicks, it's the OK button of the permission dialog
 
         }
         switch (mProfileDataArrayList.get(position).getKey()) {
