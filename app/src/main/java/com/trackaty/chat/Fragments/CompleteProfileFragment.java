@@ -1404,14 +1404,21 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
 
     // If Storage and camera permissions are granted return true so that we stop asking for permissions
     private boolean isAllPermissionGranted() {
-        Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED));
 
-        return (ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
-        //return true;
+            return (ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
+        }else{
+            Log.d(TAG, "is permission Granted= "+(ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED));
+
+            return (ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(mActivityContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
+        }
     }
 
     // If WRITE_EXTERNAL_STORAGE is granted, start writing wav file immediately, if not, ask for permission first
