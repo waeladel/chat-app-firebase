@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity {
                         .setLogo(R.mipmap.ic_launcher)      // Set logo drawable
                         .setAlwaysShowSignInMethodScreen(true)
                         .setTheme(R.style.Background_FirebaseUI)      // Set theme
-                        .setTosAndPrivacyPolicyUrls("https://sites.google.com/view/basbes/terms-of-service","https://sites.google.com/view/basbes/privacy-policy")
+                        .setTosAndPrivacyPolicyUrls("https://www.basbes.app/terms-of-service/","https://www.basbes.app/app-privacy-policy/")
                         .build(),
                 RC_SIGN_IN);
 
