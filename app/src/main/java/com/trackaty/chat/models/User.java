@@ -22,7 +22,7 @@ public class User {
     private String name;
     private String biography;
     private int loveCounter;
-    private int PickupCounter;
+    private int pickupCounter;
     private String relationship;
     private String interestedIn;
     private  int soundId;
@@ -95,7 +95,7 @@ public class User {
         result.put("name", name);
         result.put("biography", biography);
         result.put("loveCounter", loveCounter);
-        result.put("PickupCounter", PickupCounter);
+        result.put("pickupCounter", pickupCounter);
         result.put("relationship", relationship);
         result.put("interestedIn", interestedIn);
 
@@ -213,11 +213,11 @@ public class User {
     }
 
     public int getPickupCounter() {
-        return PickupCounter;
+        return pickupCounter;
     }
 
     public void setPickupCounter(int pickupCounter) {
-        PickupCounter = pickupCounter;
+        this.pickupCounter = pickupCounter;
     }
 
     public String getRelationship() {

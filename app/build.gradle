@@ -15,8 +15,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 10
-        versionName "0.1.0"
+        versionCode 12
+        versionName "0.1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"
@@ -41,11 +41,11 @@ android {
         release {
             // Enables code shrinking, obfuscation, and optimization for only
             // your project's release build type.
-            minifyEnabled false
+            minifyEnabled true
 
             // Enables resource shrinking, which is performed by the
             // Android Gradle plugin.
-            shrinkResources false
+            shrinkResources true
 
             // Includes the default ProGuard rules files that are packaged with
             // the Android Gradle plugin. To learn more, go to the section about
@@ -126,7 +126,7 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //implementation 'com.nex3z:notification-badge:1.0.2' // notification badge with animation
     implementation 'com.king.view:radarview:1.0.2'
-    implementation "io.chirp:chirpsdk:3.10.+"
+    implementation "io.chirp:chirpsdk:3.10.1"
 
     // Required only if Facebook login support is required. Find the latest Facebook SDK releases here: https://goo.gl/Ce5L94
     implementation 'com.facebook.android:facebook-android-sdk:5.5.1'
