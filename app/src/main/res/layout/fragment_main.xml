@@ -56,6 +56,21 @@ android:layout_width="match_parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/radar" />
 
+        <TextView
+            android:id="@+id/searchDescriptionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            android:background="@drawable/current_user_message_background"
+            android:gravity="center_horizontal"
+            android:padding="8dp"
+            android:text="@string/searching_description_text"
+            app:layout_constraintBottom_toBottomOf="@+id/radar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radar" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

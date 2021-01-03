@@ -198,6 +198,8 @@
     <string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without scratching. Therefore, don\'t choose it unless you start to trust this person.</string>
     <string name="message_active_default_timer">00:00:00</string>
     <string name="searching_default_timer">00:00</string>
+<!--    <string name="searching_description_text">Searching for visible users within 15 meter and no walls or barriers between you.</string>-->
+    <string name="searching_description_text">Looking for users within 15 meter, no walls in between</string>
 
 
     <!--<string name="user_facebook_helper">Username or ID without: https://facebook.com/</string>
