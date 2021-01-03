@@ -13,12 +13,16 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.trackaty.chat.Adapters.RevealAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.ViewModels.ProfileViewModel;
+import com.trackaty.chat.ViewModels.RevealViewModel;
 import com.trackaty.chat.models.Social;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +34,9 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     private final static String TAG = RevealFragment.class.getSimpleName();
 
     private final static String PRIVET_CONTACTS_KEY = "privateContacts";
-    public static ArrayList<Social> privateContacts;
+    private final static String RELATION_STATUS_KEY = "relationStatus";
     private ArrayList<Social> pramsContacts;
+    private static ArrayList<Social> sContacts;
     private RevealAdapter mRequestAdapter;
     private RecyclerView mRequestRecycler;
     private Button mSendButton, mCancelButton;
@@ -46,9 +51,10 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
     private Context mActivityContext;
     private Activity activity;
+    private RevealViewModel mViewModel;
 
     private static ItemClickListener sItemClickListen;
-    private List<Boolean> checkedList = new ArrayList<>();
+    private List<Boolean> checkedList;
 
     public RevealFragment() {
         // Empty constructor is required for DialogFragment
@@ -56,17 +62,15 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         // Use `newInstance` instead as shown below
     }
 
-    public static RevealFragment newInstance(ArrayList<Social> pContacts, ItemClickListener itemClickListener) {
-        privateContacts = pContacts;
+    public static RevealFragment newInstance(ArrayList<Social> contacts, String relationStatus, ItemClickListener itemClickListener) {
+        //sOriginalContacts = contacts;
         sItemClickListen = itemClickListener;
+        //sContacts = contacts;
 
-
-        for (int i = 0; i < privateContacts.size(); i++) {
-            Log.i(TAG, "mParam PrivateContactsList sorted " + privateContacts.get(i).getKey());
-        }
         RevealFragment fragment = new RevealFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(PRIVET_CONTACTS_KEY, privateContacts);
+        args.putParcelableArrayList(PRIVET_CONTACTS_KEY, contacts); // Send the contact list as arguments
+        args.putString(RELATION_STATUS_KEY, relationStatus); // Send relationStatus as arguments, it's important for the dialog title
         fragment.setArguments(args);
         return fragment;
     }
@@ -101,9 +105,10 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         // STYLE_NO_FRAME means that I will provide my own layout and style for the whole dialog
         // so for example the size of the default dialog will not get in my way
         // the style extends the default one. see bellow.
-
         setStyle(STYLE_NO_TITLE, R.style.DatePickerMyTheme);
-
+        checkedList = new ArrayList<>();
+        // Use a viewModel to preserve the new created contacts, We don't want to use the argument contacts because it changes the original contacts in ProfileFragment
+        mViewModel = new ViewModelProvider(this).get(RevealViewModel.class);
     }
 
     @Override
@@ -129,45 +134,59 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         mCancelButton =  fragView.findViewById(R.id.cancel_button);
         mTitle =  fragView.findViewById(R.id.dialog_title);
 
+
         // get PrivateContactsList array from arguments
         if (getArguments() != null) {
             pramsContacts = getArguments().getParcelableArrayList(PRIVET_CONTACTS_KEY);
-            if (pramsContacts != null) {
-                for (int i = 0; i < pramsContacts.size(); i++) {
-                    Log.i(TAG, "getArguments() PrivateContactsList sorted " + pramsContacts.get(i).getKey() + " public= "+ privateContacts.get(i).getValue().getPublic());
-                    if(pramsContacts.get(i).getValue().getPublic()){
-                        Log.i(TAG, "this "+ pramsContacts.get(i).getKey()+ "item is selected");
-                        // Enable send button
+            mRelationStatus = getArguments().getString(RELATION_STATUS_KEY);
+            if(null == mViewModel.getContacts() || mViewModel.getContacts().isEmpty()){
+                Log.i(TAG, "set mViewModel Contacts");
+                // Create new contacts from the argument contacts because we don't want to make changes to the original contacts
+                mViewModel.setContacts(pramsContacts);
+            }
+
+            if(null == mViewModel.getRelationStatus()){
+                Log.i(TAG, "set mViewModel relationStatus");
+                mViewModel.setRelationStatus(mRelationStatus);
+            }
+
+            if (mViewModel.getContacts() != null) {
+                for (int i = 0; i < mViewModel.getContacts().size(); i++) {
+                    Log.i(TAG, "getArguments() mViewModel.getContacts() sorted " + mViewModel.getContacts().get(i).getKey() + " public= "+ mViewModel.getContacts().get(i).getValue().getPublic());
+                    if(mViewModel.getContacts().get(i).getValue().getPublic()){
+                        Log.i(TAG, "this "+ mViewModel.getContacts().get(i).getKey()+ "item already selected of public");
+                        // Enable send button, we already have at least one public or selected contact
                         mSendButton.setEnabled(true);
 
-                        // Add to public item to checkedList
+                        // Add the public item to checkedList
                         checkedList.add(true);
                     }
                 }
             }
 
-
-
             // Adjust button text and dialog title according to relationship status
-            switch (mRelationStatus){
-                case RELATION_STATUS_SENDER:
-                    // If this selected user sent me the request
-                    //Approve request
-                    mSendButton.setText(R.string.request_button_approve_hint);
-                    mTitle.setText(R.string.user_request_approve_dialog_hint);
-                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
-                    break;
-                case RELATION_STATUS_STALKER:
-                    // If this selected user sent me the request and i am editing it
-                    // edit relation
-                    mSendButton.setText(R.string.save_button);
-                    mTitle.setText(R.string.user_request_edit_dialog_hint);
-                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
-                    break;
-                default:
-                    // Show request dialog
-                    Log.d(TAG, "mRelationStatus= " +mRelationStatus);
-                    break;
+            if(mRelationStatus != null){
+                Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                switch (mRelationStatus){
+                    case RELATION_STATUS_SENDER:
+                        // If this selected user sent me the request
+                        //Approve request
+                        mSendButton.setText(R.string.request_button_approve_hint);
+                        mTitle.setText(R.string.user_request_approve_dialog_hint);
+                        Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                        break;
+                    case RELATION_STATUS_STALKER:
+                        // If this selected user sent me the request and i am editing it
+                        // edit relation
+                        mSendButton.setText(R.string.save_button);
+                        mTitle.setText(R.string.user_request_edit_dialog_hint);
+                        Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                        break;
+                    default:
+                        // Show request dialog
+                        Log.d(TAG, "mRelationStatus= " +mRelationStatus);
+                        break;
+                }
             }
 
             mSendButton.setOnClickListener(new View.OnClickListener() {
@@ -176,6 +195,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
                     if(sItemClickListen != null){
                         sItemClickListen.onClick(view, 1, false);
                     }
+                    dismiss();
                 }
             });
 
@@ -185,11 +205,12 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
                     if(sItemClickListen != null){
                         sItemClickListen.onClick(view, 0, false);
                     }
-                    //dismiss();
+
+                    dismiss();
                 }
             });
 
-            mRequestAdapter  = new RevealAdapter(mActivityContext, pramsContacts, this);
+            mRequestAdapter  = new RevealAdapter(mActivityContext, mViewModel.getContacts(), this);
 
             // Initiate the RecyclerView
             mRequestRecycler  =  fragView.findViewById(R.id.contacts_recycler);
@@ -218,7 +239,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
         // Get existing layout params for the window
         ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
         // Assign window properties to fill the parent
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
         // Call super onResume after sizing
@@ -229,15 +250,13 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
     public void onClick(View view, int position, boolean isLongClick) {
         Log.i(TAG, "onClick view= " + view.getTag()+ " position= " +position);
 
-        if(sItemClickListen != null && position != RecyclerView.NO_POSITION){
-            sItemClickListen.onClick(view, position, false);
-        }
-
         if (view instanceof CheckBox) {
             CheckBox checkBox = (CheckBox) view;
             if (checkBox.isChecked()) {
                 Log.i(TAG, "onClick checkBox is checked. position= "+ position);
-                if (pramsContacts != null) {
+                if (mViewModel.getContacts() != null) {
+                    // Change the value of ViewModel contact to true so it stays checked in configuration changes
+                    mViewModel.getContacts().get(position).getValue().setPublic(true);
                     // Add to public item to checkedList
                     checkedList.add( true);
                     // Enable send button
@@ -245,7 +264,9 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
                 }
             }else{
                 Log.i(TAG, "onClick checkBox is unchecked. position= "+ position);
-                if (pramsContacts != null) {
+                if (mViewModel.getContacts() != null) {
+                    // Change the value of ViewModel contact to false so it stays unchecked in configuration changes
+                    mViewModel.getContacts().get(position).getValue().setPublic(false);
                     // remove from public item to checkedList
                     if(!checkedList.isEmpty()){
                         checkedList.remove(0);
@@ -256,16 +277,14 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
                     }
 
                     // Disable send button if there is no selected item
-                    if(checkedList.size() > 0){
-                        // Enable send button
-                        mSendButton.setEnabled(true);
-                    }else{
-                        // Disable send button
-                        mSendButton.setEnabled(false);
-                    }
+                    mSendButton.setEnabled(checkedList.size() > 0);
 
                 }
 
+            }
+
+            if(sItemClickListen != null && position != RecyclerView.NO_POSITION){
+                sItemClickListen.onClick(view, position, false);
             }
         }
     }

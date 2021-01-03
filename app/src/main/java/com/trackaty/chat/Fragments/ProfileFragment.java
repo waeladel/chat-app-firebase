@@ -133,17 +133,19 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     // Map to hold user selections results
     private Map<String, Boolean> mRelationsMap ;
-    // MAp to hold the original requests values in case user cancel and we need to start all over again
-    private Map<String, Boolean> mOriginalRelationsMap ;
+    // Map to hold the original requests values in case user cancel and we need to start all over again
+    // We don't need it now as we user checkedContactsMap to get the changes, then we add the untouched contact from mRelationsMap to selectedContactMap
+    //private Map<String, Boolean> mOriginalRelationsMap ;
 
     private Relation mRelations;
 
     // Create contacts Hash list, to hold user selections when sending a request
-    private Map<String, Boolean> contactsMap = new HashMap<>();
+    private Map<String, Boolean> checkedContactsMap;
 
     private Boolean isCancelLove;
 
     private ProfileViewModel mProfileViewModel;
+    private FragmentManager mFragmentManager;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -168,11 +170,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         }
 
         mProfileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
-
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        mFragmentManager = getChildFragmentManager();
 
         // instantiate a new user relations to use it for reveal requests
         mRelations = new Relation();
+
+        //mOriginalRelationsMap = new HashMap<>();
+        checkedContactsMap = new HashMap<>();
     }
 
 
@@ -309,7 +314,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             // If this selected user sent me the request
                             //Approve request
                             // Show Approve dialog
-                            contactsMap.clear(); // clear all previous selected check boxes
+                            checkedContactsMap.clear(); // clear all previous selected check boxes
                             Log.d(TAG, "RevealButton clicked mProfileViewModel Approve request");
                             mRelationsList = getRelationsList(mRelationsMap);
                             for (int i = 0; i < mRelationsList.size(); i++) {
@@ -343,7 +348,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                             // edit clicked
                                             Log.i(TAG, "edit clicked");
                                             Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
-                                            //contactsMap.clear(); // clear all previous selected check boxes
+                                            checkedContactsMap.clear(); // clear all previous selected check boxes
                                             //mOriginalRelationsMap.clear(); // clear all previous selected check boxes
                                             mRelationsList = getRelationsList(mRelationsMap);
                                             Log.d(TAG, "RevealButton clicked RelationsList size= " + mRelationsList.size());
@@ -375,8 +380,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             showDeleteRelationDialog();
                             break;
                         default:
-                            // Show request dialog
-                            contactsMap.clear(); // clear all previous selected check boxes
+                            // Show request dialog they are not Friends
+                            checkedContactsMap.clear(); // clear all previous selected check boxes
                             Log.d(TAG, "send reveal request");
                             mPrivateContactsList = getPrivateContacts();
 
@@ -476,10 +481,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
 
     //Show request/approve dialog
     private void showDialog(ArrayList<Social> contactsList, String relationStatus) {
-        requestFragment = RevealFragment.newInstance(contactsList, this);
-        requestFragment.setRelationStatus(relationStatus);
-        if (getParentFragmentManager() != null) {
-            requestFragment.show(getParentFragmentManager(), REQUEST_FRAGMENT);
+        requestFragment = RevealFragment.newInstance(contactsList, relationStatus,this);
+        //requestFragment.setRelationStatus(relationStatus);
+        if (mFragmentManager != null) {
+            requestFragment.show(mFragmentManager, REQUEST_FRAGMENT);
             Log.i(TAG, "revealRequest show clicked ");
         }
     }
@@ -487,8 +492,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show confirmation dialog before deleting relations
     private void showDeleteRelationDialog() {
         DeleteRelationAlertFragment deleteAlertFragment = DeleteRelationAlertFragment.newInstance(mActivityContext, this);
-        if (getParentFragmentManager() != null) {
-            deleteAlertFragment.show(getParentFragmentManager(), CONFIRM_DELETE_RELATION_ALERT_FRAGMENT);
+        if (mFragmentManager != null) {
+            deleteAlertFragment.show(mFragmentManager, CONFIRM_DELETE_RELATION_ALERT_FRAGMENT);
             Log.i(TAG, "confirmationFragment show clicked");
         }
     }
@@ -505,8 +510,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show a dialog to confirm blocking user
     private void showBlockDialog() {
         BlockAlertFragment blockFragment = BlockAlertFragment.newInstance(mActivityContext,this);
-        if (getParentFragmentManager() != null) {
-            blockFragment.show(getParentFragmentManager(), CONFIRM_BLOCK_ALERT_FRAGMENT);
+        if (mFragmentManager != null) {
+            blockFragment.show(mFragmentManager, CONFIRM_BLOCK_ALERT_FRAGMENT);
             Log.i(TAG, "blockFragment show clicked ");
         }
     }
@@ -514,8 +519,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     //Show a dialog to confirm blocking user and delete his conversation with us (current user)
     private void showBlockDeleteDialog() {
         BlockDeleteAlertFragment blockDeleteFragment = BlockDeleteAlertFragment.newInstance(mActivityContext, this);
-        if (getParentFragmentManager() != null) {
-            blockDeleteFragment.show(getParentFragmentManager(), CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
+        if (mFragmentManager != null) {
+            blockDeleteFragment.show(mFragmentManager, CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
             Log.i(TAG, "blockDeleteFragment show clicked ");
         }
     }
@@ -1015,7 +1020,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealButton.setBackgroundTintList(mFabDefaultColor);
                                 mRevealHint.setEnabled(true);
                                 mRelationsMap = relation.getContacts();
-                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                //mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                 break;
                             case RELATION_STATUS_RECEIVER:
                                 // If this selected received a request from me
@@ -1039,7 +1044,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setEnabled(true);
                                 mRevealHint.setTextColor(getResources().getColor(R.color.color_error));
                                 mRelationsMap = relation.getContacts();
-                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                //mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                 break;
                             case RELATION_STATUS_FOLLOWED:
                                 // If this selected user approved my (currentUser) request
@@ -1052,7 +1057,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRevealHint.setEnabled(true);
                                 mRevealHint.setTextColor(getResources().getColor(R.color.color_error));
                                 mRelationsMap = relation.getContacts();
-                                mOriginalRelationsMap = new HashMap<>(mRelationsMap);
+                                //mOriginalRelationsMap = new HashMap<>(mRelationsMap);
                                 break;
                         }
                         Log.d(TAG, "onChanged relation Status= " + relation.getStatus() + " size= " + relation.getContacts().size());
@@ -1288,10 +1293,17 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     public void onClick(View view, int position, boolean isLongClick) {
         Log.i(TAG, "onClick view= " + view + " position= " + position);
 
-        if(null != mOriginalRelationsMap){
-            for (Object o : mOriginalRelationsMap.entrySet()) {
+        if(null != checkedContactsMap){
+            for (Object o : checkedContactsMap.entrySet()) {
                 Map.Entry pair = (Map.Entry) o;
-                Log.d(TAG, "mOriginalRelationsMap = " + pair.getKey() + " = " + pair.getValue());
+                Log.d(TAG, "contactsMap loop= " + pair.getKey() + " = " + pair.getValue());
+            }
+        }
+
+        if(null != mRelationsMap){
+            for (Object o : mRelationsMap.entrySet()) {
+                Map.Entry pair = (Map.Entry) o;
+                Log.d(TAG, "mRelationsMap loop= " + pair.getKey() + " = " + pair.getValue());
             }
         }
 
@@ -1301,11 +1313,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             // do what you want with CheckBox
 
             if (checkBox.isChecked()) {
+                // CheckBox is checked
                 switch (mRelationStatus) {
                     case RELATION_STATUS_SENDER:
                         //Approving request
                         Log.d(TAG, "Approving request onClick checkBox isChecked contacts= " + mRelationsList.get(position).getKey());
-                        mRelationsMap.put(mRelationsList.get(position).getKey(), true);
+                        //mRelationsMap.put(mRelationsList.get(position).getKey(), true);
+                        // We save all checked and unchecked to checkedContactsMap, then before updating the database we add to it the old unchanged contacts from mRelationsList
+                        checkedContactsMap.put(String.valueOf(mRelationsList.get(position).getKey()), true);
                         break;
                     case RELATION_STATUS_RECEIVER:
                         //Canceling request
@@ -1314,16 +1329,19 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     case RELATION_STATUS_STALKER:
                         //edit or Un-revealing
                         Log.d(TAG, "checkBox clicked mProfileViewModel edit or Un-reveal");
-                        mRelationsMap.put(mRelationsList.get(position).getKey(), true);
+                        //mRelationsMap.put(mRelationsList.get(position).getKey(), true);
+                        // We save all checked and unchecked to checkedContactsMap, then before updating the database we add to it the old unchanged contacts from mRelationsList
+                        checkedContactsMap.put(String.valueOf(mRelationsList.get(position).getKey()), true);
                         break;
                     case RELATION_STATUS_FOLLOWED:
                         //Un-revealing, you can't edit cause you don't have permission
                         Log.d(TAG, "checkBox clicked mProfileViewModel Un-reveal");
                         break;
                     default:
-                        // Showing request dialog
+                        // Showing request dialog, they are not friends
                         Log.d(TAG, "Request onClick checkBox isChecked contacts= " + mPrivateContactsList.get(position).getKey());
-                        contactsMap.put(mPrivateContactsList.get(position).getKey(), false);
+                        // We save all checked and unchecked to checkedContactsMap, no need to add the original unchanged contacts, because we only request the selected contacts
+                        checkedContactsMap.put(mPrivateContactsList.get(position).getKey(), false); // the value should be false because the receiver didn't approve yet
                         break;
                 }
                 /*Field[] fields = mRelations.getClass().getDeclaredFields();
@@ -1360,11 +1378,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     e.printStackTrace();
                 }*/
             } else {
+                // CheckBox is unchecked
                 switch (mRelationStatus) {
                     case RELATION_STATUS_SENDER:
                         //Approving request
                         Log.d(TAG, "Denying request onClick checkBox not Checked contacts= " + mRelationsList.get(position).getKey());
-                        mRelationsMap.put(mRelationsList.get(position).getKey(), false);
+                        //mRelationsMap.put(mRelationsList.get(position).getKey(), false);
+                        // We save all checked and unchecked to checkedContactsMap, then before updating the database we add to it the old unchanged contacts from mRelationsList
+                        checkedContactsMap.put(String.valueOf(mRelationsList.get(position).getKey()), false);
                     case RELATION_STATUS_RECEIVER:
                         //Canceling request
                         Log.d(TAG, "RevealButton clicked mProfileViewModel cancelRequest");
@@ -1372,7 +1393,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     case RELATION_STATUS_STALKER:
                         //Un revealing
                         Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
-                        mRelationsMap.put(mRelationsList.get(position).getKey(), false);
+                        //mRelationsMap.put(mRelationsList.get(position).getKey(), false);
+                        // We save all checked and unchecked to checkedContactsMap, then before updating the database we add to it the old unchanged contacts from mRelationsList
+                        checkedContactsMap.put(String.valueOf(mRelationsList.get(position).getKey()), false);
                         break;
                     case RELATION_STATUS_FOLLOWED:
                         //Un-revealing, you can't edit cause you don't have permission
@@ -1381,29 +1404,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     default:
                         // Showing request dialog
                         Log.d(TAG, "Request onClick checkBox not Checked");
-                        contactsMap.remove(mPrivateContactsList.get(position).getKey());
+                        // We save all checked and unchecked to checkedContactsMap, no need to add the original unchanged contacts, because we only request the selected contacts
+                        checkedContactsMap.remove(mPrivateContactsList.get(position).getKey()); // the value and key should be removed so the receiver don't approve a non requested contact
                         break;
-                }
-            }
-
-            if(null != contactsMap){
-                for (Object o : contactsMap.entrySet()) {
-                    Map.Entry pair = (Map.Entry) o;
-                    Log.d(TAG, "contactsMap = " + pair.getKey() + " = " + pair.getValue());
-                }
-            }
-
-            if(null != mRelationsMap){
-                for (Object o : mRelationsMap.entrySet()) {
-                    Map.Entry pair = (Map.Entry) o;
-                    Log.d(TAG, "mRelationsMap = " + pair.getKey() + " = " + pair.getValue());
-                }
-            }
-
-            if(null != mOriginalRelationsMap){
-                for (Object o : mOriginalRelationsMap.entrySet()) {
-                    Map.Entry pair = (Map.Entry) o;
-                    Log.d(TAG, "mOriginalRelationsMap = " + pair.getKey() + " = " + pair.getValue());
                 }
             }
 
@@ -1413,21 +1416,22 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             switch (position) {
                 case 0:
                     // cancel clicked
-                    Log.i(TAG, "onClick cancel Button");
-                    //requestFragment.dismiss();
-                    // get relations form database again to start all over
-                    if(mRelationsMap != null){
+                    Log.i(TAG, "onClick cancel Button.");
+                    checkedContactsMap.clear(); // clear all previous selected check boxes
+                    // no need to get original relations from database again to start all over, we don't change the original contacts anymore as we set new contacts it a viewmodel
+                    /*if(mRelationsMap != null){
                         mRelationsMap.clear();
-                        mRelationsMap = new HashMap<>(mOriginalRelationsMap);
-                    }
+                        //mRelationsMap = new HashMap<>(mOriginalRelationsMap);
+                        mRelationsMap.putAll(mOriginalRelationsMap);
+                    }*/
                     //mRelationsMap = mOriginalRelationsMap;
                     //mRelationsList = getRelationsList(mOriginalRelationsMap);
-                    requestFragment.dismiss();
+                    //requestFragment.dismiss();
                     break;
                 case 1:
                     // send clicked
                     Log.i(TAG, "onClick send Button");
-                    requestFragment.dismiss();
+                    //requestFragment.dismiss();
                     sendRequest();
                     break;
             }
@@ -1491,9 +1495,16 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     }
 
     private void sendRequest() {
-        for (Object o : contactsMap.entrySet()) {
-            Map.Entry pair = (Map.Entry) o;
-            Log.d(TAG, "contactsMap = " + pair.getKey() + " = " + pair.getValue());
+        // We save all checked and unchecked to checkedContactsMap, then before updating the database we add to it the old unchanged contacts from mRelationsList
+        if(mRelationsMap != null && !mRelationsMap.isEmpty()){
+            for (Object o : mRelationsMap.entrySet()) {
+                Map.Entry pair = (Map.Entry) o;
+                if(!checkedContactsMap.containsKey(pair.getKey())){
+                    // If checkedContactsMap don't have this contact, it means it's unchanged contact, we must add it to checkedContactsMap before updating database
+                    Log.d(TAG, "mRelationsMap key to be added to contactsMap= " + pair.getKey() + " = " + pair.getValue());
+                    checkedContactsMap.put(String.valueOf(pair.getKey()), (Boolean) pair.getValue());
+                }
+            }
         }
 
         Map<String, Object> senderValues;
@@ -1514,10 +1525,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         switch (mRelationStatus){
             case RELATION_STATUS_SENDER:
                 //Approving request
-                stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                //stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                stalker = new Relation(RELATION_STATUS_STALKER , checkedContactsMap);
                 stalkerValues = stalker.toMap();
 
-                followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                //followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                followed = new Relation(RELATION_STATUS_FOLLOWED, checkedContactsMap);
                 followedValues = followed.toMap();
 
                 childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId, stalkerValues);
@@ -1537,10 +1552,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             case RELATION_STATUS_STALKER:
                 //Edit / Un-revealing
                 Log.d(TAG, "RevealButton clicked mProfileViewModel Un reveal");
-                stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                //stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                stalker = new Relation(RELATION_STATUS_STALKER , checkedContactsMap);
                 stalkerValues = stalker.toMap();
 
-                followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                //followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                followed = new Relation(RELATION_STATUS_FOLLOWED, checkedContactsMap);
                 followedValues = followed.toMap();
 
                 childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId, stalkerValues);
@@ -1550,10 +1569,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 //Un-revealing
                 Log.d(TAG, "RevealButton clicked mProfileViewModel edit/Un reveal");
 
-                stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                //stalker = new Relation(RELATION_STATUS_STALKER , mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                stalker = new Relation(RELATION_STATUS_STALKER , checkedContactsMap);
                 stalkerValues = stalker.toMap();
 
-                followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                //followed = new Relation(RELATION_STATUS_FOLLOWED, mRelationsMap);
+                // We use now checkedContactsMap after adding to it the original unchanged contacts from mRelationsMap
+                followed = new Relation(RELATION_STATUS_FOLLOWED, checkedContactsMap);
                 followedValues = followed.toMap();
 
                 childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId, followedValues);
@@ -1561,10 +1584,10 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                 break;
             default:
                 // Showing request dialog to send new request
-                sender = new Relation(RELATION_STATUS_SENDER , contactsMap);
+                sender = new Relation(RELATION_STATUS_SENDER , checkedContactsMap);
                 senderValues = sender.toMap();
 
-                receiver = new Relation(RELATION_STATUS_RECEIVER, contactsMap);
+                receiver = new Relation(RELATION_STATUS_RECEIVER, checkedContactsMap);
                 receiverValues = receiver.toMap();
 
                 childUpdates.put("/relations/" + mCurrentUserId + "/" + mUserId, receiverValues);

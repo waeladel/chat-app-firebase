@@ -49,12 +49,13 @@ public class RevealAdapter extends RecyclerView.Adapter<RevealAdapter.ViewHolder
 
 
         for (int i = 0; i < contactsArrayList.size(); i++) {
-            Log.i(TAG, "contactsArrayList sorted " + contactsArrayList.get(i).getKey());
+            Log.i(TAG, "contactsArrayList sorted " + contactsArrayList.get(i).getKey()+ " Public= "+contactsArrayList.get(i).getValue().getPublic());
         }
 
         if(null != contactsArrayList.get(position).getKey()){
-            if(contactsArrayList.get(position).getValue().getPublic()
-                    && contactsArrayList.get(position).getSection()== SECTION_SOCIAL_APPROVE){
+            //if(contactsArrayList.get(position).getValue().getPublic() && contactsArrayList.get(position).getSection()== SECTION_SOCIAL_APPROVE){
+            // Show checked even if the section is SECTION_SOCIAL_REQUEST because we want checking (in request and approve) to be persistence in configuration changes
+            if(contactsArrayList.get(position).getValue().getPublic()){
                 // Check box should be selected
                 holder.itemCheckBox.setChecked(true);
             }else{
@@ -216,7 +217,7 @@ public class RevealAdapter extends RecyclerView.Adapter<RevealAdapter.ViewHolder
     @Override
     public int getItemCount() {
         //the size of the list
-        Log.d(TAG, "getItemCount ="+ contactsArrayList.size());
+        //Log.d(TAG, "getItemCount ="+ contactsArrayList.size());
         return  contactsArrayList.size();
         //return  10;
     }
