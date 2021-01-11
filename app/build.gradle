@@ -15,8 +15,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 14
-        versionName "0.1.4"
+        versionCode 15
+        versionName "0.1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"

@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -206,7 +207,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     ringTonePreference.setSummary(R.string.app_name);
                 }else{
                     Log.d(TAG, "ringTonePreference exists");
-                    ringTonePreference.setSummary(getFileName(getCurrentRingtoneUri()));
+                    Ringtone ringtone = RingtoneManager.getRingtone(mActivityContext, getCurrentRingtoneUri());
+                    String currentRingtoneTitle = ringtone.getTitle(mActivityContext);
+                    ringTonePreference.setSummary(currentRingtoneTitle);
                 }
             }
         }
@@ -514,10 +517,11 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (requestCode == RINGTONE_PICKER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             // Make sure the request was successful
             Uri ringtoneUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            Ringtone ringtone = RingtoneManager.getRingtone(mActivityContext, ringtoneUri);
+            String ringtoneTitle = ringtone.getTitle(mActivityContext);
+            Log.d(TAG, "selected sound= "+ ringtoneUri +" sound name= "+ringtoneTitle);
 
-            Log.d(TAG, "selected sound= "+ ringtoneUri +" sound name= "+getFileName(ringtoneUri));
-
-            ringTonePreference.setSummary(getFileName(ringtoneUri));
+            ringTonePreference.setSummary(ringtoneTitle);
 
             // Save the selected ringtone
             sharedPreferences.edit().putString(PREFERENCE_KEY_RINGTONE,String.valueOf(ringtoneUri)).apply();

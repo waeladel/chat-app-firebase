@@ -15,6 +15,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
+import androidx.loader.content.CursorLoader;
 
 import com.trackaty.chat.Fragments.EditProfileFragment;
 
@@ -152,21 +153,26 @@ public class FilesHelper {
      */
     public  static File getOutputMediaFile(Context context, int type){
         Log.d(TAG, "getOutputMediaFile started");
+        File mediaStorageDir = null;
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
         if (!Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)) {
-            Log.d(TAG, "getExternalStorageState doesn't exist ");
-            return  null;
+            Log.d(TAG, "getExternalStorageState not exist");
+            // If files not meant to be shared with other apps, store them in your package-specific directories
+            // Files will be deleted after your app has been uninstalled.
+            mediaStorageDir =  new File(context.getFilesDir(), Environment.DIRECTORY_NOTIFICATIONS);
+        }else{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //mediaStorageDir = new File(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.toString() + File.separator + Environment.DIRECTORY_ALARMS);
+                // If files not meant to be shared with other apps, store them in your package-specific directories
+                // Files will be deleted after your app has been uninstalled.
+                mediaStorageDir =  new File(context.getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS).getAbsolutePath());
+            }else{
+                // This location works best if you want the created media to be shared
+                // between applications and persist after your app has been uninstalled.
+                mediaStorageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_NOTIFICATIONS);
+            }
         }
-
-        // This location works best if you want the created media to be shared
-        // between applications and persist after your app has been uninstalled.
-        //mediaStorageDir = new File(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI +File.separator+Environment.DIRECTORY_NOTIFICATIONS);
-
-        // If files not meant to be shared with other apps, store them in your package-specific directories
-        // Files will be deleted after your app has been uninstalled.
-        File mediaStorageDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_NOTIFICATIONS).getAbsolutePath());
-
 
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()){
@@ -208,20 +214,22 @@ public class FilesHelper {
         String selection = MediaStore.MediaColumns.RELATIVE_PATH + "='" + Environment.DIRECTORY_NOTIFICATIONS + File.separator + "' AND "
                 + MediaStore.MediaColumns.DISPLAY_NAME+"='" + fileName + "'";
 
-        ContentResolver resolver = context.getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), projection, selection , null, null);
+        //ContentResolver resolver = context.getContentResolver();
+        //Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), projection, selection , null, null);
+        CursorLoader loader = new CursorLoader(context, MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), projection, selection , null, null);
+        Cursor cursor = loader.loadInBackground();
 
         if (cursor != null) {
             Log.d(TAG, "cursor is not null");
             if(cursor.getCount()>0){
                 Log.d(TAG, "cursor is not 0");
                 if (cursor.moveToFirst()) {
-                    String filePath = cursor.getString(0);
-                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
+                    /*String filePath = cursor.getString(0);
                     String displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME) );
                     String relativePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.RELATIVE_PATH) );
                     long z = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED) );
-
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),  id);*/
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
                     return ContentUris.withAppendedId(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),  id);
 
                 } else {

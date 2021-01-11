@@ -1500,7 +1500,7 @@ public class CompleteProfileFragment extends Fragment implements ItemClickListen
     private void writeToExternal(){
         // Check first if the file exist before writing it
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // return if the file already exists. I must use this function beacuase in Q we are saving to public notification collection not mOutputFile path
+            // return if the file already exists. I must use this function because in Q we are saving to public notification collection not mOutputFile path
             if(FilesHelper.isFileExist(mActivityContext, mOutputFile.getName()) != null){
                 // file already exist
                 Log.i(TAG, "writeToExternal return");
