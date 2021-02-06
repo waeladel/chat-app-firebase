@@ -92,7 +92,8 @@
         <service
             android:name=".services.FindNearbyService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:foregroundServiceType="microphone">
         </service>
         <receiver
             android:name=".receivers.SoundIdAlarm"
