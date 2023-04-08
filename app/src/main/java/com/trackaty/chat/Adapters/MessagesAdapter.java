@@ -1,9 +1,14 @@
 package com.trackaty.chat.Adapters;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +17,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.fragment.app.FragmentManager;
 import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
@@ -27,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
+import com.trackaty.chat.Fragments.ReportFragment;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
 import com.trackaty.chat.models.Chat;
@@ -78,9 +86,14 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     // A not static for all notifications sender avatar to update the broken avatars when fragment stops
     private List<Message> brokenAvatarsList;// = new ArrayList<>();
 
+    // to copy message text to clipboard
+    private ClipboardManager mClipboard;
+    private ClipData mClip;
+    private ItemClickListener itemClickListener;
+
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    public MessagesAdapter(String chatKey) {
+    public MessagesAdapter(String chatKey, ItemClickListener itemClickListener) {
         super(DIFF_CALLBACK);
         // [START create_storage_reference]
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -89,6 +102,8 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         // use received chatKey to create a database ref
         mMessagesRef = mDatabaseRef.child("messages");
         this.chatKey = chatKey;
+        this.itemClickListener = itemClickListener;
+
 
         if(totalRevealedList == null){
             totalRevealedList = new ArrayList<>();
@@ -258,7 +273,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
 
-        final Message message = getItem(position);
+        final Message message = this.getItem(position);
 
         if (holder instanceof ReceivedMessageHolder){
             final ReceivedMessageHolder ReceivedHolder = (ReceivedMessageHolder) holder;
@@ -622,7 +637,6 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         private TextView mMessage, mSentTime, mResetView;
         private ScratchView mScratch;
         private CircleImageView mAvatar;
-        ItemClickListener itemClickListener;
 
         private ReceivedMessageHolder(View itemView) {
             super(itemView);
@@ -635,6 +649,52 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
 
+
+            // a listener for long click so we can display popup menu to copy text, report and delete message
+            mMessage.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.d(TAG, "onLongClick: ");
+
+                    if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                        itemClickListener.onClick(view, getBindingAdapterPosition(), true);
+                    }
+                    // Create a popup Menu if null. To show when block is clicked
+                    PopupMenu popupBlockMenu = new PopupMenu(row.getContext(), view);
+                    popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_copy_text);
+                    //popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_delete_message);
+                    //popupBlockMenu.getMenu().add(Menu.NONE, 2, 2, R.string.popup_menu_delete_message_all);
+                    popupBlockMenu.getMenu().add(Menu.NONE, 1, 2, R.string.popup_menu_report_message);
+
+                    popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            switch (item.getItemId()) {
+                                case 0:
+                                    Log.i(TAG, "onMenuItemClick. copy test to clipboard is clicked");
+                                    //copy selected text to clipboard
+                                    copyToClipboard(row.getContext(), mMessage.getText());
+                                    return true;
+                                case 1:
+                                    Log.i(TAG, "onMenuItemClick. report message clicked");
+                                    // show dialog For reporting messages
+                                    if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                                        itemClickListener.onClick(view, item.getItemId(), false);
+                                    }
+                                    return true;
+                                /*case 2:
+                                    Log.i(TAG, "onMenuItemClick. item delete message for all clicked ");
+                                    return true;*/
+                                default:
+                                    return false;
+                            }
+                        }
+                    });
+
+                    popupBlockMenu.show();
+                    return false;
+                }
+            });
             /*itemClickListener= new ItemClickListener() {
                 @Override
                 public void onClick(View view, int position, boolean isLongClick) {
@@ -649,7 +709,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             mScratch.setEraseStatusListener(new ScratchView.EraseStatusListener() {
                 @Override
                 public void onProgress(int percent) {
-                    Message message = getItem(getAdapterPosition());
+                    Message message = getItem(getBindingAdapterPosition());
 
                     if (message != null) {
                         if(message.isRevealed()){
@@ -671,7 +731,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
 
                     // Reveal the message
                     if(percent > 85){
-                        if(getAdapterPosition() != RecyclerView.NO_POSITION){
+                        if(getBindingAdapterPosition() != RecyclerView.NO_POSITION){
 
                             // set message's reveal to true, to be remembered when scrolling, and to update the database when fragment stops
                             if (message != null) {
@@ -691,7 +751,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 @Override
                 public void onCompleted(View view) {
                     //on complete is not accurate, sometimes it's not called for a strange reason
-                    Log.d(TAG, "onCompleted revealed message getAdapterPosition= "+getAdapterPosition());
+                    Log.d(TAG, "onCompleted revealed message getAdapterPosition= "+getBindingAdapterPosition());
 
                 }
             });
@@ -754,7 +814,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         public boolean onTouch(View v, MotionEvent event) {
 
             int action = event.getAction();
-            Message message = getItem(getAdapterPosition());
+            Message message = getItem(getBindingAdapterPosition());
 
             /*if(v.getId() == R.id.scratch_view){
                 Log.d(TAG,"Action View scratch_view. Id= "+v.getId()+ " getTag= " +v.getTag());
@@ -796,10 +856,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             return false;
         }
 
-        // needed only if i want the listener to be inside the adapter
-        public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListener = itemClickListener;
-        }
+
 
     }
 
@@ -821,8 +878,56 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
             mAvatar = row.findViewById(R.id.user_image);
             mSentTime = row.findViewById(R.id.sent_time);
             mSentIcon = row.findViewById(R.id.sending_icon);
+
+            mMessage.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.d(TAG, "onLongClick: ");
+
+                    // Create a popup Menu if null. To show when block is clicked
+                    PopupMenu popupBlockMenu = new PopupMenu(row.getContext(), view);
+                    popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_copy_text);
+                    //popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_delete_message);
+                    //popupBlockMenu.getMenu().add(Menu.NONE, 2, 2, R.string.popup_menu_delete_message_all);
+
+                    popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            switch (item.getItemId()) {
+                                case 0:
+                                    Log.i(TAG, "onMenuItemClick. item block clicked ");
+                                    //copy selected text to clipboard
+                                    copyToClipboard(row.getContext(), mMessage.getText());
+                                    return true;
+                                /*case 1:
+                                    Log.i(TAG, "onMenuItemClick. item delete message for you clicked ");
+                                    return true;
+                                case 2:
+                                    Log.i(TAG, "onMenuItemClick. item delete message for all clicked ");
+                                    return true;*/
+                                default:
+                                    return false;
+                            }
+                        }
+                    });
+
+                    popupBlockMenu.show();
+                    return false;
+                }
+            });
         }
 
+    }
+
+    private void copyToClipboard(Context context, CharSequence text) {
+        mClipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        mClip = ClipData.newPlainText("Copied Text", text);
+        mClipboard.setPrimaryClip(mClip);
+    }
+
+    // needed only if i want the listener to be inside the adapter
+    public void setItemClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
     }
 
 }

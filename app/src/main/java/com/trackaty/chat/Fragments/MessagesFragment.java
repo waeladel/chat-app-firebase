@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -81,6 +82,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private MessagesAdapter mMessagesAdapter;
     private  LinearLayoutManager mLinearLayoutManager;
 
+    private Message mLongClickedMessage;
     private  static final String CHAT_INACTIVE_FRAGMENT = "InactiveFragment";
     private  static final String ACTIVATE_CHAT_FRAGMENT = "ActivateFragment";
     private  static final String BLOCKED_CHAT_FRAGMENT = "BlockedChatFragment";
@@ -143,6 +145,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
     private String LastMessageKey;
 
+    private static final String REPORT_ALERT_FRAGMENT = "ReportFragment"; // Tag for report alert fragment
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -178,7 +181,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
         // prepare the Adapter
         mMessagesArrayList = new ArrayList<>();
-        mMessagesAdapter = new MessagesAdapter(mChatId); // Pass chat id because it's needed to update message revelation
+        mMessagesAdapter = new MessagesAdapter(mChatId, this); // Pass chat id because it's needed to update message revelation
 
         //mMessagesViewModel = ViewModelProviders.of(this).get(MessagesViewModel.class);
 
@@ -1582,7 +1585,7 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         }
     }
 
-    //Show a dialog to select whether to edit or un-reveal
+    //Show a dialog to select duration for the chat being active
     private void showChatActivateDialog(String mChatId) {
         ActivateChatAlertFragment chatActivateFragment = ActivateChatAlertFragment.newInstance(mChatId, this);
         if (getChildFragmentManager() != null) {
@@ -1592,22 +1595,56 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         }
     }
 
+    // show dialog For reporting messages
+    private void showReportDialog(Message message) {
+        ReportFragment reportFragment = ReportFragment.newInstance(mChatUserId, mCurrentUserId, mChatUser, mCurrentUser, message);
+        if (getChildFragmentManager() != null) {
+            reportFragment.show(getChildFragmentManager(), REPORT_ALERT_FRAGMENT);
+            Log.i(TAG, "reportAlertFragment show clicked ");
+        }
+    }
+
     @Override
     public void onClick(View view, int position, boolean isLongClick) {
-        Log.i(TAG, "onClick forever is selected. view= " + view + " position= " + position);
-        // Reveal all messages when "active forever" is selected
-        mMessagesViewModel.revealMessages(mChatId);
-        //Log.i(TAG, "mItems LastKey= " + mItems.getLastKey());
-        //mMessagesAdapter.notifyAll();
-        //mMessagesRecycler.getRecycledViewPool().clear();
-        //mMessagesAdapter.submitList(mItems);
-        //mMessagesRecycler.invalidate();
-        //mMessagesRecycler.setAdapter(null);
-        //mMessagesRecycler.setLayoutManager(null);
-        //mMessagesRecycler.setAdapter(mMessagesAdapter);
-        //mMessagesRecycler.setLayoutManager(mLinearLayoutManager);
-        //mMessagesAdapter.notifyDataSetChanged();
-        //mMessagesAdapter.notifyDataSetChanged();
+        if(view instanceof Button && position == 0){
+            Log.i(TAG, "onClick forever is selected. view= " + view + " position= " + position);
+            mMessagesViewModel.revealMessages(mChatId);
+            // Reveal all messages when "active forever" is selected
+            //
+            //Log.i(TAG, "mItems LastKey= " + mItems.getLastKey());
+            //mMessagesAdapter.notifyAll();
+            //mMessagesRecycler.getRecycledViewPool().clear();
+            //mMessagesAdapter.submitList(mItems);
+            //mMessagesRecycler.invalidate();
+            //mMessagesRecycler.setAdapter(null);
+            //mMessagesRecycler.setLayoutManager(null);
+            //mMessagesRecycler.setAdapter(mMessagesAdapter);
+            //mMessagesRecycler.setLayoutManager(mLinearLayoutManager);
+            //mMessagesAdapter.notifyDataSetChanged();
+            //mMessagesAdapter.notifyDataSetChanged();
+        } else if(view instanceof TextView){
+            if(isLongClick){
+                // Selecting a message is long clicked
+                mLongClickedMessage = mMessagesAdapter.getItem(position);
+                if (mLongClickedMessage != null) {
+                    Log.d(TAG, "onLongClick. selected message text = " + mLongClickedMessage.getMessage());
+                }
+            }else{
+                // Popupmenu item is clicked after user have selected a message
+                switch (position){
+                    case 0:
+                        // Copy text to clipboard is selected
+                        Log.d(TAG, "onMenuItemClick. copy test to clipboard is clicked. view= " + view + " position= " + position);
+                        break;
+                    case 1:
+                        // Report message is selected
+                        Log.d(TAG, "onMenuItemClick. report message clicked. view= " + view + " position= " + position);
+                        showReportDialog(mLongClickedMessage);
+                        break;
+
+                }
+            }
+        }
     }
 
     /*private class CountDownTask extends AsyncTask<Void, Integer, Void> {

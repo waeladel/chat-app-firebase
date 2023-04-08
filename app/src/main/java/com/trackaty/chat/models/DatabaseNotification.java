@@ -27,6 +27,7 @@ public class DatabaseNotification {
     private Object sent; // sent time
 
     public DatabaseNotification() {
+        this.sent = ServerValue.TIMESTAMP;
     }
 
     /*public DatabaseNotification(String title, String message, String type, String senderId, String senderName, String senderAvatar) {

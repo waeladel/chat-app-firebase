@@ -114,7 +114,7 @@ public class MessagesViewModel extends ViewModel {
 
     // To make all messages revealed when "reveal forever" is selected
     public void revealMessages(String chatId) {
-        Log.d(TAG, "chatId"+ chatId);
+        Log.d(TAG, "chatId= "+ chatId);
         messagesRepository.revealMessages(chatId);
 
     }

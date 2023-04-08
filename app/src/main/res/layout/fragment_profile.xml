@@ -37,11 +37,11 @@
             app:civ_border_color="?android:attr/colorBackground"
             app:civ_border_width="6dp"
             app:civ_circle_background_color="?android:attr/colorBackground"
-            app:layout_constraintBottom_toBottomOf="@+id/coverImage"
+            app:layout_constraintBottom_toBottomOf="@id/coverImage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/coverImage"
+            app:layout_constraintTop_toBottomOf="@id/coverImage"
             app:layout_constraintVertical_bias="0.39999998"
             app:srcCompat="@drawable/ic_round_account_filled_72"/>
 
@@ -75,7 +75,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:layout_constraintTop_toBottomOf="@id/user_image"
             tools:text="@tools:sample/full_names" />
 
         <TextView
@@ -92,7 +92,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_name_text"
+            app:layout_constraintTop_toBottomOf="@id/user_name_text"
             tools:text="@tools:sample/last_names" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -102,12 +102,13 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
+            app:fabSize="mini"
             app:srcCompat="@drawable/ic_favorite_border_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/message_button"
+            app:layout_constraintEnd_toStartOf="@id/message_button"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
+            app:layout_constraintTop_toBottomOf="@id/user_bio_text" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/message_button"
@@ -116,11 +117,12 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
+            app:fabSize="mini"
             app:srcCompat="@drawable/ic_baseline_chat_24px"
-            app:layout_constraintEnd_toStartOf="@+id/reveal_button"
+            app:layout_constraintEnd_toStartOf="@id/reveal_button"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/love_button"
-            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
+            app:layout_constraintStart_toEndOf="@id/love_button"
+            app:layout_constraintTop_toBottomOf="@id/user_bio_text" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/reveal_button"
@@ -129,11 +131,12 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            app:srcCompat="@drawable/ic_visibility_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/block_edit_button"
+            app:fabSize="mini"
+            app:layout_constraintEnd_toStartOf="@id/block_edit_button"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/message_button"
-            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
+            app:layout_constraintStart_toEndOf="@id/message_button"
+            app:layout_constraintTop_toBottomOf="@id/user_bio_text"
+            app:srcCompat="@drawable/ic_visibility_black_24dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/block_edit_button"
@@ -142,51 +145,57 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            app:srcCompat="@drawable/ic_block_24dp"
+            app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/reveal_button"
-            app:layout_constraintTop_toBottomOf="@+id/user_bio_text" />
+            app:layout_constraintStart_toEndOf="@id/reveal_button"
+            app:layout_constraintTop_toBottomOf="@id/user_bio_text"
+            app:srcCompat="@drawable/ic_block_24dp" />
+
 
         <TextView
             android:id="@+id/love_text"
+            android:labelFor="@id/love_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/love_button_hint_love"
-            app:layout_constraintEnd_toEndOf="@+id/love_button"
-            app:layout_constraintStart_toStartOf="@+id/love_button"
-            app:layout_constraintTop_toBottomOf="@+id/love_button" />
+            app:layout_constraintEnd_toEndOf="@id/love_button"
+            app:layout_constraintStart_toStartOf="@id/love_button"
+            app:layout_constraintTop_toBottomOf="@id/love_button" />
 
         <TextView
             android:id="@+id/notification_text"
+            android:labelFor="@id/message_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/message_button_hint"
-            app:layout_constraintEnd_toEndOf="@+id/message_button"
-            app:layout_constraintStart_toStartOf="@+id/message_button"
-            app:layout_constraintTop_toBottomOf="@+id/message_button" />
+            app:layout_constraintEnd_toEndOf="@id/message_button"
+            app:layout_constraintStart_toStartOf="@id/message_button"
+            app:layout_constraintTop_toBottomOf="@id/message_button" />
 
         <TextView
             android:id="@+id/reveal_button_text"
+            android:labelFor="@id/reveal_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/request_button_hint"
-            app:layout_constraintEnd_toEndOf="@+id/reveal_button"
-            app:layout_constraintStart_toStartOf="@+id/reveal_button"
-            app:layout_constraintTop_toBottomOf="@+id/reveal_button" />
+            app:layout_constraintEnd_toEndOf="@id/reveal_button"
+            app:layout_constraintStart_toStartOf="@id/reveal_button"
+            app:layout_constraintTop_toBottomOf="@id/reveal_button" />
 
         <TextView
             android:id="@+id/block_edit_text"
+            android:labelFor="@id/block_edit_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/block_button"
-            app:layout_constraintEnd_toEndOf="@+id/block_edit_button"
-            app:layout_constraintStart_toStartOf="@+id/block_edit_button"
-            app:layout_constraintTop_toBottomOf="@+id/block_edit_button" />
+            android:text="@string/block_report_button_hint"
+            app:layout_constraintEnd_toEndOf="@id/block_edit_button"
+            app:layout_constraintStart_toStartOf="@id/block_edit_button"
+            app:layout_constraintTop_toBottomOf="@id/block_edit_button" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/buttons_text_barrier"
@@ -202,30 +211,32 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="32dp"
             android:text="@string/user_statistics_headline"
             android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/buttons_text_barrier" />
+            app:layout_constraintTop_toTopOf="@id/buttons_text_barrier" />
 
         <TextView
             android:id="@+id/user_loved_by_value"
+            android:labelFor="@id/heart_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/heart_icon"
-            app:layout_constraintStart_toEndOf="@+id/heart_icon"
-            app:layout_constraintTop_toTopOf="@+id/heart_icon"
+            app:layout_constraintBottom_toBottomOf="@id/heart_icon"
+            app:layout_constraintStart_toEndOf="@id/heart_icon"
+            app:layout_constraintTop_toTopOf="@id/heart_icon"
             tools:text="@tools:sample/full_names" />
 
         <TextView
             android:id="@+id/pick_up_value"
+            android:labelFor="@id/chat_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/chat_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_loved_by_value"
-            app:layout_constraintTop_toTopOf="@+id/chat_icon"
+            app:layout_constraintBottom_toBottomOf="@id/chat_icon"
+            app:layout_constraintStart_toStartOf="@id/user_loved_by_value"
+            app:layout_constraintTop_toTopOf="@id/chat_icon"
             tools:text="@tools:sample/cities" />
 
         <ImageView
@@ -237,8 +248,7 @@
             android:layout_marginTop="8dp"
             app:srcCompat="@drawable/ic_favorite_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_statistics_headline"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintTop_toBottomOf="@id/user_statistics_headline"/>
 
         <ImageView
             android:id="@+id/chat_icon"
@@ -246,9 +256,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:srcCompat="@drawable/ic_baseline_chat_24px"
-            app:layout_constraintStart_toStartOf="@+id/heart_icon"
-            app:layout_constraintTop_toBottomOf="@+id/heart_icon"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintStart_toStartOf="@id/heart_icon"
+            app:layout_constraintTop_toBottomOf="@id/heart_icon" />
 
         <View
             android:id="@+id/relationship_divider"
@@ -262,7 +271,7 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pick_up_value" />
+            app:layout_constraintTop_toBottomOf="@id/pick_up_value" />
 
         <TextView
             android:id="@+id/relationship_headline"
@@ -274,7 +283,7 @@
             android:text="@string/user_relationship_headline"
             android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/relationship_divider" />
+            app:layout_constraintTop_toBottomOf="@id/relationship_divider" />
 
         <ImageView
             android:id="@+id/relationship_icon"
@@ -284,17 +293,17 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/relationship_headline"
-            tools:ignore="ContentDescription"
+            app:layout_constraintTop_toBottomOf="@id/relationship_headline"
             tools:src="@tools:sample/avatars"/>
 
         <TextView
             android:id="@+id/user_relationship_value"
+            android:labelFor="@id/relationship_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/relationship_icon"
-            app:layout_constraintStart_toStartOf="@+id/pick_up_value"
-            app:layout_constraintTop_toTopOf="@+id/relationship_icon"
+            app:layout_constraintBottom_toBottomOf="@id/relationship_icon"
+            app:layout_constraintStart_toStartOf="@id/pick_up_value"
+            app:layout_constraintTop_toTopOf="@id/relationship_icon"
             tools:text="@tools:sample/date/hhmm" />
 
         <View
@@ -309,7 +318,7 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_relationship_value" />
+            app:layout_constraintTop_toBottomOf="@id/user_relationship_value" />
 
         <TextView
             android:id="@+id/interested_in_headline"
@@ -321,7 +330,7 @@
             android:text="@string/user_interested_in_headline"
             android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/interested_divider" />
+            app:layout_constraintTop_toBottomOf="@id/interested_divider" />
 
 
         <ImageView
@@ -332,17 +341,17 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/interested_in_headline"
-            tools:ignore="ContentDescription"
+            app:layout_constraintTop_toBottomOf="@id/interested_in_headline"
             tools:src="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/user_interested_value"
+            android:labelFor="@id/interested_in_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/interested_in_icon"
-            app:layout_constraintStart_toStartOf="@+id/user_relationship_value"
-            app:layout_constraintTop_toTopOf="@+id/interested_in_icon"
+            app:layout_constraintBottom_toBottomOf="@id/interested_in_icon"
+            app:layout_constraintStart_toStartOf="@id/user_relationship_value"
+            app:layout_constraintTop_toTopOf="@id/interested_in_icon"
             tools:text="@tools:sample/date/ddmmyy" />
 
         <com.google.android.material.button.MaterialButton
@@ -362,7 +371,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_interested_value" />
+            app:layout_constraintTop_toBottomOf="@id/user_interested_value" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

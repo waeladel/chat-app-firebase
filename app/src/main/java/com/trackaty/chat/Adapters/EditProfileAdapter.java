@@ -161,7 +161,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Log.i(TAG, "onBindViewHolder called="+ mProfileDataArrayList.get(position).getKey());
 
         if (holder instanceof avatarImageHolder){
@@ -788,7 +788,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         //expandableHolder.expandableLayout.collapse();
 
                         // Initiate the about RecyclerView
-                        expandableHolder.expandableRecycler.setHasFixedSize(true);
+                        //expandableHolder.expandableRecycler.setHasFixedSize(true);
 
                         // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
                         //// the transient data will be lost when expandableHolder is created again when we scroll up then down
@@ -819,7 +819,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
-                        expandableHolder.expandableRecycler.setHasFixedSize(true);
+                        //expandableHolder.expandableRecycler.setHasFixedSize(true);
 
                         // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
                         //// the transient data will be lost when expandableHolder is created again when we scroll up then down
@@ -850,7 +850,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
-                        expandableHolder.expandableRecycler.setHasFixedSize(true);
+                        //expandableHolder.expandableRecycler.setHasFixedSize(true);
 
                         // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
                         //// the transient data will be lost when expandableHolder is created again when we scroll up then down
@@ -880,7 +880,7 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         //aboutAdapter = new AboutAdapter(fragmentContext, habitsArrayList);
 
                         // Initiate the about RecyclerView
-                        expandableHolder.expandableRecycler.setHasFixedSize(true);
+                        //expandableHolder.expandableRecycler.setHasFixedSize(true);
 
                         // Only set the adapter and the layout manager at the first load because if we keep setting the adapter
                         //// the transient data will be lost when expandableHolder is created again when we scroll up then down

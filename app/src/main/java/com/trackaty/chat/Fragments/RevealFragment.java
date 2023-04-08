@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.trackaty.chat.Adapters.RevealAdapter;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
-import com.trackaty.chat.ViewModels.ProfileViewModel;
 import com.trackaty.chat.ViewModels.RevealViewModel;
 import com.trackaty.chat.models.Social;
 
@@ -132,7 +130,7 @@ public class RevealFragment extends DialogFragment implements ItemClickListener 
 
         mSendButton =  fragView.findViewById(R.id.send_button);
         mCancelButton =  fragView.findViewById(R.id.cancel_button);
-        mTitle =  fragView.findViewById(R.id.dialog_title);
+        mTitle =  fragView.findViewById(R.id.reported_name);
 
 
         // get PrivateContactsList array from arguments

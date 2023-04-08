@@ -96,6 +96,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
     private  static final String CONFIRM_DELETE_RELATION_ALERT_FRAGMENT = "DeleteRelationAlertFragment";
     private  static final String CONFIRM_BLOCK_ALERT_FRAGMENT = "BlockFragment"; // Tag for confirm block alert fragment
     private  static final String CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT = "BlockDeleteFragment"; // Tag for confirm block and delete alert fragment
+    private  static final String REPORT_ALERT_FRAGMENT = "ReportFragment"; // Tag for report alert fragment
+
 
 
     // DatabaseNotification's types
@@ -229,36 +231,42 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                             // the only option is to unblock him
                             unblockUser();
                             break;
-                            default:
-                                // There is no blocking relation
-                                //showBlockDialog(); // To confirm blocking or cancel
-                                // Create a popup Menu if null. To show when block is clicked
-                                PopupMenu popupBlockMenu = new PopupMenu(mActivityContext, view);
-                                popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_block);
-                                popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_block_delete);
+                        default:
+                            // There is no blocking relation
+                            //showBlockDialog(); // To confirm blocking or cancel
+                            // Create a popup Menu if null. To show when block is clicked
+                            PopupMenu popupBlockMenu = new PopupMenu(mActivityContext, view);
+                            popupBlockMenu.getMenu().add(Menu.NONE, 0, 0, R.string.popup_menu_block);
+                            popupBlockMenu.getMenu().add(Menu.NONE, 1, 1, R.string.popup_menu_block_delete);
+                            popupBlockMenu.getMenu().add(Menu.NONE, 2, 2, R.string.popup_menu_report);
 
-                                popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                    @Override
-                                    public boolean onMenuItemClick(MenuItem item) {
-                                        switch (item.getItemId()) {
-                                            case 0:
-                                                Log.i(TAG, "onMenuItemClick. item block clicked ");
-                                                //blockUser();
-                                                showBlockDialog();
-                                                return true;
-                                            case 1:
-                                                Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
-                                                //blockDelete();
-                                                showBlockDeleteDialog();
-                                                return true;
-                                            default:
-                                                return false;
-                                        }
+
+                            popupBlockMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    switch (item.getItemId()) {
+                                        case 0:
+                                            Log.i(TAG, "onMenuItemClick. item block clicked ");
+                                            //blockUser();
+                                            showBlockDialog();
+                                            return true;
+                                        case 1:
+                                            Log.i(TAG, "onMenuItemClick. item block and delete conversation clicked ");
+                                            //blockDelete();
+                                            showBlockDeleteDialog();
+                                            return true;
+                                        case 2:
+                                            Log.i(TAG, "onMenuItemClick. item report clicked ");
+                                            showReportDialog();
+                                            return true;
+                                        default:
+                                            return false;
                                     }
-                                });
+                                }
+                            });
 
-                                popupBlockMenu.show();
-                                break;
+                            popupBlockMenu.show();
+                            break;
                     }
                 } else {
                     Log.i(TAG, "going to edit profile fragment= ");
@@ -522,6 +530,14 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         if (mFragmentManager != null) {
             blockDeleteFragment.show(mFragmentManager, CONFIRM_BLOCK_DELETE_ALERT_FRAGMENT);
             Log.i(TAG, "blockDeleteFragment show clicked ");
+        }
+    }
+
+    private void showReportDialog() {
+        ReportFragment reportFragment = ReportFragment.newInstance(mUserId, mCurrentUserId, mUser, mCurrentUser);
+        if (mFragmentManager != null) {
+            reportFragment.show(mFragmentManager, REPORT_ALERT_FRAGMENT);
+            Log.i(TAG, "reportAlertFragment show clicked ");
         }
     }
 
@@ -928,7 +944,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
         // toggle mBlockEditButton
         if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
             mBlockEditButton.setImageResource(R.drawable.ic_block_24dp);
-            mBlockEditHint.setText(R.string.block_button);
+            mBlockEditHint.setText(R.string.block_report_button_hint);
             //mUserRef = mDatabaseRef.child("users").child(mUserId);
             //showUser(mUserId);
             // update the reveal request
@@ -977,7 +993,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                                 mRelationStatus = RELATION_STATUS_BLOCKED;
 
                                 // change block hint to Unblock, and change color to red
-                                mBlockEditHint.setText(R.string.unblock_button);
+                                mBlockEditHint.setText(R.string.unblock_report_button_hint);
                                 mBlockEditHint.setTextColor(getResources().getColor(R.color.color_error));
 
                                 mLoveButton.setEnabled(false);
@@ -1090,7 +1106,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                         mRelationStatus = RELATION_STATUS_NOT_FRIEND;
 
                         // Enable all buttons. In case they were disabled by previous block
-                        mBlockEditHint.setText(R.string.block_button); // in case it was set to unblock from previous block
+                        mBlockEditHint.setText(R.string.block_report_button_hint); // in case it was set to unblock from previous block
                         mBlockEditButton.setEnabled(true);
                         mBlockEditButton.setClickable(true);
                         mBlockEditButton.setBackgroundTintList(mFabDefaultColor);
@@ -1134,7 +1150,7 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             // it's logged in user profile
             Log.d(TAG, "it's logged in user profile= " + mUserId);
             mBlockEditButton.setImageResource(R.drawable.ic_user_edit_profile);
-            mBlockEditHint.setText(R.string.edit_profile_button);
+            mBlockEditHint.setText(R.string.edit_profile_button_hint);
 
             mLoveButton.setEnabled(false);
             mLoveButton.setClickable(false);
@@ -1429,10 +1445,16 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     //requestFragment.dismiss();
                     break;
                 case 1:
-                    // send clicked
-                    Log.i(TAG, "onClick send Button");
+                    // send reveal request clicked
+                    Log.i(TAG, "onClick Button send revea");
                     //requestFragment.dismiss();
                     sendRequest();
+                    break;
+                case 3:
+                    // send report clicked
+                    Log.i(TAG, "onClick Button send report");
+                    //requestFragment.dismiss();
+                    //sendRequest();
                     break;
             }
         } else {
@@ -1462,8 +1484,8 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
                     Log.i(TAG, "un-reveal clicked and show confirmation dialog");
                     //Show confirmation dialog
                     showDeleteRelationDialog();
-                    break;
-                */case 6:
+                    break;*/
+                case 6:
                     // block is clicked
                     Log.i(TAG, "block is clicked, we must start blocking function");
                     //block this user

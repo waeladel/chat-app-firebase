@@ -25,6 +25,7 @@ public class Message {
     private Object created ;
 
     public Message() {
+        this.created = ServerValue.TIMESTAMP;
     }
 
     public Message(String message, String senderId, String senderName,String senderAvatar , String status ,boolean revealed) {
@@ -56,7 +57,7 @@ public class Message {
         result.put("senderAvatar", senderAvatar);
         result.put("status", status);
         result.put("revealed", revealed);
-        result.put("created", ServerValue.TIMESTAMP);
+        result.put("created", created);
 
         return result;
     }// [END post_to_map]

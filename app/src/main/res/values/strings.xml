@@ -14,6 +14,13 @@
 
     <string name="popup_menu_block">Block</string>
     <string name="popup_menu_block_delete">Block and delete chat</string>
+    <string name="popup_menu_report">Report</string>
+
+    <string name="popup_menu_copy_text">Copy message text</string>
+    <string name="popup_menu_delete_message">Delete message for you</string>
+    <string name="popup_menu_delete_message_all">Delete message for everyone</string>
+    <string name="popup_menu_report_message">Report message</string>
+    <string name="clipboard_label_copied_text">Copied Text</string>
 
     <string name="love_button_hint_love">Like</string>
     <string name="love_button_hint_love_back">Like Back</string>
@@ -31,9 +38,9 @@
     <string name="chat_inactive_alert_dialog_title">Conversation Is Inactive</string>
     <string name="chat_blocked_alert_dialog_title">Conversation Disabled</string>
 
-    <string name="block_button">Block</string>
-    <string name="unblock_button">Unblock</string>
-    <string name="edit_profile_button">Edit Profile</string>
+    <string name="block_report_button_hint" formatted="false">Block\\Report</string>
+    <string name="unblock_report_button_hint" formatted="false">Unblock\\Report</string>
+    <string name="edit_profile_button_hint">Edit Profile</string>
 
     <string name="see_more_about_button">See more about %1$s</string>
     <string name="see_more_button">See more</string>
@@ -43,6 +50,8 @@
     <string name="save_button">Save</string>
     <string name="cancel_button">Cancel</string>
     <string name="user_social_private_button">Private contact</string>
+    <string name="send_report_button">Send report</string>
+
 
     <!--toast and error messages -->
     <string name="sign_in_cancelled">Sign in has been cancelled</string>
@@ -191,6 +200,8 @@
     <string name="plugged_headset_dialog_message">Headset is plugged. To maximize visibility range you must unplug it or at least do not wear it. Would you like to route audio output to the speaker?</string>
     <string name="speaker_dialog_message">You have a call in progress, would you like to turn the speaker on to maximize visibility range?</string>
     <string name="volume_dialog_message">Volume is too low, would you like to maximize it to achieve a wider visibility range?</string>
+    <string name="report_dialog_title">Report User?</string>
+    <string name="report_dialog_message">If someone is in immediate danger, call local emergency service.\n\nPlease select the reason for reporting this user or content, we won’t let the person know who reported them.</string>
 
 
 
@@ -248,6 +259,7 @@
     <string name="original_profile_image_description">Profile Image</string>
     <string name="send_text_icon">Send message</string>
     <string name="message_sent_icon">Message sent icon</string>
+
     <!--Notifications-->
     <string name="notification_like_title">New like</string>
     <string name="notification_pick_up_title">New pick-up line</string>
@@ -399,6 +411,21 @@
     <string name="settings_display_battery">Set by Battery Saver</string>
     <string name="settings_display_system">Use system default</string>
     <!-- settings dark array -->
+
+    <!-- report radio buttons array -->
+    <string name="radio_button_report_harassment">Harassment or bullying</string>
+    <string name="radio_button_report_suicide">Suicide or self-harm</string>
+    <string name="radio_button_report_inappropriate">Shown sexual or inappropriate content</string>
+    <string name="radio_button_report_impersonate">Impersonating someone else</string>
+    <string name="radio_button_report_Hate">Hate speech</string>
+    <string name="radio_button_report_child_abuse">Child abuse</string>
+    <string name="radio_button_report_misinformation">Spreads false information</string>
+    <string name="radio_button_report_violence">Violence or repulsive</string>
+    <string name="radio_button_report_terrorism">Promotes terrorism</string>
+    <string name="radio_button_report_scams">Scams</string>
+    <string name="radio_button_report_spam">Spam</string>
+    <string name="radio_button_report_other">Other</string>
+    <!-- report radio buttons array -->
 
     <!-- values-->
     <string name="horoscope_not_specified">Horoscope: Not Specified</string>
