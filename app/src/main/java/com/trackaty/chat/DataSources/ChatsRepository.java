@@ -260,16 +260,17 @@ public class ChatsRepository {
                     }
 
                     if (dataSnapshot.exists()) {
-                        // loop throw users value
+                        // loop throw chats value
                         List<Chat> chatsList = new ArrayList<>();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             Chat chat = snapshot.getValue(Chat.class);
-                            if (chat != null) {
+                            // check if last sent is null or not before adding it to that list so that the app doesn't crash
+                            // i notice in Tabourless it's null when blocking the user and the offline sync is enabled so it rights the old deleted chat room without lastSent value
+                            if (chat != null && chat.getLastSent() != null) {
                                 chat.setKey(snapshot.getKey());
+                                chatsList.add(chat);
                             }
 
-                            chatsList.add(chat);
-                            //Log.d(TAG, "mama getItems = " + chat.getLastMessage() + " getSnapshotKey= " + snapshot.getKey());
 
                         }
 

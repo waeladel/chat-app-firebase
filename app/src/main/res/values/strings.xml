@@ -13,8 +13,10 @@
     <string name="menu_search">Search</string>
 
     <string name="popup_menu_block">Block</string>
-    <string name="popup_menu_block_delete">Block and delete chat</string>
+    <string name="popup_menu_block_delete">Block and hide conversation</string>
     <string name="popup_menu_report">Report</string>
+    <string name="popup_menu_unblock">Unblock</string>
+
 
     <string name="popup_menu_copy_text">Copy message text</string>
     <string name="popup_menu_delete_message">Delete message for you</string>
@@ -185,7 +187,7 @@
     <string name="confirm_block_delete_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You can\'t exchange messages, likes or reveal requests. Are you sure you want to block this user and delete your conversation with him/her?</string>
 -->
     <string name="confirm_block_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You won\'t be able to exchange messages, likes or reveal requests.</string>
-    <string name="confirm_block_delete_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You won\'t be able to exchange messages, likes or reveal requests and your conversation will be deleted. </string>
+    <string name="confirm_block_delete_dialog_message">Blocking a user means he or she can no longer detect if you are nearby, neither do you. You won\'t be able to exchange messages, likes or reveal requests. Also your conversation will be hidden. </string>
     <string name="battery_optimization_dialog_body">Your device enters Doze mode when it is unplugged and stationary for long time. While the device is in Doze the period of being undetected gets longer, as you will be visible to others only once every 9 minutes.\n\nDo you want to exempt the app from battery optimization to keep the default intervals?</string>
     <string name="user_confirm_dialog_positive">Yes</string>
     <string name="user_confirm_blocking_dialog">Block</string>

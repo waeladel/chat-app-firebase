@@ -100,16 +100,13 @@ public class ProfileViewModel extends ViewModel {
         return mLoveStatues;
     }
 
-    public void blockUser(String currentUserId, String userId) {
-        relationRepository.blockUser(currentUserId, userId);
+    public void blockUser(String currentUserId, String userId, String relation, boolean isDeleteChat) {
+        relationRepository.blockUser(currentUserId, userId, relation, isDeleteChat);
     }
 
-    public void blockDelete(String currentUserId, String userId) {
-        relationRepository.blockDelete(currentUserId, userId);
-    }
 
-    public void unblockUser(String currentUserId, String userId) {
-        relationRepository.unblockUser(currentUserId, userId);
+    public void unblockUser(String currentUserId, String userId, String relationStatus) {
+        relationRepository.unblockUser(currentUserId, userId, relationStatus);
     }
 
     public LiveData<User> getUser(String currentUserId){

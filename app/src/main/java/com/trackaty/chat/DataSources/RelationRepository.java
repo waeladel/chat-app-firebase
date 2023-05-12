@@ -46,10 +46,10 @@ public class RelationRepository {
     // DatabaseNotification's types
     private static final String NOTIFICATION_TYPE_PICK_UP = "Pickup";
     private static final String NOTIFICATION_TYPE_MESSAGE = "Message";
-    private static final String NOTIFICATION_TYPE_LIKE = "Like"; // if other user liked me. I did't liked him
+    private static final String NOTIFICATION_TYPE_LIKE = "Like"; // if other user liked me. I didn't liked him
     private static final String NOTIFICATION_TYPE_LIKE_BACK = "LikeBack"; // if other user liked me after i liked him
-    private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RevealSent";
-    private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RevealApproved";
+    private static final String NOTIFICATION_TYPE_REQUESTS_SENT = "RequestSent";
+    private static final String NOTIFICATION_TYPE_REQUESTS_APPROVED = "RequestApproved";
 
     // requests and relations status
     private static final String RELATION_STATUS_SENDER = "sender";
@@ -59,6 +59,8 @@ public class RelationRepository {
     private static final String RELATION_STATUS_NOT_FRIEND = "notFriend";
     private static final String RELATION_STATUS_BLOCKING = "blocking"; // the selected user is blocking me (current user)
     private static final String RELATION_STATUS_BLOCKED= "blocked"; // the selected user is blocked by me (current user)
+    private static final String RELATION_STATUS_BLOCKING_VS_BLOCKED_BACK = "blocking/blocked_back"; // the selected user is blocking me (current user) and i the (current user) blocked him back
+    private static final String RELATION_STATUS_BLOCKED_VS_BLOCKING_BACK = "blocked/blocking_back"; // the selected user is blocked by me and the selected user blocked me back
 
     // HashMap to keep track of Firebase Listeners
     //private HashMap< DatabaseReference , ValueEventListener> mListenersMap;
@@ -526,29 +528,66 @@ public class RelationRepository {
         });
     }
 
-    // Block user without deleting conversation
-    public void blockUser(String currentUserId, String userId) {
+    // Block user and remove likes and update relations
+    public void blockUser(String currentUserId, String userId, String relation, boolean isDeleteChat) {
         Map<String, Object> childUpdates = new HashMap<>();
-        //Cancel likes i (current user) sent to this (target user). Keep like he sent to me (current user)
+
+        // ****** favorites is where current user save the likes he give ****** //
+
+        //Cancel the like i (current user) sent to this (selected user)
         childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
-        //likes is to display who send likes to this particular user
+
+        //reject likes that the (selected user) sent to me (current user)
+        childUpdates.put("/favorites/" + userId + "/" + currentUserId, null);
+
+        // ****** Likes is where we count the likes that a user received ****** //
+
+        // remove from the (selected user) counter the like that he received from me
         childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
 
-        // Update relations to blocking (current user) and blocked (target user)
-        childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKED);
-        childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKING);
+        // remove from my (current user) counter the like i received by (selected user)
+        childUpdates.put("/likes/" + currentUserId + "/" + userId, null);
+
+        if(relation.equals(RELATION_STATUS_BLOCKING)){
+            // this selected user had already blocked me (current user), it's time to block back
+            // Update relations to blocking/blocked_back for (current user) and blocked/blocking_back for (selected user)
+            childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKING_VS_BLOCKED_BACK);
+            childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKED_VS_BLOCKING_BACK);
+        }else{
+            // Update relations to blocking for (current user) and blocked for (selected user)
+            childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKED);
+            childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKING);
+        }
 
         // Chat ID is not passed from MainFragment, we need to create
         String chatId = getJoinedKeys(currentUserId , userId);
         // update chat active to -1, which means it's blocked chat room
         childUpdates.put("/chats/" + chatId +"/active",-1);
 
-        // Delete chats with this person from chats recycler view
-        /*childUpdates.put("/userChats/" + currentUserId + "/" + chatId, null);
-        childUpdates.put("/userChats/" + userId + "/" + chatId, null);*/
+        // to remove the conversation room if user selected to hide the conversation too
+        if(isDeleteChat){
+            // Delete chat room with this person from chats recycler view
+            childUpdates.put("/userChats/" + currentUserId + "/" + chatId, null);
+            childUpdates.put("/userChats/" + userId + "/" + chatId, null);
+        }
 
         // Delete notifications
+        // remove notifications i (current user) received from the selected user
+        childUpdates.put("/notifications/alerts/" + currentUserId + "/" +userId, null);
+        childUpdates.put("/notifications/alerts/" + currentUserId + "/" +userId + NOTIFICATION_TYPE_PICK_UP, null);
+        childUpdates.put("/notifications/alerts/" + currentUserId + "/" +userId + NOTIFICATION_TYPE_LIKE, null);
+        childUpdates.put("/notifications/alerts/" + currentUserId + "/" +userId + NOTIFICATION_TYPE_REQUESTS_SENT, null);
+        childUpdates.put("/notifications/alerts/" + currentUserId + "/" +userId + NOTIFICATION_TYPE_REQUESTS_APPROVED, null);
 
+        childUpdates.put("/notifications/messages/" + currentUserId + "/" +userId, null);
+
+        // remove my notifications (current user) that had been sent to the selected user, because we are blocking him
+        childUpdates.put("/notifications/alerts/" + userId + "/" +currentUserId + NOTIFICATION_TYPE_PICK_UP, null);
+        childUpdates.put("/notifications/alerts/" + userId + "/" +currentUserId + NOTIFICATION_TYPE_LIKE, null);
+        childUpdates.put("/notifications/alerts/" + userId + "/" +currentUserId + NOTIFICATION_TYPE_REQUESTS_SENT, null);
+        childUpdates.put("/notifications/alerts/" + userId + "/" +currentUserId + NOTIFICATION_TYPE_REQUESTS_APPROVED, null);
+
+        childUpdates.put("/notifications/messages/" + userId + "/" +currentUserId, null);
 
         mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -560,47 +599,27 @@ public class RelationRepository {
         });
     }
 
-    // Block user and delete the conversation (userChat table)
-    public void blockDelete(String currentUserId, String userId) {
-        Map<String, Object> childUpdates = new HashMap<>();
-        //Cancel likes i (current user) sent to this (target user). Keep like he sent to me (current user)
-        childUpdates.put("/favorites/" + currentUserId + "/" + userId, null);
-        //likes is to display who send likes to this particular user
-        childUpdates.put("/likes/" + userId + "/" + currentUserId, null);
-
-        // Update relations to blocking (current user) and blocked (target user)
-        childUpdates.put("/relations/" + currentUserId + "/" + userId+ "/status", RELATION_STATUS_BLOCKED);
-        childUpdates.put("/relations/" + userId + "/" + currentUserId+ "/status", RELATION_STATUS_BLOCKING);
-
-        // Chat ID is not passed from MainFragment, we need to create
-        String chatId = getJoinedKeys(currentUserId , userId);
-        // update chat active to -1, which means it's blocked chat room
-        childUpdates.put("/chats/" + chatId +"/active",-1);
-
-        // Delete chats with this person from chats recycler view
-        childUpdates.put("/userChats/" + currentUserId + "/" + chatId, null);
-        childUpdates.put("/userChats/" + userId + "/" + chatId, null);
-
-        // Delete notifications
-
-
-        mDatabaseRef.updateChildren(childUpdates).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                // Write was successful!
-                Log.i(TAG, "block onSuccess");
-                // ...
-            }
-        });
-    }
 
     // Delete blocking/blocked relation to start fresh
-    public void unblockUser(String currentUserId, String userId) {
+    public void unblockUser(String currentUserId, String userId, String relationStatus) {
         Map<String, Object> childUpdates = new HashMap<>();
 
-        // Update relations to null. To start fresh
-        childUpdates.put("/relations/" + currentUserId + "/" + userId, null);
-        childUpdates.put("/relations/" + userId + "/" + currentUserId, null);
+        if(relationStatus.equals(RELATION_STATUS_BLOCKING_VS_BLOCKED_BACK)) {
+            // this selected user had already blocked me (current user), and i am (current user) blocked him back and now i am unblocking
+            // Update relations to the previous blocking status, blocking/blocked_back for (current user) and blocked/blocking_back for (selected user)
+            childUpdates.put("/relations/" + currentUserId + "/" + userId + "/status", RELATION_STATUS_BLOCKING);
+            childUpdates.put("/relations/" + userId + "/" + currentUserId + "/status", RELATION_STATUS_BLOCKED);
+
+        }else if(relationStatus.equals(RELATION_STATUS_BLOCKED_VS_BLOCKING_BACK)){
+            // This selected user was blocked by me (current user) and he blocked me back and now i am unblocking
+            // Now the original block is being removed and we will be only left with the block back, so we need to reverse the original block relation
+            childUpdates.put("/relations/" + currentUserId + "/" + userId + "/status", RELATION_STATUS_BLOCKING);
+            childUpdates.put("/relations/" + userId + "/" + currentUserId + "/status", RELATION_STATUS_BLOCKED);
+        }else{
+            // Update relations to null. To start fresh
+            childUpdates.put("/relations/" + currentUserId + "/" + userId, null);
+            childUpdates.put("/relations/" + userId + "/" + currentUserId, null);
+        }
 
         // Chat ID is not passed from MainFragment, we need to create
         String chatId = getJoinedKeys(currentUserId , userId);
