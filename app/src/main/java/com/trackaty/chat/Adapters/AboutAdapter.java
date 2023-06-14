@@ -245,12 +245,12 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getBindingAdapterPosition());
                     if(TextUtils.isEmpty(editable.toString().trim())){
-                        aboutArrayList.get(getAdapterPosition()).setValue(null);
+                        aboutArrayList.get(getBindingAdapterPosition()).setValue(null);
 
                         // set EditProfileViewModel.user values
-                        switch (aboutArrayList.get(getAdapterPosition()).getKey()){
+                        switch (aboutArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "nationality":
                                 mEditProfileViewModel.getUser().setNationality(null);
                                 break;
@@ -268,10 +268,10 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> 
                                 break;
                         }
                     }else{
-                        aboutArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                        aboutArrayList.get(getBindingAdapterPosition()).setValue(editable.toString());
 
                         // set EditProfileViewModel.user values
-                        switch (aboutArrayList.get(getAdapterPosition()).getKey()){
+                        switch (aboutArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "nationality":
                                 mEditProfileViewModel.getUser().setNationality(String.valueOf(editable).trim());
                                 break;

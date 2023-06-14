@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,7 +25,7 @@ import java.util.Map;
 
 public class NotificationsRepository {
 
-    private final static String TAG = NotificationsRepository.class.getSimpleName();
+    private final static String TAG = "NotificationsRepository";
 
     // [START declare_database_ref]
     private DatabaseReference mDatabaseRef;
@@ -58,6 +59,10 @@ public class NotificationsRepository {
     private static int mScrollDirection;
     private static int mVisibleItem;
 
+    private boolean isSeeing;
+
+    private static Map<String, Object> updateSeenMap;
+
     // A listener for chat changes
     private ValueEventListener afterListener = new ValueEventListener() {
         @Override
@@ -79,9 +84,6 @@ public class NotificationsRepository {
             if (dataSnapshot.exists()) {
                 List<DatabaseNotification> list = new ArrayList<>();
 
-                // Create a map for all seen notifications need to be updated
-                Map<String, Object> updateSeenMap = new HashMap<>();
-
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
@@ -90,8 +92,11 @@ public class NotificationsRepository {
                         if(getLoadAfterKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
                             list.add(notification);
 
-                            // If is not seen, update seen to true
+                            // If is not seen, update seen to true and add it to updateSeenMap
+                            Log.d(TAG, "afterListener: isSeeing= "+ isSeeing);
                             if(!notification.isSeen()){
+                                Log.d(TAG, "afterListener: set notifications Seen to true: notification key= "+ notification.getKey());
+                                // add notification to the map that holds all seen notifications need to be updated
                                 updateSeenMap.put(snapshot.getKey()+"/seen", true);
                                 notification.setSeen(true);
                             }
@@ -101,10 +106,19 @@ public class NotificationsRepository {
                 }
 
                 // Update seen notifications
-                if(updateSeenMap.size() > 0){
-                    //Update seen notifications
-                    mNotificationsRef.updateChildren(updateSeenMap);
-                    return;
+                Log.d(TAG, "afterMessagesListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                if(updateSeenMap.size() > 0 && isSeeing){
+                    // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen notifications hear too
+                    // just in case an invalidate happens while the user is seeing by currently opening notifications tap
+                    Log.d(TAG, "afterMessagesListener: Updating seen notifications in the database. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    mNotificationsRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "afterMessagesListener updateSeenMap onSuccess: clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                            updateSeenMap.clear();
+                        }
+                    });
+
                 }
 
                 if(list.size() != 0){
@@ -164,9 +178,6 @@ public class NotificationsRepository {
             if (dataSnapshot.exists()) {
                 List<DatabaseNotification> list = new ArrayList<>();
 
-                // Create a map for all seen notifications need to be updated
-                Map<String, Object> updateSeenMap = new HashMap<>();
-
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
@@ -175,8 +186,11 @@ public class NotificationsRepository {
                         if(getLoadBeforeKey()!= notification.getSentLong()) { // if snapshot key = startAt key? don't add it again
                             list.add(notification);
 
-                            // If is not seen, update seen to true
+                            // If is not seen, update seen to true and add it to updateSeenMap
+                            Log.d(TAG, "beforeListener: isSeeing= "+ isSeeing);
                             if(!notification.isSeen()){
+                                Log.d(TAG, "beforeListener: set notifications Seen to true: notification key= "+ notification.getKey());
+                                // add notification to the map that holds all seen notifications need to be updated
                                 updateSeenMap.put(snapshot.getKey()+"/seen", true);
                                 notification.setSeen(true);
                             }
@@ -185,11 +199,19 @@ public class NotificationsRepository {
                     }
                 }
 
-                // Update seen notifications
-                if(updateSeenMap.size() > 0){
-                    //Update seen notifications
-                    mNotificationsRef.updateChildren(updateSeenMap);
-                    return;
+                Log.d(TAG, "beforeListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                if(updateSeenMap.size() > 0 && isSeeing){
+                    // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen notifications hear too
+                    // just in case an invalidate happens while the user is seeing by currently opening notifications tap
+                    Log.d(TAG, "beforeListener: Updating seen notifications in the database. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    mNotificationsRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "beforeListener: updateSeenMap onSuccess: clearing updateSeenMap after pushing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                            updateSeenMap.clear();
+                        }
+                    });
+
                 }
 
                 if(list.size() != 0){
@@ -222,7 +244,7 @@ public class NotificationsRepository {
     };
 
 
-    public NotificationsRepository(String userKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
+    public NotificationsRepository(String userKey, boolean seeing, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // use received chatKey to create a database ref
 
@@ -235,6 +257,14 @@ public class NotificationsRepository {
         isInitialFirstLoaded =  true;
         isAfterFirstLoaded = true;
         isBeforeFirstLoaded = true;
+
+        // When we first load isSeeing is true to update seeing fields in fetched notifications to true but then
+        // isSeeing should be updated from notification fragment based on it's onResume and OnStop
+        // if fragment stopped it should be false so we don't update seen field, when its resumed it should be true to update seen field
+        isSeeing = seeing;
+
+        // to hold all notifications that their seen field need to be updated
+        updateSeenMap = new HashMap<>();
 
         Log.d(TAG, "mama mDatabaseRef init. isInitialFirstLoaded= " + isInitialFirstLoaded+ " after= "+isAfterFirstLoaded + " before= "+isBeforeFirstLoaded);
 
@@ -272,6 +302,24 @@ public class NotificationsRepository {
 
     }
 
+    // To only update notification's seen when user is opening the notification's tap
+    public void setSeeing (boolean seeing) {
+        isSeeing = seeing;
+        Log.d(TAG, "setSeeing function called. isSeeing: "+ isSeeing);
+        // Update seen notifications
+        if(updateSeenMap.size() > 0){
+            Log.d(TAG, "setSeeing function called. updating updateSeenMap because it's size is > 0");
+            //Update seen notifications
+            mNotificationsRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    Log.d(TAG, "setSeeing function called. updateSeenMap onSuccess. clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    updateSeenMap.clear();
+                }
+            });
+        }
+    }
+
     // get initial data
     public void getItems(Long initialKey, final int size,
                          @NonNull final ItemKeyedDataSource.LoadInitialCallback<DatabaseNotification> callback){
@@ -302,16 +350,16 @@ public class NotificationsRepository {
                         // loop throw users value
                         List<DatabaseNotification> list = new ArrayList<>();
 
-                        // Create a map for all seen notifications need to be updated
-                        Map<String, Object> updateSeenMap = new HashMap<>();
-
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             DatabaseNotification notification = snapshot.getValue(DatabaseNotification.class);
                             if (notification != null) {
                                 notification.setKey(snapshot.getKey());
 
-                                // If is not seen, update seen to true
+                                // If is not seen, update seen to true and add it to updateSeenMap
+                                Log.d(TAG, "initialListener: isSeeing= "+ isSeeing);
                                 if(!notification.isSeen()){
+                                    Log.d(TAG, "initialListener: set notifications Seen to true: notification key= "+ notification.getKey());
+                                    // add notification to the map that holds all seen notifications need to be updated
                                     updateSeenMap.put(snapshot.getKey()+"/seen", true);
                                     notification.setSeen(true);
                                 }
@@ -322,11 +370,20 @@ public class NotificationsRepository {
 
                         }
 
-                        // Update seen notifications
-                        if(updateSeenMap.size() > 0){
+                        Log.d(TAG, "initialListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                        // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen notifications hear too
+                        // if user is currently isSeeing, just in case an invalidate happens while the user is opening notifications tap
+                        if(updateSeenMap.size() > 0 && isSeeing){
+                            Log.d(TAG, "initialListener: Updating seen notifications. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
                             //Update seen notifications
-                            mNotificationsRef.updateChildren(updateSeenMap);
-                            return;
+                            mNotificationsRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d(TAG, "initialListener updateSeenMap onSuccess: clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                                    updateSeenMap.clear();
+                                }
+                            });
+
                         }
 
                         if (list.size() != 0) {
@@ -477,7 +534,7 @@ public class NotificationsRepository {
 
         afterQuery = mNotificationsRef
                 .orderByChild("sent")
-                .startAt(key)
+                .startAfter(key)
                 .limitToFirst(size);
 
         afterQuery.addValueEventListener(afterListener);
@@ -498,7 +555,7 @@ public class NotificationsRepository {
 
         beforeQuery = mNotificationsRef
                 .orderByChild("sent")
-                .endAt(key)
+                .endBefore(key)
                 .limitToLast(size);
 
         beforeQuery.addValueEventListener(beforeListener);

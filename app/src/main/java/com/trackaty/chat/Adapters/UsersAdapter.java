@@ -93,7 +93,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
                 public void onClick(View view, int position, boolean isLongClick) {
 
                     if (view.getId() == R.id.user_image) { // only avatar is clicked
-                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        //mListener.onTextViewNameClick(view, getBindingAdapterPosition());
                         Log.i(TAG, "user avatar clicked= " + view.getId());
                         NavDirections ProfileDirection = MainFragmentDirections.actionMainToProfile(user.getKey());
                         //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
@@ -102,7 +102,7 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
                             /*Navigation.findNavController(this, R.id.host_fragment)
                             .navigate(directions);*/
-                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        //mListener.onTextViewNameClick(view, getBindingAdapterPosition());
                     } else {//-1 entire row is clicked
                         Log.i(TAG, "user row clicked= " + view.getId());
                         NavDirections MessageDirection = MainFragmentDirections.actionMainFragToMessagesFrag(null, user.getKey(), false);
@@ -430,18 +430,18 @@ public class UsersAdapter extends PagedListAdapter<User, UsersAdapter.ConcertVie
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
                 /*switch (view.getId()) {
                     case R.id.profile_image:
-                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        //mListener.onTextViewNameClick(view, getBindingAdapterPosition());
                         Log.i(TAG, "user avatar clicked= "+view.getId());
-                        itemClickListener.onAvatarClick(view, getAdapterPosition(), false);
+                        itemClickListener.onAvatarClick(view, getBindingAdapterPosition(), false);
                         break;
                     default://-1
-                        //mListener.onTextViewNameClick(view, getAdapterPosition());
+                        //mListener.onTextViewNameClick(view, getBindingAdapterPosition());
                         Log.i(TAG, "user row clicked= "+view.getId());
-                        itemClickListener.onRowClick(view, getAdapterPosition(), false);
+                        itemClickListener.onRowClick(view, getBindingAdapterPosition(), false);
                         break;
                 }*/
             }

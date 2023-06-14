@@ -751,7 +751,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                 @Override
                 public void onCompleted(View view) {
                     //on complete is not accurate, sometimes it's not called for a strange reason
-                    Log.d(TAG, "onCompleted revealed message getAdapterPosition= "+getBindingAdapterPosition());
+                    Log.d(TAG, "onCompleted revealed message getBindingAdapterPosition= "+getBindingAdapterPosition());
 
                 }
             });
@@ -766,9 +766,9 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     Log.d(TAG, "onRevealed percent onRevealed "+tv);
                     mScratch.setVisibility(View.GONE);
 
-                    Log.d(TAG, "onRevealed revealed message getAdapterPosition= "+getAdapterPosition());
-                    if(getAdapterPosition() != RecyclerView.NO_POSITION){
-                        Message message = getItem(getAdapterPosition());
+                    Log.d(TAG, "onRevealed revealed message getBindingAdapterPosition= "+getBindingAdapterPosition());
+                    if(getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                        Message message = getItem(getBindingAdapterPosition());
                         Log.d(TAG, "onRevealed revealed message = "+message.getMessage()+ " key ="+ message.getKey());
                         // update message reveal to true
                         //mMessagesRef.child(chatKey).child(message.getKey()).child("revealed").setValue(true);
@@ -800,7 +800,7 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
         public boolean onLongClick(View v) {
             Log.d(TAG, "onDrag ");
             //return false;
-            //itemClickListener.onClick(v, getAdapterPosition(), true);
+            //itemClickListener.onClick(v, getBindingAdapterPosition(), true);
             return false;
         }*/
 
@@ -835,8 +835,8 @@ public class MessagesAdapter extends PagedListAdapter<Message, RecyclerView.View
                     return true;
                 /*case (MotionEvent.ACTION_MOVE) :
                     Log.d(TAG,"Action was MOVE");
-                    *//*if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        itemClickListener.onClick(v, getAdapterPosition(), true);
+                    *//*if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                        itemClickListener.onClick(v, getBindingAdapterPosition(), true);
                     }*//*
                     return true;
                 case (MotionEvent.ACTION_UP) :

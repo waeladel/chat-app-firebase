@@ -35,6 +35,7 @@ import io.chirp.chirpsdk.models.ChirpError;
 import io.chirp.chirpsdk.interfaces.ChirpEventListener;
 
 import static android.content.Context.AUDIO_SERVICE;
+import static com.trackaty.chat.Utils.PendingIntentFlags.pendingIntentUpdateCurrentFlag;
 
 public class SoundIdAlarm extends BroadcastReceiver {
 
@@ -641,7 +642,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
 
         alarmIntent = new Intent(context, SoundIdAlarm.class);
         alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentSoundId);
-        pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM,alarmIntent, pendingIntentUpdateCurrentFlag());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -657,7 +658,7 @@ public class SoundIdAlarm extends BroadcastReceiver {
     private void stopAlarm() {
         Log.d(TAG , "stopAlarm()");
         alarmIntent = new Intent(context, SoundIdAlarm.class);
-        pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, pendingIntentUpdateCurrentFlag());
         if (alarmManager != null) {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();

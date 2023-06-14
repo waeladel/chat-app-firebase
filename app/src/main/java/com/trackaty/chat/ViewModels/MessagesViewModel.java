@@ -24,7 +24,7 @@ import java.util.Timer;
 public class MessagesViewModel extends ViewModel {
 
     private final static String TAG = MessagesViewModel.class.getSimpleName();
-    private MessagesDataFactory messagesDataFactory;
+    private MessagesDataFactory mDataFactory;
     private PagedList.Config config;
     public LiveData<PagedList<Message>> itemPagedList;
     public  MutableLiveData<PagedList<Message>> items;
@@ -43,7 +43,7 @@ public class MessagesViewModel extends ViewModel {
     public MessagesViewModel(String chatKey, String chatUserId, String currentUserId) {
 
         // pass chatKey to the constructor of MessagesDataFactory
-        messagesDataFactory = new MessagesDataFactory(chatKey);
+        mDataFactory = new MessagesDataFactory(chatKey);
         messagesRepository = new MessagesRepository();
 
         agoTime = new MutableLiveData<>();
@@ -65,7 +65,7 @@ public class MessagesViewModel extends ViewModel {
                 //.setEnablePlaceholders(true)
                 .build();
 
-        itemPagedList = new LivePagedListBuilder<>(messagesDataFactory, config).build();
+        itemPagedList = new LivePagedListBuilder<>(mDataFactory, config).build();
         /*itemPagedList = (new LivePagedListBuilder(messagesDataFactory,config))
                 .build();*/
         chat = messagesRepository.getChat(chatKey);
@@ -97,7 +97,7 @@ public class MessagesViewModel extends ViewModel {
     // When last database message is not loaded, Invalidate messagesDataSource to scroll down
     public void invalidateData() {
         // invalidate messagesDataSource
-        messagesDataFactory.invalidateData();
+        mDataFactory.invalidateData();
     }
 
     public LiveData<Chat> getChat(String chatId) {
@@ -117,6 +117,13 @@ public class MessagesViewModel extends ViewModel {
         Log.d(TAG, "chatId= "+ chatId);
         messagesRepository.revealMessages(chatId);
 
+    }
+
+    // To only update message's seen when user is opening the message's tap
+    public void setSeeing(boolean isSeeing) {
+        Log.d(TAG, "NotificationsViewModel set seeing= "+isSeeing);
+        // Remove all listeners when fragment is paused so it doesn't update seen filed to true for notifications that user is not watching in fact
+        mDataFactory.setSeeing(isSeeing);
     }
 
     // Set scroll direction and last visible item which is used to get initial key's position
@@ -143,7 +150,7 @@ public class MessagesViewModel extends ViewModel {
         messagesRepository.removeListeners();
 
         // Remove all Listeners from MessagesListRepository
-        MessagesListRepository.removeListeners();
+        mDataFactory.removeListeners();
 
         /*// Update all seen messages by currentUser before onCleared
         updateSeenMessages(chatId);*/

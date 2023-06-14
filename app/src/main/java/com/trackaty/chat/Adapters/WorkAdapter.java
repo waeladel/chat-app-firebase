@@ -184,12 +184,12 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition());
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getBindingAdapterPosition());
                     if(TextUtils.isEmpty(String.valueOf(editable).trim())){
-                        workArrayList.get(getAdapterPosition()).setValue(null);
+                        workArrayList.get(getBindingAdapterPosition()).setValue(null);
 
                         // set EditProfileViewModel.user values
-                        switch (workArrayList.get(getAdapterPosition()).getKey()){
+                        switch (workArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "work":
                                 mEditProfileViewModel.getUser().setWork(null);
                                 break;
@@ -201,10 +201,10 @@ public class WorkAdapter extends RecyclerView.Adapter<WorkAdapter.ViewHolder> {
                                 break;
                         }
                     }else{
-                        workArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                        workArrayList.get(getBindingAdapterPosition()).setValue(editable.toString());
 
                         // set EditProfileViewModel.user values
-                        switch (workArrayList.get(getAdapterPosition()).getKey()){
+                        switch (workArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "work":
                                 mEditProfileViewModel.getUser().setWork(String.valueOf(editable).trim());
                                 break;

@@ -9,14 +9,16 @@ import androidx.paging.ItemKeyedDataSource;
 
 public class NotificationsDataSource extends ItemKeyedDataSource<Long, DatabaseNotification> {
 
-    private final static String TAG = NotificationsDataSource.class.getSimpleName();
+    private final static String TAG = "NotificationsDataSource";
     private String mChatKey;
+    private boolean isSeeing;
     private NotificationsRepository mRepository;
 
     // get chatKey on the constructor
     public NotificationsDataSource(String chatKey){
         //mRepository = new ChatsRepository(chatKey);
         this.mChatKey = chatKey;
+        isSeeing = true;
         Log.d(TAG, "mama ChatsDataSource initiated ");
        /* usersRepository.getUsersChangeSubject().observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe();{
             invalidate();
@@ -27,6 +29,12 @@ public class NotificationsDataSource extends ItemKeyedDataSource<Long, DatabaseN
     // Pass scrolling direction and last/first visible item to the repository
     public void setScrollDirection(int scrollDirection, int lastVisibleItem){
         mRepository.setScrollDirection(scrollDirection, lastVisibleItem);
+    }
+
+    // To only update notification's seen when user is opening the notification's tap
+    public void setSeeing (boolean seeing) {
+        isSeeing = seeing;
+        mRepository.setSeeing(isSeeing);
     }
 
     // removeListeners on viewModel cleared
@@ -40,7 +48,7 @@ public class NotificationsDataSource extends ItemKeyedDataSource<Long, DatabaseN
         //super.addInvalidatedCallback(onInvalidatedCallback);
         Log.d(TAG, "mama Callback ChatsDataSource addInvalidatedCallback ");
         // pass firebase Callback to ChatsRepository
-        mRepository = new NotificationsRepository(mChatKey, onInvalidatedCallback);
+        mRepository = new NotificationsRepository(mChatKey, isSeeing, onInvalidatedCallback);
         //mRepository.ChatsChanged(onInvalidatedCallback);
         //invalidate();
     }

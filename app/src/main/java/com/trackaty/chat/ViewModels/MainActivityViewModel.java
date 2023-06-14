@@ -2,6 +2,7 @@ package com.trackaty.chat.ViewModels;
 
 import android.util.Log;
 
+import com.trackaty.chat.DataSources.MainActivityRepository;
 import com.trackaty.chat.DataSources.UserRepository;
 import com.trackaty.chat.models.User;
 
@@ -10,8 +11,8 @@ import androidx.lifecycle.ViewModel;
 
 public class MainActivityViewModel extends ViewModel {
 
-    private final static String TAG = MainActivityViewModel.class.getSimpleName();
-    private UserRepository userRepository;
+    private final static String TAG = "MainActivityViewModel";
+    private MainActivityRepository mainActivityRepository;
     private  MutableLiveData<User> currentUser;
     private MutableLiveData<String> currentUserId;
     private MutableLiveData<Long> chatCount, notificationCount;
@@ -19,7 +20,7 @@ public class MainActivityViewModel extends ViewModel {
     public MainActivityViewModel() {
 
         // pass userId to the constructor of MessagesDataFactory
-        userRepository = new UserRepository();
+        mainActivityRepository = new MainActivityRepository();
 
         //currentUserId = new MutableLiveData<>();
         //chatCount = new MutableLiveData<>();
@@ -50,14 +51,14 @@ public class MainActivityViewModel extends ViewModel {
             if(chatCount == null){
                 chatCount = new MutableLiveData<>();
             }
-            chatCount = userRepository.getChatsCount(userId);
+            chatCount = mainActivityRepository.getChatsCount(userId);
             Log.d(TAG, "updateCurrentUserId chatCount= "+ chatCount.getValue());
 
             // update notification count of the new user
             if(notificationCount == null){
                 notificationCount = new MutableLiveData<>();
             }
-            notificationCount = userRepository.getNotificationsCount(userId);
+            notificationCount = mainActivityRepository.getNotificationsCount(userId);
 
         }
         currentUserId.setValue(userId);
@@ -66,17 +67,17 @@ public class MainActivityViewModel extends ViewModel {
 
     public MutableLiveData<User> getCurrentUser() {
         Log.d(TAG, "getUser"+ currentUserId);
-        currentUser = userRepository.getCurrentUser(currentUserId.getValue());
+        currentUser = mainActivityRepository.getCurrentUser(currentUserId.getValue());
         return currentUser;
     }
 
     // Get counts for unread chats
     public MutableLiveData<Long> getChatsCount(String userId) {
-        Log.d(TAG, "getChatsCount"+ userId);
+        Log.d(TAG, "getChatsCount: current userId "+ userId);
         if(chatCount == null){
-            Log.d(TAG, "chatCount is null, get relation from database");
+            Log.d(TAG, "chatCount is null, get chatCount from database");
             chatCount = new MutableLiveData<>();
-            chatCount = userRepository.getChatsCount(userId);
+            chatCount = mainActivityRepository.getChatsCount(userId);
         }
         Log.d(TAG, "getChatsCount chatCount Count= "+ chatCount.getValue());
         return chatCount;
@@ -84,25 +85,20 @@ public class MainActivityViewModel extends ViewModel {
 
     // Get counts for unread chats
     public MutableLiveData<Long> getNotificationsCount(String userId) {
-        Log.d(TAG, "getNotificationsCount"+ userId);
+        Log.d(TAG, "getNotificationsCount: current userId= "+ userId);
         if(notificationCount == null){
-            Log.d(TAG, "notificationCount is null, get relation from database");
+            Log.d(TAG, "notificationCount is null, get notificationCount from database");
             notificationCount = new MutableLiveData<>();
-            notificationCount = userRepository.getNotificationsCount(userId);
+            notificationCount = mainActivityRepository.getNotificationsCount(userId);
         }
         Log.d(TAG, "getNotificationsCount notification Count= "+ notificationCount.getValue());
         return notificationCount;
     }
 
-    public void clearViewModel() {
-        Log.d(TAG, "removeListeners");
-        onCleared();
-    }
-
     @Override
     protected void onCleared() {
         Log.d(TAG, "mama MainActivityViewModel onCleared:");
-        userRepository.removeListeners();
+        mainActivityRepository.removeListeners();
         super.onCleared();
     }
 

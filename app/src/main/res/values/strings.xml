@@ -204,7 +204,9 @@
     <string name="volume_dialog_message">Volume is too low, would you like to maximize it to achieve a wider visibility range?</string>
     <string name="report_dialog_title">Report User?</string>
     <string name="report_dialog_message">If someone is in immediate danger, call local emergency service.\n\nPlease select the reason for reporting this user or content, we won’t let the person know who reported them.</string>
-
+    <string name="allow_notification_title">Allow notifications</string>
+    <string name="allow_notification_message">The app needs permission to send notifications in order to notify you when you are visible to others, when you are searching for nearby potential lover, when a user send you a message, like or request to reveal your contact.</string>
+    <string name="notification_settings_message">The app needs permission to send notifications in order to notify you when you are visible to others, when you are searching for nearby potential lover, when a user send you a message, like or request to reveal your contact. \n\n Do you want to go to settings to enable notifications?</string>
 
 
     <!--<string name="activate_chat_dialog_message">P.S. If you select Forever you will read messages instantly without the need to scratch it. Therefore, don\'t choose it unless you feel comfortable with this person.</string>-->

@@ -1,5 +1,6 @@
 package com.trackaty.chat.Fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -26,10 +27,10 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentManager;
@@ -51,10 +52,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trackaty.chat.BuildConfig;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.CheckPermissions;
 import com.trackaty.chat.Utils.FilesHelper;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.User;
 import com.trackaty.chat.receivers.SoundIdAlarm;
+import com.trackaty.chat.services.MessagingService;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -69,6 +72,7 @@ import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.POWER_SERVICE;
 import static androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode;
 import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
+import static com.trackaty.chat.Utils.PendingIntentFlags.*;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
     private final static String TAG = SettingsFragment.class.getSimpleName();
@@ -597,6 +601,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     // Start the alarm
     private void startAlarm() {
+        // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+        CheckPermissions.checkNotificationPermission(getContext());
+
         if(!isDozeWhiteList()){ // check if the app is already exempted from battery optimization
             int batteryAlertShowTimes = sharedPreferences.getInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, 0);
             if(batteryAlertShowTimes < 3){
@@ -605,12 +612,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 sharedPreferences.edit().putInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, batteryAlertShowTimes+1).apply();
             }
         }
+
         setAlarm();
     }
 
     // check if alarm PendingIntent is already exists or not
     private boolean isAlarmExist() {
-        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, pendingIntentNoCreateFlag());
         if (checkPendingIntent != null){
             Log.d(TAG , "isAlarmExist: yet it is exist. checkPendingIntent= "+checkPendingIntent);
             return true;
@@ -631,7 +639,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         //alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentUser.getSoundId());
         //alarmIntent.putExtra(USER_ID_KEY, mCurrentUserId);
-        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, pendingIntentUpdateCurrentFlag());
         if (alarmManager != null) {
             Log.d(TAG , "setAlarm: alarmManager= "+alarmManager);
             //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),60000, pendingIntent);
@@ -655,7 +663,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         Log.d(TAG , "stopAlarm()");
         alarmManager =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
         alarmIntent = new Intent(activity, SoundIdAlarm.class);
-        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, pendingIntentUpdateCurrentFlag());
         if (alarmManager != null) {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();
@@ -724,13 +732,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     // Create Ongoing notification when alarm is set
     private void setNotification() {
-        Intent NotificationClickIntent = new Intent(mActivityContext, MainActivity.class);
-        //PendingIntent pendingIntent = PendingIntent.getActivity(mActivityContext, NOTIFICATION_PENDING_INTENT_REQUEST_CODE, NotificationClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         PendingIntent notificationPendingIntent = new NavDeepLinkBuilder(mActivityContext)
                 .setGraph(R.navigation.nav_graph)
                 .setDestination(R.id.settingsFragment)
-                //.setArguments(bundle)
                 .createPendingIntent();
 
         mNotification = new NotificationCompat.Builder(mActivityContext, VISIBILITY_CHANNEL_ID)
@@ -744,7 +749,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 .setOngoing(true)
                 .build();
 
-        notificationManager.notify(VISIBILITY_NOTIFICATION_ID, mNotification);
+        if(CheckPermissions.isNotificationGrantedEnabled(mActivityContext)){
+            notificationManager.notify(VISIBILITY_NOTIFICATION_ID, mNotification);
+        }
 
     }
 

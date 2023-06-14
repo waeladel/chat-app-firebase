@@ -387,14 +387,14 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
             }
 
-            if(getAdapterPosition() != RecyclerView.NO_POSITION){
-                Log.i(TAG, "user row clicked= "+view.getId()+ " Position= "+ getAdapterPosition());
+            if(getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                Log.i(TAG, "user row clicked= "+view.getId()+ " Position= "+ getBindingAdapterPosition());
                 // get clicked notification
-                DatabaseNotification notification = getItem(getAdapterPosition());
+                DatabaseNotification notification = getItem(getBindingAdapterPosition());
                 if(notification != null){
                     notification.setClicked(true); // set clicked notification to true
                     mNotificationsRef.child(notification.getKey()).child("clicked").setValue(true);// update clicked field on database
@@ -407,11 +407,9 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                     if (null != notification.getType()) {
                         switch (notification.getType()){
                             case NOTIFICATION_TYPE_LIKE:
-                                //TODO Go to likes fragment
                                 Navigation.findNavController(view).navigate(ProfileDirection);
                                 break;
                             case NOTIFICATION_TYPE_LIKE_BACK:
-                                //TODO Go to likes fragment
                                 Navigation.findNavController(view).navigate(ProfileDirection);
                                 break;
                             case NOTIFICATION_TYPE_PICK_UP:
@@ -422,11 +420,9 @@ public class NotificationsAdapter extends PagedListAdapter<DatabaseNotification,
                                 break;
                             case NOTIFICATION_TYPE_REQUESTS_SENT:
                                 Navigation.findNavController(view).navigate(ProfileDirection);
-
                                 break;
                             case NOTIFICATION_TYPE_REQUESTS_APPROVED:
                                 Navigation.findNavController(view).navigate(ProfileDirection);
-
                                 break;
                             default:
                                 Navigation.findNavController(view).navigate(ProfileDirection);

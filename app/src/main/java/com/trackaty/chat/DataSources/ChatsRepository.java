@@ -422,7 +422,7 @@ public class ChatsRepository {
 
         afterQuery = mChatsRef
                 .orderByChild("lastSent")
-                .startAt(key)
+                .startAfter(key)
                 .limitToFirst(size);
 
         afterQuery.addValueEventListener(afterListener);
@@ -443,7 +443,7 @@ public class ChatsRepository {
 
         beforeQuery = mChatsRef
                 .orderByChild("lastSent")
-                .endAt(key)
+                .endBefore(key)
                 .limitToLast(size);
 
         beforeQuery.addValueEventListener(beforeListener);

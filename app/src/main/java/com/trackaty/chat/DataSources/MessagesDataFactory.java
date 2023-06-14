@@ -7,23 +7,32 @@ import com.trackaty.chat.models.Message;
 public class MessagesDataFactory extends DataSource.Factory<String, Message>{
 
     private String mChatKey;
-    private MessagesDataSource messagesDataSource;
+    private MessagesDataSource mDataSource;
 
     // receive chatKey on the constructor
     public MessagesDataFactory(String chatKey) {
         this.mChatKey = chatKey;
-        messagesDataSource = new MessagesDataSource(mChatKey);
+        mDataSource = new MessagesDataSource(mChatKey);
+    }
+
+    // To only update message's seen when user is opening the message's tap
+    public void setSeeing (boolean seeing) {
+        mDataSource.setSeeing(seeing);
     }
 
     // When last database message is not loaded, Invalidate messagesDataSource to scroll down
     public void invalidateData() {
-        messagesDataSource.invalidateData();
+        mDataSource.invalidateData();
         //messagesDataSource.loadInitial();
+    }
+
+    public void removeListeners() {
+        mDataSource.removeListeners();
     }
 
     @Override
     public DataSource<String, Message> create() {
-        return messagesDataSource;
+        return mDataSource;
     }
 
 

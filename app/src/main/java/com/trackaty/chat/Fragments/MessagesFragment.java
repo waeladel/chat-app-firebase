@@ -120,8 +120,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     private int bottomVisibleItemCount;
     private int scrollDirectionY;
 
-    private PagedList<Message> mItems;
-
     private static final int REACHED_THE_TOP = 2;
     private static final int SCROLLING_UP = 1;
     private static final int SCROLLING_DOWN = -1;
@@ -202,145 +200,29 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
         mMessagesViewModel.itemPagedList.observe(this, new Observer<PagedList<Message>>() {
             @Override
             public void onChanged(@Nullable final PagedList<Message> items) {
-                System.out.println("mama onChanged");
-                if (items != null ){
-                    // your code here
-                    // Create new Thread to loop until items.size() is greater than 0
-                    new Thread(new Runnable() {
-                        int sleepCounter = 0;
-                        @Override
-                        public void run() {
-                            try {
-                                while(items.size()==0) {
-                                    //Keep looping as long as items size is 0
-                                    Thread.sleep(20);
-                                    Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                    if(sleepCounter == 1000){
-                                        break;
-                                    }
-                                    //handler.post(this);
+                if (items != null && items.size()>0){
+                    Log.d(TAG, "submitList");
+                    // Scroll to last item
+                    // Only scroll to bottom if user is not reading messages above
+                    Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
+
+                    // Check if we have isHitBottom saved when change configuration occur or not
+                    if(savedInstanceState != null){
+                        isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
+                    }
+
+                    mMessagesAdapter.submitList(items);
+
+                    if( null == isHitBottom || isHitBottom){
+                        if(items.size()>0){ // don't scroll to bottom if there are no items
+                            mMessagesRecycler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
                                 }
-                                //Now items size is greater than 0, let's submit the List
-                                Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                if(items.size() == 0 && sleepCounter == 1000){
-                                    // If we submit List after loop is finish with 0 results
-                                    // we may erase another results submitted via newer thread
-                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
-                                }else{
-                                    Log.d(TAG, "submitList");
-                                    // Scroll to last item
-                                    // Only scroll to bottom if user is not reading messages above
-                                    Log.d(TAG, "scroll to bottom if user is not above. isHitBottom= "+ isHitBottom+ " items.size= "+items.size()+ " ItemCount= "+mMessagesAdapter.getItemCount());
-
-                                    // Check if we have isHitBottom saved when change configuration occur or not
-                                    if(savedInstanceState != null){
-                                        isHitBottom = savedInstanceState.getBoolean(IS_HII_BOTTOM);
-                                    }
-
-                                    Log.d(TAG, "isHitBottom= "+isHitBottom +" adapter getItemCount= "+ mMessagesAdapter.getItemCount());
-
-                                    mMessagesAdapter.submitList(items);
-
-                                        /*mMessagesViewModel.getLastMessageOnce(mChatId, new FirebaseMessageCallback() {
-                                            @Override
-                                            public void onCallback(Message message) {
-                                                if(message != null){
-                                                    LastMessageKey = message.getKey();
-                                                }
-                                            }
-                                        });*/
-
-                                        /*if( null == isHitBottom){
-                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                                mMessagesRecycler.postDelayed(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        mMessagesRecycler.scrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                    }
-                                                }, 500);
-                                            }
-                                        }else if(isHitBottom){
-                                            if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                                //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                                Log.d(TAG, "isHitBottom adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                                mMessagesRecycler.postDelayed(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                    }
-                                                }, 500);
-                                            }
-                                        }*/
-
-                                    if( null == isHitBottom || isHitBottom){
-                                        if(mMessagesAdapter.getItemCount()>0 ){// stop scroll to bottom if there are no items
-                                            //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                            Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                            //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                            //mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount());
-                                            mMessagesRecycler.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                                }
-                                            }, 500);
-                                        }
-                                    }
-
-                                    mItems = items;
-                                }
-
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
+                            }, 500);
                         }
-                    }).start();
-
-                        /*Thread thread = new Thread() {
-                            int sleepCounter = 0;
-                            @Override
-                            public void run() {
-                                try {
-                                    while(items.size()==0) {
-                                        //Keep looping as long as items size is 0
-                                        sleep(20);
-                                        Log.d(TAG, "sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                        if(sleepCounter == 1000){
-                                            break;
-                                        }
-                                        //handler.post(this);
-                                    }
-                                    //Now items size is greater than 0, let's submit the List
-                                    Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                    mMessagesAdapter.submitList(items);
-
-                                    // Scroll to last item
-                                    Log.d(TAG, "isHitBottom = "+isHitBottom);
-
-                                    // Only scroll to bottom if user is not reading messages above
-                                    if(null == isHitBottom || isHitBottom){
-                                        if(items.size()>0){// stop scroll to bottom if there are no items
-                                        //mMessagesRecycler.smoothScrollToPosition(items.size()-1);
-                                        Log.d(TAG, "adapter getItemCount= "+mMessagesAdapter.getItemCount());
-                                        mMessagesRecycler.smoothScrollToPosition(mMessagesAdapter.getItemCount()-1);
-                                        }
-                                    }
-
-
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        thread.start();*/
-
+                    }
                 }
             }
         });// End init  mMessagesViewModel itemPagedList here after mCurrentUserId is received//
@@ -736,12 +618,21 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        mMessagesViewModel.setSeeing(true); // to disable updating seeing field when fragment is stopped
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
         // Cancel all countdown timers on fragment stop
         CancelLastOnlineTimer();
         CancelActiveTimer();
+
+        mMessagesViewModel.setSeeing(false); // remove listeners to disable updating seeing field when fragment is stopped
 
         // Create a map for all messages need to be updated
         Map<String, Object> updateMap = new HashMap<>();
@@ -1441,24 +1332,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
                 // It's used to notify the adapter to update item position
                 mMessagesAdapter.addSentToStatusList(message);
 
-                /*for (int i = 0; i < mItems.size(); i++) {
-                    if (mItems.get(i) != null && mItems.get(i).getKey().equals(messageKey)) {
-                        Log.d(TAG, "onSuccess. mItems. message= " + mItems.get(i).getMessage() + " key= " + mItems.get(i).getKey());
-                        if (mItems.get(i) != null) {
-                            mItems.get(i).setSent(true);
-                        }
-
-                    }
-                }
-
-                mMessagesAdapter.submitList(mItems);*/
-                //mMessagesAdapter.submitList(mItems);
-                //mMessagesAdapter.notifyDataSetChanged();
-                // To scroll to bottom when user send new message
-                /*mScrollDirection = REACHED_THE_BOTTOM;
-                mMessagesViewModel.setScrollDirection(mScrollDirection);
-                isHitBottom = true;*/
-                // ...
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1516,7 +1389,6 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
 
                         mMessagesViewModel.setScrollDirection(mScrollDirection, lastCompletelyVisibleItem);
                         Log.d(TAG, "invalidating the dataSource...");
-                        //mItems.getDataSource().invalidate();
                         //mMessagesAdapter.getCurrentList().getDataSource().invalidate();
                         mMessagesViewModel.invalidateData();
 
@@ -1611,10 +1483,8 @@ public class MessagesFragment extends Fragment implements ItemClickListener {
             mMessagesViewModel.revealMessages(mChatId);
             // Reveal all messages when "active forever" is selected
             //
-            //Log.i(TAG, "mItems LastKey= " + mItems.getLastKey());
             //mMessagesAdapter.notifyAll();
             //mMessagesRecycler.getRecycledViewPool().clear();
-            //mMessagesAdapter.submitList(mItems);
             //mMessagesRecycler.invalidate();
             //mMessagesRecycler.setAdapter(null);
             //mMessagesRecycler.setLayoutManager(null);

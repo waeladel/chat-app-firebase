@@ -19,7 +19,6 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trackaty.chat.Adapters.NotificationsAdapter;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.CheckPermissions;
 import com.trackaty.chat.ViewModels.NotificationsViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.Chat;
@@ -119,71 +119,22 @@ public class NotificationsFragment extends Fragment{
                     }).get(ChatsViewModel.class);*/
 
 
-        // It's best to observe on onActivityCreated so that we dona't have to update ViewModel manually.
+        // It's best to observe on onActivityCreated so that we don't have to update ViewModel manually.
         // This is because LiveData will not call the observer since it had already delivered the last result to that observer.
         // But recycler adapter is updated any way despite that LiveData delivers updates only when data changes, and only to active observers.
         // Use getViewLifecycleOwner() instead of this, to get only one observer for this view
         mViewModel.getItemPagedList().observe(this, new Observer<PagedList<DatabaseNotification>>() {
             @Override
             public void onChanged(@Nullable final PagedList<DatabaseNotification> items) {
-
-                if (items != null ){
-                    // your code here
-                    Log.d(TAG, "Notifications onChanged submitList size" +  items.size());
-                    // Create new Thread to loop until items.size() is greater than 0
-                    new Thread(new Runnable() {
-                        int sleepCounter = 0;
-                        @Override
-                        public void run() {
-                            try {
-                                while(items.size()==0) {
-                                    //Keep looping as long as items size is 0
-                                    Thread.sleep(20);
-                                    Log.d(TAG, "Notifications onChanged. sleep 1000. size= "+items.size()+" sleepCounter="+sleepCounter++);
-                                    if(sleepCounter == 1000){
-                                        break;
-                                    }
-                                    //handler.post(this);
-                                }
-                                //Now items size is greater than 0, let's submit the List
-                                Log.d(TAG, "Notifications onChanged. after  sleep finished. size= "+items.size());
-                                if(items.size() == 0 && sleepCounter == 1000){
-                                    // If we submit List after loop is finish with 0 results
-                                    // we may erase another results submitted via newer thread
-                                    Log.d(TAG, "Notifications onChanged. Loop finished with 0 items. Don't submitList");
-                                }else{
-                                    Log.d(TAG, "Notifications onChanged. submitList= "+items.size());
-                                    mAdapter.submitList(items);
-                                }
-
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }).start();
-                                /*Thread thread = new Thread() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            while(items.size()==0) {
-                                                //Keep looping as long as items size is 0
-                                                sleep(10);
-                                                Log.d(TAG, "sleep 1000. size= "+items.size());
-                                                //handler.post(this);
-                                            }
-                                            //Now items size is greater than 0, let's submit the List
-                                            Log.d(TAG, "after  sleep finished. size= "+items.size());
-                                            mAdapter.submitList(items);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                };
-                                thread.start();*/
+                if (items != null && items.size()>0){
+                    Log.d(TAG, "onChanged submitList size= " +  items.size());
+                    mAdapter.submitList(items);
                 }
             }
         });
+
+        // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+        CheckPermissions.checkNotificationPermission(getContext());
 
     }
 
@@ -274,9 +225,20 @@ public class NotificationsFragment extends Fragment{
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        mViewModel.setSeeing(true); // to disable updating seeing field when fragment is stopped
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+
+        //mViewModel.clearViewModel();
+        mViewModel.setSeeing(false); // remove listeners to disable updating seeing field when fragment is stopped
+
         // Create a map for all messages need to be updated
         Map<String, Object> updateMap = new HashMap<>();
 
@@ -311,7 +273,7 @@ public class NotificationsFragment extends Fragment{
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "chats onDestroy");
+        Log.d(TAG, "onDestroy");
         super.onDestroy();
     }
 

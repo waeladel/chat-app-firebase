@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -51,6 +52,7 @@ import io.chirp.chirpsdk.models.ChirpError;
 import io.chirp.chirpsdk.interfaces.ChirpEventListener;
 
 import static com.trackaty.chat.App.FIND_NEARBY_CHANNEL_ID;
+import static com.trackaty.chat.Utils.PendingIntentFlags.pendingIntentUpdateCurrentFlag;
 
 public class FindNearbyService extends Service {
 
@@ -68,7 +70,7 @@ public class FindNearbyService extends Service {
     //private final Random mGenerator = new Random();
 
 
-    private final static int PENDING_INTENT_REQUESTCODE = 45; // For the notification
+    private final static int PENDING_INTENT_REQUEST_CODE = 45; // For the notification
     private final static int SEARCHING_PERIOD = 10*60*1000; //1*60*1000;
 
     private static final int LIKES_NOTIFICATION_ID = 1;
@@ -229,7 +231,11 @@ public class FindNearbyService extends Service {
         }
 
         Intent NotificationClickIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, PENDING_INTENT_REQUESTCODE, NotificationClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pendingIntent = PendingIntent.getActivity(this, PENDING_INTENT_REQUEST_CODE, NotificationClickIntent, pendingIntentUpdateCurrentFlag());
+        PendingIntent pendingIntent = new NavDeepLinkBuilder(this)
+                .setGraph(R.navigation.nav_graph)
+                .setDestination(R.id.mainFragment)
+                .createPendingIntent();
 
         mNotification = new NotificationCompat.Builder(this, FIND_NEARBY_CHANNEL_ID)
                 .setContentTitle(getString(R.string.notification_nearby_title))

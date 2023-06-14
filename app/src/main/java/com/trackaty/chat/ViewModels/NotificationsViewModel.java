@@ -14,7 +14,7 @@ import com.trackaty.chat.models.DatabaseNotification;
 
 public class NotificationsViewModel extends ViewModel {
 
-    private final static String TAG = NotificationsViewModel.class.getSimpleName();
+    private final static String TAG = "NotificationsViewModel";
 
     private NotificationsDataFactory mDataFactory;
     private PagedList.Config config;
@@ -23,7 +23,6 @@ public class NotificationsViewModel extends ViewModel {
 
     private DatabaseReference mDatabaseRef;
     private DatabaseReference mNotificationsRef;
-
 
     public NotificationsViewModel(String currentUserId) {
 
@@ -72,10 +71,17 @@ public class NotificationsViewModel extends ViewModel {
         mDataFactory.setScrollDirection(scrollDirection, lastVisibleItem);
     }
 
+    // To only update notification's seen when user is opening the notification's tap
+    public void setSeeing(boolean isSeeing) {
+        Log.d(TAG, "NotificationsViewModel set seeing= "+isSeeing);
+        // Remove all listeners when fragment is paused so it doesn't update seen filed to true for notifications that user is not watching in fact
+        mDataFactory.setSeeing(isSeeing);
+    }
+
 
     @Override
     protected void onCleared() {
-        Log.d(TAG, "mama NotificationsViewModel onCleared:");
+        Log.d(TAG, "NotificationsViewModel onCleared:");
         //NotificationsRepository.removeListeners();
         // Remove all listeners on viewModel cleared
         mDataFactory.removeListeners();

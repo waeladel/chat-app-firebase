@@ -4,6 +4,7 @@ package com.trackaty.chat.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -42,6 +43,7 @@ import com.squareup.picasso.Picasso;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.CheckPermissions;
 import com.trackaty.chat.Utils.SortSocial;
 import com.trackaty.chat.ViewModels.ProfileViewModel;
 import com.trackaty.chat.activities.MainActivity;
@@ -263,8 +265,11 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "LoveButton is clicked. notificationType= "+ notificationType);
+                // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+                CheckPermissions.checkNotificationPermission(getContext());
+
                 if (isCancelLove) {
-                    //Current user loved this user before, lit's unlove
+                    //Current user loved this user before, let's un-love
                     mProfileViewModel.cancelLove(mCurrentUserId, mUserId);
                 } else {
 
@@ -280,6 +285,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             @Override
             public void onClick(View view) {
                 if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+                    CheckPermissions.checkNotificationPermission(getContext());
+
                     Log.d(TAG, "send message to user");
                     NavDirections MessageDirection = ProfileFragmentDirections.actionProfileFragmentToMessagesFragment(null, mUserId, false);
                     //NavController navController = Navigation.findNavController(this, R.id.host_fragment);
@@ -296,6 +304,9 @@ public class ProfileFragment extends Fragment implements ItemClickListener {
             @Override
             public void onClick(View view) {
                 if (null != mUserId && !mUserId.equals(mCurrentUserId)) { // it's not logged in user. It's another user
+                    // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+                    CheckPermissions.checkNotificationPermission(getContext());
+
                     switch (mRelationStatus) {
                         case RELATION_STATUS_SENDER:
                             // If this selected user sent me the request

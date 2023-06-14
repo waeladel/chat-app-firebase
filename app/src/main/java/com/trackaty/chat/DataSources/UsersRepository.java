@@ -454,7 +454,7 @@ public class UsersRepository {
 
         afterQuery = mUserSearchRef
                 .orderByChild("created")
-                .startAt(key)
+                .startAfter(key)
                 .limitToFirst(size);
 
         afterQuery.addValueEventListener(afterListener);
@@ -473,7 +473,7 @@ public class UsersRepository {
 
         beforeQuery = mUserSearchRef
                 .orderByChild("created")
-                .endAt(key)
+                .endBefore(key)
                 .limitToLast(size);
 
         beforeQuery.addValueEventListener(beforeListener);

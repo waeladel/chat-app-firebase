@@ -1355,8 +1355,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
             }
 
         }
@@ -1398,8 +1398,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
             }
 
         }
@@ -1441,8 +1441,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
             }
 
         }
@@ -1479,11 +1479,11 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getAdapterPosition()+ " key= "+mProfileDataArrayList.get(getAdapterPosition()).getKey());
+                    Log.d(TAG, "Editable Name= "+ editable.toString()+ "position= "+getBindingAdapterPosition()+ " key= "+mProfileDataArrayList.get(getBindingAdapterPosition()).getKey());
                     if(TextUtils.isEmpty((String.valueOf(editable).trim()))){
-                        mProfileDataArrayList.get(getAdapterPosition()).setValue(null);
+                        mProfileDataArrayList.get(getBindingAdapterPosition()).setValue(null);
                         // set EditProfileViewModel.user values
-                        switch (mProfileDataArrayList.get(getAdapterPosition()).getKey()){
+                        switch (mProfileDataArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "name":
                                 mEditProfileViewModel.getUser().setName(null);
                                 break;
@@ -1492,10 +1492,10 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 break;
                         }
                     }else{
-                        mProfileDataArrayList.get(getAdapterPosition()).setValue(editable.toString());
+                        mProfileDataArrayList.get(getBindingAdapterPosition()).setValue(editable.toString());
 
                         // set EditProfileViewModel.user values
-                        switch (mProfileDataArrayList.get(getAdapterPosition()).getKey()){
+                        switch (mProfileDataArrayList.get(getBindingAdapterPosition()).getKey()){
                             case "name":
                                 mEditProfileViewModel.getUser().setName(String.valueOf(editable).trim());
                                 break;
@@ -1535,8 +1535,8 @@ public class EditProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
             }
 
         }

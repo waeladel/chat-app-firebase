@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import androidx.paging.ItemKeyedDataSource;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -77,6 +78,9 @@ public class MessagesListRepository {
     private static final String Message_STATUS_DELIVERED = "Delivered";
     private static final String Message_STATUS_SEEN = "Seen";
     private static final String Message_STATUS_REVEALED = "Revealed";
+    private boolean isSeeing;
+    private static Map<String, Object> updateSeenMap;
+
 
     private ValueEventListener afterMessagesListener = new ValueEventListener() {
         @Override
@@ -98,15 +102,13 @@ public class MessagesListRepository {
             if (dataSnapshot.exists()) {
                 List<Message> messagesList = new ArrayList<>();
 
-                // Create a map for all seen messages need to be updated
-                Map<String, Object> updateMap = new HashMap<>();
-
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                     if(!getLoadAfterKey().equals(snapshot.getKey())) { // if snapshot key = startAt key? don't add it again
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
+                            //Log.d(TAG, "getMessagesAfter. key= "+ message.getKey() + " message= "+ message.getMessage());
 
                             // Add only seen messages by current user to seenItemsList
                             // If current user is not the sender, the other user is seeing this message
@@ -114,7 +116,8 @@ public class MessagesListRepository {
                                 //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
                                     Log.d(TAG, "getMessagesAfter. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
-                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    //updateSeenMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    updateSeenMap.put("/messages/" + chatKey + "/" +snapshot.getKey()+"/status", Message_STATUS_SEEN);
                                     message.setStatus(Message_STATUS_SEEN);
                                 }
                             }
@@ -126,11 +129,23 @@ public class MessagesListRepository {
                         //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
                 }
+
                 // Update seen messages
-                if(updateMap.size() > 0){
-                    mMessagesRef.updateChildren(updateMap);
-                    return;
+                Log.d(TAG, "afterMessagesListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                if(updateSeenMap.size() > 0 && isSeeing){
+                    // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen messages hear too
+                    // just in case an invalidate happens while the user is seeing by currently opening messages tap
+                    Log.d(TAG, "afterMessagesListener: Updating seen messages in the database. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    mDatabaseRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "afterMessagesListener updateSeenMap onSuccess: clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                            updateSeenMap.clear();
+                        }
+                    });
+
                 }
+
                 // Get TotalItems logs
                 printTotalItems();
                 //printSeenItems();
@@ -175,8 +190,6 @@ public class MessagesListRepository {
             if (dataSnapshot.exists()) {
                 List<Message> messagesList = new ArrayList<>();
 
-                // Create a map for all seen messages need to be updated
-                Map<String, Object> updateMap = new HashMap<>();
 
                 // loop throw users value
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()){
@@ -184,14 +197,15 @@ public class MessagesListRepository {
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
-
+                            //Log.d(TAG, "getMessagesBefore. key= "+ message.getKey() + " message= "+ message.getMessage());
                             // Add only seen messages by current user to seenItemsList
                             // If current user is not the sender, the other user is seeing this message
                             if(!TextUtils.equals(message.getSenderId(), currentUserId)){
                                 //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
                                     Log.d(TAG, "getMessagesBefore. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
-                                    updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    //updateSeenMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    updateSeenMap.put("/messages/" + chatKey + "/" +snapshot.getKey()+"/status", Message_STATUS_SEEN);
                                     message.setStatus(Message_STATUS_SEEN);
                                 }
                             }
@@ -202,9 +216,19 @@ public class MessagesListRepository {
                 }
 
                 // Update seen messages
-                if(updateMap.size() > 0){
-                    mMessagesRef.updateChildren(updateMap);
-                    return;
+                Log.d(TAG, "beforeMessagesListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                if(updateSeenMap.size() > 0 && isSeeing){
+                    // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen notifications hear too
+                    // just in case an invalidate happens while the user is seeing by currently opening messages tap
+                    Log.d(TAG, "beforeMessagesListener: Updating seen messages in the database. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    mDatabaseRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "beforeMessagesListener updateSeenMap onSuccess: clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                            updateSeenMap.clear();
+                        }
+                    });
+
                 }
 
                 if(messagesList.size() != 0){
@@ -247,7 +271,7 @@ public class MessagesListRepository {
 
     //private Query getMessagesQuery;
 
-    public MessagesListRepository(String chatKey, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
+    public MessagesListRepository(String chatKey, boolean seeing, @NonNull DataSource.InvalidatedCallback onInvalidatedCallback){
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // use received chatKey to create a database ref
         mMessagesRef = mDatabaseRef.child("messages").child(chatKey);
@@ -264,6 +288,14 @@ public class MessagesListRepository {
         isInitialFirstLoaded =  true;
         isAfterFirstLoaded = true;
         isBeforeFirstLoaded = true;
+
+        // When we first load isSeeing is true to update seeing fields in fetched notifications to true but then
+        // isSeeing should be updated from notification fragment based on it's onResume and OnStop
+        // if fragment stopped it should be false so we don't update seen field, when its resumed it should be true to update seen field
+        isSeeing = seeing;
+
+        // to hold all notifications that their seen field need to be updated
+        updateSeenMap = new HashMap<>();
 
         Log.d(TAG, "mama MessagesListRepository init. isInitialFirstLoaded= " + isInitialFirstLoaded+ " after= "+isAfterFirstLoaded + " before= "+isBeforeFirstLoaded);
 
@@ -311,6 +343,25 @@ public class MessagesListRepository {
         Log.d(TAG, "mScrollDirection = " + scrollDirection+ " lastVisibleItem= "+ lastVisibleItem);
         mScrollDirection = scrollDirection;
         mLastVisibleItem = lastVisibleItem;
+    }
+
+    // To only update massages' seen when user is opening the massage's tap
+    public void setSeeing (boolean seeing) {
+        isSeeing = seeing;
+        Log.d(TAG, "setSeeing function called. isSeeing: "+ isSeeing);
+        // Update seen messages
+        if(updateSeenMap.size() > 0){
+            Log.d(TAG, "setSeeing function called. updating updateSeenMap because it's size is > 0");
+            //Update seen messages
+            mDatabaseRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    Log.d(TAG, "setSeeing function called. updateSeenMap onSuccess. clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                    updateSeenMap.clear();
+                }
+            });
+
+        }
     }
 
     /*public static MessagesListRepository getInstance() {
@@ -368,28 +419,19 @@ public class MessagesListRepository {
                 if (dataSnapshot.exists()) {
                     final List<Message> messagesList = new ArrayList<>();
 
-                    // Create a map for all seen messages need to be updated
-                    Map<String, Object> updateMap = new HashMap<>();
                     // loop throw users value
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()){
                         Message message = snapshot.getValue(Message.class);
                         if (message != null) {
                             message.setKey(snapshot.getKey());
 
-                            /*// Add only seen messages by current user to seenItemsList
-                            // If current user is not the sender, the other user is seeing this message
-                            if(null != message.getSenderId() && !message.getSenderId().equals(currentUserId)){
-                                seenItemsList.add(message);
-                            }*/
-
-                            // Add only seen messages by current user to seenItemsList
-                            // If current user is not the sender, the other user is seeing this message
+                            // Add only seen messages by current user to updateSeenMap
+                            // If current user is not the sender, he is the receiver which means he is seeing this message
                             if(!TextUtils.equals(message.getSenderId(), currentUserId)){
-                                //seenItemsList.add(message);
                                 if(null == message.getStatus() || !TextUtils.equals(message.getStatus(), Message_STATUS_SEEN)){
-                                    Log.d(TAG, "initiated. seen messages need to be updated = message"+ message.getMessage()+ "status"+ message.getStatus()+ "key"+ message.getKey());
-                                    //updateMap.put(snapshot.getKey()+"/status", Message_STATUS_SEEN);
-                                    updateMap.put("/messages/" + chatKey + "/" +snapshot.getKey()+"/status", Message_STATUS_SEEN);
+                                    Log.d(TAG, "initiated. put seen messages into updateSeenMap = message= "+ message.getMessage()+ " status= "+ message.getStatus()+ " key= "+ message.getKey());
+                                    // put seen messages into updateSeenMap so we can update the database later on fragment stop/resume and on invalidate
+                                    updateSeenMap.put("/messages/" + chatKey + "/" +snapshot.getKey()+"/status", Message_STATUS_SEEN);
                                     message.setStatus(Message_STATUS_SEEN);
                                 }
                             }
@@ -397,20 +439,29 @@ public class MessagesListRepository {
                         messagesList.add(message);
                         // Add messages to totalItemsList ArrayList to be used to get the initial key position
                         totalItemsList.add(message);
-
-                        //Log.d(TAG, "mama getMessage = "+ message.getMessage()+" getSnapshotKey= " +  snapshot.getKey());
                     }
 
-                    // Update seen messages
-                    if(updateMap.size() > 0){
-                        // Update chats member read
-                        updateMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
-                        updateMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
+                    // Update seen messages and chats on initial load and on invalidate
+                    Log.d(TAG, "initialListener: SeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
 
-                       /* // Update seen chats count
-                        updateMap.put("/counts/" + currentUserId + "/chats/" + chatKey, null);*/
-                        mDatabaseRef.updateChildren(updateMap);
-                        return;
+                    if(updateSeenMap.size() >0){
+                        Log.d(TAG, "initialListener: put read chat to updateSeenMap. updateSeenMap size= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                        // put read chats into updateSeenMap so we update database when on fragment resume or stop or right now on invalidate
+                        updateSeenMap.put("/userChats/" + currentUserId + "/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
+                        updateSeenMap.put("/chats/" + chatKey + "/members/" +currentUserId+ "/read/" , true);
+
+                        if(isSeeing){
+                            // We already push updateSeenMap to the database when fragment stops and resume but we need to Update seen notifications hear too
+                            // just in case an invalidate happens while the user is seeing by currently opening messages tap
+                            mDatabaseRef.updateChildren(updateSeenMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d(TAG, "initialListener: clearing updateSeenMap after pushing seeing updateSeenMap do database. size before clear= "+ updateSeenMap.size() + " isSeeing= "+ isSeeing);
+                                    updateSeenMap.clear();
+                                }
+                            });
+                        }
+
                     }
 
                     printTotalItems();
@@ -544,7 +595,7 @@ public class MessagesListRepository {
 
         Log.d(TAG, "mama getMessagesAfter. AfterKey= " + key);
         afterMessagesQuery = mMessagesRef.orderByKey()
-                            .startAt(key)
+                            .startAfter(key)
                             .limitToFirst(size);
 
         afterMessagesQuery.addValueEventListener(afterMessagesListener);
@@ -563,7 +614,7 @@ public class MessagesListRepository {
         Query beforeMessagesQuery;
 
         beforeMessagesQuery = mMessagesRef.orderByKey()
-                                .endAt(key)
+                                .endBefore(key)
                                 .limitToLast(size);
 
         beforeMessagesQuery.addValueEventListener(beforeMessagesListener);
@@ -644,7 +695,7 @@ public class MessagesListRepository {
     }*/
 
    //removeListeners is static so it can be triggered when ViewModel is onCleared
-    public static void removeListeners(){
+    public void removeListeners(){
         if(null != mListenersList){
             for (int i = 0; i < mListenersList.size(); i++) {
                 //Log.d(TAG, "removed Listeners ref= "+ mListenersList.get(i).getReference()+ " Listener= "+ mListenersList.get(i).getListener());

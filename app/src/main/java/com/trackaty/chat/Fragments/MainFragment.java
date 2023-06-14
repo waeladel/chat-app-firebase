@@ -43,6 +43,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavDeepLinkBuilder;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,10 +58,10 @@ import com.trackaty.chat.Adapters.UsersAdapter;
 import com.trackaty.chat.Interface.FirebaseUserCallback;
 import com.trackaty.chat.Interface.ItemClickListener;
 import com.trackaty.chat.R;
+import com.trackaty.chat.Utils.CheckPermissions;
 import com.trackaty.chat.ViewModels.UsersViewModel;
 import com.trackaty.chat.activities.MainActivity;
 import com.trackaty.chat.models.User;
-import com.trackaty.chat.receivers.MicMuteChangedReceiver;
 import com.trackaty.chat.receivers.SoundIdAlarm;
 import com.trackaty.chat.services.FindNearbyService;
 
@@ -74,6 +75,7 @@ import java.util.concurrent.TimeUnit;
 import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.POWER_SERVICE;
 import static com.trackaty.chat.App.VISIBILITY_CHANNEL_ID;
+import static com.trackaty.chat.Utils.PendingIntentFlags.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -367,54 +369,9 @@ public class MainFragment extends Fragment implements ItemClickListener{
             @Override
             public void onChanged(@Nullable final PagedList<User> items) {
                 Log.d(TAG, "mama onChanged");
-                if (items != null) {
-                    // Create new Thread to loop until items.size() is greater than 0
-
-                    //delay submitList till items size is not 0
-                   /* new java.util.Timer().schedule(
-                            new java.util.TimerTask() {
-                                @Override
-                                public void run() {
-                                    // your code here
-                                    Log.d(TAG, "mama submitList size" +  items.size());
-                                    mUsersAdapter.submitList(items);
-
-                                }
-                            },
-                            1000
-                    );*/
-                    // Create new Thread to loop until items.size() is greater than 0
-                    new Thread(new Runnable() {
-                        int sleepCounter = 0;
-                        @Override
-                        public void run() {
-                            try {
-                                while (items.size() == 0) {
-                                    //Keep looping as long as items size is 0
-                                    Thread.sleep(20);
-                                    Log.d(TAG, "sleep 1000. size= " + items.size() + " sleepCounter=" + sleepCounter++);
-                                    if (sleepCounter == 1000) {
-                                        break;
-                                    }
-                                    //handler.post(this);
-                                }
-                                //Now items size is greater than 0, let's submit the List
-                                Log.d(TAG, "after  sleep finished. size= " + items.size());
-                                if (items.size() == 0 && sleepCounter == 1000) {
-                                    // If we submit List after loop is finish with 0 results
-                                    // we may erase another results submitted via newer thread
-                                    Log.d(TAG, "Loop finished with 0 items. Don't submitList");
-                                } else {
-                                    Log.d(TAG, "submitList");
-                                    mUsersAdapter.submitList(items);
-                                }
-
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }).start();
+                if (items != null && items.size()>0) {
+                    Log.d(TAG, "submitList size = "+ items.size());
+                    mUsersAdapter.submitList(items);
                 }
             }
         });
@@ -758,6 +715,9 @@ public class MainFragment extends Fragment implements ItemClickListener{
                 mActivityContext.unregisterReceiver(mMicMuteChangedReceiver);
             }*/
         } else {
+            // Starting from Api 33 we must grant post notification permission at run time to be able to send notifications
+            CheckPermissions.checkNotificationPermission(getContext());
+
             Log.d(TAG, "startStopSearchService: is Service running false= "+isMyServiceRunning(FindNearbyService.class));
             if(!isMicMuted()){
                 Log.d(TAG , "Microphone is not Muted. lets start search service");
@@ -800,69 +760,12 @@ public class MainFragment extends Fragment implements ItemClickListener{
         mRadarLayout.setVisibility(View.GONE);
     }
 
-    // Start or stop the alarm when Visibility is clicked
-    private void startStopAlarm() {
-        if (isAlarmExist()) {
-            stopAlarm();
-        } else {
-            if(!isDozeWhiteList()){ // check if the app is already exempted from battery optimization
-                int batteryAlertShowTimes = mSharedPreferences.getInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, 0);
-                if(batteryAlertShowTimes < 3){
-                    // show the dialog only if it wasn't shown 3 times before
-                    showBatteryDialog();
-                    mSharedPreferences.edit().putInt(PREFERENCE_BATTERY_ALERT_SHOWING_TIMES_KEY, batteryAlertShowTimes+1).apply();
-                }
-            }
-            setAlarm();
-        }
-    }
-
-    private boolean isAlarmExist() {
-        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, PendingIntent.FLAG_NO_CREATE);
-        if (checkPendingIntent != null){
-            Log.d(TAG , "isAlarmExist: yet it is exist. checkPendingIntent= "+checkPendingIntent);
-            return true;
-        }else{
-            Log.d(TAG , "isAlarmExist: not exist. checkPendingIntent= "+checkPendingIntent);
-            return false;
-        }
-    }
-
-    private void setAlarm() {
-        Log.d(TAG , "setAlarm(). mCurrentUserId= "+viewModel.getCurrentUserId() + " soundId="+ mCurrentUser.getSoundId());
-        //create a Bundle object
-        Bundle extras = new Bundle();
-        extras.putString(USER_ID_KEY, viewModel.getCurrentUserId());
-        extras.putInt(USER_SOUND_ID_KEY, mCurrentUser.getSoundId());
-        //attach the bundle to the Intent object
-        alarmIntent.putExtras(extras);
-
-        //alarmIntent.putExtra(USER_SOUND_ID_KEY, mCurrentUser.getSoundId());
-        //alarmIntent.putExtra(USER_ID_KEY, mCurrentUserId);
-        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        if (alarmManager != null) {
-            Log.d(TAG , "setAlarm: alarmManager= "+alarmManager);
-            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),60000, pendingIntent);
-            //alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() , 60000, pendingIntent);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), pendingIntent);
-            }else{
-                alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() , pendingIntent);
-            }
-        }
-        setNotification(); // Create Ongoing notification when alarm is set
-        /*//alarmManager.setAndAllowWhileIdle();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent);
-        }*/
-
-    }
 
     private void stopAlarm() {
         Log.d(TAG , "stopAlarm()");
         alarmManager =  (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
         alarmIntent = new Intent(activity, SoundIdAlarm.class);
-        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(activity, REQUEST_CODE_ALARM, alarmIntent, pendingIntentUpdateCurrentFlag());
         if (alarmManager != null) {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();
@@ -873,52 +776,6 @@ public class MainFragment extends Fragment implements ItemClickListener{
         mSharedPreferences.edit().putBoolean(PREFERENCE_KEY_VISIBLE, false).apply();
     }
 
-    private boolean isDozeWhiteList() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String packageName = activity.getPackageName();
-            PowerManager pm = (PowerManager) activity.getSystemService(POWER_SERVICE);
-            if (pm != null) {
-                // is exempt from power optimization
-                // Not exempt from power optimization
-                return pm.isIgnoringBatteryOptimizations(packageName);
-            }else{
-                return false;
-            }
-        }else{
-            // API is below android marshmallow anyway
-            return true;
-        }
-    }
-
-    //Show a dialog to confirm blocking user
-    private void showBatteryDialog() {
-        BatteryAlertFragment batteryFragment = BatteryAlertFragment.newInstance(mActivityContext);
-        if (getChildFragmentManager() != null) {
-            fragmentManager = getChildFragmentManager();
-            batteryFragment.show(fragmentManager, BATTERY_ALERT_FRAGMENT);
-            Log.i(TAG, "blockFragment show clicked ");
-        }
-    }
-
-    // Create Ongoing notification when alarm is set
-    private void setNotification() {
-        Intent NotificationClickIntent = new Intent(mActivityContext, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mActivityContext, NOTIFICATION_PENDING_INTENT_REQUEST_CODE, NotificationClickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        mNotification = new NotificationCompat.Builder(mActivityContext, VISIBILITY_CHANNEL_ID)
-                .setContentTitle(getString(R.string.notification_visibility_title))
-                .setContentText(getString(R.string.notification_visibility_body))
-                .setSmallIcon(R.mipmap.ic_notification)
-                .setColor(getResources().getColor(R.color.color_primary))
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .build();
-
-        notificationManager.notify(VISIBILITY_NOTIFICATION_ID, mNotification);
-
-    }
 
     // Cancel Ongoing notification when user click visibility again
     private void cancelNotification() {

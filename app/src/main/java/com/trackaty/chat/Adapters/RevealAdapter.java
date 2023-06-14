@@ -245,9 +245,9 @@ public class RevealAdapter extends RecyclerView.Adapter<RevealAdapter.ViewHolder
 
         @Override
         public void onClick(View view) {
-            if(itemClickListener != null && getAdapterPosition() != RecyclerView.NO_POSITION){
-                itemClickListener.onClick(view, getAdapterPosition(), false);
-                Log.d(TAG, "onClick ="+ getAdapterPosition());
+            if(itemClickListener != null && getBindingAdapterPosition() != RecyclerView.NO_POSITION){
+                itemClickListener.onClick(view, getBindingAdapterPosition(), false);
+                Log.d(TAG, "onClick ="+ getBindingAdapterPosition());
 
             }
         }

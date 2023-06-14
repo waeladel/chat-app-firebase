@@ -1,5 +1,6 @@
 package com.trackaty.chat.receivers;
 
+import static com.trackaty.chat.Utils.PendingIntentFlags.*;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,7 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
@@ -59,7 +59,7 @@ public class MutedDeviceReceiver extends BroadcastReceiver {
     // check if alarm PendingIntent is already exists or not
     private boolean isAlarmExist() {
         alarmIntent  = new Intent(context, SoundIdAlarm.class);
-        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, pendingIntentNoCreateFlag());
         if (checkPendingIntent != null){
             Log.d(TAG , "isAlarmExist: yet it is exist. checkPendingIntent= "+checkPendingIntent);
             return true;
@@ -73,7 +73,7 @@ public class MutedDeviceReceiver extends BroadcastReceiver {
     private void stopAlarm() {
         Log.d(TAG , "stopAlarm()");
         alarmIntent = new Intent(context, SoundIdAlarm.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, pendingIntentUpdateCurrentFlag());
         if (alarmManager != null) {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();

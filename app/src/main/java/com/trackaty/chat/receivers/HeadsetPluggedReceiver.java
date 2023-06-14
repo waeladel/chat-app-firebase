@@ -1,5 +1,7 @@
 package com.trackaty.chat.receivers;
 
+import static com.trackaty.chat.Utils.PendingIntentFlags.pendingIntentNoCreateFlag;
+
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -68,7 +70,7 @@ public class HeadsetPluggedReceiver extends BroadcastReceiver {
     // check if alarm PendingIntent is already exists or not
     private boolean isAlarmExist(Context context) {
         alarmIntent  = new Intent(context, SoundIdAlarm.class);
-        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent checkPendingIntent = PendingIntent.getBroadcast(context, REQUEST_CODE_ALARM, alarmIntent, pendingIntentNoCreateFlag());
         if (checkPendingIntent != null){
             Log.d(TAG , "isAlarmExist: yet it is exist. checkPendingIntent= "+checkPendingIntent);
             return true;

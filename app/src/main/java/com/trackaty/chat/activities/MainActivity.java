@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,14 +31,18 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -45,8 +51,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.installations.InstallationTokenResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.trackaty.chat.App;
 import com.trackaty.chat.Fragments.HeadsetAlertFragment;
@@ -84,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
     //initialize the FirebaseAuth instance
     private FirebaseAuth  mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-
     // currentUserId needs to be null at first load, to initiate observers for notifications counter and chats counter
     /*FirebaseUser FirebaseCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
     String currentUserId = FirebaseCurrentUser != null ? FirebaseCurrentUser.getUid() : null;*/
@@ -136,28 +139,25 @@ public class MainActivity extends AppCompatActivity {
     private  static final String VOLUME_ALERT_FRAGMENT_TAG = "VolumeAlertFragmentTag"; // Tag for headset plugged alert dialog
     private  static final String MUTED_MIC_ALERT_FRAGMENT_TAG = "MutedMicFragment"; // Tag for confirm block and delete alert fragment
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
+    /*private NavigationBarView.OnItemSelectedListener mOnItemSelectedListener
+            = new BottomNavigationView.OnItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
+                case R.id.mainFragment:
                     goToMain();
                     return true;
-                case R.id.navigation_chats:
+                case R.id.chatsFragment:
                     goToChats();
                     return true;
-                case R.id.navigation_notifications:
+                case R.id.notificationsFragment:
                     goToNotifications();
                     return true;
             }
-
             return false;
         }
-
-
-    };
+    };*/
 
     // A listener for user's online statues
     private ValueEventListener onlineListener = new ValueEventListener() {
@@ -193,6 +193,17 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Create an ActivityResultLauncher which registers a callback for the FirebaseUI Activity result contract
+    // See: https://developer.android.com/training/basics/intents/result
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new FirebaseAuthUIActivityResultContract(),
+            new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
+                @Override
+                public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
+                    onSignInResult(result);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,23 +236,27 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "destination Label= "+ destination.getLabel()+ " currentUserId="+ currentUserId);
                 Log.d(TAG, "destination id= "+ destination.getId());
 
-                if(TextUtils.equals("fragment_main", destination.getLabel())){
-                   bottomNavigation.setVisibility(View.VISIBLE);
-                    bottomNavigation.setSelectedItemId(R.id.navigation_home);
-                }else if(TextUtils.equals("chats_fragment", destination.getLabel())){
+                /*if(R.id.mainFragment == destination.getId()){
                     bottomNavigation.setVisibility(View.VISIBLE);
-                    bottomNavigation.setSelectedItemId(R.id.navigation_chats);
-                }else if(TextUtils.equals("fragment_notification", destination.getLabel())) {
+                    bottomNavigation.setSelectedItemId(R.id.mainFragment);
+                }else if(R.id.chatsFragment == destination.getId()){
                     bottomNavigation.setVisibility(View.VISIBLE);
-                    bottomNavigation.setSelectedItemId(R.id.navigation_notifications);
+                    bottomNavigation.setSelectedItemId(R.id.chatsFragment);
+                }else if(R.id.notificationsFragment == destination.getId()) {
+                    bottomNavigation.setVisibility(View.VISIBLE);
+                    bottomNavigation.setSelectedItemId(R.id.notificationsFragment);
                 }else{
                     bottomNavigation.setVisibility(View.GONE);
-                }
+                }*/
 
-                // To only pan window in message fragment without effecting edit and complete profile
-                if(R.id.messagesFragment == destination.getId()){
+                // Hide bottom navigation in complete profile and message fragment
+                if(R.id.messagesFragment == destination.getId() || R.id.completeProfileFragment == destination.getId()){
+                    bottomNavigation.setVisibility(View.GONE);
+                    // To only pan window in message fragment without effecting edit and complete profile
                     //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
                 }else{
+                    bottomNavigation.setVisibility(View.VISIBLE);
+                    // To only pan window in message fragment without effecting edit and complete profile
                     getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
                 }
             }
@@ -251,7 +266,9 @@ public class MainActivity extends AppCompatActivity {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         bottomNavigation =  findViewById(R.id.navigation) ;
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        NavigationUI.setupWithNavController(bottomNavigation, navController);
+        //No need for OnItemSelectedListener because we setup the bottom nav with setupWithNavController function
+        //bottomNavigation.setOnItemSelectedListener(mOnItemSelectedListener);
 
         //notificationsBadge  = bottomNavigation.getBadge(R.id.navigation_notifications);
 
@@ -399,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onChanged(Long count) {
                     Log.d(TAG, "getNotificationsCount onChanged notifications count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
-                    notificationsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_notifications); //showBadge() show badge over chats menu item
+                    notificationsBadge = bottomNavigation.getOrCreateBadge(R.id.notificationsFragment); //showBadge() show badge over chats menu item
                     if(count != null && count != 0){
                         notificationsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
@@ -435,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onChanged(Long count) {
                     Log.d(TAG, "getChatsCount onChanged chats count = "+ count + " currentUserId= "+userKey);
                     // Display chats count if > 0
-                    chatsBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_chats); // showBadge() show badge over chats menu item
+                    chatsBadge = bottomNavigation.getOrCreateBadge(R.id.chatsFragment); // showBadge() show badge over chats menu item
                     if(count != null && count != 0){
                         chatsBadge.setMaxCharacterCount(3); // Max number is 99
                         //chatsBadge.setBackgroundColor(R.drawable.badge_background_shadow);
@@ -489,22 +506,10 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch (id){
-            /*case 1:
-                Log.d(TAG, "MenuItem search is clicked");
-                if(!isPermissionGranted()){
-                    requestPermission();
-                }else{
-                    startStopSearchService();
-                }
-
-                break;*/
             case R.id.action_profile:
                 Log.d(TAG, "MenuItem = 0");
                 goToProfile();
                 break;
-            /*case R.id.action_menu_invite:
-                Log.d(TAG, "MenuItem = 1  INVITE clicked ");
-                break;*/
             case R.id.action_settings:
                 Log.d(TAG, "MenuItem = 2  settings clicked");
                 goToSettings();
@@ -517,29 +522,12 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "MenuItem = 3");
                             }
                         });
-                /*FirebaseAuth.getInstance().signOut(); // logout firebase user
-                LoginManager.getInstance().logOut();// logout from facebook too
-                Twitter.logOut(); // logout from twitter too
-                // Google sign out
-               Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                        new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-                                //updateUI(null);
-                                Log.d(TAG, "Google sign out succeeded");
-                            }
-                        });*/
-                // finish all activities and fragments to start fresh
-                //finishAffinity();
-                //finish();
                 break;
-            /*case R.id.action_menu_home:
-                Log.d(TAG, "MenuItem = 4  home clicked ");
-                goToMain();
-                break;*/
             case android.R.id.home:
+                // it's important for up arrow in toolbar to work
                 onBackPressed();
                 break;
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -641,7 +629,7 @@ public class MainActivity extends AppCompatActivity {
             // Choose authentication providers
             providers = Arrays.asList(
                     new AuthUI.IdpConfig.EmailBuilder().build(),
-                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                    //new AuthUI.IdpConfig.FacebookBuilder().build(),
                     new AuthUI.IdpConfig.TwitterBuilder().build(),
                     new AuthUI.IdpConfig.GoogleBuilder().build());
 
@@ -650,72 +638,61 @@ public class MainActivity extends AppCompatActivity {
             // Choose authentication providers
             providers = Arrays.asList(
                     new AuthUI.IdpConfig.EmailBuilder().build(),
-                    new AuthUI.IdpConfig.FacebookBuilder().build(),
+                    //new AuthUI.IdpConfig.FacebookBuilder().build(),
                     new AuthUI.IdpConfig.GoogleBuilder().build());
         }
 
-
-
         // Create and launch sign-in intent
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .setLogo(R.mipmap.ic_launcher)      // Set logo drawable
-                        .setAlwaysShowSignInMethodScreen(true)
-                        .setTheme(R.style.Background_FirebaseUI)      // Set theme
-                        .setTosAndPrivacyPolicyUrls("https://www.basbes.app/terms-of-service/","https://www.basbes.app/app-privacy-policy/")
-                        .build(),
-                RC_SIGN_IN);
+        Intent signInIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .setLogo(R.mipmap.ic_launcher)      // Set logo drawable
+                .setAlwaysShowSignInMethodScreen(true)
+                .setTheme(R.style.Background_FirebaseUI)      // Set theme
+                .setTosAndPrivacyPolicyUrls("https://www.basbes.app/terms-of-service/","https://www.basbes.app/app-privacy-policy/")
+                .build();
+        signInLauncher.launch(signInIntent);
 
         isFirstloaded = false;
 
     }
 
-    //Activity result after user selects a provider he wants to use
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    // When the sign-in flow is complete, you will receive the result in onSignInResult
+    private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
 
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
+        IdpResponse response = result.getIdpResponse();
+        Log.d(TAG, "requestCode ok:" + result.getResultCode());
 
-            Log.d(TAG, "requestCode ok:" + requestCode);
-
-            if (resultCode == RESULT_OK) {
-                // Successfully signed in
-                Log.d(TAG, "Sign in successfully:" + response);
-                isFirstloaded = true; // to add the Listener because it won't be added Automatically on onStart
-                mAuth.addAuthStateListener(mAuthListener); //
-                //finish();
-            } else {
-                // Sign in failed, check response for error code
-                // Sign in failed
-                if (response == null) {
-                    // User pressed back button
-                    //Toast.makeText(MainActivity.this, getString(R.string.sign_in_cancelled), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Sign in has been cancelled. response is null");
-                    if(!isFirstloaded){
-                        finish();
-                    }
-                    return;
+        if (result.getResultCode() == RESULT_OK) {
+            // Successfully signed in
+            //FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            Log.d(TAG, "Sign in successfully:" + response);
+            isFirstloaded = true; // to add the Listener because it won't be added Automatically on onStart
+            mAuth.addAuthStateListener(mAuthListener); //
+            //finish();
+        } else {
+            // Sign in failed. If response is null the user canceled the
+            // sign-in flow using the back button. Otherwise check
+            // response.getError().getErrorCode() and handle the error.
+            if (response == null) {
+                // User pressed back button
+                Log.d(TAG, "Sign in has been cancelled. response is null");
+                if(!isFirstloaded){
+                    finish();
                 }
-
-                if (ErrorCodes.NO_NETWORK == response.getError().getErrorCode()) {
-                    Log.d(TAG, "No internet connection:" + response);
-
-                    Toast.makeText(MainActivity.this, getString(R.string.no_internet_connection),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                Log.d(TAG, "Unknown error occurred:" + response);
-
-                Toast.makeText(MainActivity.this, getString(R.string.unknown_error),
-                        Toast.LENGTH_LONG).show();
-
-                Log.e(TAG, "Sign-in error: ", response.getError());
+                return;
             }
+
+            initiateLogin(); // App failed to login,  display login options again
+
+            if (ErrorCodes.NO_NETWORK == response.getError().getErrorCode()) {
+                Log.d(TAG, "No internet connection:" + response);
+                Toast.makeText(MainActivity.this, getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            Log.d(TAG, "Unknown error occurred:" + response + " error= "+response.getError());
+            Toast.makeText(MainActivity.this, getString(R.string.unknown_error), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -793,7 +770,7 @@ public class MainActivity extends AppCompatActivity {
                                     //mTokensRef.child(mUserId).child(token).setValue(true);
                                     if (!TextUtils.isEmpty(token)) {
                                         Log.d(TAG, "getToken ="+ token);
-                                        mUserRef.child("token").child(token).setValue(true);
+                                        mUserRef.child("tokens").child(token).setValue(true);
                                     }
                                 }
                             });

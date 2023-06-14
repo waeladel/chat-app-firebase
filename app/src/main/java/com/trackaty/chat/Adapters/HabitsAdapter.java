@@ -152,11 +152,11 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
                         Log.d(TAG, "mama spinner selected ");
                         switch (selectedItemPosition){ // display sorting option selected from shared preference
                             case 1:
-                                habitsArrayList.get(getAdapterPosition()).setValue("true");
-                                Log.d(TAG, "spinner item 0 is selected= " +habitsArrayList.get(getAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getAdapterPosition()).getValue());
+                                habitsArrayList.get(getBindingAdapterPosition()).setValue("true");
+                                Log.d(TAG, "spinner item 0 is selected= " +habitsArrayList.get(getBindingAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getBindingAdapterPosition()).getValue());
 
                                 // set EditProfileViewModel.user values
-                                switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                switch (habitsArrayList.get(getBindingAdapterPosition()).getKey()){
                                     case "athlete":
                                         mEditProfileViewModel.getUser().setAthlete(true);
                                         break;
@@ -187,11 +187,11 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
                                 }
                                 break;
                             case 2:
-                                habitsArrayList.get(getAdapterPosition()).setValue("false");
-                                Log.d(TAG, "spinner item 1 is selected= " +habitsArrayList.get(getAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getAdapterPosition()).getValue());
+                                habitsArrayList.get(getBindingAdapterPosition()).setValue("false");
+                                Log.d(TAG, "spinner item 1 is selected= " +habitsArrayList.get(getBindingAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getBindingAdapterPosition()).getValue());
 
                                 // set EditProfileViewModel.user values
-                                switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                switch (habitsArrayList.get(getBindingAdapterPosition()).getKey()){
                                     case "athlete":
                                         mEditProfileViewModel.getUser().setAthlete(false);
                                         break;
@@ -222,10 +222,10 @@ public class HabitsAdapter extends RecyclerView.Adapter<HabitsAdapter.ViewHolder
                                 }
                                 break;
                             default:
-                                habitsArrayList.get(getAdapterPosition()).setValue(null);
-                                Log.d(TAG, "spinner item default is selected= " +habitsArrayList.get(getAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getAdapterPosition()).getValue());
+                                habitsArrayList.get(getBindingAdapterPosition()).setValue(null);
+                                Log.d(TAG, "spinner item default is selected= " +habitsArrayList.get(getBindingAdapterPosition()).getKey()+ " Value= "+ habitsArrayList.get(getBindingAdapterPosition()).getValue());
                                 // set EditProfileViewModel.user values
-                                switch (habitsArrayList.get(getAdapterPosition()).getKey()){
+                                switch (habitsArrayList.get(getBindingAdapterPosition()).getKey()){
                                     case "athlete":
                                         mEditProfileViewModel.getUser().setAthlete(null);
                                         break;
