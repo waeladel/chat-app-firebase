@@ -3,8 +3,8 @@ apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "33.0.2"
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
 
     // Load keystore
     def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -13,11 +13,11 @@ android {
 
     defaultConfig {
         applicationId "com.basbes.dating"
-        minSdkVersion 16
-        targetSdkVersion 33
+        minSdkVersion 23
+        targetSdkVersion 34
         multiDexEnabled true // Enabling multiDex support.
-        versionCode 20
-        versionName "0.2.0"
+        versionCode 21
+        versionName "0.2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //resConfigs "auto" // To only only get relevant FirebaseUI translations . "en", "de", "it", "fr"
@@ -89,7 +89,7 @@ dependencies {
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     // Import the BoM for the Firebase platform. BoM will make all Firebase dependencies compatible
-    implementation platform('com.google.firebase:firebase-bom:28.0.0')
+    implementation platform('com.google.firebase:firebase-bom:33.4.0')
     //implementation 'com.google.firebase:firebase-core'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-auth'
@@ -100,9 +100,9 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.firebase:firebase-storage'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:core:1.5.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
@@ -130,7 +130,7 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     //implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
 
-    implementation "androidx.preference:preference:1.2.0" // For settings preference
+    implementation "androidx.preference:preference:1.2.1" // For settings preference
     //implementation 'org.awaitility:awaitility:3.1.6'
     //implementation 'com.github.cooltechworks:ScratchView:v1.1' // ScratchView
     implementation 'com.clock.scratch:Scratch:1.0.0'// A better ScratchView

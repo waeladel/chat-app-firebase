@@ -30,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -679,7 +681,8 @@ public class MainFragment extends Fragment implements ItemClickListener{
             Log.i(TAG, "requestPermission: No explanation needed; request the permission");
             //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
             // Use this requestPermissions(new String[] to receive the result on fragment instead of the activity
-            requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            //requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
         }
     }
 
@@ -783,7 +786,7 @@ public class MainFragment extends Fragment implements ItemClickListener{
     }
 
     // Get Request Permissions Result
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == RESULT_REQUEST_RECORD_AUDIO) {
             // If request is cancelled, the result arrays are empty.
@@ -798,7 +801,26 @@ public class MainFragment extends Fragment implements ItemClickListener{
                 Log.i(TAG, "onRequestPermissionsResult permission denied");
             }
         }
-    }
+    }*/
+
+    // Register the permissions callback, which handles the user's response to the
+    // system permissions dialog. Save the return value, an instance of
+    // ActivityResultLauncher, as an instance variable.
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Permission is granted. Continue the action or workflow in your app.
+                    Log.i(TAG, "Audio Permissions Result=  permission was granted");
+                    startStopSearchService();
+                } else {
+                    Log.i(TAG, "Audio Permissions Result= permission denied");
+                    // Explain to the user that the feature is unavailable because the
+                    // feature requires a permission that the user has denied. At the
+                    // same time, respect the user's decision. Don't link to system
+                    // settings in an effort to convince the user to change their
+                    // decision.
+                }
+            });
 
     /** Defines callbacks for service binding, passed to bindService() */
     /*private ServiceConnection connection = new ServiceConnection() {
@@ -943,7 +965,8 @@ public class MainFragment extends Fragment implements ItemClickListener{
             Log.d(TAG, "item clicked position= " + position + " View= "+view);
             //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
             // Use this requestPermissions(new String[] to receive the result on fragment instead of the activity
-            requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            //requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, RESULT_REQUEST_RECORD_AUDIO);
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
         }
     }
 
